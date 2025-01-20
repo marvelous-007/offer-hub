@@ -1,6 +1,9 @@
-![Banner_OFFER-HUB](https://github.com/user-attachments/assets/43947941-48c8-4505-82cc-f09795793ff4)
 
-# 🌟 OFFER-HUB | Decentralized Freelance Platform  
+
+![Banner_OFFER-HUB](https://github.com/user-attachments/assets/d55b55b0-4a1e-454b-9eda-43ac1da8593f)
+
+
+ 🌟 OFFER-HUB | Decentralized Freelance Platform  
 
 Welcome to **OFFER-HUB**! This platform aims to revolutionize the freelance marketplace by leveraging **blockchain technology**, **cryptocurrency payments**, and **smart contracts** to create a secure and efficient environment for freelancers and clients worldwide.  
 
