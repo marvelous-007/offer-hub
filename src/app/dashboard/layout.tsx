@@ -6,7 +6,7 @@ interface layoutProps {
 
 const layout = ({ children }: layoutProps) => {
   return (
-    <div className="flex flex-col h-screen gap-5">
+    <div className="flex flex-col h-min-screen gap-5">
       <Header />
       {children}
     </div>
