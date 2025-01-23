@@ -21,7 +21,7 @@ const UserProfilePage = () => {
         />
         <div className="flex flex-col w-full md:w-5/6">
           <CardHeader>
-            <CardTitle className="text-3xl font-bold text-primary-700">
+            <CardTitle className="text-3xl font-bold text-primary-700 dark:text-white">
               Edit Profile
             </CardTitle>
           </CardHeader>
