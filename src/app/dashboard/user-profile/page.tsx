@@ -1,5 +1,7 @@
 "use client";
 
+import Discounts from "@/components/modules/authentication/pages/Discounts";
+import Titles from "@/components/modules/authentication/pages/Titles";
 import UserProfile from "@/components/modules/authentication/pages/UserProfile";
 import useSidebar from "@/components/modules/authentication/ui/sidebar/hooks/useSidebar";
 import SettingsSidebar from "@/components/modules/authentication/ui/sidebar/Sidebar";
@@ -27,8 +29,8 @@ const UserProfilePage = () => {
             <Card className={cn("overflow-hidden h-full w-full")}>
               <CardContent className="p-6">
                 {currentTab === "profile" && <UserProfile />}
-                {currentTab === "titles" && <p>titles</p>}
-                {currentTab === "discounts" && <p>discounts</p>}
+                {currentTab === "titles" && <Titles />}
+                {currentTab === "discounts" && <Discounts />}
               </CardContent>
             </Card>
           </CardContent>
