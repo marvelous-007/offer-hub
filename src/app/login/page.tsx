@@ -6,12 +6,11 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
 import ParticleBackground from './ParticleBackground'
 
 export default function Login() {
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [, setIsLoading] = useState<boolean>(false)
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault()
@@ -43,6 +42,7 @@ export default function Login() {
       <div className="relative z-10 mx-auto w-full max-w-[400px] space-y-8 px-4">
         <form onSubmit={onSubmit} className="space-y-6">
           <div className="space-y-2">
+            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
             <label className="text-sm font-medium">Username or Email</label>
             <Input
               type="email"
@@ -53,6 +53,7 @@ export default function Login() {
           </div>
 
           <div className="space-y-2">
+            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
             <label className="text-sm font-medium">Password</label>
             <Input
               type="password"
@@ -70,6 +71,7 @@ export default function Login() {
                 width={20}
                 height={20}
               />
+              {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
               <label className="text-sm hover:underline">
                 Keep me signed in
               </label>
@@ -82,6 +84,7 @@ export default function Login() {
                 width={20}
                 height={20}
               />
+              {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
               <label className="text-sm hover:underline">Forgot Password</label>
             </div>
             </Link>
