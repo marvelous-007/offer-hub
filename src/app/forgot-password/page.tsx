@@ -28,7 +28,7 @@ export default function ForgotPassword() {
       <ParticleBackground />
       
       {/* Logo Section - Left Side */}
-      <div className="fixed left-8 top-8 z-10">
+      <div className="fixed left-8 top-8 z-10 flex items-center space-x-40">
         <Image
           src="/logo.svg"
           alt="Offer Hub Logo"
@@ -37,6 +37,12 @@ export default function ForgotPassword() {
           priority
           className="dark:invert"
         />
+        {/* Enlace "Back to log in" */}
+        <div className="text-sm">
+          <Link href="/login" className="hover:underline text-gray-500">
+            Back to log in
+          </Link>
+        </div>
       </div>
 
       {/* Forgot Password Form - Center */}
@@ -50,6 +56,7 @@ export default function ForgotPassword() {
           </div>
 
           <div className="space-y-2">
+            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
             <label className="text-sm font-medium">Email</label>
             <Input
               type="email"
@@ -61,16 +68,10 @@ export default function ForgotPassword() {
 
           <Button
             type="submit"
-            className="w-full h-11 bg-[#159A9C] text-white hover:bg-[#002333] rounded-full"
+            className="w-full h-11 bg-[#159A9C] text-white hover:bg-[#002333] rounded-md"
           >
             Send password
           </Button>
-
-          <div className="text-center text-sm">
-            <Link href="/login" className="hover:underline">
-              Back to log in
-            </Link>
-          </div>
         </form>
       </div>
     </div>
