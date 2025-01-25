@@ -86,7 +86,9 @@ export default function WorkerDetailsCard({
           </p>
         </div>
       </CardContent>
-
+      <CardFooter className="flex justify-center">
+        <Button className="font-bold text-base bg-[#159A9C] rounded-xl text-white">Contact Me</Button>
+      </CardFooter>
     </Card>
   );
 }
