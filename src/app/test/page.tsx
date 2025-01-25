@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import SidebarFilters from '../../components/ui/sideBarFilters';
+import SidebarFilters from '../../components/ui/searchBar';
 
 const App = () => {
   return (
