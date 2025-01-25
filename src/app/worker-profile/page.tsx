@@ -1,5 +1,5 @@
 import React from "react";
-import WorkerDetailsCard from "@/components/Profile/WorkerDetailsCard";
+import WorkerDetailsCard from "@/components/Profile/workerDetailsCard";
 
 const workerDetailsProps = {
   workerInfo: {
