@@ -1,20 +1,22 @@
 "use client";
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
 import { X, Check, Plus } from "lucide-react";
-import * as Slider from "@radix-ui/react-slider";
 
 export default function SidebarFilters() {
-  const allKeywords = ["Spring", "Smart", "Modern", "Summer", "Winter"]; // Lista completa
-  const [keywords, setKeywords] = useState(["Spring", "Smart", "Modern"]); // Keywords activas
+  const allKeywords = ["Spring", "Smart", "Modern", "Summer", "Winter"];
+  const [keywords, setKeywords] = useState(["Spring", "Smart", "Modern"]);
   const [priceRange, setPriceRange] = useState([0, 100]);
-  const [checkedLabels, setCheckedLabels] = useState<string[]>([]); // Estado independiente para los "Labels"
+  const [checkedLabels, setCheckedLabels] = useState<string[]>([]);
   const [checkedColors, setCheckedColors] = useState<string[]>([]);
   const [checkedSizes, setCheckedSizes] = useState<string[]>([]);
   const colors = ["Red", "Blue", "Green"];
   const sizes = ["Small", "Medium", "Large"];
-  const labels = ["Label1", "Label2", "Label3"]; // Etiquetas para los checkboxes generales
+  const labels = ["Label1", "Label2", "Label3"];
 
   const updatePriceRange = (value: [number, number]) => {
     setPriceRange(value);
@@ -65,23 +67,16 @@ export default function SidebarFilters() {
       <div className="mb-6">
         {labels.map((label, index) => (
           <div key={index} className="flex items-center gap-2 mb-2">
-            <div
-              className={`w-5 h-5 flex items-center justify-center border rounded ${
-                checkedLabels.includes(label)
-                  ? "bg-[#002333] text-white"
-                  : "border-[#B4BEC9]"
-              }`}
-              onClick={() => {
-                const updatedLabels = checkedLabels.includes(label)
-                  ? checkedLabels.filter((l) => l !== label)
-                  : [...checkedLabels, label];
+            <Checkbox
+              id={`label-${index}`}
+              checked={checkedLabels.includes(label)}
+              onCheckedChange={(checked) => {
+                const updatedLabels = checked
+                  ? [...checkedLabels, label]
+                  : checkedLabels.filter((l) => l !== label);
                 setCheckedLabels(updatedLabels);
               }}
-            >
-              {checkedLabels.includes(label) && (
-                <Check className="w-4 h-4 text-white" />
-              )}
-            </div>
+            />
             <div>
               <label
                 htmlFor={`label-${index}`}
@@ -100,20 +95,14 @@ export default function SidebarFilters() {
         <h3 className="text-base font-medium mb-2 text-[#002333]">
           Price Range
         </h3>
-        <Slider.Root
-          className="relative flex items-center select-none touch-none w-full h-5"
+        <Slider
           value={priceRange}
           min={0}
           max={100}
           step={1}
-          onValueChange={updatePriceRange}
-        >
-          <Slider.Track className="bg-[#B4BEC9] relative flex-grow rounded-full h-1">
-            <Slider.Range className="absolute bg-[#002333] rounded-full h-full" />
-          </Slider.Track>
-          <Slider.Thumb className="block w-4 h-4 bg-[#002333] rounded-full" />
-          <Slider.Thumb className="block w-4 h-4 bg-[#002333] rounded-full" />
-        </Slider.Root>
+          onValueChange={(value) => setPriceRange(value)}
+          className="mt-4"
+        />
         <div className="flex justify-between mt-1 text-[#002333]">
           <span className="text-sm">${priceRange[0]}</span>
           <span className="text-sm">${priceRange[1]}</span>
@@ -125,23 +114,16 @@ export default function SidebarFilters() {
         <h3 className="text-base font-medium mb-2 text-[#002333]">Color</h3>
         {colors.map((color, index) => (
           <div key={index} className="flex items-center gap-2 mb-2">
-            <div
-              className={`w-5 h-5 flex items-center justify-center border rounded ${
-                checkedColors.includes(color)
-                  ? "bg-[#002333] text-white"
-                  : "border-[#B4BEC9]"
-              }`}
-              onClick={() => {
-                const updatedColors = checkedColors.includes(color)
-                  ? checkedColors.filter((c) => c !== color)
-                  : [...checkedColors, color];
+            <Checkbox
+              id={`color-${index}`}
+              checked={checkedColors.includes(color)}
+              onCheckedChange={(checked) => {
+                const updatedColors = checked
+                  ? [...checkedColors, color]
+                  : checkedColors.filter((c) => c !== color);
                 setCheckedColors(updatedColors);
               }}
-            >
-              {checkedColors.includes(color) && (
-                <Check className="w-4 h-4 text-white" />
-              )}
-            </div>
+            />
             <label
               htmlFor={`color-${index}`}
               className="text-sm text-[#002333]"
@@ -157,23 +139,16 @@ export default function SidebarFilters() {
         <h3 className="text-base font-medium mb-2 text-[#002333]">Size</h3>
         {sizes.map((size, index) => (
           <div key={index} className="flex items-center gap-2 mb-2">
-            <div
-              className={`w-5 h-5 flex items-center justify-center border rounded ${
-                checkedSizes.includes(size)
-                  ? "bg-[#002333] text-white"
-                  : "border-[#B4BEC9]"
-              }`}
-              onClick={() => {
-                const updatedSizes = checkedSizes.includes(size)
-                  ? checkedSizes.filter((s) => s !== size)
-                  : [...checkedSizes, size];
+            <Checkbox
+              id={`size-${index}`}
+              checked={checkedSizes.includes(size)}
+              onCheckedChange={(checked) => {
+                const updatedSizes = checked
+                  ? [...checkedSizes, size]
+                  : checkedSizes.filter((s) => s !== size);
                 setCheckedSizes(updatedSizes);
               }}
-            >
-              {checkedSizes.includes(size) && (
-                <Check className="w-4 h-4 text-white" />
-              )}
-            </div>
+            />
             <label htmlFor={`size-${index}`} className="text-sm text-[#002333]">
               {size}
             </label>
