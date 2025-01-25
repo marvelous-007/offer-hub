@@ -56,6 +56,36 @@ export default function WorkerDetailsCard({
           </p>
         </div>
       </CardHeader>
+      <Separator />
+      <CardContent className="flex flex-col gap-4 mt-2">
+        <p className="text-xl text-center text-muted-foreground">
+          On time: {statistics.jobsDeliveredOnTime}%
+        </p>
+        <p className="text-xl text-center text-muted-foreground">
+          Within Budget: {statistics.jobsCompletedWithoutBudget}%
+        </p>
+        <p className="text-xl text-center text-muted-foreground">
+          AcceptanceRate: {statistics.acceptanceRate}%
+        </p>
+        <div className="flex justify-between    ">
+          <p className="text-base text-center font-normal text-muted-foreground flex items-center">
+            <Image width={20} height={20} alt="" src="/icons/italy.png" className="mr-2"/>
+            {location.country}
+            <span className="text-xs font-normal text-muted-foreground">
+              {" "}
+              ({location.localTime})
+            </span>
+          </p>
+          <p className="text-xl text-center text-[#002333EC] font-bold flex items-center">
+            <Image width={20} height={20} alt="" src="/icons/dollar.png" className="mr-2"/>
+            ${rate.pricePerJob}
+            <span className="text-xs font-normal text-muted-foreground">
+                {" "}
+                per job
+            </span>
+          </p>
+        </div>
+      </CardContent>
 
     </Card>
   );
