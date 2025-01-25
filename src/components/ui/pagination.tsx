@@ -2,7 +2,7 @@
 
 import React from "react";
 import clsx from "clsx";
-import Image from 'next/image';
+import Image from "next/image";
 import ArrowLeftIcon from "@/components/icons/Arrow left.svg";
 import ArrowRightIcon from "@/components/icons/Arrow right.svg";
 

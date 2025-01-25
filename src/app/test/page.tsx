@@ -1,14 +1,23 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import SidebarFilters from '../../components/ui/searchBar';
+"use client"
 
-const App = () => {
+import React, { useState } from "react";
+import Pagination from "../../components/ui/pagination";  
+
+export default function PaginationTest() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = 68;
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   return (
-    <div>
-      <h1>Test Sidebar Filters</h1>
-      <SidebarFilters />
+    <div className="min-h-screen flex items-center justify-center bg-[#F8F8F8]">
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
-};
-
-export default App;
+}
