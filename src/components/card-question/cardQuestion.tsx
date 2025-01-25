@@ -1,9 +1,9 @@
 import React from "react";
 
 interface CardQuestionProps {
-  icon: React.ReactNode; // Icono que representa la categoría
-  title: string;         // Título de la categoría
-  questions: string[];   // Lista de preguntas
+  icon: React.ReactNode;
+  title: string;
+  questions: string[];
 }
 
 const CardQuestion: React.FC<CardQuestionProps> = ({ icon, title, questions }) => {
@@ -18,7 +18,7 @@ const CardQuestion: React.FC<CardQuestionProps> = ({ icon, title, questions }) =
           <li key={index}>
             <a
               href="#"
-              className="text-primary-500 hover:underline"
+              className="text-primary-500 no-underline hover:text-primary-400"
               aria-label={question}
             >
               {question}
