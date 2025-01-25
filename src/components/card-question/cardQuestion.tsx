@@ -1,4 +1,5 @@
 import React from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 interface CardQuestionProps {
   icon: React.ReactNode;
@@ -8,25 +9,29 @@ interface CardQuestionProps {
 
 const CardQuestion: React.FC<CardQuestionProps> = ({ icon, title, questions }) => {
   return (
-    <div className="rounded-lg shadow-md p-4 bg-card text-card-foreground">
-      <div className="flex items-center mb-4">
-        <span className="text-xl mr-2">{icon}</span>
-        <h2 className="text-lg font-semibold">{title}</h2>
-      </div>
-      <ul className="list-none space-y-2">
-        {questions.map((question, index) => (
-          <li key={index}>
-            <a
-              href="#"
-              className="text-primary-500 no-underline hover:text-primary-400"
-              aria-label={question}
-            >
-              {question}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Card className="w-full max-w-3xl p-6 bg-card text-card-foreground">
+      <CardHeader className="flex items-start gap-4">
+        <span className="text-2xl flex items-center justify-center">
+          {icon}
+        </span>
+        <CardTitle className="text-xl font-bold">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ul className="list-none mt1 space-y-2">
+          {questions.map((question, index) => (
+            <li key={index}>
+              <a
+                href="#"
+                className="text-primary-600 hover:text-primary-700 no-underline"
+                aria-label={question}
+              >
+                {question}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
   );
 };
 
