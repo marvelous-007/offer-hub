@@ -5,7 +5,7 @@ const workerDetailsProps = {
   workerInfo: {
     name: "Santiago Villarreal",
     role: "AI Engineer",
-    joiningDate: "March 2020"
+    joiningDate: "March 2020",
   },
   statistics: {
     jobsDeliveredOnTime: 9,
@@ -27,12 +27,14 @@ const workerDetailsProps = {
 
 export default function Page() {
   return (
-    <WorkerDetailsCard
-      workerInfo={workerDetailsProps.workerInfo}
-      statistics={workerDetailsProps.statistics}
-      location={workerDetailsProps.location}
-      rate={workerDetailsProps.rate}
-      contacts={workerDetailsProps.contacts}
-    />
+    <div className="flex w-full h-screen justify-center items-center">
+      <WorkerDetailsCard
+        workerInfo={workerDetailsProps.workerInfo}
+        statistics={workerDetailsProps.statistics}
+        location={workerDetailsProps.location}
+        rate={workerDetailsProps.rate}
+        contacts={workerDetailsProps.contacts}
+      />
+    </div>
   );
 }
