@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import ParticleBackground from '../login/ParticleBackground'
 import Image from "next/image"
+import { ArrowLeft } from "lucide-react" 
 
 export default function ForgotPassword() {
   const router = useRouter()
@@ -28,7 +29,7 @@ export default function ForgotPassword() {
       <ParticleBackground />
       
       {/* Logo Section - Left Side */}
-      <div className="fixed left-8 top-8 z-10 flex items-center space-x-40">
+      <div className="fixed left-8 top-8 z-10 flex items-center space-x-20">
         <Image
           src="/logo.svg"
           alt="Offer Hub Logo"
@@ -37,12 +38,11 @@ export default function ForgotPassword() {
           priority
           className="dark:invert"
         />
-        {/* Enlace "Back to log in" */}
-        <div className="text-sm">
-          <Link href="/login" className="hover:underline text-gray-500">
-            Back to log in
-          </Link>
-        </div>
+
+        <Link href="/login" className="hover:underline flex items-center space-x-2">
+          <ArrowLeft className="w-4 h-4 text-[#159A9C]" />
+          <span className="text-sm text-gray-500">Back to log in</span>
+        </Link>
       </div>
 
       {/* Forgot Password Form - Center */}
@@ -56,7 +56,6 @@ export default function ForgotPassword() {
           </div>
 
           <div className="space-y-2">
-            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
             <label className="text-sm font-medium">Email</label>
             <Input
               type="email"
