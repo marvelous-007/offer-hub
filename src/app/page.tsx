@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar/Navbar"; // Asegúrate de que la ruta sea correcta
 
 const links = [
-  { name: "Home", href: "/" },
-  { name: "My Chats", href: "/chats" },
-  { name: "Find Workers", href: "/workers" },
-  { name: "My Account", href: "/account" },
-  { name: "FAQ", href: "/faq" },
-  { name: "Help", href: "/help" },
+  { name: "Home", href: "/", isActive: true },
+  { name: "My Chats", href: "/chats", isActive: false },
+  { name: "Find workers", href: "/workers", isActive: false },
+  { name: "My Account", href: "/account", isActive: false },
+  { name: "FAQ", href: "/faq", isActive: false },
+  { name: "Help", href: "/help", isActive: false },
 ];
+
 
 const user = {
   name: "John Doe",
