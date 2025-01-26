@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react";
-import Pagination from "../../components/ui/pagination";  
+import CustomPagination from "../../components/ui/customPagination";  
 
 export default function PaginationTest() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -13,7 +13,7 @@ export default function PaginationTest() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8F8F8]">
-      <Pagination
+      <CustomPagination
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={handlePageChange}

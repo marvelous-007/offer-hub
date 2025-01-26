@@ -32,7 +32,7 @@ export default function SidebarFilters() {
             <Badge
               key={keyword}
               variant="secondary"
-              className="bg-[#DEEFE7] text-[#002333] px-3 py-1 rounded-full flex items-center gap-1"
+              className="bg-[#DEEFE7] text-[#002333] px-3 py-1 rounded-full flex items-center gap-1 text-sm font-medium"
             >
               {keyword}
               <X
@@ -53,7 +53,7 @@ export default function SidebarFilters() {
               <Badge
                 key={keyword}
                 variant="secondary"
-                className="bg-[#B4BEC9] text-[#002333] px-3 py-1 rounded-full flex items-center gap-1 cursor-pointer"
+                className="bg-[#B4BEC9] text-[#002333] px-3 py-1 rounded-full flex items-center gap-1 cursor-pointer text-sm font-medium"
                 onClick={() => setKeywords((prev) => [...prev, keyword])}
               >
                 {keyword}
