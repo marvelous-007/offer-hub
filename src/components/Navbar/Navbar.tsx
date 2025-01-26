@@ -3,7 +3,9 @@ import Link from "next/link";
 
 interface NavbarProps {
   logo: string;
-  links: { name: string; href: string }[];
+  links: {
+      isActive: any; name: string; href: string 
+}[];
   user: {
     name: string;
     profilePicture: string;
@@ -26,7 +28,7 @@ export default function Navbar({ logo, links, user }: NavbarProps) {
       <Link
         href={link.href}
         className={`px-4 py-2 rounded-lg ${
-          // Aquí se chequea si el link está activo (puedes usar lógica adicional para determinarlo)
+          // check if link is active
           link.isActive
             ? "bg-[#159A9C] text-white" // Botón seleccionado
             : "text-[#159A9C] hover:bg-gray-100 hover:text-[#159A9C]" // Normal y hover
