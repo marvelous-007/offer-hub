@@ -15,7 +15,7 @@ const links = [
 
 const user = {
   name: "John Doe",
-  profilePicture: "/profile.jpg",
+  profilePicture: "/profile.svg",
 };
 
 export default function Home() {
