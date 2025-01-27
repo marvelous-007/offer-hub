@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-// Mock data for portfolio items
 const portfolioItems = [
   { id: 1, category: "Website Design", image: "https://admin.12grids.com/uploads/blogs/original_cover_images/Webp/Future_Of_Responsive_Web_Design_12Grids.webp", title: "Website 1" },
   { id: 2, category: "Certifications", image: "https://ucarecdn.com/7ce39035-fe9b-407b-8f04-8d0d8f1d1fdf/-/format/auto/-/preview/750x750/-/quality/lighter/scrum-bridge.png", title: "Certification 1" },
@@ -13,7 +12,6 @@ const portfolioItems = [
 const WorkerPortfolio = () => {
   const [activeCategory, setActiveCategory] = useState("All");
 
-    // Count items by category
     const categoryCounts = portfolioItems.reduce<Record<string, number>>((counts, item) => {
         counts[item.category] = (counts[item.category] || 0) + 1;
         return counts;
@@ -21,7 +19,6 @@ const WorkerPortfolio = () => {
   
     const allCount = portfolioItems.length;
 
-    // Filter portfolio items based on the active category
     const filteredItems =
         activeCategory === "All"
         ? portfolioItems
@@ -30,8 +27,6 @@ const WorkerPortfolio = () => {
     return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Portfolio</h2>
-
-      {/* Filter buttons */}
       <div className="flex gap-2 mb-4">
         {[
           { label: "All", count: allCount },
@@ -53,9 +48,7 @@ const WorkerPortfolio = () => {
           </button>
         ))}
       </div>
-
-      {/* Portfolio grid */}
-      {/* Change md:grid-cols-# in order to change how much grids are shown on screen */}
+      
       <div className="grid grid-cols-4 md:grid-cols-3 gap-4">
         {filteredItems.map((item) => (
           <div
