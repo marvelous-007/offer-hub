@@ -24,7 +24,7 @@ export default function SidebarFilters() {
 
   return (
     <Card className="w-[280px] p-6 border rounded-lg">
-      {/* Keywords Section */}
+      
       <div className="mb-6">
         <h3 className="text-base font-medium mb-2">Keywords</h3>
         <div className="flex flex-wrap gap-2 mb-4">
@@ -45,7 +45,7 @@ export default function SidebarFilters() {
           ))}
         </div>
 
-        {/* Deselected Keywords */}
+        
         <div className="flex flex-wrap gap-2">
           {allKeywords
             .filter((keyword) => !keywords.includes(keyword))
@@ -63,7 +63,7 @@ export default function SidebarFilters() {
         </div>
       </div>
 
-      {/* Labels Section */}
+     
       <div className="mb-6">
         {labels.map((label, index) => (
           <div key={index} className="flex items-center gap-2 mb-2">
@@ -90,7 +90,7 @@ export default function SidebarFilters() {
         ))}
       </div>
 
-      {/* Price Range Section */}
+     
       <div className="mb-6">
         <h3 className="text-base font-medium mb-2 text-[#002333]">
           Price Range
@@ -109,7 +109,7 @@ export default function SidebarFilters() {
         </div>
       </div>
 
-      {/* Color Section */}
+      
       <div className="mb-6">
         <h3 className="text-base font-medium mb-2 text-[#002333]">Color</h3>
         {colors.map((color, index) => (
@@ -134,7 +134,7 @@ export default function SidebarFilters() {
         ))}
       </div>
 
-      {/* Size Section */}
+    
       <div>
         <h3 className="text-base font-medium mb-2 text-[#002333]">Size</h3>
         {sizes.map((size, index) => (
