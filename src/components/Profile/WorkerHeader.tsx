@@ -33,7 +33,6 @@ export default function WorkerHeader({
 }: WorkerHeaderProps) {
   return (
     <Card className="mx-4 md:mx-10">
-      {/* Banner Image */}
       <div className="h-32 md:h-48 bg-cover bg-center">
         <Image
           src={bannerImage}
@@ -44,9 +43,7 @@ export default function WorkerHeader({
         />
       </div>
 
-      {/* Profile and Details Section */}
       <div className="relative flex flex-col items-center md:flex-row px-4 md:px-7 pb-6 md:pb-10">
-        {/* Profile Image */}
         <div className="-mt-12 md:-mt-24">
           <Avatar className="w-24 h-24 md:w-48 md:h-48 border-4 border-white">
             <AvatarImage src={profileImage} />
@@ -59,7 +56,6 @@ export default function WorkerHeader({
           </Avatar>
         </div>
 
-        {/* Name and Role */}
         <div className="mt-4 md:mt-0 md:ml-6 text-center md:text-left flex-1">
           <div className="flex flex-col md:flex-row items-center md:items-start">
             <h2 className="text-xl md:text-4xl font-semibold text-black leading-tight">
@@ -78,7 +74,6 @@ export default function WorkerHeader({
           <p className="text-gray-600 text-sm md:text-lg mt-2">{role}</p>
         </div>
 
-        {/* Action Buttons */}
         <div className="mt-4 md:mt-0 md:ml-auto flex items-center justify-center gap-4 md:gap-[35px]">
           <Button variant="ghost" size="icon" onClick={onOptions}>
             <Image
