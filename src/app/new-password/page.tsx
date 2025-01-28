@@ -1,6 +1,6 @@
 import React from 'react';
 import InputField from '@/components/Form/InputField';
-import Button from '@/components/Form/Button';
+import ButtonForm from '@/components/Form/Button';
 import Image from 'next/image';
 
 export default function PasswordChangeForm() {
@@ -35,7 +35,7 @@ export default function PasswordChangeForm() {
           </div>
 
           <div className="flex justify-center">
-            <Button />
+            <ButtonForm />
           </div>
         </form>
       </div>
