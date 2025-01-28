@@ -15,23 +15,19 @@ interface NavbarProps {
 export default function Navbar({ logo, links, user }: NavbarProps) {
   return (
     <nav className="flex justify-between items-center w-full p-4 bg-white shadow-md">
-      {/* Logo */}
       <div className="flex items-center">
         <Image src={logo} alt="Logo" width={50} height={50} className="mr-4" />
         <span className="text-lg font-bold">Offer Hub</span>
       </div>
-
-      {/* Navigation Links */}
       <ul className="hidden md:flex space-x-4">
   {links.map((link) => (
     <li key={link.name}>
       <Link
         href={link.href}
         className={`px-4 py-2 rounded-lg ${
-          // check if link is active
           link.isActive
-            ? "bg-[#159A9C] text-white" // Botón seleccionado
-            : "text-[#159A9C] hover:bg-gray-100 hover:text-[#159A9C]" // Normal y hover
+            ? "bg-[#159A9C] text-white"
+            : "text-[#159A9C] hover:bg-gray-100 hover:text-[#159A9C]"
         }`}
       >
         {link.name}
@@ -39,9 +35,6 @@ export default function Navbar({ logo, links, user }: NavbarProps) {
     </li>
   ))}
 </ul>
-
-
-      {/* User Profile */}
       <div className="flex items-center space-x-2">
         <Image
           src={user.profilePicture}
