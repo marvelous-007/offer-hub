@@ -64,7 +64,7 @@ const defaultSections: FooterSection[] = [
 
 const defaultSocialLinks: SocialLink[] = [
   { label: "X", href: "https://x.com/offerhub_", icon: "x" },
-  { label: "Telegram", href: "https://telegram.org", icon: "telegram" },
+  { label: "Telegram", href: "https://t.me/offer_hub_contributors", icon: "telegram" },
   { label: "GitHub", href: "https://github.com/OFFER-HUB/offer-hub", icon: "github" },
 ]
 
