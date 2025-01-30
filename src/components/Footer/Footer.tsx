@@ -83,7 +83,7 @@ function SocialIcon({ icon }: { icon: string }) {
 
 export function Footer({
   navigationLinks = defaultNavigationLinks,
-  sections = [],
+  sections = defaultSections,
   socialLinks = defaultSocialLinks,
   className,
 }: FooterProps) {
