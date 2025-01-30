@@ -1,14 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react'
 import Particles from 'react-tsparticles'
 import { loadSlim } from 'tsparticles-slim'
 import { useCallback } from 'react'
 
 const ParticleBackground = () => {
-  const particlesInit = useCallback(async (engine) => {
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  const particlesInit = useCallback(async (engine: any) => {
     await loadSlim(engine)
   }, [])
 
-  const particlesLoaded = useCallback(async (container) => {
+  const particlesLoaded = useCallback(async (container: unknown) => {
     console.log('Particles loaded:', container)
   }, [])
 
