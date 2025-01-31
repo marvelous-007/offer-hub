@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -33,7 +29,10 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    --font-geist-sans: "Geist", sans-serif;
+    --font-geist-mono: "Azeret Mono", monospace;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -60,13 +59,19 @@ body {
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
-}
 
-@layer base {
-  * {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+    margin: 0;
+    line-height: 1.5;
+    font-weight: 400;
+    font-family: var(--font-geist-sans);
   }
 }
