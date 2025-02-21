@@ -2,10 +2,10 @@ import { Request, Response, NextFunction, Router } from "express";
 
 import { ActivityLogsService } from "@/services";
 
-export const router = Router();
+export const activityLogsRouter = Router();
 const activityLogsService = new ActivityLogsService();
 
-router.post(
+activityLogsRouter.post(
     '/',
     async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -18,7 +18,7 @@ router.post(
     }
 );
 
-router.get(
+activityLogsRouter.get(
     '/:id',
     async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -35,7 +35,7 @@ router.get(
     }
 );
 
-router.get(
+activityLogsRouter.get(
     '/',
     async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -48,7 +48,7 @@ router.get(
     }
 );
 
-router.post(
+activityLogsRouter.post(
     '/:id',
     async (req: Request, res: Response, next: NextFunction) => {
         try {
