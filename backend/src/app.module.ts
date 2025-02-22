@@ -4,6 +4,7 @@ import { RatingsModule } from './ratings.module';
 import { Rating } from './entities/ratings.entity';
 import { User } from './entities/user.entity';
 import { Project } from './entities/project.entity';
+import { Skill } from './entities/skills.entity';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { Project } from './entities/project.entity';
       username: 'admin',
       password: 'admin',
       database: 'offerhub',
-      entities: [Rating, User, Project],
+      entities: [Rating, User, Project, Skill],
       synchronize: true,
     }),
     RatingsModule
