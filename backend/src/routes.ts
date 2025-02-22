@@ -2,7 +2,7 @@ import { Router } from 'express';
 import achievementsController from '@/controllers/achievements.controller';
 import notificationsController from "./controllers/notifications.controller";
 import authLogsController from "./controllers/auth-logs.controller";
-import { SkillsController } from './controllers/skills.controller';
+import SkillsController from './controllers/skills.controller';
 
 const router = Router();
 
