@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ActivityLogsModule } from './activity-logs.module';
-// import { RatingsModule } from './ratings.module';
-// import { Rating } from './entities/ratings.entity';
+import { RatingsModule } from './ratings.module';
+import { ActivityLogs } from './entities';
+import { Rating } from './entities/ratings.entity';
+
+// Commented out since the files do not exist
 // import { User } from './entities/user.entity';
 // import { Project } from './entities/project.entity';
-import { ActivityLogs } from './entities';
+
 
 @Module({
   imports: [
@@ -16,10 +19,10 @@ import { ActivityLogs } from './entities';
       username: 'admin',
       password: 'admin',
       database: 'offerhub',
-      entities: [ActivityLogs], //Rating, User, Project],
+      entities: [ActivityLogs, Rating],
       synchronize: true,
     }),
-    ActivityLogsModule, //RatingsModule
+    ActivityLogsModule, RatingsModule
   ],
 })
-export class AppModule {} 
+export class AppModule {}
