@@ -1,1 +1,0 @@
-export * from "@/repositories/activity-logs.repository";

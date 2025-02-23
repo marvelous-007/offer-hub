@@ -1,32 +1,47 @@
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
 import { CreateActivityLogsDto, UpdateActivityLogsDto } from "@/dtos";
-import { ActivityLogsRepository } from "@/repositories";
+import { ActivityLogs } from "@/entities";
 
 
+@Injectable()
 export class ActivityLogsService {
-    private readonly repo: ActivityLogsRepository;
-
-    constructor() {
-        this.repo = new ActivityLogsRepository();
-    }
+    constructor(
+        @InjectRepository(ActivityLogs) private readonly repo: Repository<ActivityLogs>
+    ) {}
 
     async create(activityLogData: CreateActivityLogsDto) {
-        return this.repo.create(activityLogData);
+        const activityLog = await this.repo.create(activityLogData);
+
+        return this.repo.save(activityLog);
     }
 
     async findById(id: string) {
-        return this.repo.findById(id);
+        const activityLog = await this.repo.findOne({ where: { log_id: id }});
+        if (!activityLog) {
+            throw new NotFoundException(`Activity Log with ID ${id} not found.`)
+        }
+        return activityLog;
     }
 
     async findAll() {
-        return this.repo.findAll();
+        return this.repo.find();
     }
 
     async update(id: string, data: UpdateActivityLogsDto) {
-        return this.repo.update(id, data);
+        const activityLog = await this.findById(id);
+        Object.assign(activityLog, data);
+
+        return this.repo.save(activityLog);
     }
 
     async delete(id: string) {
-        await this.findById(id);
+        const result = await this.repo.delete(id);
+        if (result.affected === 0) {
+            throw new NotFoundException(`Activity Log with ID ${id} not found.`)
+        }
+
         return this.repo.delete(id);
     }
 }
