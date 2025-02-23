@@ -1,9 +1,25 @@
+import { IsOptional, IsString, IsUUID } from "class-validator";
+
 export class CreateActivityLogsDto {
+    @IsString()
     action_type: string;
+
+    @IsString()
     entity_type: string;
+
+    @IsString()
+    @IsOptional()
+    @IsUUID()
     entity_id?: string;
+
     details?: Record<string, any>;
+
+    @IsString()
+    @IsOptional()
     ip_address?: string;
+
+    @IsString()
+    @IsOptional()
     user_agent?: string;
 }
 

@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { validate } from "class-validator";
 import { Repository } from "typeorm";
 import { CreateActivityLogsDto, UpdateActivityLogsDto } from "@/dtos";
 import { ActivityLogs } from "@/entities";
@@ -12,6 +13,10 @@ export class ActivityLogsService {
     ) {}
 
     async create(activityLogData: CreateActivityLogsDto) {
+        const errors = await validate(activityLogData);
+        if (errors.length > 0) {
+            throw new BadRequestException(errors);
+        }
         const activityLog = await this.repo.create(activityLogData);
 
         return this.repo.save(activityLog);
