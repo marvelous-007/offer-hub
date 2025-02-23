@@ -1,7 +1,8 @@
 import 'reflect-metadata';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
-import { User } from './user.entity';
-import { Project } from './project.entity';
+// Commented out since the files do not exist
+// import { User } from './user.entity';
+// import { Project } from './project.entity';
 
 @Entity('ratings')
 export class Rating {
@@ -26,15 +27,16 @@ export class Rating {
   @CreateDateColumn({ type: 'timestamp with time zone' })
   created_at!: Date;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'from_user_id' })
-  fromUser!: User;
+  // Commented out relations to avoid errors
+  // @ManyToOne(() => User)
+  // @JoinColumn({ name: 'from_user_id' })
+  // fromUser!: User;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'to_user_id' })
-  toUser!: User;
+  // @ManyToOne(() => User)
+  // @JoinColumn({ name: 'to_user_id' })
+  // toUser!: User;
 
-  @ManyToOne(() => Project)
-  @JoinColumn({ name: 'project_id' })
-  project!: Project;
-} 
+  // @ManyToOne(() => Project)
+  // @JoinColumn({ name: 'project_id' })
+  // project!: Project;
+}

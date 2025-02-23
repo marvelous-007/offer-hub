@@ -2,7 +2,7 @@ import { Request, Response, Router } from 'express';
 import { AchievementsService } from '@/services/achievements.service';
 import { CreateAchievementDto, UpdateAchievementDto } from '@/dtos/achievements.dto';
 
-const router = Router();
+const router: Router = Router();
 const achievementsService = new AchievementsService();
 
 router.post('/', async (req: Request, res: Response) => {

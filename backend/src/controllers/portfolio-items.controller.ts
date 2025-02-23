@@ -5,7 +5,7 @@ import {
   UpdatePortfolioItemDto,
 } from "../dtos/portfolio-items.dto";
 
-const router = Router();
+const router: Router = Router();
 
 router.get("/", (req: Request, res: Response) => {
   res.json(portfolioItemsService.getAll());
