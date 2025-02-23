@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { RatingsModule } from './ratings.module';
 import { Rating } from './entities/ratings.entity';
 
+// Commented out since the files do not exist
 // import { User } from './entities/user.entity';
 // import { Project } from './entities/project.entity';
 
@@ -18,7 +19,7 @@ import { Rating } from './entities/ratings.entity';
       entities: [Rating],
       synchronize: true,
     }),
-    RatingsModule
+    RatingsModule,
   ],
 })
-export class AppModule {} 
+export class AppModule {}
