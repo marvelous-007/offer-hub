@@ -18,7 +18,8 @@ export class AchievementsRepository {
   }
 
   async findById(id: string): Promise<Achievement | undefined> {
-    return await this.repo.findOne({ where: { achievement_id: id } });
+    return ;
+    //return await this.repo.findOne({ where: { achievement_id: id } });
   }
 
   async update(id: string, achievementData: Partial<Achievement>): Promise<Achievement> {
