@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RatingsModule } from './ratings.module';
 import { Rating } from './entities/ratings.entity';
-import { User } from './entities/user.entity';
-import { Project } from './entities/project.entity';
-import { Skill } from './entities/skills.entity';
+
+// import { User } from './entities/user.entity';
+// import { Project } from './entities/project.entity';
 
 @Module({
   imports: [
@@ -15,7 +15,7 @@ import { Skill } from './entities/skills.entity';
       username: 'admin',
       password: 'admin',
       database: 'offerhub',
-      entities: [Rating, User, Project, Skill],
+      entities: [Rating],
       synchronize: true,
     }),
     RatingsModule
