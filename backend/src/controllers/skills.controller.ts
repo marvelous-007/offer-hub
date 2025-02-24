@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
-import { SkillsService } from "@/services/skills.service";
-import { CreateSkillDto, UpdateSkillDto } from "@/dtos/skills.dto";
+import { SkillsService } from "../services/skills.service";
+import { CreateSkillDto, UpdateSkillDto } from "../dtos/skills.dto";
 
 const router = Router();
 const skillsService = new SkillsService();

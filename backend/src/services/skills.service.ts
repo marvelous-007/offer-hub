@@ -2,7 +2,7 @@ import { SkillsRepository } from "../repositories/skills.repository";
 import { CreateSkillDto, UpdateSkillDto } from "../dtos/skills.dto";
 import { Skill } from "../entities/skills.entity";
 
-export class skillsService {
+export class SkillsService {
   private skillsRepository: SkillsRepository;
 
   constructor() {

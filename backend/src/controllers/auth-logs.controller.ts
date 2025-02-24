@@ -5,7 +5,7 @@ import {
   UpdateAuthLogDto,
 } from "../dtos/auth-logs.dto";
 
-const router = Router();
+const router: Router = Router();
 
 router.get("/", (req: Request, res: Response) => {
   res.json(authLogsService.getAll());

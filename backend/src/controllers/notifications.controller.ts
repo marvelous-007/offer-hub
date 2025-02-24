@@ -5,7 +5,7 @@ import {
   UpdateNotificationDto,
 } from "../dtos/notifications.dto";
 
-const router = Router();
+const router: Router = Router();
 
 router.get("/", (req: Request, res: Response) => {
   res.json(notificationsService.getAll());
