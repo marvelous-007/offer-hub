@@ -8,7 +8,7 @@ import {
   JoinColumn,
   CreateDateColumn,
 } from "typeorm";
-import { Category } from "./category.entity";
+// import { Category } from "./category.entity";
 
 @Entity("skills")
 export class Skill {
@@ -27,7 +27,7 @@ export class Skill {
   @CreateDateColumn({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;
 
-  @OneToOne(() => Category)
-  @JoinColumn({ name: "category_id" })
-  toCategory!: Category;
+  // @OneToOne(() => Category)
+  // @JoinColumn({ name: "category_id" })
+  // toCategory!: Category;
 }

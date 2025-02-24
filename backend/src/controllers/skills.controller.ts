@@ -2,7 +2,7 @@ import { Request, Response, Router } from "express";
 import { SkillsService } from "../services/skills.service";
 import { CreateSkillDto, UpdateSkillDto } from "../dtos/skills.dto";
 
-const router = Router();
+const router: Router = Router();
 const skillsService = new SkillsService();
 
 router.post("/", async (req: Request, res: Response) => {
