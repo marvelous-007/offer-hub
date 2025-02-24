@@ -3,7 +3,6 @@ import portfolioItemsController from "./controllers/portfolio-items.controller";
 import achievementsController from "./controllers/achievements.controller";
 import notificationsController from "./controllers/notifications.controller";
 import authLogsController from "./controllers/auth-logs.controller";
-import skillsController from "./controllers/skills.controller";
 import certificationsController from "./controllers/certifications.controller";
 
 const router: ExpressRouter = Router(); // Explicit type annotation fixes the error
@@ -17,7 +16,6 @@ router.use("/portfolio-items", portfolioItemsController);
 router.use("/achievements", achievementsController);
 router.use("/notifications", notificationsController);
 router.use("/auth-logs", authLogsController);
-router.use("/skills", skillsController);
 router.use("/certifications", certificationsController);
 
 export default router;

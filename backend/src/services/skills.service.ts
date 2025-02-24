@@ -1,31 +1,56 @@
-import { SkillsRepository } from "../repositories/skills.repository";
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { validate } from "class-validator";
+import { Repository } from "typeorm";
 import { CreateSkillDto, UpdateSkillDto } from "../dtos/skills.dto";
 import { Skill } from "../entities/skills.entity";
 
-export class SkillsService {
-  private skillsRepository: SkillsRepository;
+@Injectable()
+export class SkillService {
+  constructor(
+    @InjectRepository(Skill)
+    private readonly repo: Repository<Skill>
+  ) {}
 
-  constructor() {
-    this.skillsRepository = new SkillsRepository();
+  async create(skillData: CreateSkillDto) {
+    const errors = await validate(skillData);
+    if (errors.length > 0) {
+      throw new BadRequestException(errors);
+    }
+    const skill = await this.repo.create(skillData);
+
+    return this.repo.save(skill);
   }
 
-  async create(dto: CreateSkillDto): Promise<Skill> {
-    return await this.skillsRepository.create(dto);
+  async findById(id: string) {
+    const skill = await this.repo.findOne({ where: { skill_id: id } });
+    if (!skill) {
+      throw new NotFoundException(`Skill with ID ${id} not found.`);
+    }
+    return skill;
   }
 
-  async findAll(): Promise<Skill[]> {
-    return await this.skillsRepository.findAll();
+  async findAll() {
+    return this.repo.find();
   }
 
-  async findById(id: string): Promise<Skill | null> {
-    return await this.skillsRepository.findById(id);
+  async update(id: string, data: UpdateSkillDto) {
+    const skill = await this.findById(id);
+    Object.assign(skill, data);
+
+    return this.repo.save(skill);
   }
 
-  async update(id: string, dto: UpdateSkillDto): Promise<Skill> {
-    return await this.skillsRepository.update(id, dto);
-  }
+  async remove(id: string) {
+    const result = await this.repo.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Skill with ID ${id} not found.`);
+    }
 
-  async remove(id: string): Promise<void> {
-    await this.skillsRepository.delete(id);
+    return this.repo.delete(id);
   }
 }
