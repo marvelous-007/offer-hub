@@ -1,63 +1,43 @@
-import { Request, Response, Router } from 'express';
-import CategoriesService from '@/services/categories.service';
-import { CreateCategoryDto, UpdateCategoryDto } from '@/dtos/categories.dto';
+import 'reflect-metadata';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { CategoriesService } from '../services/categories.service';
+import { CreateCategoryDto, UpdateCategoryDto } from '../dtos/categories.dto';
+import { Category } from '../entities/categories.entity';
 
-const router: Router = Router();
-const categoriesService = new CategoriesService();
+@Controller('categories')
+export class CategoriesController {
+  constructor(private readonly categoriesService: CategoriesService) { }
 
-router.post('/', async (req: Request, res: Response) => {
-  try {
-    const dto: CreateCategoryDto = req.body;
-    const category = await categoriesService.createCategory(dto);
-    res.status(201).json(category);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to create category' });
+  @Post()
+  async create(@Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
+    return await this.categoriesService.create(createCategoryDto);
   }
-});
 
-router.get('/', async (req: Request, res: Response) => {
-  try {
-    const categories = await categoriesService.getCategories();
-    res.status(200).json(categories);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch categories' });
+  @Get()
+  async findAll(): Promise<Category[]> {
+    return await this.categoriesService.findAll();
   }
-});
 
-router.get('/:id', async (req: Request, res: Response) => {
-  try {
-    const category = await categoriesService.getCategoryById(req.params.id);
-    if (category) {
-      res.status(200).json(category);
-    } else {
-      res.status(404).json({ error: 'Category not found' });
-    }
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch category' });
+  @Get(':id')
+  async findOne(@Param('id') id: string): Promise<Category> {
+    return await this.categoriesService.findOne(id);
   }
-});
 
-router.put('/:id', async (req: Request, res: Response) => {
-  try {
-    const dto: UpdateCategoryDto = req.body;
-    const category = await categoriesService.updateCategory(req.params.id, dto);
-    res.status(200).json(category);
-  } catch (error) {
-    if (error instanceof Error && error.message === 'Category not found after update') {
-      res.status(404).json({ error: 'Category not found' });
-    } else {
-      res.status(500).json({ error: 'Failed to update category' });
-    }
+  @Get('slug/:slug')
+  async findBySlug(@Param('slug') slug: string): Promise<Category> {
+    return await this.categoriesService.findBySlug(slug);
   }
-});
 
-router.delete('/:id', async (req: Request, res: Response) => {
-  try {
-    await categoriesService.deleteCategory(req.params.id);
-    res.status(204).send();
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to delete category' });
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ): Promise<Category> {
+    return await this.categoriesService.update(id, updateCategoryDto);
   }
-});
 
-export default router;
+  @Delete(':id')
+  async remove(@Param('id') id: string): Promise<void> {
+    return await this.categoriesService.remove(id);
+  }
+}

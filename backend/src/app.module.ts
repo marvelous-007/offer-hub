@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RatingsModule } from './ratings.module';
+import { CategoryModule } from './category.module';
 import { Rating } from './entities/ratings.entity';
 import { Category } from './entities/categories.entity';
 
@@ -20,7 +21,7 @@ import { Category } from './entities/categories.entity';
       entities: [Rating, Category],
       synchronize: true,
     }),
-    RatingsModule,
+    RatingsModule, CategoryModule
   ],
 })
-export class AppModule {}
+export class AppModule { }
