@@ -4,6 +4,7 @@ import achievementsController from "./controllers/achievements.controller";
 import notificationsController from "./controllers/notifications.controller";
 import authLogsController from "./controllers/auth-logs.controller";
 import certificationsController from "./controllers/certifications.controller";
+import { TransactionsController } from "./controllers/transactions.controller";
 
 const router: ExpressRouter = Router(); // Explicit type annotation fixes the error
 
@@ -12,5 +13,5 @@ router.use("/achievements", achievementsController);
 router.use("/notifications", notificationsController);
 router.use("/auth-logs", authLogsController);
 router.use('/certifications', certificationsController)
-
+router.post("/transactions", TransactionsController.create);
 export default router;
