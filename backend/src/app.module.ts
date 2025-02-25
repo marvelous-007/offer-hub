@@ -4,7 +4,8 @@ import { ActivityLogsModule } from './activity-logs.module';
 import { RatingsModule } from './ratings.module';
 import { ActivityLogs } from './entities';
 import { Rating } from './entities/ratings.entity';
-
+import { UserAchievement } from './entities/user-achievements.entity';
+import { UserAchievementsModule } from './user-achievements.module';
 // Commented out since the files do not exist
 // import { User } from './entities/user.entity';
 // import { Project } from './entities/project.entity';
@@ -19,10 +20,10 @@ import { Rating } from './entities/ratings.entity';
       username: 'admin',
       password: 'admin',
       database: 'offerhub',
-      entities: [ActivityLogs, Rating],
+      entities: [ActivityLogs, Rating, UserAchievement],
       synchronize: true,
     }),
-    ActivityLogsModule, RatingsModule
+    ActivityLogsModule, RatingsModule,UserAchievementsModule
   ],
 })
 export class AppModule {}
