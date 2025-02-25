@@ -1,13 +1,17 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ActivityLogsModule } from './activity-logs.module';
 import { RatingsModule } from './ratings.module';
-import { CategoryModule } from './category.module';
+import { ActivityLogs } from './entities';
 import { Rating } from './entities/ratings.entity';
+import { UserAchievement } from './entities/user-achievements.entity';
+import { UserAchievementsModule } from './user-achievements.module';
+import { CategoryModule } from './category.module';
 import { Category } from './entities/categories.entity';
-
 // Commented out since the files do not exist
 // import { User } from './entities/user.entity';
 // import { Project } from './entities/project.entity';
+
 
 @Module({
   imports: [
@@ -18,10 +22,10 @@ import { Category } from './entities/categories.entity';
       username: 'admin',
       password: 'admin',
       database: 'offerhub',
-      entities: [Rating, Category],
+      entities: [ActivityLogs, Rating, UserAchievement, Category],
       synchronize: true,
     }),
-    RatingsModule, CategoryModule
+    ActivityLogsModule, RatingsModule,UserAchievementsModule, CategoryModule
   ],
 })
 export class AppModule { }
