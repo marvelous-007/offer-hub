@@ -1,23 +1,39 @@
-import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { UserAchievement } from "@/entities/user-achievements.entity";
-import { CreateUserAchievementDTO } from "@/dtos/user-achievements.dto";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { UserAchievementsRepository } from "@/repositories/user-achievements.repository";
+import { CreateUserAchievementDTO } from "@/dtos/user-achievements.dto";
+import { UserAchievement } from "@/entities/user-achievements.entity";
+import type { UserAchievementResponseDTO } from "@/dtos/user-achievements.dto";
 
 @Injectable()
 export class UserAchievementsService {
     constructor(
-        @InjectRepository(UserAchievementsRepository)
-        private readonly userAchievementsRepository: Repository<UserAchievement>, 
+        private readonly userAchievementsRepository: UserAchievementsRepository
     ) {}
 
     async create(dto: CreateUserAchievementDTO): Promise<UserAchievement> {
-        const userAchievement = this.userAchievementsRepository.create(dto);
-        return await this.userAchievementsRepository.save(userAchievement);
+        return await this.userAchievementsRepository.create(dto);
     }
 
-    async findAll(): Promise<UserAchievement[]> {
-        return await this.userAchievementsRepository.find();
+    async findOne(userId: string): Promise<UserAchievementResponseDTO> {
+        const userAchievements = await this.userAchievementsRepository.findOne(userId);
+        
+        if (!userAchievements || userAchievements.length === 0) {
+            throw new NotFoundException('User achievements not found');
+        }
+    
+        const userAchievement = userAchievements[0]; 
+    
+        return {
+            user_id: userAchievement.user_id,
+            achievement_id: userAchievement.achievement_id,
+        };
     }
+    
+    async findAll(): Promise<UserAchievement[]> {
+        return await this.userAchievementsRepository.findAll();
+    }
+
+    async deleteUserAchievement(user_id: string,achievement_id: string): Promise<void> {
+        return this.userAchievementsRepository.delete(user_id, achievement_id);
+      }
 }
