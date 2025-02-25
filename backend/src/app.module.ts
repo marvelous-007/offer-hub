@@ -6,10 +6,15 @@ import { ActivityLogs } from './entities';
 import { Rating } from './entities/ratings.entity';
 import { SkillsModule } from './skills.module';
 import { Skill } from './entities/skills.entity';
+
+import { UserProfileModule } from './modules/user-profile.module';
+import { UserProfile } from './entities/user-profiles.entity';
+
 import { UserAchievement } from './entities/user-achievements.entity';
 import { UserAchievementsModule } from './user-achievements.module';
 import { CategoryModule } from './category.module';
 import { Category } from './entities/categories.entity';
+
 // Commented out since the files do not exist
 // import { User } from './entities/user.entity';
 // import { Project } from './entities/project.entity';
@@ -24,10 +29,10 @@ import { Category } from './entities/categories.entity';
       username: 'admin',
       password: 'admin',
       database: 'offerhub',
-      entities: [ActivityLogs, Rating, UserAchievement, Category, Skill],
+      entities: [ActivityLogs, Rating, UserProfile, UserAchievement, Category, Skill],
       synchronize: true,
     }),
-    ActivityLogsModule, RatingsModule,UserAchievementsModule, CategoryModule, SkillsModule
+    ActivityLogsModule, RatingsModule,UserAchievementsModule, CategoryModule, UserProfileModule, SkillsModule
   ],
 })
 export class AppModule { }
