@@ -1,4 +1,5 @@
 
+import { FreelancerSkill } from '@/entities/freelancer-skills.entity';
 import { UserProfile } from '@/entities/user-profiles.entity';
 import { IsString, IsOptional, IsUUID, IsArray, IsIn } from 'class-validator';
 
@@ -74,6 +75,7 @@ export class UserProfileResponseDTO {
     languages?: string[];
     profile_image_url?: string;
     updated_at: Date;
+    freelancerSkills: FreelancerSkill[];
 
     constructor(data: UserProfile) {
         this.profile_id = data.profile_id;
