@@ -4,7 +4,9 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  OneToMany,
 } from "typeorm";
+import { FreelancerSkill } from "./freelancer-skills.entity";
 
 @Entity("skills")
 export class Skill {
@@ -19,4 +21,7 @@ export class Skill {
 
   @CreateDateColumn({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;
+
+  @OneToMany(() => FreelancerSkill, (freelancerSkill) => freelancerSkill.skill)
+  freelancerSkills: FreelancerSkill[];
 }

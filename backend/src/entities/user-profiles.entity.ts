@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { FreelancerSkill } from './freelancer-skills.entity';
 
 @Entity('user_profiles')
 export class UserProfile {
@@ -31,4 +32,7 @@ export class UserProfile {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updated_at: Date;
+
+  @OneToMany(() => FreelancerSkill, (freelancerSkill) => freelancerSkill.user)
+  freelancerSkills: FreelancerSkill[];
 }
