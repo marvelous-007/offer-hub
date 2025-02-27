@@ -1,12 +1,12 @@
 import { Router, Request, Response } from "express";
-import usersService from "../services/users.service";
+import { UsersService } from "../services/users.service";
 import { CreateUserDto, UpdateUserDto } from "../dtos/users.dto";
 
 const router: Router = Router();
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const users = await usersService.findAll();
+    const users = await UsersService.findAll();
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: "Error fetching users", error });
@@ -16,7 +16,7 @@ router.get("/", async (req: Request, res: Response) => {
 router.post("/", async (req: Request, res: Response) => {
   try {
     const data: CreateUserDto = req.body;
-    const user = await usersService.create(data);
+    const user = await UsersService.create(data);
     res.status(201).json(user);
   } catch (error) {
     res.status(500).json({ message: "Error creating user", error });
@@ -25,7 +25,7 @@ router.post("/", async (req: Request, res: Response) => {
 
 router.get("/wallet/:address", async (req: Request, res: Response) => {
   try {
-    const user = await usersService.findByWalletAddress(req.params.address);
+    const user = await UsersService.findByWalletAddress(req.params.address);
     if (user) {
       res.json(user);
     } else {
@@ -38,7 +38,7 @@ router.get("/wallet/:address", async (req: Request, res: Response) => {
 
 router.get("/:id", async (req: Request, res: Response) => {
   try {
-    const user = await usersService.findById(req.params.id);
+    const user = await UsersService.findById(req.params.id);
     if (user) {
       res.json(user);
     } else {
@@ -52,7 +52,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 router.put("/:id", async (req: Request, res: Response) => {
   try {
     const data: UpdateUserDto = req.body;
-    const updated = await usersService.update(req.params.id, data);
+    const updated = await UsersService.update(req.params.id, data);
     if (updated) {
       res.json(updated);
     } else {
@@ -65,7 +65,7 @@ router.put("/:id", async (req: Request, res: Response) => {
 
 router.delete("/:id", async (req: Request, res: Response) => {
   try {
-    const deleted = await usersService.remove(req.params.id);
+    const deleted = await UsersService.remove(req.params.id);
     if (deleted) {
       res.status(204).send();
     } else {
