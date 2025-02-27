@@ -1,63 +1,79 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, HttpCode, HttpStatus } from '@nestjs/common';
-import { UsersService } from '@/services/users.service';
-import { CreateUserDto, UpdateUserDto, UserResponseDto } from '@/dtos/users.dto';
-import { User } from '@/entities/users.entity';
+import { Router, Request, Response } from "express";
+import usersService from "@/services/users.service";
+import { CreateUserDto, UpdateUserDto } from "@/dtos/users.dto";
 
-@Controller('users')
-export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+const router: Router = Router();
 
-  @Get()
-  async findAll(): Promise<UserResponseDto[]> {
-    const users = await this.usersService.findAll();
-    return users.map(this.mapToResponseDto);
+router.get("/", async (req: Request, res: Response) => {
+  try {
+    const users = await usersService.findAll();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching users", error });
   }
+});
 
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<UserResponseDto> {
-    const user = await this.usersService.findById(id);
-    return this.mapToResponseDto(user);
+router.post("/", async (req: Request, res: Response) => {
+  try {
+    const data: CreateUserDto = req.body;
+    const user = await usersService.create(data);
+    res.status(201).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Error creating user", error });
   }
+});
 
-  @Get('wallet/:address')
-  async findByWalletAddress(@Param('address') address: string): Promise<UserResponseDto> {
-    const user = await this.usersService.findByWalletAddress(address);
-    return this.mapToResponseDto(user);
+router.get("/wallet/:address", async (req: Request, res: Response) => {
+  try {
+    const user = await usersService.findByWalletAddress(req.params.address);
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching user", error });
   }
+});
 
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
-    const user = await this.usersService.create(createUserDto);
-    return this.mapToResponseDto(user);
+router.get("/:id", async (req: Request, res: Response) => {
+  try {
+    const user = await usersService.findById(req.params.id);
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching user", error });
   }
+});
 
-  @Put(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() updateUserDto: UpdateUserDto,
-  ): Promise<UserResponseDto> {
-    const user = await this.usersService.update(id, updateUserDto);
-    return this.mapToResponseDto(user);
+router.put("/:id", async (req: Request, res: Response) => {
+  try {
+    const data: UpdateUserDto = req.body;
+    const updated = await usersService.update(req.params.id, data);
+    if (updated) {
+      res.json(updated);
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error updating user", error });
   }
+});
 
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string): Promise<void> {
-    await this.usersService.remove(id);
+router.delete("/:id", async (req: Request, res: Response) => {
+  try {
+    const deleted = await usersService.remove(req.params.id);
+    if (deleted) {
+      res.status(204).send();
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting user", error });
   }
+});
 
-  // Helper method to map entity to DTO
-  private mapToResponseDto(user: User): UserResponseDto {
-    return {
-      userId: user.userId,
-      walletAddress: user.walletAddress,
-      email: user.email,
-      username: user.username,
-      createdAt: user.createdAt,
-      lastLogin: user.lastLogin,
-      isActive: user.isActive,
-      twoFactorEnabled: user.twoFactorEnabled,
-    };
-  }
-}
+export default router;

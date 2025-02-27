@@ -3,10 +3,10 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeor
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid', { name: 'user_id' })
-  userId: string;
+  user_id: string;
 
   @Column({ name: 'wallet_address', length: 100, unique: true })
-  walletAddress: string;
+  wallet_address: string;
 
   @Column({ nullable: true, unique: true })
   email: string;
@@ -15,14 +15,14 @@ export class User {
   username: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
-  createdAt: Date;
+  created_at: Date;
 
   @Column({ name: 'last_login', type: 'timestamp with time zone', nullable: true })
-  lastLogin: Date;
+  last_login: Date;
 
   @Column({ name: 'is_active', default: true })
-  isActive: boolean;
+  is_active: boolean;
 
   @Column({ name: 'two_factor_enabled', default: false })
-  twoFactorEnabled: boolean;
+  two_factor_enabled: boolean;
 }
