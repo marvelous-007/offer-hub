@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, HttpCode, ParseUUIDPipe } from '@nestjs/common';
 import { UsersService } from '@/services/users.service';
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from '@/dtos/users.dto';
 import { User } from '@/entities/users.entity';
@@ -18,7 +18,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<User> {
+  async findOne(@Param('id', new ParseUUIDPipe()) id: string): Promise<User>{
     return await this.usersService.findById(id);
   }
 
