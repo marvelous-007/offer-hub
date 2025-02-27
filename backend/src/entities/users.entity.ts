@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToMany } from 'typeorm';
+import { ActivityLogs } from './activity-logs.entity';
 
 @Entity('users')
 export class User {
@@ -25,4 +26,7 @@ export class User {
 
   @Column({ name: 'two_factor_enabled', default: false })
   two_factor_enabled: boolean;
+
+  @OneToMany(() => ActivityLogs, (activityLog) => activityLog.user)
+  activity_logs: ActivityLogs[];
 }
