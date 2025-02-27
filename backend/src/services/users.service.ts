@@ -1,47 +1,59 @@
-import { getRepository } from 'typeorm';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { User } from '@/entities/users.entity';
 import { CreateUserDto, UpdateUserDto } from '@/dtos/users.dto';
 
-class UsersService {
+@Injectable()
+export class UsersService {
+  constructor(
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>
+  ) {}
+
   async findAll(): Promise<User[]> {
-    const userRepository = getRepository(User);
-    return await userRepository.find();
+    return await this.usersRepository.find();
   }
 
-  async findById(userId: string): Promise<User | null> {
-    const userRepository = getRepository(User);
-    return await userRepository.findOne({ where: { user_id: userId } });
+  async findById(userId: string): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { user_id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+    return user;
   }
 
-  async findByWalletAddress(walletAddress: string): Promise<User | null> {
-    const userRepository = getRepository(User);
-    return await userRepository.findOne({ where: { wallet_address: walletAddress } });
+  async findByWalletAddress(walletAddress: string): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { wallet_address: walletAddress } });
+    if (!user) {
+      throw new NotFoundException(`User with wallet address ${walletAddress} not found`);
+    }
+    return user;
   }
 
   async findByUsername(username: string): Promise<User | null> {
-    const userRepository = getRepository(User);
-    return await userRepository.findOne({ where: { username } });
+    return await this.usersRepository.findOne({ where: { username } });
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const userRepository = getRepository(User);
-    return await userRepository.findOne({ where: { email } });
+    return await this.usersRepository.findOne({ where: { email } });
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const userRepository = getRepository(User);
-    
     // Check for existing user with same wallet address
-    const existingWallet = await this.findByWalletAddress(createUserDto.walletAddress);
+    const existingWallet = await this.usersRepository.findOne({ 
+      where: { wallet_address: createUserDto.walletAddress } 
+    });
+    
     if (existingWallet) {
-      throw new Error(`User with wallet address ${createUserDto.walletAddress} already exists`);
+      throw new ConflictException(`User with wallet address ${createUserDto.walletAddress} already exists`);
     }
 
     // Check for existing username
     if (createUserDto.username) {
       const existingUsername = await this.findByUsername(createUserDto.username);
       if (existingUsername) {
-        throw new Error(`Username ${createUserDto.username} is already taken`);
+        throw new ConflictException(`Username ${createUserDto.username} is already taken`);
       }
     }
 
@@ -49,33 +61,32 @@ class UsersService {
     if (createUserDto.email) {
       const existingEmail = await this.findByEmail(createUserDto.email);
       if (existingEmail) {
-        throw new Error(`Email ${createUserDto.email} is already registered`);
+        throw new ConflictException(`Email ${createUserDto.email} is already registered`);
       }
     }
 
     // Map DTO to entity
-    const newUser = userRepository.create({
+    const newUser = this.usersRepository.create({
       wallet_address: createUserDto.walletAddress,
       email: createUserDto.email,
       username: createUserDto.username
     });
 
-    return await userRepository.save(newUser);
+    return await this.usersRepository.save(newUser);
   }
 
-  async update(userId: string, updateUserDto: UpdateUserDto): Promise<User | null> {
-    const userRepository = getRepository(User);
-    const user = await this.findById(userId);
+  async update(userId: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { user_id: userId } });
     
     if (!user) {
-      return null;
+      throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
     // Check username uniqueness if being updated
     if (updateUserDto.username && updateUserDto.username !== user.username) {
       const existingUsername = await this.findByUsername(updateUserDto.username);
       if (existingUsername) {
-        throw new Error(`Username ${updateUserDto.username} is already taken`);
+        throw new ConflictException(`Username ${updateUserDto.username} is already taken`);
       }
     }
 
@@ -83,7 +94,7 @@ class UsersService {
     if (updateUserDto.email && updateUserDto.email !== user.email) {
       const existingEmail = await this.findByEmail(updateUserDto.email);
       if (existingEmail) {
-        throw new Error(`Email ${updateUserDto.email} is already registered`);
+        throw new ConflictException(`Email ${updateUserDto.email} is already registered`);
       }
     }
 
@@ -93,34 +104,27 @@ class UsersService {
     if (updateUserDto.isActive !== undefined) user.is_active = updateUserDto.isActive;
     if (updateUserDto.twoFactorEnabled !== undefined) user.two_factor_enabled = updateUserDto.twoFactorEnabled;
 
-    return await userRepository.save(user);
+    return await this.usersRepository.save(user);
   }
 
-  async updateLastLogin(userId: string): Promise<boolean> {
-    const userRepository = getRepository(User);
-    const user = await this.findById(userId);
+  async updateLastLogin(userId: string): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { user_id: userId } });
     
     if (!user) {
-      return false;
+      throw new NotFoundException(`User with ID ${userId} not found`);
     }
     
     user.last_login = new Date();
-    await userRepository.save(user);
-    return true;
+    return await this.usersRepository.save(user);
   }
 
-  async remove(userId: string): Promise<boolean> {
-    const userRepository = getRepository(User);
-    const user = await this.findById(userId);
+  async remove(userId: string): Promise<void> {
+    const user = await this.usersRepository.findOne({ where: { user_id: userId } });
     
     if (!user) {
-      return false;
+      throw new NotFoundException(`User with ID ${userId} not found`);
     }
     
-    await userRepository.remove(user);
-    return true;
+    await this.usersRepository.remove(user);
   }
 }
-
-const usersService = new UsersService();
-export default usersService;
