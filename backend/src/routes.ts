@@ -7,7 +7,12 @@ import certificationsController from "./controllers/certifications.controller";
 import { TransactionsController } from "./controllers/transactions.controller";
 import conversationsController from '@/controllers/conversations.controller';
 
-const router: ExpressRouter = Router(); // Explicit type annotation fixes the error
+const router: ExpressRouter = Router();
+
+// Health Check Route
+router.get("/health", (req, res) => {
+  res.status(200).json({ status: "OK", message: "Server is running" });
+});
 
 router.use("/portfolio-items", portfolioItemsController);
 router.use("/achievements", achievementsController);

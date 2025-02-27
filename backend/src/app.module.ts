@@ -4,6 +4,18 @@ import { ActivityLogsModule } from './activity-logs.module';
 import { RatingsModule } from './ratings.module';
 import { ActivityLogs } from './entities';
 import { Rating } from './entities/ratings.entity';
+import { SkillsModule } from './skills.module';
+import { FreelancerSkillsModule } from './freelancer-skills.module';
+import { Skill } from './entities/skills.entity';
+
+import { UserProfileModule } from './modules/user-profile.module';
+import { UserProfile } from './entities/user-profiles.entity';
+
+import { UserAchievement } from './entities/user-achievements.entity';
+import { UserAchievementsModule } from './user-achievements.module';
+import { CategoryModule } from './category.module';
+import { Category } from './entities/categories.entity';
+import { FreelancerSkill } from './entities/freelancer-skills.entity';
 
 // Commented out since the files do not exist
 // import { User } from './entities/user.entity';
@@ -19,10 +31,11 @@ import { Rating } from './entities/ratings.entity';
       username: 'admin',
       password: 'admin',
       database: 'offerhub',
-      entities: [ActivityLogs, Rating],
+      entities: [ActivityLogs, Rating, UserProfile, UserAchievement, Category, Skill, FreelancerSkill],
       synchronize: true,
+      autoLoadEntities: true,
     }),
-    ActivityLogsModule, RatingsModule
+    ActivityLogsModule, RatingsModule,UserAchievementsModule, CategoryModule, UserProfileModule, SkillsModule, FreelancerSkillsModule
   ],
 })
-export class AppModule {}
+export class AppModule { }
