@@ -5,6 +5,7 @@ import notificationsController from "./controllers/notifications.controller";
 import authLogsController from "./controllers/auth-logs.controller";
 import certificationsController from "./controllers/certifications.controller";
 import conversationsController from '@/controllers/conversations.controller';
+import servicesController from '@/controllers/services.controller';
 
 const router: ExpressRouter = Router();
 
@@ -19,5 +20,6 @@ router.use("/notifications", notificationsController);
 router.use("/auth-logs", authLogsController);
 router.use('/certifications', certificationsController);
 router.use('/conversations', conversationsController);
+router.use('/services', servicesController);
 
 export default router;
