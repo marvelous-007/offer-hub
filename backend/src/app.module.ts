@@ -16,11 +16,11 @@ import { UserAchievementsModule } from './user-achievements.module';
 import { CategoryModule } from './category.module';
 import { Category } from './entities/categories.entity';
 import { FreelancerSkill } from './entities/freelancer-skills.entity';
+import { User } from './entities/users.entity'; 
+import { UsersModule } from './modules/users.module'; 
 
 // Commented out since the files do not exist
-// import { User } from './entities/user.entity';
 // import { Project } from './entities/project.entity';
-
 
 @Module({
   imports: [
@@ -31,11 +31,27 @@ import { FreelancerSkill } from './entities/freelancer-skills.entity';
       username: 'admin',
       password: 'admin',
       database: 'offerhub',
-      entities: [ActivityLogs, Rating, UserProfile, UserAchievement, Category, Skill, FreelancerSkill],
+      entities: [
+        ActivityLogs, 
+        Rating, 
+        UserProfile, 
+        UserAchievement, 
+        Category, 
+        Skill, 
+        FreelancerSkill,
+        User 
+      ],
       synchronize: true,
       autoLoadEntities: true,
     }),
-    ActivityLogsModule, RatingsModule,UserAchievementsModule, CategoryModule, UserProfileModule, SkillsModule, FreelancerSkillsModule
+    ActivityLogsModule, 
+    RatingsModule,
+    UserAchievementsModule, 
+    CategoryModule, 
+    UserProfileModule, 
+    SkillsModule, 
+    FreelancerSkillsModule,
+    UsersModule  
   ],
 })
 export class AppModule { }
