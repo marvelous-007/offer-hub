@@ -36,8 +36,8 @@ export class AuthLogsService {
   }
 
   async getByUserId(userId: string): Promise<AuthLog[]> {
-    return this.repo.find({ where: { user_id: userId } });
-  }
+    return this.repo.find({ where: { user: { user_id: userId } } });
+  }  
 
   async getByEventType(eventType: string): Promise<AuthLog[]> {
     return this.repo.find({ where: { event_type: eventType } });
