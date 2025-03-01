@@ -2,6 +2,20 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDa
 import { User } from "../users/entity";
 import { Project } from "../projects/entity";
 
+export enum TransactionStatus {
+  PENDING = "pending",
+  COMPLETED = "completed",
+  FAILED = "failed",
+  CANCELLED = "cancelled"
+}
+
+export enum TransactionType {
+  PAYMENT = "payment",
+  ESCROW_DEPOSIT = "escrow_deposit",
+  ESCROW_RELEASE = "escrow_release",
+  REFUND = "refund"
+}
+
 @Entity("transactions")
 export class Transaction {
   @PrimaryGeneratedColumn("uuid")
@@ -28,11 +42,11 @@ export class Transaction {
   @Column({ type: "varchar", length: 100, unique: true, nullable: false })
   transaction_hash: string;
 
-  @Column({ type: "varchar", length: 20, check: "status IN ('pending', 'completed', 'failed', 'cancelled')" })
-  status: "pending" | "completed" | "failed" | "cancelled";
+  @Column({ type: "enum", enum: TransactionStatus, default: TransactionStatus.PENDING })
+  status: TransactionStatus;
 
-  @Column({ type: "varchar", length: 20, check: "type IN ('payment', 'escrow_deposit', 'escrow_release', 'refund')" })
-  type: "payment" | "escrow_deposit" | "escrow_release" | "refund";
+  @Column({ type: "enum", enum: TransactionType })
+  type: TransactionType;
 
   @CreateDateColumn({ type: "timestamp with time zone", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;
