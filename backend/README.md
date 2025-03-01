@@ -24,7 +24,7 @@ cd offer-hub/backend
 
 ### 2️⃣ **Install dependencies**
 ```sh
-pnpm install  
+npm install  
 ```
 
 ### 3️⃣ **Set up environment variables**
