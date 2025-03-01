@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { config } from 'dotenv';
+
+config(); // Cargar variables de entorno
 
 //=======================================
 //               Entities
@@ -20,6 +23,8 @@ import { Transaction } from './modules-v2/transactions/entity';
 import { User } from './modules-v2/users/entity';
 import { UserAchievement } from './modules-v2/user-achievements/entity';
 import { UserProfile } from './modules-v2/user-profiles/entity';
+import { Achievement } from './modules-v2/achievements/entity';
+
 //=======================================
 //               Modules
 //=======================================
@@ -39,17 +44,19 @@ import { TransactionsModule } from './modules-v2/transactions/module';
 import { UsersModule } from './modules-v2/users/module';
 import { UserAchievementsModule } from './modules-v2/user-achievements/module';
 import { UserProfileModule } from './modules-v2/user-profiles/module';
+import { AchievementsModule } from './modules-v2/achievements/module';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'admin',
-      password: 'admin',
-      database: 'offerhub',
+      host: process.env.DATABASE_HOST || (process.env.DOCKER_ENV ? 'offer_hub_database' : 'localhost'),
+      port: parseInt(process.env.DATABASE_PORT || '5432', 10),
+      username: process.env.DATABASE_USER || 'offerhub_admin',
+      password: process.env.DATABASE_PASSWORD || 'offerhub_pass',
+      database: process.env.DATABASE_NAME || 'offer_hub_database',
       entities: [
+        Achievement, 
         ActivityLogs,
         AuthLog,
         Category,
@@ -86,6 +93,7 @@ import { UserProfileModule } from './modules-v2/user-profiles/module';
     UsersModule,
     UserAchievementsModule,
     UserProfileModule,
+    AchievementsModule, 
   ],
 })
 export class AppModule {}

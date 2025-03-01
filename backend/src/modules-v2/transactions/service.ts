@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { CreateTransactionDto, UpdateTransactionDto } from "./dto";
-import { Transaction } from "./entity";
+import { Transaction, TransactionStatus, TransactionType } from "./entity";
 import { User } from "../users/entity";
 import { Project } from "../projects/entity";
 
@@ -28,7 +28,16 @@ export class TransactionsService {
     const project = await this.projectRepo.findOne({ where: { project_id: dto.project_id } });
     if (!project) throw new NotFoundException(`Project with ID ${dto.project_id} not found.`);
 
-    const transaction = this.repo.create({ ...dto, fromUser, toUser, project });
+    const transaction = this.repo.create({
+      ...dto,
+      fromUser,
+      toUser,
+      project,
+      status: dto.status as TransactionStatus,
+      type: dto.type as TransactionType,
+      completed_at: dto.status === TransactionStatus.COMPLETED ? new Date() : undefined,
+    });
+
     return this.repo.save(transaction);
   }
 

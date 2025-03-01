@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+/*import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MessagesRepository } from '@/repositories/messages.repository';
 import { CreateMessageDto, UpdateMessageDto } from '@/dtos/messages.dto';
@@ -37,3 +37,4 @@ export class MessagesService {
     await this.messagesRepository.delete(message_id);
   }
 }
+*/

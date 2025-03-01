@@ -19,12 +19,12 @@ export class Rating {
   @JoinColumn({ name: 'project_id' })
   project!: Project;
 
-  @Column({ type: 'integer', check: 'score >= 1 AND score <= 5' })
+  @Column({ type: 'int' })
   score!: number;
 
   @Column({ type: 'text', nullable: true })
   comment!: string;
 
-  @CreateDateColumn({ type: 'timestamp with time zone', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({ type: 'timestamp with time zone' })
   created_at!: Date;
 }
