@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import Navbar from "@/components/Navbar/Navbar";
-import { Footer } from "@/components/Footer/Footer";
+import Navbar from "@/components/Navbar/navbar";
+import { Footer } from "@/components/Footer/footer";
 
 const links = [
   { name: "Home", href: "/", isActive: true },

@@ -13,19 +13,15 @@ export default function WorkerDescription({
 }) {
   return (
     <div className="grid min-h-screen grid-rows-[auto,1fr] items-start justify-items-start gap-10 bg-white px-4 py-10 sm:py-24 font-sans">
-      {/* Header */}
       <header className="flex flex-col gap-6">
         <div className="flex flex-wrap items-center gap-8 text-left">
-          {/* Stars */}
           <div className="flex gap-2 text-yellow-400 text-2xl">
             {[...Array(stars)].map((_, index) => (
               <span key={index}>★</span>
             ))}
           </div>
-          {/* Rating */}
           <span className="text-lg text-black">{rating}</span>
           <span className="text-lg text-black mr-4">{reviews}</span>
-          {/* Flag */}
           <Image
             src={flagSrc}
             alt={`${country} flag`}
@@ -34,7 +30,6 @@ export default function WorkerDescription({
             className="rounded-full ml-4"
           />
           <span className="text-xl text-black">{country}</span>
-          {/* Price */}
           <div className="flex items-center gap-2 mt-2">
             <span className="text-lg text-black mr-4">{time}</span>
             <Image
@@ -51,7 +46,6 @@ export default function WorkerDescription({
         </div>
       </header>
 
-      {/* Title */}
       <div className="max-w-3xl">
         <h2 className="text-xl font-bold text-black">{title}</h2>
         <p className="mt-4 text-lg text-black">{description}</p>

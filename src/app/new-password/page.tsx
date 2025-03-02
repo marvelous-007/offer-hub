@@ -1,6 +1,6 @@
 import React from 'react';
-import InputField from '@/components/Form/InputField';
-import ButtonForm from '@/components/Form/Button';
+import InputField from '@/components/Form/input-field';
+import ButtonForm from '@/components/Form/button';
 import Image from 'next/image';
 
 export default function PasswordChangeForm() {

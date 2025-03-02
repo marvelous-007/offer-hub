@@ -1,5 +1,5 @@
 import Image from "next/image";
-import ProfileForm from "../ui/form/ProfileForm";
+import ProfileForm from "../ui/form/profile-form";
 import Link from "next/link";
 
 const UserProfile = () => {
