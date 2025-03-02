@@ -27,7 +27,7 @@ npm install
 
 ### 3️⃣ **Set up environment variables**
 Create a `.env` file in `backend/` with:
-```sh
+```typescript
 DATABASE_HOST=offer_hub_database
 DATABASE_PORT=5432
 DATABASE_USER=offerhub_admin
