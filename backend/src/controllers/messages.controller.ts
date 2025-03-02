@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Patch } from '@nestjs/common';
+/*import { Controller, Get, Post, Body, Param, Delete, Patch } from '@nestjs/common';
 import { MessagesService } from '@/services/messages.service';
 import { CreateMessageDto, UpdateMessageDto } from '@/dtos/messages.dto';
 
@@ -34,3 +34,4 @@ export class MessagesController {
     return this.messagesService.deleteMessage(message_id);
   }
 }
+*/

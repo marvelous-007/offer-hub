@@ -1,4 +1,4 @@
-import WorkerCard from "@/components/card/WorkersCard"
+import WorkerCard from "@/components/Card/workers-card"
 
 // Mock data for workers
 const workers = [

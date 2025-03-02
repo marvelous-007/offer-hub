@@ -1,11 +1,21 @@
+import * as dotenv from 'dotenv';
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+
+dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
-  await app.listen(3001); // I chanced this because the docker compose container runs in 3000
+  const port = process.env.PORT || 3001; 
+  await app.listen(port);
+
+  console.log('\n=======================================');
+  console.log('🚀 OFFER-HUB Server is running!');
+  console.log('=======================================');
+  console.log(`🌍 URL: http://localhost:${port}`);
+  console.log(`📅 Started at: ${new Date().toLocaleString()}`);
+  console.log('=======================================\n');
 }
-bootstrap(); 
+
+bootstrap();

@@ -1,9 +1,9 @@
 "use client";
 
-import Discounts from "@/components/modules/authentication/pages/Discounts";
-import Titles from "@/components/modules/authentication/pages/Titles";
-import UserProfile from "@/components/modules/authentication/pages/UserProfile";
-import useSidebar from "@/components/modules/authentication/ui/sidebar/hooks/useSidebar";
+import Discounts from "@/components/modules/authentication/pages/discounts";
+import Titles from "@/components/modules/authentication/pages/titles";
+import UserProfile from "@/components/modules/authentication/pages/user-profile";
+import useSidebar from "@/components/modules/authentication/ui/sidebar/hooks/use-sidebar";
 import SettingsSidebar from "@/components/modules/authentication/ui/sidebar/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";

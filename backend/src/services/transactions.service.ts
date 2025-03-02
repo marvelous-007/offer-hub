@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+/*import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Transaction } from "@/entities/transactions.entity";
-import { CreateTransactionDto, UpdateTransactionDto } from "@/dtos/transactions.dto";
+//import { CreateTransactionDto, UpdateTransactionDto } from "@/dtos/transactions.dto";
 
 @Injectable()
 export class TransactionsService {
@@ -48,3 +48,4 @@ export class TransactionsService {
     await this.transactionsRepository.remove(transaction);
   }
 }
+*/

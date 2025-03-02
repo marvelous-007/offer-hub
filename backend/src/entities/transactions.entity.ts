@@ -1,18 +1,18 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from "typeorm";
-import { User } from "@/entities/user.entity";
+//import { User } from "@/entities/user.entity";
 import { Project } from "@/entities/project.entity";
 
 @Entity("transactions")
 export class Transaction {
   @PrimaryGeneratedColumn("uuid")
   transactionId: string;
-
+/*
   @ManyToOne(() => User)
   fromUserId: User;
 
   @ManyToOne(() => User)
   toUserId: User;
-
+*/
   @ManyToOne(() => Project)
   projectId: Project;
 
