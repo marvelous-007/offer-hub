@@ -24,6 +24,7 @@ import { User } from './modules-v2/users/entity';
 import { UserAchievement } from './modules-v2/user-achievements/entity';
 import { UserProfile } from './modules-v2/user-profiles/entity';
 import { Achievement } from './modules-v2/achievements/entity';
+import { ServicesModule } from '@/modules-v2/services/module';
 
 //=======================================
 //               Modules
@@ -73,6 +74,7 @@ import { AchievementsModule } from './modules-v2/achievements/module';
         User,
         UserAchievement,
         UserProfile,
+        ServicesModule,
       ],
       synchronize: true,
       autoLoadEntities: true,
