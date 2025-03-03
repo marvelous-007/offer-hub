@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, HttpStatus, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Query } from '@nestjs/common';
 import { ServicesService } from '@/services/services.service';
 import { CreateServiceDto, UpdateServiceDto, ServiceResponseDto } from '@/dtos/services.dto';
 
@@ -8,35 +8,34 @@ export class ServicesController {
 
   @Post()
   async create(@Body() createServiceDto: CreateServiceDto): Promise<ServiceResponseDto> {
-    return await this.servicesService.create(createServiceDto);
+    return this.servicesService.create(createServiceDto);
   }
 
   @Get()
-  async findAll(@Query('freelancer_id') freelancer_id?: string): Promise<ServiceResponseDto[]> {
-    if (freelancer_id) {
-      return await this.servicesService.findByFreelancer(freelancer_id);
+  async findAll(@Query('active') active?: string): Promise<ServiceResponseDto[]> {
+    if (active === 'true') {
+      return this.servicesService.findActive();
     }
-    return await this.servicesService.findAll();
+    return this.servicesService.findAll();
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<ServiceResponseDto> {
-    return await this.servicesService.findOne(id);
+    return this.servicesService.findById(id);
   }
 
-  @Patch(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() updateServiceDto: UpdateServiceDto,
-  ): Promise<ServiceResponseDto> {
-    return await this.servicesService.update(id, updateServiceDto);
+  @Get('freelancer/:freelancerId')
+  async findByFreelancer(@Param('freelancerId') freelancerId: string): Promise<ServiceResponseDto[]> {
+    return this.servicesService.findByFreelancerId(freelancerId);
+  }
+
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() updateServiceDto: UpdateServiceDto): Promise<ServiceResponseDto> {
+    return this.servicesService.update(id, updateServiceDto);
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string): Promise<void> {
-    return await this.servicesService.remove(id);
+    return this.servicesService.delete(id);
   }
 }
-
-export default ServicesController;

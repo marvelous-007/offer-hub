@@ -9,37 +9,52 @@ export class ServicesService {
 
   async create(createServiceDto: CreateServiceDto): Promise<ServiceResponseDto> {
     const service = await this.servicesRepository.create(createServiceDto);
-    return this.mapServiceToDto(service);
+    return this.mapToResponseDto(service);
   }
 
   async findAll(): Promise<ServiceResponseDto[]> {
     const services = await this.servicesRepository.findAll();
-    return services.map(service => this.mapServiceToDto(service));
+    return services.map(service => this.mapToResponseDto(service));
   }
 
-  async findOne(service_id: string): Promise<ServiceResponseDto> {
-    const service = await this.servicesRepository.findById(service_id);
+  async findById(id: string): Promise<ServiceResponseDto> {
+    const service = await this.servicesRepository.findById(id);
     if (!service) {
-      throw new NotFoundException(`Service with ID ${service_id} not found`);
+      throw new NotFoundException(`Service with ID ${id} not found`);
     }
-    return this.mapServiceToDto(service);
+    return this.mapToResponseDto(service);
   }
 
-  async findByFreelancer(freelancer_id: string): Promise<ServiceResponseDto[]> {
-    const services = await this.servicesRepository.findByFreelancerId(freelancer_id);
-    return services.map(service => this.mapServiceToDto(service));
+  async findByFreelancerId(freelancerId: string): Promise<ServiceResponseDto[]> {
+    const services = await this.servicesRepository.findByFreelancerId(freelancerId);
+    return services.map(service => this.mapToResponseDto(service));
   }
 
-  async update(service_id: string, updateServiceDto: UpdateServiceDto): Promise<ServiceResponseDto> {
-    const service = await this.servicesRepository.update(service_id, updateServiceDto);
-    return this.mapServiceToDto(service);
+  async findActive(): Promise<ServiceResponseDto[]> {
+    const services = await this.servicesRepository.findActive();
+    return services.map(service => this.mapToResponseDto(service));
   }
 
-  async remove(service_id: string): Promise<void> {
-    return this.servicesRepository.delete(service_id);
+  async update(id: string, updateServiceDto: UpdateServiceDto): Promise<ServiceResponseDto> {
+    const existingService = await this.servicesRepository.findById(id);
+    if (!existingService) {
+      throw new NotFoundException(`Service with ID ${id} not found`);
+    }
+    
+    const updatedService = await this.servicesRepository.update(id, updateServiceDto);
+    return this.mapToResponseDto(updatedService);
   }
 
-  private mapServiceToDto(service: Service): ServiceResponseDto {
+  async delete(id: string): Promise<void> {
+    const existingService = await this.servicesRepository.findById(id);
+    if (!existingService) {
+      throw new NotFoundException(`Service with ID ${id} not found`);
+    }
+    
+    await this.servicesRepository.delete(id);
+  }
+
+  private mapToResponseDto(service: Service): ServiceResponseDto {
     return {
       service_id: service.service_id,
       freelancer_id: service.freelancer_id,

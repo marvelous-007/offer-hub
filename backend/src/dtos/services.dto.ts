@@ -1,14 +1,16 @@
-import { IsUUID, IsString, IsNumber, IsBoolean, IsOptional, Min, MaxLength } from 'class-validator';
+import { IsUUID, IsString, IsNotEmpty, IsOptional, IsNumber, Min, IsBoolean } from 'class-validator';
 
 export class CreateServiceDto {
-  @IsUUID(4)
+  @IsUUID()
+  @IsNotEmpty()
   freelancer_id: string;
 
   @IsString()
-  @MaxLength(200)
+  @IsNotEmpty()
   title: string;
 
   @IsString()
+  @IsNotEmpty()
   description: string;
 
   @IsNumber()
@@ -26,7 +28,6 @@ export class CreateServiceDto {
 
 export class UpdateServiceDto {
   @IsString()
-  @MaxLength(200)
   @IsOptional()
   title?: string;
 

@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { User } from '@/entities/users.entity';
 
 @Entity('services')
 export class Service {
@@ -8,30 +9,28 @@ export class Service {
   @Column('uuid')
   freelancer_id: string;
 
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'freelancer_id' })
+  freelancer: User;
+
   @Column({ type: 'varchar', length: 200 })
   title: string;
 
-  @Column('text')
+  @Column({ type: 'text' })
   description: string;
 
-  @Column('decimal', { precision: 12, scale: 2 })
+  @Column({ type: 'decimal', precision: 12, scale: 2 })
   base_price: number;
 
-  @Column('integer')
+  @Column({ type: 'integer' })
   delivery_time_days: number;
 
   @Column({ type: 'boolean', default: true })
   is_active: boolean;
 
-  @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({ type: 'timestamp with time zone' })
   created_at: Date;
 
-  @UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+  @UpdateDateColumn({ type: 'timestamp with time zone' })
   updated_at: Date;
-
-  // Commented out since User entity might not be fully implemented yet
-  // @ManyToOne(() => User, (user) => user.services)
-  // @JoinColumn({ name: 'freelancer_id' })
-  // freelancer: User;
-  
 }

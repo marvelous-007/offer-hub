@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react";
-import CustomPagination from "../../components/ui/customPagination";  
+import CustomPagination from "../../components/ui/custom-pagination";  
 
 export default function PaginationTest() {
   const [currentPage, setCurrentPage] = useState(1);

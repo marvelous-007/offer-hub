@@ -1,1 +1,1 @@
-export { CardInfo } from "./CardInfo";
+export { CardInfo } from "./card-info";

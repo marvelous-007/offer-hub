@@ -1,42 +1,46 @@
+version: '3.8'
+
 services:
-  postgres:
+  offer_hub_database:
     image: postgres:15
-    container_name: backend_postgres
+    container_name: offer_hub_database
     restart: always
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: offerhub
+      POSTGRES_USER: offerhub_admin
+      POSTGRES_PASSWORD: offerhub_pass
+      POSTGRES_DB: offer_hub_database
     ports:
-      - "5432:5432"
+      - "5432:5432"  
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - offer_hub_db_data:/var/lib/postgresql/data
 
-  postgrest:
-    image: postgrest/postgrest
-    container_name: backend_postgrest
-    restart: always
-    environment:
-      PGRST_DB_URI: postgres://admin:admin@postgres:5432/offerhub
-      PGRST_DB_SCHEMA: public
-      PGRST_DB_ANON_ROLE: anon
-    depends_on:
-      - postgres
-    ports:
-      - "3000:3000"
-
-  hasura:
+  offer_hub_hasura:
     image: hasura/graphql-engine:v2.40.0
-    container_name: backend_hasura
+    container_name: offer_hub_hasura
     restart: always
     environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://admin:admin@postgres:5432/offerhub
+      HASURA_GRAPHQL_DATABASE_URL: postgres://offerhub_admin:offerhub_pass@offer_hub_database:5432/offer_hub_database
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
-      HASURA_GRAPHQL_ADMIN_SECRET: myadminsecret
+      HASURA_GRAPHQL_ADMIN_SECRET: offerhub_secret
     depends_on:
-      - postgres
+      - offer_hub_database
     ports:
       - "8080:8080"
 
+  offer_hub_backend:
+    build: .
+    container_name: offer_hub_backend
+    restart: always
+    environment:
+      DATABASE_HOST: offer_hub_database
+      DATABASE_PORT: 5432
+      DATABASE_USER: offerhub_admin
+      DATABASE_PASSWORD: offerhub_pass
+      DATABASE_NAME: offer_hub_database
+    depends_on:
+      - offer_hub_database
+    ports:
+      - "3001:3001"  
+
 volumes:
-  postgres_data: {}
+  offer_hub_db_data: {}

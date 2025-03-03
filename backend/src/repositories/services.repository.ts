@@ -1,45 +1,53 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Service } from '@/entities/services.entity';
 
 @Injectable()
 export class ServicesRepository {
   constructor(
     @InjectRepository(Service)
-    private readonly repo: Repository<Service>,
+    private readonly repository: Repository<Service>
   ) {}
 
-  async create(data: Partial<Service>): Promise<Service> {
-    const service = this.repo.create(data);
-    return this.repo.save(service);
+  async create(serviceData: Partial<Service>): Promise<Service> {
+    const service = this.repository.create(serviceData);
+    return await this.repository.save(service);
   }
 
   async findAll(): Promise<Service[]> {
-    return this.repo.find();
+    return await this.repository.find({
+      relations: ['freelancer']
+    });
   }
 
-  async findById(service_id: string): Promise<Service | null> {
-    return this.repo.findOne({ where: { service_id } });
+  async findById(id: string): Promise<Service | null> {
+    return await this.repository.findOne({ 
+      where: { service_id: id },
+      relations: ['freelancer']
+    });
   }
 
-  async findByFreelancerId(freelancer_id: string): Promise<Service[]> {
-    return this.repo.find({ where: { freelancer_id } });
+  async findByFreelancerId(freelancerId: string): Promise<Service[]> {
+    return await this.repository.find({ 
+      where: { freelancer_id: freelancerId },
+      relations: ['freelancer']
+    });
   }
 
-  async update(service_id: string, data: Partial<Service>): Promise<Service> {
-    const service = await this.findById(service_id);
-    if (!service) {
-      throw new NotFoundException(`Service with ID ${service_id} not found`);
-    }
-    await this.repo.update(service_id, data);
-    return this.findById(service_id) as Promise<Service>;
+  async findActive(): Promise<Service[]> {
+    return await this.repository.find({ 
+      where: { is_active: true },
+      relations: ['freelancer']
+    });
   }
 
-  async delete(service_id: string): Promise<void> {
-    const result = await this.repo.delete(service_id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Service with ID ${service_id} not found`);
-    }
+  async update(id: string, serviceData: Partial<Service>): Promise<Service> {
+    await this.repository.update(id, serviceData);
+    return this.findById(id) as Promise<Service>;
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.repository.delete(id);
   }
 }
