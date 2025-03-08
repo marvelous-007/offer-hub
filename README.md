@@ -1,6 +1,7 @@
 
-
-![Banner_OFFER-HUB](https://github.com/user-attachments/assets/d55b55b0-4a1e-454b-9eda-43ac1da8593f)
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/7799a3c4-ccec-42fc-80d0-226309b8169b" alt="O-H" width="200">
+</div>
 
 
  🌟 OFFER-HUB | Decentralized Freelance Platform  
