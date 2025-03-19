@@ -1,1 +1,0 @@
-export * from "@/controllers/activity-logs.controller";

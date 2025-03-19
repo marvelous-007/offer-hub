@@ -2,16 +2,18 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { config } from 'dotenv';
 
-config(); // Cargar variables de entorno
+config(); // Load .env file
 
 //=======================================
 //               Entities
 //=======================================
+import { Achievement } from './modules-v2/achievements/entity';
 import { ActivityLogs } from './modules-v2/activity-logs/entity';
 import { AuthLog } from './modules-v2/auth-logs/entity';
 import { Category } from './modules-v2/categories/entity';
 import { Certification } from './modules-v2/certifications/entity';
 import { Conversation } from './modules-v2/conversations/entity';
+import { ConversationParticipant } from './modules-v2/conversation-participants/entity';
 import { FreelancerSkill } from './modules-v2/freelancer-skills/entity';
 import { Message } from './modules-v2/messages/entity';
 import { Notification } from './modules-v2/notifications/entity';
@@ -23,8 +25,8 @@ import { Transaction } from './modules-v2/transactions/entity';
 import { User } from './modules-v2/users/entity';
 import { UserAchievement } from './modules-v2/user-achievements/entity';
 import { UserProfile } from './modules-v2/user-profiles/entity';
-import { Achievement } from './modules-v2/achievements/entity';
-import { ServicesModule } from '@/modules-v2/services/module';
+import { Service } from './modules-v2/services/entity';
+import { ServiceCategory } from './modules-v2/service-categories/entity';
 
 //=======================================
 //               Modules
@@ -34,6 +36,7 @@ import { AuthLogsModule } from './modules-v2/auth-logs/module';
 import { CategoriesModule } from './modules-v2/categories/module';
 import { CertificationsModule } from './modules-v2/certifications/module';
 import { ConversationsModule } from './modules-v2/conversations/module';
+import { ConversationParticipantsModule } from './modules-v2/conversation-participants/module';
 import { FreelancerSkillsModule } from './modules-v2/freelancer-skills/module';
 import { MessagesModule } from './modules-v2/messages/module';
 import { NotificationsModule } from './modules-v2/notifications/module';
@@ -46,6 +49,8 @@ import { UsersModule } from './modules-v2/users/module';
 import { UserAchievementsModule } from './modules-v2/user-achievements/module';
 import { UserProfileModule } from './modules-v2/user-profiles/module';
 import { AchievementsModule } from './modules-v2/achievements/module';
+import { ServicesModule } from './modules-v2/services/module';
+import { ServiceCategoriesModule } from './modules-v2/service-categories/module';
 
 @Module({
   imports: [
@@ -57,12 +62,13 @@ import { AchievementsModule } from './modules-v2/achievements/module';
       password: process.env.DATABASE_PASSWORD || 'offerhub_pass',
       database: process.env.DATABASE_NAME || 'offer_hub_database',
       entities: [
-        Achievement, 
+        Achievement,
         ActivityLogs,
         AuthLog,
         Category,
         Certification,
         Conversation,
+        ConversationParticipant,
         FreelancerSkill,
         Message,
         Notification,
@@ -74,7 +80,8 @@ import { AchievementsModule } from './modules-v2/achievements/module';
         User,
         UserAchievement,
         UserProfile,
-        ServicesModule,
+        Service,
+        ServiceCategory,
       ],
       synchronize: true,
       autoLoadEntities: true,
@@ -84,6 +91,7 @@ import { AchievementsModule } from './modules-v2/achievements/module';
     CategoriesModule,
     CertificationsModule,
     ConversationsModule,
+    ConversationParticipantsModule,
     FreelancerSkillsModule,
     MessagesModule,
     NotificationsModule,
@@ -95,7 +103,9 @@ import { AchievementsModule } from './modules-v2/achievements/module';
     UsersModule,
     UserAchievementsModule,
     UserProfileModule,
-    AchievementsModule, 
+    AchievementsModule,
+    ServicesModule,
+    ServiceCategoriesModule,
   ],
 })
 export class AppModule {}
