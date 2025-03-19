@@ -7,50 +7,50 @@ config(); // Load .env file
 //=======================================
 //               Entities
 //=======================================
-import { Achievement } from './modules-v2/achievements/entity';
-import { ActivityLogs } from './modules-v2/activity-logs/entity';
-import { AuthLog } from './modules-v2/auth-logs/entity';
-import { Category } from './modules-v2/categories/entity';
-import { Certification } from './modules-v2/certifications/entity';
-import { Conversation } from './modules-v2/conversations/entity';
-import { ConversationParticipant } from './modules-v2/conversation-participants/entity';
-import { FreelancerSkill } from './modules-v2/freelancer-skills/entity';
-import { Message } from './modules-v2/messages/entity';
-import { Notification } from './modules-v2/notifications/entity';
-import { PortfolioItem } from './modules-v2/portfolio-items/entity';
-import { Project } from './modules-v2/projects/entity';
-import { Rating } from './modules-v2/ratings/entity';
-import { Skill } from './modules-v2/skills/entity';
-import { Transaction } from './modules-v2/transactions/entity';
-import { User } from './modules-v2/users/entity';
-import { UserAchievement } from './modules-v2/user-achievements/entity';
-import { UserProfile } from './modules-v2/user-profiles/entity';
-import { Service } from './modules-v2/services/entity';
-import { ServiceCategory } from './modules-v2/service-categories/entity';
+import { Achievement } from './modules/achievements/entity';
+import { ActivityLogs } from './modules/activity-logs/entity';
+import { AuthLog } from './modules/auth-logs/entity';
+import { Category } from './modules/categories/entity';
+import { Certification } from './modules/certifications/entity';
+import { Conversation } from './modules/conversations/entity';
+import { ConversationParticipant } from './modules/conversation-participants/entity';
+import { FreelancerSkill } from './modules/freelancer-skills/entity';
+import { Message } from './modules/messages/entity';
+import { Notification } from './modules/notifications/entity';
+import { PortfolioItem } from './modules/portfolio-items/entity';
+import { Project } from './modules/projects/entity';
+import { Rating } from './modules/ratings/entity';
+import { Skill } from './modules/skills/entity';
+import { Transaction } from './modules/transactions/entity';
+import { User } from './modules/users/entity';
+import { UserAchievement } from './modules/user-achievements/entity';
+import { UserProfile } from './modules/user-profiles/entity';
+import { Service } from './modules/services/entity';
+import { ServiceCategory } from './modules/service-categories/entity';
 
 //=======================================
 //               Modules
 //=======================================
-import { ActivityLogsModule } from './modules-v2/activity-logs/module';
-import { AuthLogsModule } from './modules-v2/auth-logs/module';
-import { CategoriesModule } from './modules-v2/categories/module';
-import { CertificationsModule } from './modules-v2/certifications/module';
-import { ConversationsModule } from './modules-v2/conversations/module';
-import { ConversationParticipantsModule } from './modules-v2/conversation-participants/module';
-import { FreelancerSkillsModule } from './modules-v2/freelancer-skills/module';
-import { MessagesModule } from './modules-v2/messages/module';
-import { NotificationsModule } from './modules-v2/notifications/module';
-import { PortfolioItemsModule } from './modules-v2/portfolio-items/module';
-import { ProjectsModule } from './modules-v2/projects/module';
-import { RatingsModule } from './modules-v2/ratings/module';
-import { SkillsModule } from './modules-v2/skills/module';
-import { TransactionsModule } from './modules-v2/transactions/module';
-import { UsersModule } from './modules-v2/users/module';
-import { UserAchievementsModule } from './modules-v2/user-achievements/module';
-import { UserProfileModule } from './modules-v2/user-profiles/module';
-import { AchievementsModule } from './modules-v2/achievements/module';
-import { ServicesModule } from './modules-v2/services/module';
-import { ServiceCategoriesModule } from './modules-v2/service-categories/module';
+import { ActivityLogsModule } from './modules/activity-logs/module';
+import { AuthLogsModule } from './modules/auth-logs/module';
+import { CategoriesModule } from './modules/categories/module';
+import { CertificationsModule } from './modules/certifications/module';
+import { ConversationsModule } from './modules/conversations/module';
+import { ConversationParticipantsModule } from './modules/conversation-participants/module';
+import { FreelancerSkillsModule } from './modules/freelancer-skills/module';
+import { MessagesModule } from './modules/messages/module';
+import { NotificationsModule } from './modules/notifications/module';
+import { PortfolioItemsModule } from './modules/portfolio-items/module';
+import { ProjectsModule } from './modules/projects/module';
+import { RatingsModule } from './modules/ratings/module';
+import { SkillsModule } from './modules/skills/module';
+import { TransactionsModule } from './modules/transactions/module';
+import { UsersModule } from './modules/users/module';
+import { UserAchievementsModule } from './modules/user-achievements/module';
+import { UserProfileModule } from './modules/user-profiles/module';
+import { AchievementsModule } from './modules/achievements/module';
+import { ServicesModule } from './modules/services/module';
+import { ServiceCategoriesModule } from './modules/service-categories/module';
 
 @Module({
   imports: [
