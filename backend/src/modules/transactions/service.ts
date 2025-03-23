@@ -96,26 +96,23 @@ export class TransactionsService {
     });
 
     if (!transaction) {
-      throw new NotFoundException(
-        `transaction with ID ${transaction_id} not found.`
-      );
+      throw new NotFoundException(`transaction_Not_found`);
     }
 
     if (transaction.status !== TransactionStatus.PENDING) {
-      throw new Error("Funds_can_only_be_released_for_pending_transactions");
+      throw new Error("Funds_released_for_pending_transactions");
     }
 
-    // Check if there is an active dispute
     const dispute = await this.disputerepo.findOne({
       where: { transaction_id },
     });
-
-    if (dispute?.status === DisputeStatus.PENDING) {
-      throw new Error("Transaction_cannot_be_completed_while_dispute_active");
+    if (dispute?.status !== DisputeStatus.RESOLVED) {
+      throw new Error("Transaction_not_completed_while_dispute_active");
     }
-
+    transaction.status = TransactionStatus.COMPLETED;
+    transaction.completed_at = new Date();
     await this.repo.save(transaction);
 
-    return { message: "Funds released successfully.", transaction };
+    return { message: "fund_released_successfully", transaction };
   }
 }
