@@ -80,16 +80,12 @@ export class DisputesService {
   ): Promise<DisputeEntity> {
     const dispute = await this.getDisputeById(id);
 
-    if (dispute.status !== DisputeStatus.PENDING) {
-      throw new BadRequestException("only_pending_disputes_can_be_updated");
+    if (dispute.status == dto.status) {
+      throw new BadRequestException("already_same_status_set");
     }
 
     if (dto.status) {
       dispute.status = dto.status;
-    }
-
-    if (dto.reason) {
-      dispute.reason = dto.reason;
     }
 
     dispute.updated_at = new Date();

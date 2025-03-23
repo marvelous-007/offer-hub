@@ -20,12 +20,7 @@ export class CreateDisputeDto {
 
 export class UpdateDisputeDto {
   @IsEnum(DisputeStatus)
-  @IsOptional()
   status?: DisputeStatus;
-
-  @IsString()
-  @IsOptional()
-  reason?: string;
 }
 
 export class DisputeResponseDto {
