@@ -45,8 +45,8 @@ export class DisputesService {
     }
 
     const dispute = this.disputeRepository.create({
-      transaction_id: dto.transaction_id,
-      user_id: dto.user_id,
+      transaction: transaction,
+      user,
       reason: dto.reason,
       status: DisputeStatus.PENDING,
     });
@@ -63,7 +63,7 @@ export class DisputesService {
 
   async getDisputeById(id: string): Promise<DisputeEntity> {
     const dispute = await this.disputeRepository.findOne({
-      where: { id },
+      where: { dispute_id: id },
       relations: ["transaction", "user"],
     });
 

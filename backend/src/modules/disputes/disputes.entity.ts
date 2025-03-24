@@ -7,19 +7,22 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from "typeorm";
-
+import { Transaction } from "../transactions/entity";
 import { DisputeStatus } from "./disputes.dto";
+import { User } from "../users/entity";
 
 @Entity("disputes")
 export class DisputeEntity {
   @PrimaryGeneratedColumn("uuid")
-  id!: string;
+  dispute_id!: string;
 
-  @Column("uuid")
-  transaction_id!: string;
+  @ManyToOne(() => Transaction, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "transaction_id" })
+  transaction!: Transaction;
 
-  @Column("uuid")
-  user_id!: string;
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "user_id" })
+  user!: User;
 
   @Column("text")
   reason!: string;

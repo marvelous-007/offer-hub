@@ -25,7 +25,7 @@ export class UpdateDisputeDto {
 
 export class DisputeResponseDto {
   @IsUUID()
-  id!: string;
+  dispute_id!: string;
 
   @IsUUID()
   transaction_id!: string;

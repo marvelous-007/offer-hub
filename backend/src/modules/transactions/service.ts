@@ -96,19 +96,21 @@ export class TransactionsService {
     });
 
     if (!transaction) {
-      throw new NotFoundException(`transaction_Not_found`);
+      return { message: "transaction_Not_found" };
     }
 
     if (transaction.status !== TransactionStatus.PENDING) {
-      throw new Error("Funds_released_for_pending_transactions");
+      return { message: "Funds_already_released" };
     }
 
     const dispute = await this.disputerepo.findOne({
-      where: { transaction_id },
+      where: { transaction },
     });
+
     if (dispute?.status !== DisputeStatus.RESOLVED) {
-      throw new Error("Transaction_not_completed_while_dispute_active");
+      return { message: "Transaction_not_completed_while_dispute_active" };
     }
+
     transaction.status = TransactionStatus.COMPLETED;
     transaction.completed_at = new Date();
     await this.repo.save(transaction);
