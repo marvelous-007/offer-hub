@@ -53,6 +53,7 @@ import { AchievementsModule } from "./modules/achievements/module";
 import { ServicesModule } from "./modules/services/module";
 import { ServiceCategoriesModule } from "./modules/service-categories/module";
 import { DisputesModule } from "./modules/disputes/disputes.module";
+import { VerificationsModule } from "./modules/verification/verification.module";
 
 @Module({
   imports: [
@@ -61,10 +62,10 @@ import { DisputesModule } from "./modules/disputes/disputes.module";
       host:
         process.env.DATABASE_HOST ||
         (process.env.DOCKER_ENV ? "offer_hub_database" : "localhost"),
-      port: parseInt(process.env.DATABASE_PORT || "5432", 10),
-      username: process.env.DATABASE_USER || "lagodxy",
-      password: process.env.DATABASE_PASSWORD || "4633922",
-      database: process.env.DATABASE_NAME || "test",
+        port: parseInt(process.env.DATABASE_PORT || "5432", 10),
+        username: process.env.DATABASE_USER || "offerhub_admin",
+        password: process.env.DATABASE_PASSWORD || "offerhub_pass",
+        database: process.env.DATABASE_NAME || "offer_hub_database",
       entities: [
         Achievement,
         ActivityLogs,
@@ -112,6 +113,7 @@ import { DisputesModule } from "./modules/disputes/disputes.module";
     ServicesModule,
     ServiceCategoriesModule,
     DisputesModule,
+    VerificationsModule
   ],
 })
 export class AppModule {}
