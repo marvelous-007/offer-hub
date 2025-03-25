@@ -62,9 +62,9 @@ import { DisputesModule } from "./modules/disputes/disputes.module";
         process.env.DATABASE_HOST ||
         (process.env.DOCKER_ENV ? "offer_hub_database" : "localhost"),
       port: parseInt(process.env.DATABASE_PORT || "5432", 10),
-      username: process.env.DATABASE_USER || "offerhub_admin",
-      password: process.env.DATABASE_PASSWORD || "offerhub_pass",
-      database: process.env.DATABASE_NAME || "offer_hub_database",
+      username: process.env.DATABASE_USER || "lagodxy",
+      password: process.env.DATABASE_PASSWORD || "4633922",
+      database: process.env.DATABASE_NAME || "test",
       entities: [
         Achievement,
         ActivityLogs,
