@@ -28,6 +28,7 @@ import { UserProfile } from "./modules/user-profiles/entity";
 import { Service } from "./modules/services/entity";
 import { ServiceCategory } from "./modules/service-categories/entity";
 import { DisputeEntity } from "./modules/disputes/disputes.entity";
+import { Webhook } from "./modules/webhooks/entity";
 
 //=======================================
 //               Modules
@@ -55,6 +56,7 @@ import { ServicesModule } from "./modules/services/module";
 import { ServiceCategoriesModule } from "./modules/service-categories/module";
 import { DisputesModule } from "./modules/disputes/disputes.module";
 import { InvoiceModule } from './modules/invoices/module';
+import { WebhooksModule } from "./modules/webhooks/module";
 
 @Module({
   imports: [
@@ -89,6 +91,7 @@ import { InvoiceModule } from './modules/invoices/module';
         Service,
         ServiceCategory,
         DisputeEntity,
+        Webhook,
       ],
       synchronize: true,
       autoLoadEntities: true,
@@ -115,6 +118,7 @@ import { InvoiceModule } from './modules/invoices/module';
     ServiceCategoriesModule,
     DisputesModule,
     InvoiceModule,
+    WebhooksModule,
   ],
 })
 export class AppModule {}
