@@ -29,7 +29,10 @@
     "dotenv": "^16.4.7",
     "figlet": "^1.8.0",
     "gradient-string": "^3.0.0",
+    "minio": "^8.0.5",
+    "pdfkit": "^0.16.0",
     "pg": "^8.10.0",
+    "puppeteer": "^24.4.0",
     "reflect-metadata": "^0.2.2",
     "socket.io": "^4.8.1",
     "typeorm": "^0.3.20"

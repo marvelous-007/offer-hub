@@ -55,6 +55,7 @@ import { ServicesModule } from "./modules/services/module";
 import { ServiceCategoriesModule } from "./modules/service-categories/module";
 import { CacheModule } from '@nestjs/cache-manager';
 import { DisputesModule } from "./modules/disputes/disputes.module";
+import { InvoiceModule } from './modules/invoices/module';
 
 @Module({
   imports: [
@@ -115,6 +116,7 @@ import { DisputesModule } from "./modules/disputes/disputes.module";
     ServiceCategoriesModule,
     CacheModule,
     DisputesModule,
+    InvoiceModule,
   ],
 })
 export class AppModule {}
