@@ -33,7 +33,7 @@ export function ProfileSidebar() {
               key={index}
               className={cn(
                 "w-4 h-4",
-                index === 3 ? "text-muted-foreground/40" : "text-yellow-400"
+                index === 3 ? "text-muted-foreground/40" : "text-yellow-400",
               )}
               fill="currentColor"
               viewBox="0 0 20 20"

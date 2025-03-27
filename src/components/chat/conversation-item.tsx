@@ -27,7 +27,7 @@ export function ConversationItem({
     <div
       className={cn(
         "flex gap-3 p-3 hover:bg-muted/50 cursor-pointer",
-        active && "bg-muted/50"
+        active && "bg-muted/50",
       )}
       onClick={onClick}
     >

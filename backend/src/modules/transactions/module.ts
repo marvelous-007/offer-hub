@@ -11,7 +11,7 @@ import { DisputeEntity } from "../disputes/disputes.entity";
 @Module({
   imports: [
     TypeOrmModule.forFeature([Transaction, User, Project, DisputeEntity]),
-    forwardRef(() => InvoiceModule)
+    forwardRef(() => InvoiceModule),
   ],
   controllers: [TransactionsController],
   providers: [TransactionsService],

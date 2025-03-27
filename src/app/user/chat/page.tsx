@@ -10,7 +10,7 @@ export default function MessagingInterface() {
   const [activeConversationId, setActiveConversationId] = useState(1);
 
   const activeConversation = conversationsData.find(
-    (conversation) => conversation.id === activeConversationId
+    (conversation) => conversation.id === activeConversationId,
   );
 
   return (

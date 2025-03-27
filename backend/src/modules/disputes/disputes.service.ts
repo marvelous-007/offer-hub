@@ -24,7 +24,7 @@ export class DisputesService {
     private readonly transactionRepository: Repository<Transaction>,
 
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async createDispute(dto: CreateDisputeDto): Promise<DisputeEntity> {
@@ -76,7 +76,7 @@ export class DisputesService {
 
   async updateDispute(
     id: string,
-    dto: UpdateDisputeDto
+    dto: UpdateDisputeDto,
   ): Promise<DisputeEntity> {
     const dispute = await this.getDisputeById(id);
 

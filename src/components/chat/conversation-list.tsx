@@ -41,7 +41,7 @@ export function ConversationList({
         (conv) =>
           conv.name.toLowerCase().includes(query) ||
           conv.message.toLowerCase().includes(query) ||
-          conv.category.toLowerCase().includes(query)
+          conv.category.toLowerCase().includes(query),
       );
     }
 
