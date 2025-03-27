@@ -32,6 +32,7 @@ import { DisputeEntity } from "./modules/disputes/disputes.entity";
 //=======================================
 //               Modules
 //=======================================
+
 import { ActivityLogsModule } from "./modules/activity-logs/module";
 import { AuthLogsModule } from "./modules/auth-logs/module";
 import { CategoriesModule } from "./modules/categories/module";
@@ -54,6 +55,8 @@ import { ServicesModule } from "./modules/services/module";
 import { ServiceCategoriesModule } from "./modules/service-categories/module";
 import { DisputesModule } from "./modules/disputes/disputes.module";
 import { VerificationsModule } from "./modules/verification/verification.module";
+import { InvoiceModule } from './modules/invoices/module';
+
 
 @Module({
   imports: [
@@ -113,7 +116,8 @@ import { VerificationsModule } from "./modules/verification/verification.module"
     ServicesModule,
     ServiceCategoriesModule,
     DisputesModule,
-    VerificationsModule
+    VerificationsModule,
+    InvoiceModule,
   ],
 })
 export class AppModule {}
