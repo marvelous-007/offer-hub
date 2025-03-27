@@ -35,7 +35,6 @@ export default function FiltersSection({
   setSelectedLocation,
   resetAllFilters,
 }: FiltersSectionProps) {
-  // State for filter sections (expanded/collapsed)
   const [expandedSections, setExpandedSections] = useState({
     category: false,
     hourlyRate: false,
@@ -43,15 +42,12 @@ export default function FiltersSection({
     location: false,
   })
 
-  // State for location dropdown
   const [locationDropdownOpen, setLocationDropdownOpen] = useState(false)
 
-  // Constants for hourly rate
   const minRate = 20
   const maxRate = 80
   const currentRate = minRate + (hourlyRate / 100) * (maxRate - minRate)
 
-  // Toggle section expansion
   const toggleSection = (section: string) => {
     setExpandedSections({
       ...expandedSections,
@@ -59,12 +55,10 @@ export default function FiltersSection({
     })
   }
 
-  // Select category (radio button behavior)
   const selectCategory = (category: string) => {
     setSelectedCategory(selectedCategory === category ? "" : category)
   }
 
-  // Toggle rating filter
   const toggleRatingFilter = (rating: string) => {
     setRatingFilters({
       ...ratingFilters,
@@ -72,12 +66,10 @@ export default function FiltersSection({
     })
   }
 
-  // Handle slider change
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setHourlyRate(Number.parseInt(e.target.value))
   }
 
-  // Select location
   const selectLocation = (location: string) => {
     setSelectedLocation(location)
     setLocationDropdownOpen(false)
@@ -202,7 +194,6 @@ export default function FiltersSection({
         </div>
       </div>
 
-      {/* Hourly Rate Section */}
       <div className="border-t border-gray-100">
         <div className="p-5">
           {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
@@ -251,7 +242,6 @@ export default function FiltersSection({
         </div>
       </div>
 
-      {/* Rating Section */}
       <div className="border-t border-gray-100">
         <div className="p-5">
           {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
@@ -393,7 +383,6 @@ export default function FiltersSection({
         </div>
       </div>
 
-      {/* Location Section */}
       <div className="border-t border-gray-100">
         <div className="p-5">
           {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
