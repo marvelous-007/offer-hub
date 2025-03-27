@@ -55,8 +55,10 @@ import { AchievementsModule } from "./modules/achievements/module";
 import { ServicesModule } from "./modules/services/module";
 import { ServiceCategoriesModule } from "./modules/service-categories/module";
 import { DisputesModule } from "./modules/disputes/disputes.module";
+import { VerificationsModule } from "./modules/verification/verification.module";
 import { InvoiceModule } from './modules/invoices/module';
 import { WebhooksModule } from "./modules/webhooks/module";
+
 
 @Module({
   imports: [
@@ -65,10 +67,10 @@ import { WebhooksModule } from "./modules/webhooks/module";
       host:
         process.env.DATABASE_HOST ||
         (process.env.DOCKER_ENV ? "offer_hub_database" : "localhost"),
-      port: parseInt(process.env.DATABASE_PORT || "5432", 10),
-      username: process.env.DATABASE_USER || "offerhub_admin",
-      password: process.env.DATABASE_PASSWORD || "offerhub_pass",
-      database: process.env.DATABASE_NAME || "offer_hub_database",
+        port: parseInt(process.env.DATABASE_PORT || "5432", 10),
+        username: process.env.DATABASE_USER || "offerhub_admin",
+        password: process.env.DATABASE_PASSWORD || "offerhub_pass",
+        database: process.env.DATABASE_NAME || "offer_hub_database",
       entities: [
         Achievement,
         ActivityLogs,
@@ -117,6 +119,7 @@ import { WebhooksModule } from "./modules/webhooks/module";
     ServicesModule,
     ServiceCategoriesModule,
     DisputesModule,
+    VerificationsModule,
     InvoiceModule,
     WebhooksModule,
   ],
