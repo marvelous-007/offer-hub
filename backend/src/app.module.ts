@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { config } from "dotenv";
 
@@ -55,6 +55,7 @@ import { ServicesModule } from "./modules/services/module";
 import { ServiceCategoriesModule } from "./modules/service-categories/module";
 import { DisputesModule } from "./modules/disputes/disputes.module";
 import { InvoiceModule } from './modules/invoices/module';
+import { LogginMiddleware } from "./modules/logs/logs.middleware";
 
 @Module({
   imports: [
@@ -117,4 +118,10 @@ import { InvoiceModule } from './modules/invoices/module';
     InvoiceModule,
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer){
+    consumer
+      .apply(LogginMiddleware)
+      .forRoutes('*');
+  }
+}
