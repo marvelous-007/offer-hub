@@ -8,12 +8,15 @@ import { Project } from "../projects/entity";
 import { InvoiceService } from "../invoices/service";
 import { DisputeEntity } from "../disputes/disputes.entity";
 import { DisputeStatus } from "../disputes/disputes.dto";
+import { WebhooksService } from "../webhooks/service";
+import { WebhookEvent } from "../webhooks/entity";
 
 @Injectable()
 export class TransactionsService {
   constructor(
     @InjectRepository(Transaction)
     private readonly repo: Repository<Transaction>,
+    private readonly webhooksService: WebhooksService,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
     @InjectRepository(Project) private readonly projectRepo: Repository<Project>,
     @Inject(forwardRef(() => InvoiceService)) private readonly invoiceService: InvoiceService,
@@ -60,6 +63,18 @@ export class TransactionsService {
     });
 
     const savedTransaction = await this.repo.save(transaction);
+    //Trigger webhook
+    if (savedTransaction.status === TransactionStatus.COMPLETED) { 
+    
+      const webhookData = {
+        event: WebhookEvent.PAYMENT_COMPLETED, 
+        data: {  
+          savedTransaction
+        }
+      };
+      
+      await this.webhooksService.triggerWebhook(webhookData);
+    }
 
     if (savedTransaction.status === TransactionStatus.COMPLETED && 
       (savedTransaction.type === TransactionType.PAYMENT || 
