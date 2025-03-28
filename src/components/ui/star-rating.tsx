@@ -23,6 +23,7 @@ export default function StarRating({
         .fill(0)
         .map((_, i) => (
           <Star
+            // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
             key={i}
             className={`${sizeClass} ${i < rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
           />

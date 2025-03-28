@@ -7,11 +7,12 @@ import { User } from "../users/entity";
 import { Project } from "../projects/entity";
 import { InvoiceModule } from "../invoices/module";
 import { DisputeEntity } from "../disputes/disputes.entity";
+import { WebhooksModule } from "../webhooks/module";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Transaction, User, Project, DisputeEntity]),
-    forwardRef(() => InvoiceModule),
+    WebhooksModule,forwardRef(() => InvoiceModule)
   ],
   controllers: [TransactionsController],
   providers: [TransactionsService],
