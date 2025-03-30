@@ -1,0 +1,8 @@
+{"path":"auth","statusCode":401,"errorMessage":"Invalid credentials","timestamp":"2023-03-29T12:00:10.000Z"}
+{"path":"graphql","statusCode":500,"errorMessage":"Error forwarding request to Hasura","timestamp":"2025-03-30T06:42:45.894Z"}
+{"path":"graphql","statusCode":500,"errorMessage":"Error forwarding request to Hasura","timestamp":"2025-03-30T06:49:44.504Z"}
+{"path":"graphql","statusCode":500,"errorMessage":"Error forwarding request to Hasura","timestamp":"2025-03-30T06:54:31.344Z"}
+{"path":"payments/create","statusCode":401,"errorMessage":"Unauthorized","timestamp":"2025-03-30T09:25:53.937Z"}
+{"path":"payments/create","statusCode":401,"errorMessage":"Unauthorized","timestamp":"2025-03-30T09:27:27.730Z"}
+{"path":"payments/create","statusCode":401,"errorMessage":"Unauthorized","timestamp":"2025-03-30T09:27:41.447Z"}
+{"path":"payments/create","statusCode":401,"errorMessage":"Unauthorized","timestamp":"2025-03-30T09:28:24.569Z"}

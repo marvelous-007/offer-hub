@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { ConfigModule } from "@nestjs/config";
 import { config } from "dotenv";
 
 config(); // Load .env file
@@ -58,10 +59,18 @@ import { DisputesModule } from "./modules/disputes/disputes.module";
 import { VerificationsModule } from "./modules/verification/verification.module";
 import { InvoiceModule } from './modules/invoices/module';
 import { WebhooksModule } from "./modules/webhooks/module";
+// Import the new Gateway and Logs modules
+import { GatewayModule } from "./modules/gateway/module";
+import { LogsModule } from "./modules/logs/module";
+import { RateLimitModule } from "./modules/gateway/rate-limit.module";
 
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
     TypeOrmModule.forRoot({
       type: "postgres",
       host:
@@ -98,6 +107,7 @@ import { WebhooksModule } from "./modules/webhooks/module";
       synchronize: true,
       autoLoadEntities: true,
     }),
+    // Core modules
     ActivityLogsModule,
     AuthLogsModule,
     CategoriesModule,
@@ -122,6 +132,11 @@ import { WebhooksModule } from "./modules/webhooks/module";
     VerificationsModule,
     InvoiceModule,
     WebhooksModule,
+    
+    // New modules for API Gateway
+    RateLimitModule,
+    LogsModule,
+    GatewayModule,
   ],
 })
 export class AppModule {}
