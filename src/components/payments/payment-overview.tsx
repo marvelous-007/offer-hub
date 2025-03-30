@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
+import { useState } from "react";
+import { motion } from "framer-motion";
 import {
   ArrowUpRight,
   ArrowDownRight,
@@ -13,17 +13,29 @@ import {
   AlertCircle,
   ClockIcon,
   FileText,
-} from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import RecentTransactionsTable from "@/components/payments/recent-transactions-table"
-import PaymentChart from "@/components/payments/payment-chart"
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import RecentTransactionsTable from "@/components/payments/recent-transactions-table";
+import PaymentChart from "@/components/payments/payment-chart";
 
 export default function PaymentOverview() {
-  const [timeframe, setTimeframe] = useState("month")
+  const [timeframe, setTimeframe] = useState("month");
 
   const container = {
     hidden: { opacity: 0 },
@@ -33,17 +45,24 @@ export default function PaymentOverview() {
         staggerChildren: 0.1,
       },
     },
-  }
+  };
 
   const item = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 },
-  }
+  };
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="space-y-6"
+    >
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h2 className="text-2xl font-bold text-[#002333]">Financial Overview</h2>
+        <h2 className="text-2xl font-bold text-[#002333]">
+          Financial Overview
+        </h2>
         <div className="flex items-center gap-2">
           <Select defaultValue={timeframe} onValueChange={setTimeframe}>
             <SelectTrigger className="w-[180px]">
@@ -66,12 +85,16 @@ export default function PaymentOverview() {
         <motion.div variants={item}>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-[#002333]/70">Total Earnings</CardTitle>
+              <CardTitle className="text-sm font-medium text-[#002333]/70">
+                Total Earnings
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-end justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-[#002333]">$8,450.50</div>
+                  <div className="text-2xl font-bold text-[#002333]">
+                    $8,450.50
+                  </div>
                   <p className="text-xs text-green-600 flex items-center mt-1">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     <span>+12.5% from last {timeframe}</span>
@@ -88,12 +111,16 @@ export default function PaymentOverview() {
         <motion.div variants={item}>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-[#002333]/70">Pending Payments</CardTitle>
+              <CardTitle className="text-sm font-medium text-[#002333]/70">
+                Pending Payments
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-end justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-[#002333]">$1,245.00</div>
+                  <div className="text-2xl font-bold text-[#002333]">
+                    $1,245.00
+                  </div>
                   <p className="text-xs text-amber-600 flex items-center mt-1">
                     <ClockIcon className="h-3 w-3 mr-1" />
                     <span>3 payments awaiting</span>
@@ -110,7 +137,9 @@ export default function PaymentOverview() {
         <motion.div variants={item}>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-[#002333]/70">Paid Invoices</CardTitle>
+              <CardTitle className="text-sm font-medium text-[#002333]/70">
+                Paid Invoices
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-end justify-between">
@@ -132,12 +161,16 @@ export default function PaymentOverview() {
         <motion.div variants={item}>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-[#002333]/70">Platform Fees</CardTitle>
+              <CardTitle className="text-sm font-medium text-[#002333]/70">
+                Platform Fees
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-end justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-[#002333]">$422.50</div>
+                  <div className="text-2xl font-bold text-[#002333]">
+                    $422.50
+                  </div>
                   <p className="text-xs text-red-600 flex items-center mt-1">
                     <TrendingDown className="h-3 w-3 mr-1" />
                     <span>-2.3% from last {timeframe}</span>
@@ -155,9 +188,12 @@ export default function PaymentOverview() {
       <motion.div variants={item}>
         <Alert className="bg-[#DEEFE7]/30 border-[#15949C]">
           <AlertCircle className="h-4 w-4 text-[#15949C]" />
-          <AlertTitle className="text-[#002333] font-medium">Payment Reminder</AlertTitle>
+          <AlertTitle className="text-[#002333] font-medium">
+            Payment Reminder
+          </AlertTitle>
           <AlertDescription className="text-[#002333]/70">
-            You have 3 pending payments totaling $1,245.00. The next payment is due in 5 days.
+            You have 3 pending payments totaling $1,245.00. The next payment is
+            due in 5 days.
           </AlertDescription>
         </Alert>
       </motion.div>
@@ -167,7 +203,9 @@ export default function PaymentOverview() {
           <Card>
             <CardHeader>
               <CardTitle>Payment Trends</CardTitle>
-              <CardDescription>Your earnings and expenses over time</CardDescription>
+              <CardDescription>
+                Your earnings and expenses over time
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <PaymentChart timeframe={timeframe} />
@@ -188,11 +226,15 @@ export default function PaymentOverview() {
                     <CreditCard className="h-5 w-5 text-[#15949C]" />
                   </div>
                   <div>
-                    <p className="font-medium text-[#002333]">Visa ending in 4242</p>
+                    <p className="font-medium text-[#002333]">
+                      Visa ending in 4242
+                    </p>
                     <p className="text-xs text-[#002333]/70">Expires 12/25</p>
                   </div>
                 </div>
-                <Badge className="bg-[#15949C]/10 text-[#15949C] hover:bg-[#15949C]/20">Default</Badge>
+                <Badge className="bg-[#15949C]/10 text-[#15949C] hover:bg-[#15949C]/20">
+                  Default
+                </Badge>
               </div>
 
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -214,8 +256,12 @@ export default function PaymentOverview() {
                     </svg>
                   </div>
                   <div>
-                    <p className="font-medium text-[#002333]">Add Payment Method</p>
-                    <p className="text-xs text-[#002333]/70">Connect a new card or account</p>
+                    <p className="font-medium text-[#002333]">
+                      Add Payment Method
+                    </p>
+                    <p className="text-xs text-[#002333]/70">
+                      Connect a new card or account
+                    </p>
                   </div>
                 </div>
                 <Button variant="ghost" size="sm" className="text-[#15949C]">
@@ -232,9 +278,14 @@ export default function PaymentOverview() {
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>Recent Transactions</CardTitle>
-              <CardDescription>Your latest financial activities</CardDescription>
+              <CardDescription>
+                Your latest financial activities
+              </CardDescription>
             </div>
-            <Button variant="outline" className="border-[#15949C] text-[#15949C] hover:bg-[#DEEFE7]">
+            <Button
+              variant="outline"
+              className="border-[#15949C] text-[#15949C] hover:bg-[#DEEFE7]"
+            >
               View All
             </Button>
           </CardHeader>
@@ -244,6 +295,5 @@ export default function PaymentOverview() {
         </Card>
       </motion.div>
     </motion.div>
-  )
+  );
 }
-
