@@ -11,24 +11,17 @@ dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  // Get port from .env file, default to 3000
   const port = process.env.PORT || 3000;
-
-  // Global middlewares
-  // helmet and compression are handled internally
   
-  // Use NestJS built-in express handling
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-  // CORS configuration
   app.enableCors({
     origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
 
-  // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -37,7 +30,6 @@ async function bootstrap() {
     }),
   );
 
-  // Swagger documentation setup
   const config = new DocumentBuilder()
     .setTitle('OfferHub API Gateway')
     .setDescription('API Gateway for OfferHub services')

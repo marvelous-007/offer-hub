@@ -1,1 +1,0 @@
-API Gateway caching test passed - GraphQL query results cached successfully
