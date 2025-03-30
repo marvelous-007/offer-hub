@@ -16,4 +16,13 @@ export class WebhooksController {
   async registerWebhook(@Body() createWebhookDto: CreateWebhookDto): Promise<Webhook> {
     return this.webhooksService.register(createWebhookDto);
   }
+
+  @Post('hasura-events')
+async handleHasuraEvent(
+  @Body() payload: any,
+): Promise<{ success: boolean }> {
+  const result = await this.webhooksService.handleHasuraEvent(payload);
+  return { success: result };
+}
+
 }
