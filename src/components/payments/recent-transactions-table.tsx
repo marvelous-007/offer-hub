@@ -1,9 +1,17 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { ArrowUpRight, ArrowDownRight, FileText, MoreHorizontal, Download, Eye, Copy } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import {
+  ArrowUpRight,
+  ArrowDownRight,
+  FileText,
+  MoreHorizontal,
+  Download,
+  Eye,
+  Copy,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,8 +19,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { motion } from "framer-motion"
+} from "@/components/ui/dropdown-menu";
+import { motion } from "framer-motion";
 
 // Sample transaction data
 const transactions = [
@@ -61,22 +69,34 @@ const transactions = [
     status: "completed",
     client: "Blog Media",
   },
-]
+];
 
 export default function RecentTransactionsTable() {
-  const [hoveredRow, setHoveredRow] = useState<string | null>(null)
+  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
           <tr className="border-b border-gray-100">
-            <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">Transaction</th>
-            <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">Date</th>
-            <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">Client</th>
-            <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">Amount</th>
-            <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">Status</th>
-            <th className="text-right py-3 px-4 text-[#002333]/70 font-medium">Actions</th>
+            <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">
+              Transaction
+            </th>
+            <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">
+              Date
+            </th>
+            <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">
+              Client
+            </th>
+            <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">
+              Amount
+            </th>
+            <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">
+              Status
+            </th>
+            <th className="text-right py-3 px-4 text-[#002333]/70 font-medium">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -94,7 +114,9 @@ export default function RecentTransactionsTable() {
                 <div className="flex items-center">
                   <div
                     className={`h-8 w-8 rounded-full flex items-center justify-center mr-3 ${
-                      transaction.type === "income" ? "bg-green-100" : "bg-red-100"
+                      transaction.type === "income"
+                        ? "bg-green-100"
+                        : "bg-red-100"
                     }`}
                   >
                     {transaction.type === "income" ? (
@@ -104,8 +126,12 @@ export default function RecentTransactionsTable() {
                     )}
                   </div>
                   <div>
-                    <p className="font-medium text-[#002333]">{transaction.description}</p>
-                    <p className="text-xs text-[#002333]/70">{transaction.id}</p>
+                    <p className="font-medium text-[#002333]">
+                      {transaction.description}
+                    </p>
+                    <p className="text-xs text-[#002333]/70">
+                      {transaction.id}
+                    </p>
                   </div>
                 </div>
               </td>
@@ -118,14 +144,23 @@ export default function RecentTransactionsTable() {
               </td>
               <td className="py-4 px-4 text-[#002333]">{transaction.client}</td>
               <td className="py-4 px-4">
-                <span className={`font-medium ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}>
-                  {transaction.type === "income" ? "+" : "-"}${transaction.amount.toFixed(2)}
+                <span
+                  className={`font-medium ${
+                    transaction.type === "income"
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  {transaction.type === "income" ? "+" : "-"}$
+                  {transaction.amount.toFixed(2)}
                 </span>
               </td>
               <td className="py-4 px-4">
                 <Badge
                   className={`${
-                    transaction.status === "completed" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"
+                    transaction.status === "completed"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-amber-100 text-amber-800"
                   }`}
                 >
                   {transaction.status === "completed" ? "Completed" : "Pending"}
@@ -165,6 +200,5 @@ export default function RecentTransactionsTable() {
         </tbody>
       </table>
     </div>
-  )
+  );
 }
-
