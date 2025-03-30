@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
+import { ApiRequestLog, ApiErrorLog, ApiResponseLog } from './types';
 
 const readFile = promisify(fs.readFile);
 const logsDir = path.resolve(process.cwd(), 'logs');
@@ -10,7 +11,7 @@ const logsDir = path.resolve(process.cwd(), 'logs');
 export class LogsService {
   private readonly logger = new Logger(LogsService.name);
 
-  async getRequestLogs(): Promise<any[]> {
+  async getRequestLogs(): Promise<ApiRequestLog[]> {
     try {
       const filePath = path.join(logsDir, 'api-requests.log');
       
@@ -38,7 +39,7 @@ export class LogsService {
     }
   }
 
-  async getErrorLogs(): Promise<any[]> {
+  async getErrorLogs(): Promise<ApiErrorLog[]> {
     try {
       const filePath = path.join(logsDir, 'api-errors.log');
       
@@ -66,7 +67,7 @@ export class LogsService {
     }
   }
 
-  async getResponseLogs(): Promise<any[]> {
+  async getResponseLogs(): Promise<ApiResponseLog[]> {
     try {
       const filePath = path.join(logsDir, 'api-responses.log');
       

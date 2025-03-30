@@ -1,30 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
-
-interface ApiRequestLog {
-  path: string;
-  method: string;
-  userId: string;
-  requestBody: string;
-  timestamp: Date;
-  ip?: string;
-}
-
-interface ApiResponseLog {
-  path: string;
-  statusCode: number;
-  responseBody: string;
-  timestamp: Date;
-}
-
-interface ApiErrorLog {
-  path: string;
-  statusCode: number;
-  errorMessage: string;
-  timestamp: Date;
-  stack?: string;
-}
+import { ApiRequestLog, ApiResponseLog, ApiErrorLog } from './types';
 
 @Injectable()
 export class GatewayLogService {

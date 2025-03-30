@@ -1,4 +1,3 @@
-
 import * as dotenv from 'dotenv';
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
@@ -12,7 +11,8 @@ dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const port = process.env.PORT || 3001;
+  // Get port from .env file, default to 3000
+  const port = process.env.PORT || 3000;
 
   // Global middlewares
   // helmet and compression are handled internally

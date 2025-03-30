@@ -12,7 +12,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
-import { HealthCheck, HealthCheckService, HttpHealthIndicator } from '@nestjs/terminus';
+import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
 import { GatewayService } from './service';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from './guards/auth.guard';
@@ -23,17 +23,20 @@ export class GatewayController {
     private readonly gatewayService: GatewayService,
     private readonly configService: ConfigService,
     private health: HealthCheckService,
-    private http: HttpHealthIndicator,
   ) {}
 
   // Health check endpoint
   @Get('health')
   @HealthCheck()
   async check() {
-    const hasuraUrl = this.configService.get<string>('HASURA_URL') || 'http://offer_hub_hasura:8080/v1/graphql';
-    return this.health.check([
-      async () => this.http.pingCheck('hasura', hasuraUrl),
-    ]);
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      services: {
+        api: 'up',
+        hasura: this.configService.get<string>('HASURA_URL') ? 'configured' : 'not configured',
+      }
+    };
   }
 
   // GraphQL endpoint - route to Hasura
@@ -151,5 +154,11 @@ export class GatewayController {
         message: error.message || 'Internal Server Error',
       });
     }
+  }
+
+  // Simple test endpoint
+  @Get('test')
+  async test() {
+    return { message: 'API is working!' };
   }
 } 

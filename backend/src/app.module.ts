@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule } from "@nestjs/config";
 import { config } from "dotenv";
+import { CacheModule } from '@nestjs/cache-manager';
 
 config(); // Load .env file
 
@@ -55,11 +56,9 @@ import { UserProfileModule } from "./modules/user-profiles/module";
 import { AchievementsModule } from "./modules/achievements/module";
 import { ServicesModule } from "./modules/services/module";
 import { ServiceCategoriesModule } from "./modules/service-categories/module";
-import { CacheModule } from '@nestjs/cache-manager';
 import { DisputesModule } from "./modules/disputes/disputes.module";
-import { InvoiceModule } from "./modules/invoices/module";
 import { VerificationsModule } from "./modules/verification/verification.module";
-import { InvoiceModule } from './modules/invoices/module';
+import { InvoiceModule } from "./modules/invoices/module";
 import { WebhooksModule } from "./modules/webhooks/module";
 // Import the new Gateway and Logs modules
 import { GatewayModule } from "./modules/gateway/module";
@@ -71,6 +70,11 @@ import { RateLimitModule } from "./modules/gateway/rate-limit.module";
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+    }),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 60 * 5, // 5 minutes
+      max: 100, // max 100 items in cache
     }),
     TypeOrmModule.forRoot({
       type: "postgres",
@@ -129,7 +133,6 @@ import { RateLimitModule } from "./modules/gateway/rate-limit.module";
     AchievementsModule,
     ServicesModule,
     ServiceCategoriesModule,
-    CacheModule,
     DisputesModule,
     VerificationsModule,
     InvoiceModule,
