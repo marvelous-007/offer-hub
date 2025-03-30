@@ -55,7 +55,9 @@ import { UserProfileModule } from "./modules/user-profiles/module";
 import { AchievementsModule } from "./modules/achievements/module";
 import { ServicesModule } from "./modules/services/module";
 import { ServiceCategoriesModule } from "./modules/service-categories/module";
+import { CacheModule } from '@nestjs/cache-manager';
 import { DisputesModule } from "./modules/disputes/disputes.module";
+import { InvoiceModule } from "./modules/invoices/module";
 import { VerificationsModule } from "./modules/verification/verification.module";
 import { InvoiceModule } from './modules/invoices/module';
 import { WebhooksModule } from "./modules/webhooks/module";
@@ -63,7 +65,6 @@ import { WebhooksModule } from "./modules/webhooks/module";
 import { GatewayModule } from "./modules/gateway/module";
 import { LogsModule } from "./modules/logs/module";
 import { RateLimitModule } from "./modules/gateway/rate-limit.module";
-
 
 @Module({
   imports: [
@@ -128,6 +129,7 @@ import { RateLimitModule } from "./modules/gateway/rate-limit.module";
     AchievementsModule,
     ServicesModule,
     ServiceCategoriesModule,
+    CacheModule,
     DisputesModule,
     VerificationsModule,
     InvoiceModule,
