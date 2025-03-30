@@ -1,13 +1,33 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Search, Filter, Download, Calendar, FileText, ArrowUpRight, ArrowDownRight } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Search,
+  Filter,
+  Download,
+  Calendar,
+  FileText,
+  ArrowUpRight,
+  ArrowDownRight,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Pagination,
   PaginationContent,
@@ -16,7 +36,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination"
+} from "@/components/ui/pagination";
 
 // Sample payment history data
 const paymentHistory = [
@@ -100,12 +120,12 @@ const paymentHistory = [
     client: "Tech Innovations",
     paymentMethod: "Bank Transfer",
   },
-]
+];
 
 export default function PaymentHistory() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [typeFilter, setTypeFilter] = useState("all")
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
 
   const container = {
     hidden: { opacity: 0 },
@@ -115,33 +135,41 @@ export default function PaymentHistory() {
         staggerChildren: 0.05,
       },
     },
-  }
+  };
 
   const item = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 },
-  }
+  };
 
   // Filter payments based on search term and filters
   const filteredPayments = paymentHistory.filter((payment) => {
     const matchesSearch =
       payment.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       payment.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      payment.id.toLowerCase().includes(searchTerm.toLowerCase())
+      payment.id.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = statusFilter === "all" || payment.status === statusFilter
-    const matchesType = typeFilter === "all" || payment.type === typeFilter
+    const matchesStatus =
+      statusFilter === "all" || payment.status === statusFilter;
+    const matchesType = typeFilter === "all" || payment.type === typeFilter;
 
-    return matchesSearch && matchesStatus && matchesType
-  })
+    return matchesSearch && matchesStatus && matchesType;
+  });
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="space-y-6"
+    >
       <motion.div variants={item}>
         <Card>
           <CardHeader>
             <CardTitle>Payment History</CardTitle>
-            <CardDescription>View and manage all your past transactions</CardDescription>
+            <CardDescription>
+              View and manage all your past transactions
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -181,7 +209,10 @@ export default function PaymentHistory() {
                   <Calendar className="h-4 w-4" />
                 </Button>
 
-                <Button variant="outline" className="hidden md:flex items-center">
+                <Button
+                  variant="outline"
+                  className="hidden md:flex items-center"
+                >
                   <Filter className="h-4 w-4 mr-2" />
                   More Filters
                 </Button>
@@ -197,23 +228,43 @@ export default function PaymentHistory() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">Transaction</th>
-                    <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">Date</th>
-                    <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">Client</th>
-                    <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">Payment Method</th>
-                    <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">Amount</th>
-                    <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">Status</th>
-                    <th className="text-right py-3 px-4 text-[#002333]/70 font-medium">Actions</th>
+                    <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">
+                      Transaction
+                    </th>
+                    <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">
+                      Date
+                    </th>
+                    <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">
+                      Client
+                    </th>
+                    <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">
+                      Payment Method
+                    </th>
+                    <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">
+                      Amount
+                    </th>
+                    <th className="text-left py-3 px-4 text-[#002333]/70 font-medium">
+                      Status
+                    </th>
+                    <th className="text-right py-3 px-4 text-[#002333]/70 font-medium">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredPayments.map((payment, index) => (
-                    <motion.tr key={payment.id} variants={item} className="border-b border-gray-100 hover:bg-gray-50">
+                    <motion.tr
+                      key={payment.id}
+                      variants={item}
+                      className="border-b border-gray-100 hover:bg-gray-50"
+                    >
                       <td className="py-4 px-4">
                         <div className="flex items-center">
                           <div
                             className={`h-8 w-8 rounded-full flex items-center justify-center mr-3 ${
-                              payment.type === "income" ? "bg-green-100" : "bg-red-100"
+                              payment.type === "income"
+                                ? "bg-green-100"
+                                : "bg-red-100"
                             }`}
                           >
                             {payment.type === "income" ? (
@@ -223,8 +274,12 @@ export default function PaymentHistory() {
                             )}
                           </div>
                           <div>
-                            <p className="font-medium text-[#002333]">{payment.description}</p>
-                            <p className="text-xs text-[#002333]/70">{payment.id}</p>
+                            <p className="font-medium text-[#002333]">
+                              {payment.description}
+                            </p>
+                            <p className="text-xs text-[#002333]/70">
+                              {payment.id}
+                            </p>
                           </div>
                         </div>
                       </td>
@@ -235,13 +290,22 @@ export default function PaymentHistory() {
                           day: "numeric",
                         })}
                       </td>
-                      <td className="py-4 px-4 text-[#002333]">{payment.client}</td>
-                      <td className="py-4 px-4 text-[#002333]">{payment.paymentMethod}</td>
+                      <td className="py-4 px-4 text-[#002333]">
+                        {payment.client}
+                      </td>
+                      <td className="py-4 px-4 text-[#002333]">
+                        {payment.paymentMethod}
+                      </td>
                       <td className="py-4 px-4">
                         <span
-                          className={`font-medium ${payment.type === "income" ? "text-green-600" : "text-red-600"}`}
+                          className={`font-medium ${
+                            payment.type === "income"
+                              ? "text-green-600"
+                              : "text-red-600"
+                          }`}
                         >
-                          {payment.type === "income" ? "+" : "-"}${payment.amount.toFixed(2)}
+                          {payment.type === "income" ? "+" : "-"}$
+                          {payment.amount.toFixed(2)}
                         </span>
                       </td>
                       <td className="py-4 px-4">
@@ -252,11 +316,17 @@ export default function PaymentHistory() {
                               : "bg-amber-100 text-amber-800"
                           }`}
                         >
-                          {payment.status === "completed" ? "Completed" : "Pending"}
+                          {payment.status === "completed"
+                            ? "Completed"
+                            : "Pending"}
                         </Badge>
                       </td>
                       <td className="py-4 px-4 text-right">
-                        <Button variant="ghost" size="sm" className="h-8 text-[#15949C]">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-[#15949C]"
+                        >
                           <FileText className="h-4 w-4 mr-2" />
                           View
                         </Button>
@@ -266,7 +336,10 @@ export default function PaymentHistory() {
 
                   {filteredPayments.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="py-8 text-center text-[#002333]/70">
+                      <td
+                        colSpan={7}
+                        className="py-8 text-center text-[#002333]/70"
+                      >
                         No transactions found matching your filters.
                       </td>
                     </tr>
@@ -305,6 +378,5 @@ export default function PaymentHistory() {
         </Card>
       </motion.div>
     </motion.div>
-  )
+  );
 }
-
