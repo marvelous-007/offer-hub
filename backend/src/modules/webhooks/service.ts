@@ -75,4 +75,53 @@ export class WebhooksService {
       return false;
     }
   }
+
+  async handleHasuraEvent(payload: any): Promise<boolean> {
+    const { table, event } = payload;
+  
+    if (!table?.name || !event?.op) return false;
+  
+    const operation = event.op; // 'INSERT' | 'UPDATE' | 'DELETE'
+    const newData = event.data.new;
+    const oldData = event.data.old;
+  
+    switch (table.name) {
+      case 'transactions':
+        switch (operation) {
+          case 'INSERT':
+            console.log('🟢 New transaction inserted:', newData);
+            // Trigger balance updates, notifications, etc. here
+            break;
+          case 'UPDATE':
+            console.log('📝 Transaction updated:');
+            console.log('Previous:', oldData);
+            console.log('Current:', newData);
+            break;
+          default:
+            console.warn(`⚠️ Unhandled operation for transactions: ${operation}`);
+        }
+        break;
+  
+      case 'services':
+        switch (operation) {
+          case 'INSERT':
+            console.log('🆕 New service created:', newData);
+            // Optionally notify the freelancer or log the action
+            break;
+          case 'DELETE':
+            console.log('❌ Service deleted:', oldData);
+            break;
+          default:
+            console.warn(`⚠️ Unhandled operation for services: ${operation}`);
+        }
+        break;
+  
+      default:
+        console.warn(`⚠️ Event received for unsupported table: ${table.name}`);
+        return false;
+    }
+  
+    return true;
+  }
+  
 }
