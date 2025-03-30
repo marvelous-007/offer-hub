@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 import {
   LineChart,
   Line,
@@ -12,16 +12,16 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-} from "recharts"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+} from "recharts";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface PaymentChartProps {
-  timeframe: string
+  timeframe: string;
 }
 
 export default function PaymentChart({ timeframe }: PaymentChartProps) {
-  const [chartType, setChartType] = useState("line")
-  const [chartData, setChartData] = useState<any[]>([])
+  const [chartType, setChartType] = useState("line");
+  const [chartData, setChartData] = useState<any[]>([]);
 
   useEffect(() => {
     // Generate data based on timeframe
@@ -35,36 +35,40 @@ export default function PaymentChart({ timeframe }: PaymentChartProps) {
           { name: "Fri", earnings: 490, expenses: 160 },
           { name: "Sat", earnings: 350, expenses: 110 },
           { name: "Sun", earnings: 200, expenses: 70 },
-        ]
+        ];
       } else if (timeframe === "month") {
         return [
           { name: "Week 1", earnings: 1200, expenses: 450 },
           { name: "Week 2", earnings: 1800, expenses: 520 },
           { name: "Week 3", earnings: 1400, expenses: 480 },
           { name: "Week 4", earnings: 2200, expenses: 650 },
-        ]
+        ];
       } else if (timeframe === "quarter") {
         return [
           { name: "Jan", earnings: 3200, expenses: 1200 },
           { name: "Feb", earnings: 4500, expenses: 1500 },
           { name: "Mar", earnings: 3800, expenses: 1300 },
-        ]
+        ];
       } else {
         return [
           { name: "Q1", earnings: 12000, expenses: 4500 },
           { name: "Q2", earnings: 15000, expenses: 5200 },
           { name: "Q3", earnings: 13500, expenses: 4800 },
           { name: "Q4", earnings: 18000, expenses: 6500 },
-        ]
+        ];
       }
-    }
+    };
 
-    setChartData(generateData())
-  }, [timeframe])
+    setChartData(generateData());
+  }, [timeframe]);
 
   return (
     <div className="h-[350px]">
-      <Tabs defaultValue={chartType} onValueChange={setChartType} className="mb-4">
+      <Tabs
+        defaultValue={chartType}
+        onValueChange={setChartType}
+        className="mb-4"
+      >
         <TabsList className="grid w-[200px] grid-cols-2">
           <TabsTrigger value="line">Line</TabsTrigger>
           <TabsTrigger value="bar">Bar</TabsTrigger>
@@ -135,7 +139,12 @@ export default function PaymentChart({ timeframe }: PaymentChartProps) {
               }}
             />
             <Legend />
-            <Bar dataKey="earnings" fill="#15949C" radius={[4, 4, 0, 0]} animationDuration={1500} />
+            <Bar
+              dataKey="earnings"
+              fill="#15949C"
+              radius={[4, 4, 0, 0]}
+              animationDuration={1500}
+            />
             <Bar
               dataKey="expenses"
               fill="#002333"
@@ -147,6 +156,5 @@ export default function PaymentChart({ timeframe }: PaymentChartProps) {
         </TabsContent>
       </ResponsiveContainer>
     </div>
-  )
+  );
 }
-
