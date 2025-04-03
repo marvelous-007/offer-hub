@@ -1,5 +1,5 @@
-version: "3.8"
 
+version: "3.8"
 services:
   offer_hub_database:
     image: postgres:15
@@ -40,15 +40,22 @@ services:
     depends_on:
       - offer_hub_database
     ports:
-      - "3001:3001"
+      - "3001:3001" 
+
+  redis:
+    image: redis:6
+    container_name: redis_cache
+    ports:
+      - "6379:6379"
+    restart: always
 
   offer_hub_minio:
     image: minio/minio
     container_name: offer_hub_minio
     restart: always
     ports:
-      - "9000:9000"     # MinIO API
-      - "9001:9001"     # Web Console
+      - "9000:9000" # MinIO API
+      - "9001:9001" # Web Console
     environment:
       MINIO_ROOT_USER: offerhub_minio
       MINIO_ROOT_PASSWORD: offerhub_minio_secret

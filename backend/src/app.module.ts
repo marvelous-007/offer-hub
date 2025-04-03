@@ -1,6 +1,8 @@
 import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { ConfigModule } from "@nestjs/config";
 import { config } from "dotenv";
+import { CacheModule } from '@nestjs/cache-manager';
 
 config(); // Load .env file
 
@@ -28,6 +30,7 @@ import { UserProfile } from "./modules/user-profiles/entity";
 import { Service } from "./modules/services/entity";
 import { ServiceCategory } from "./modules/service-categories/entity";
 import { DisputeEntity } from "./modules/disputes/disputes.entity";
+import { Webhook } from "./modules/webhooks/entity";
 
 //=======================================
 //               Modules
@@ -55,19 +58,35 @@ import { ServicesModule } from "./modules/services/module";
 import { ServiceCategoriesModule } from "./modules/service-categories/module";
 import { DisputesModule } from "./modules/disputes/disputes.module";
 import { InvoiceModule } from './modules/invoices/module';
+import { VerificationsModule } from "./modules/verification/verification.module";
+import { InvoiceModule } from "./modules/invoices/module";
+import { WebhooksModule } from "./modules/webhooks/module";
+// Import the new Gateway and Logs modules
+import { GatewayModule } from "./modules/gateway/module";
+import { LogsModule } from "./modules/logs/module";
+import { RateLimitModule } from "./modules/gateway/rate-limit.module";
 import { LogginMiddleware } from "./modules/logs/logs.middleware";
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 60 * 5, // 5 minutes
+      max: 100, // max 100 items in cache
+    }),
     TypeOrmModule.forRoot({
       type: "postgres",
       host:
         process.env.DATABASE_HOST ||
         (process.env.DOCKER_ENV ? "offer_hub_database" : "localhost"),
-      port: parseInt(process.env.DATABASE_PORT || "5432", 10),
-      username: process.env.DATABASE_USER || "offerhub_admin",
-      password: process.env.DATABASE_PASSWORD || "offerhub_pass",
-      database: process.env.DATABASE_NAME || "offer_hub_database",
+        port: parseInt(process.env.DATABASE_PORT || "5432", 10),
+        username: process.env.DATABASE_USER || "offerhub_admin",
+        password: process.env.DATABASE_PASSWORD || "offerhub_pass",
+        database: process.env.DATABASE_NAME || "offer_hub_database",
       entities: [
         Achievement,
         ActivityLogs,
@@ -90,10 +109,12 @@ import { LogginMiddleware } from "./modules/logs/logs.middleware";
         Service,
         ServiceCategory,
         DisputeEntity,
+        Webhook,
       ],
       synchronize: true,
       autoLoadEntities: true,
     }),
+    // Core modules
     ActivityLogsModule,
     AuthLogsModule,
     CategoriesModule,
@@ -115,7 +136,14 @@ import { LogginMiddleware } from "./modules/logs/logs.middleware";
     ServicesModule,
     ServiceCategoriesModule,
     DisputesModule,
+    VerificationsModule,
     InvoiceModule,
+    WebhooksModule,
+    
+    // New modules for API Gateway
+    RateLimitModule,
+    LogsModule,
+    GatewayModule,
   ],
 })
 export class AppModule {
