@@ -59,13 +59,13 @@ import { ServiceCategoriesModule } from "./modules/service-categories/module";
 import { DisputesModule } from "./modules/disputes/disputes.module";
 import { InvoiceModule } from './modules/invoices/module';
 import { VerificationsModule } from "./modules/verification/verification.module";
-import { InvoiceModule } from "./modules/invoices/module";
 import { WebhooksModule } from "./modules/webhooks/module";
 // Import the new Gateway and Logs modules
 import { GatewayModule } from "./modules/gateway/module";
 import { LogsModule } from "./modules/logs/module";
 import { RateLimitModule } from "./modules/gateway/rate-limit.module";
 import { LogginMiddleware } from "./modules/logs/logs.middleware";
+import { PrometheusModule } from "./modules/prometheus/module";
 
 @Module({
   imports: [
@@ -139,6 +139,7 @@ import { LogginMiddleware } from "./modules/logs/logs.middleware";
     VerificationsModule,
     InvoiceModule,
     WebhooksModule,
+    PrometheusModule,
     
     // New modules for API Gateway
     RateLimitModule,
