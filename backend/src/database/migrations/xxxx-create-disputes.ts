@@ -19,3 +19,26 @@ export class CreateDisputesTableXXXX implements MigrationInterface {
     await queryRunner.query(`DROP TABLE disputes;`);
   }
 }
+
+export class AddRolesTableXXXX implements MigrationInterface {
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
+      CREATE TABLE roles (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(50) UNIQUE NOT NULL
+      );
+
+      INSERT INTO roles (name) VALUES ('admin'), ('freelancer'), ('client');
+
+      ALTER TABLE users
+      ADD COLUMN role_id INT REFERENCES roles(id) DEFAULT 2; -- Default to 'freelancer'
+    `);
+  }
+
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
+      ALTER TABLE users DROP COLUMN role_id;
+      DROP TABLE roles;
+    `);
+  }
+}
