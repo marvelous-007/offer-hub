@@ -67,6 +67,7 @@ import { LogsModule } from "./modules/logs/module";
 import { RateLimitModule } from "./modules/gateway/rate-limit.module";
 import { LogginMiddleware } from "./modules/logs/logs.middleware";
 import { PrometheusModule } from "./modules/prometheus/module";
+import { SearchModule } from "./modules/search/search.module";
 
 @Module({
   imports: [
