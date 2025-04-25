@@ -1,18 +1,38 @@
-
 version: "3.8"
 services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    container_name: offer_hub_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - offer_hub_network
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+
   offer_hub_database:
     image: postgres:15
     container_name: offer_hub_database
     restart: always
     environment:
-      POSTGRES_USER: offerhub_admin
-      POSTGRES_PASSWORD: offerhub_pass
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
       POSTGRES_DB: offer_hub_database
     ports:
       - "5432:5432"
     volumes:
       - offer_hub_db_data:/var/lib/postgresql/data
+    networks:
+      - offer_hub_network
 
   offer_hub_hasura:
     image: hasura/graphql-engine:v2.40.0
@@ -26,6 +46,8 @@ services:
       - offer_hub_database
     ports:
       - "8080:8080"
+    networks:
+      - offer_hub_network
 
   offer_hub_backend:
     build: .
@@ -37,10 +59,17 @@ services:
       DATABASE_USER: offerhub_admin
       DATABASE_PASSWORD: offerhub_pass
       DATABASE_NAME: offer_hub_database
+      ELASTICSEARCH_HOST: elasticsearch
+      ELASTICSEARCH_PORT: 9200
     depends_on:
-      - offer_hub_database
+      offer_hub_database:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
     ports:
-      - "3001:3001" 
+      - "3001:3001"
+    networks:
+      - offer_hub_network
 
   redis:
     image: redis:6
@@ -48,6 +77,8 @@ services:
     ports:
       - "6379:6379"
     restart: always
+    networks:
+      - offer_hub_network
 
   offer_hub_minio:
     image: minio/minio
@@ -62,6 +93,8 @@ services:
     volumes:
       - offer_hub_minio_data:/data
     command: server --console-address ":9001" /data
+    networks:
+      - offer_hub_network
 
   prometheus:
     image: prom/prometheus
@@ -92,3 +125,8 @@ services:
 volumes:
   offer_hub_db_data: {}
   offer_hub_minio_data: {}
+  elasticsearch_data: {}
+
+networks:
+  offer_hub_network:
+    driver: bridge

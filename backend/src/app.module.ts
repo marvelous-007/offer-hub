@@ -3,6 +3,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule } from "@nestjs/config";
 import { config } from "dotenv";
 import { CacheModule } from '@nestjs/cache-manager';
+import { APP_GUARD, Reflector } from '@nestjs/core';
 
 config(); // Load .env file
 
@@ -66,12 +67,19 @@ import { LogsModule } from "./modules/logs/module";
 import { RateLimitModule } from "./modules/gateway/rate-limit.module";
 import { LogginMiddleware } from "./modules/logs/logs.middleware";
 import { PrometheusModule } from "./modules/prometheus/module";
+import { SearchModule } from "./modules/search/search.module";
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      load: [
+        () => ({
+          ELASTICSEARCH_HOST: process.env.ELASTICSEARCH_HOST || 'elasticsearch',
+          ELASTICSEARCH_PORT: process.env.ELASTICSEARCH_PORT || '9200',
+        }),
+      ],
     }),
     CacheModule.register({
       isGlobal: true,
@@ -145,6 +153,10 @@ import { PrometheusModule } from "./modules/prometheus/module";
     RateLimitModule,
     LogsModule,
     GatewayModule,
+    SearchModule,
+  ],
+  providers: [
+    Reflector,
   ],
 })
 export class AppModule {

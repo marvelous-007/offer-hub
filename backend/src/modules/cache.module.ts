@@ -12,7 +12,7 @@ import { CacheService } from './cache/cache.service';
             host: 'localhost',
             port: 6379,
           },
-          ttl: 600, // 10 minutes
+          ttl: 600, 
         }),
       }),
     }),
@@ -20,4 +20,4 @@ import { CacheService } from './cache/cache.service';
   providers: [CacheService],
   exports: [CacheService],
 })
-export class CustomCacheModule {} // Renamed to avoid conflicts
+export class CustomCacheModule {} 
