@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule } from "@nestjs/config";
 import { config } from "dotenv";
@@ -58,14 +58,15 @@ import { AchievementsModule } from "./modules/achievements/module";
 import { ServicesModule } from "./modules/services/module";
 import { ServiceCategoriesModule } from "./modules/service-categories/module";
 import { DisputesModule } from "./modules/disputes/disputes.module";
+import { InvoiceModule } from './modules/invoices/module';
 import { VerificationsModule } from "./modules/verification/verification.module";
-import { InvoiceModule } from "./modules/invoices/module";
 import { WebhooksModule } from "./modules/webhooks/module";
 // Import the new Gateway and Logs modules
 import { GatewayModule } from "./modules/gateway/module";
 import { LogsModule } from "./modules/logs/module";
 import { RateLimitModule } from "./modules/gateway/rate-limit.module";
-import { SearchModule } from './modules/search/search.module';
+import { LogginMiddleware } from "./modules/logs/logs.middleware";
+import { PrometheusModule } from "./modules/prometheus/module";
 
 @Module({
   imports: [
@@ -145,6 +146,7 @@ import { SearchModule } from './modules/search/search.module';
     VerificationsModule,
     InvoiceModule,
     WebhooksModule,
+    PrometheusModule,
     
     // New modules for API Gateway
     RateLimitModule,
@@ -156,4 +158,10 @@ import { SearchModule } from './modules/search/search.module';
     Reflector,
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer){
+    consumer
+      .apply(LogginMiddleware)
+      .forRoutes('*');
+  }
+}
