@@ -3,6 +3,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule } from "@nestjs/config";
 import { config } from "dotenv";
 import { CacheModule } from '@nestjs/cache-manager';
+import { APP_GUARD, Reflector } from '@nestjs/core';
 
 config(); // Load .env file
 
@@ -64,12 +65,19 @@ import { WebhooksModule } from "./modules/webhooks/module";
 import { GatewayModule } from "./modules/gateway/module";
 import { LogsModule } from "./modules/logs/module";
 import { RateLimitModule } from "./modules/gateway/rate-limit.module";
+import { SearchModule } from './modules/search/search.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      load: [
+        () => ({
+          ELASTICSEARCH_HOST: process.env.ELASTICSEARCH_HOST || 'elasticsearch',
+          ELASTICSEARCH_PORT: process.env.ELASTICSEARCH_PORT || '9200',
+        }),
+      ],
     }),
     CacheModule.register({
       isGlobal: true,
@@ -142,6 +150,10 @@ import { RateLimitModule } from "./modules/gateway/rate-limit.module";
     RateLimitModule,
     LogsModule,
     GatewayModule,
+    SearchModule,
+  ],
+  providers: [
+    Reflector,
   ],
 })
 export class AppModule {}
