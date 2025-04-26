@@ -3,130 +3,131 @@
 import React, { useState } from 'react'
 import Header from '@/components/freelancer-search/header'
 import { Button } from '@/components/ui/button'
-//import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { useFreelancerSteps } from '@/hooks/use-freelancer-steps'
 
-// Fake skill list for now (you can replace with API data later)
-const ALL_SKILLS = [
-  'Illustration',
-  'Informational Infographic',
-  'Brand Development',
-  'Music Production',
-  'Creative Brief',
-  'Creative Computer Services',
-  'Creative Strategy',
-  'Creative Writing',
-  'Adobe Creative Cloud',
-  'Branding & Marketing',
-  'Branding',
-  'Branding Management',
+const CATEGORIES = [
+  'Accounting & Consulting',
+  'Admin Support',
+  'Customer Service',
+  'Data Science & Analytics',
+  'Design & Creative',
+  'Engineering & Architecture',
+  'IT Networking',
+  'Legal',
+  'Sales & Marketing',
+  'Translation',
+  'Web, Mobile & Software Dev',
+  'Writing',
 ]
+
+const JOB_TYPES_MAP: Record<string, string[]> = {
+  'Accounting & Consulting': ['Financial Analysis', 'Bookkeeping', 'Payroll Services'],
+  'Admin Support': ['Data Entry', 'Virtual Assistant', 'Project Coordination'],
+  'Customer Service': ['Customer Support', 'Technical Support', 'Client Management'],
+  'Data Science & Analytics': ['Data Analysis', 'Data Visualization', 'Machine Learning'],
+  'Design & Creative': ['Product Design', 'Photography', 'Video & Animation'],
+  'Engineering & Architecture': ['Mechanical Design', 'CAD Drafting', 'Architecture Planning'],
+  'IT Networking': ['Network Setup', 'Security Analysis', 'Cloud Engineering'],
+  'Legal': ['Contract Drafting', 'Legal Consulting', 'Compliance'],
+  'Sales & Marketing': ['SEO', 'PPC Advertising', 'Email Marketing'],
+  'Translation': ['Language Translation', 'Localization', 'Subtitling'],
+  'Web, Mobile & Software Dev': [
+    'Blockchain, NFT & Cryptocurrency',
+    'AI Apps & Integration',
+    'Desktop Application Development',
+    'Game Design & Development',
+    'Web & Mobile Design',
+    'Web Development',
+  ],
+  'Writing': ['Content Writing', 'Technical Writing', 'Blogging'],
+}
 
 export default function UserSelectJobType() {
   const { prevStep, nextStep } = useFreelancerSteps()
 
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([])
-  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>([])
 
-  const handleSelectSkill = (skill: string) => {
-    setSelectedSkills((prev) =>
-      prev.includes(skill)
-        ? prev.filter((s) => s !== skill)
-        : prev.length < 4 // 1 main + 3 optional
-        ? [...prev, skill]
+  const handleSelectJobType = (job: string) => {
+    setSelectedJobTypes((prev) =>
+      prev.includes(job)
+        ? prev.filter((j) => j !== job)
+        : prev.length < 3
+        ? [...prev, job]
         : prev
     )
   }
 
-  const filteredSkills = ALL_SKILLS.filter((skill) =>
-    skill.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const jobOptions = selectedCategory ? JOB_TYPES_MAP[selectedCategory] || [] : []
 
   return (
     <div className="space-y-6">
-      {/* Progress Header */}
-      <Header title="3/10" />
+      <Header title="2/10" />
 
-      <h2 className="text-2xl font-semibold">You’re close! What work are you here to do?</h2>
+      <h2 className="text-2xl font-semibold">
+        Great, so what kind of projects are you looking for?
+      </h2>
       <p className="text-muted-foreground">
-        Your skills show clients what you can offer, and help us choose which jobs to recommend to you.
+        Don’t worry you can change these choices later on.
       </p>
 
-      {/* Selected Skills */}
-      <div className="flex flex-wrap gap-2">
-        {selectedSkills.map((skill) => (
-          <span
-            key={skill}
-            className="px-3 py-1 bg-primary/10 text-primary text-sm rounded-full"
-          >
-            {skill}
-          </span>
-        ))}
-      </div>
-
-      {/* Search Input */}
-      <div>
-        <Input
-          placeholder="Search skills..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-
-      {/* Skill Suggestions Dropdown */}
-      {searchTerm && (
-        <div className="border rounded-md shadow-md max-h-48 overflow-auto">
-          {filteredSkills.map((skill) => (
-            <div
-              key={skill}
-              onClick={() => {
-                handleSelectSkill(skill)
-                setSearchTerm('') // Clear after selection
-              }}
-              className={cn(
-                'p-3 cursor-pointer hover:bg-muted',
-                selectedSkills.includes(skill) && 'bg-primary/10'
-              )}
-            >
-              {skill}
-            </div>
-          ))}
-          {filteredSkills.length === 0 && (
-            <div className="p-3 text-muted-foreground text-sm">No matching skills found.</div>
-          )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-8">
+        {/* Left: Categories List */}
+        <div className="space-y-3">
+          <h3 className="text-lg font-medium">Select 1 Category</h3>
+          <div className="flex flex-col space-y-2">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => {
+                  setSelectedCategory(cat)
+                  setSelectedJobTypes([])
+                }}
+                className={cn(
+                  'text-left px-2 py-1 rounded-md hover:bg-muted transition',
+                  selectedCategory === cat && 'text-primary font-semibold underline'
+                )}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
-      )}
 
-      {/* Suggested Skills Section */}
-      <div className="space-y-2">
-        <h3 className="text-lg font-medium">Suggested Skills</h3>
-        <div className="flex flex-wrap gap-2">
-          {['Branding & Marketing', 'Branding', 'Branding Management'].map((suggestedSkill) => (
-            <Button
-              key={suggestedSkill}
-              variant="outline"
-              size="sm"
-              onClick={() => handleSelectSkill(suggestedSkill)}
-              disabled={selectedSkills.includes(suggestedSkill)}
-            >
-              + {suggestedSkill}
-            </Button>
-          ))}
+        {/* Right: Job Types Checkboxes */}
+        <div className="space-y-3">
+          <h3 className="text-lg font-medium">Select 3 options</h3>
+          <div className="flex flex-col space-y-3">
+            {jobOptions.map((job) => (
+              <label key={job} className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectedJobTypes.includes(job)}
+                  onChange={() => handleSelectJobType(job)}
+                  disabled={
+                    !selectedJobTypes.includes(job) && selectedJobTypes.length >= 3
+                  }
+                  className="w-4 h-4 accent-primary"
+                />
+                <span className="text-sm">{job}</span>
+              </label>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="flex justify-between mt-10">
+      {/* Footer Buttons */}
+      <div className="flex justify-between mt-12">
         <Button variant="outline" onClick={prevStep}>
           Back
         </Button>
         <Button
           onClick={nextStep}
-          disabled={selectedSkills.length === 0}
+          disabled={!selectedCategory || selectedJobTypes.length === 0}
         >
-          Continue
+          Choose type of job
         </Button>
       </div>
     </div>
