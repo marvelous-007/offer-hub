@@ -1,6 +1,7 @@
 'use client'
 
 import { useFreelancerSteps } from '@/hooks/use-freelancer-steps'
+import UserProfilePreviewActiveState from './user-profile-preview-active-state'
 
 const steps = [
   { key: 'user-choose-role', component: null }, // to be implemented
@@ -16,7 +17,7 @@ const steps = [
   { key: 'user-enter-service-fee', component: null },  // to be implemented
   { key: 'user-setting-up-account-profile-active-state', component: null },  // to be implemented
   { key: 'user-profile-photo-active-and-focus-state', component: null },  // to be implemented
-  { key: 'user-profile-set-uo-preview', component: null },  // to be implemented
+  { key: 'user-profile-preview-active-state', component: <UserProfilePreviewActiveState /> },  // implemented
 ]
 
 export default function StepsController() {
