@@ -4,7 +4,11 @@ import { ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
-export default function Header() {
+interface HeaderProps {
+  title: string
+}
+
+export default function Header({ title }: HeaderProps) {
   const router = useRouter()
 
   return (
@@ -20,7 +24,7 @@ export default function Header() {
               priority
             />
           </div>
-          <span className="font-semibold text-gray-700 uppercase">Offer Hub</span>
+          <span className="font-semibold text-gray-700 uppercase">{title}</span>
         </div>
         <button
           onClick={() => router.push('/dashboard')} // change this path as needed
