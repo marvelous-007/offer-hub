@@ -2,6 +2,7 @@
 
 import { useFreelancerSteps } from "@/hooks/use-freelancer-steps";
 import UserAddWorkExperienceDefaultState from "./user-add-work-experience-default-state";
+import Header from "../header";
 
 const steps = [
   { key: "user-choose-role", component: null }, // to be implemented
@@ -32,8 +33,8 @@ export default function StepsController() {
   const StepComponent = steps[currentStep]?.component;
 
   return (
-    <>
-      {StepComponent ? StepComponent : <p>This step is not yet implemented.</p>}
+    <section className="flex flex-col gap-y-16 pt-8 min-h-svh">
+      <Header />
 
       <div className="mt-8 flex justify-between">
         <button onClick={prevStep} disabled={currentStep === 0}>
@@ -43,6 +44,13 @@ export default function StepsController() {
           Next
         </button>
       </div>
-    </>
+      <div className="flex-1 flex">
+        {StepComponent ? (
+          StepComponent
+        ) : (
+          <p>This step is not yet implemented.</p>
+        )}
+      </div>
+    </section>
   );
 }
