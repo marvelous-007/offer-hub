@@ -2,12 +2,13 @@
 import { useFreelancerSteps } from '@/hooks/use-freelancer-steps'
 import UserAddWorkExperienceActiveState from '@/components/freelancer-profile/steps/user-add-work-experience-active-state'
 import Header from '@/components/freelancer-profile/header'
+import UserAddWorkExperience from '@/components/freelancer-profile/steps/user-add-work-experience';
 
 const steps = [
   { key: 'user-choose-role', component: null }, // to be implemented
   { key: 'user-select-job-type', component: null }, // to be implemented
   { key: 'user-select-interested-category', component: null },  // to be implemented
-  { key: 'user-add-work-experience', component: null },  // to be implemented
+  { key: 'user-add-work-experience', component: <UserAddWorkExperience /> },
   { key: 'user-add-work-experience-active-state', component: <UserAddWorkExperienceActiveState /> },
   { key: 'user-add-work-experience-active-state-not-in-focus', component: null },  // to be implemented
   { key: 'user-add-work-experience-default-state', component: null },  // to be implemented
