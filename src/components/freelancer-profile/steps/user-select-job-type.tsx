@@ -1,8 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
-import Header from '@/components/freelancer-search/header'
+import Header from "@/components/freelancer-profile/steps/header";
 import { Button } from '@/components/ui/button'
+import { ArrowLeft } from "lucide-react";
 import { cn } from '@/lib/utils'
 import { useFreelancerSteps } from '@/hooks/use-freelancer-steps'
 
@@ -68,15 +69,16 @@ export default function UserSelectJobType() {
       <h2 className="text-2xl font-semibold">
         Great, so what kind of projects are you looking for?
       </h2>
-      <p className="text-muted-foreground">
-        Don’t worry you can change these choices later on.
-      </p>
+      <p className="text-[#149A9B]">
+  Don’t worry you can change these choices later on.
+</p>
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-8">
         {/* Left: Categories List */}
-        <div className="space-y-3">
-          <h3 className="text-lg font-medium">Select 1 Category</h3>
-          <div className="flex flex-col space-y-2">
+        <div className="space-y-3 ">
+          <h3 className="text-lg font-medium ">Select 1 Category</h3>
+          <div className="flex flex-col space-y-2 ">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
@@ -87,7 +89,7 @@ export default function UserSelectJobType() {
                 }}
                 className={cn(
                   'text-left px-2 py-1 rounded-md hover:bg-muted transition',
-                  selectedCategory === cat && 'text-primary font-semibold underline'
+                  selectedCategory === cat && 'text-[#149A9B] font-semibold underline'
                 )}
               >
                 {cat}
@@ -119,15 +121,15 @@ export default function UserSelectJobType() {
       </div>
 
       {/* Footer Buttons */}
-      <div className="flex justify-between mt-12">
-        <Button variant="outline" onClick={prevStep}>
-          Back
+      <div className="flex justify-between mt-8">
+        <Button onClick={prevStep} variant="ghost" className="gap-1 rounded-full">
+          <ArrowLeft size={18} /> Back
         </Button>
         <Button
           onClick={nextStep}
-          disabled={!selectedCategory || selectedJobTypes.length === 0}
+          className="bg-[#149A9B] text-white rounded-full md:min-w-36"
         >
-          Choose type of job
+          Add Experience
         </Button>
       </div>
     </div>
