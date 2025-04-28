@@ -47,6 +47,14 @@ export default {
           "900": "#000a11",
           "950": "#00060b",
         },
+        success: {
+          DEFAULT: '#16a34a',
+          foreground: '#ffffff',
+        },
+        warning: {
+          DEFAULT: '#d97706',
+          foreground: '#ffffff',
+        },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",

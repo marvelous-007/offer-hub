@@ -55,8 +55,8 @@ pnpm i
 
 7️⃣ Run the development server:
 
-```bash
-pnpm dev
+```bashpnpm dev
+
 ```
 
 8️⃣ Open the app in your browser at:
