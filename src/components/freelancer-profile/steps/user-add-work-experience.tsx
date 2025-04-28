@@ -2,7 +2,6 @@
 
 import { Search } from "lucide-react";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 
 export default function UserAddWorkExperience() {
   const [role, setRole] = useState("");
@@ -20,17 +19,17 @@ export default function UserAddWorkExperience() {
             It’s the very first thing clients see, so make it count. Stand out by describing your expertise in your own words.
           </p>
         </div>
-        <div className="flex flex-col gap-2">
-          <label htmlFor="role" className="text-sm font-medium text-[#19213D]">
-            Your professional role
-          </label>
-          <Input
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <Search className="w-5 h-5 text-gray-400" />
+          </div>
+          <input
             id="role"
             type="text"
             value={role}
             onChange={(e) => setRole(e.target.value)}
             placeholder="Example: Design & Creative"
-            className="border-[#19213D] rounded-[16px] p-4 text-sm placeholder-gray-400"
+            className="w-full border border-[#19213D] rounded-[16px] p-4 pl-12 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#19213D]"
           />
         </div>
       </div>
