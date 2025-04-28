@@ -25,13 +25,10 @@ function Header({ className, ...props }: Props) {
         </Link>
 
         <Button
-  onClick={() => {}}
-  variant="outline"
-  className=" bg-[#149A9B] text-white rounded-full md:min-w-36 hover:bg-[#128B8C] cursor-pointer"
->
-  Sign In
-</Button>
-
+          onClick={() => {}}
+          variant="outline" className='border-[#002333] bg-transparent rounded-full md:min-w-36'>
+          Sign In
+        </Button>
       </div>
     </header>
   )
