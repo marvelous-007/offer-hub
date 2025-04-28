@@ -8,7 +8,7 @@ const steps = [
   { key: 'user-select-job-type', component: null }, // to be implemented
   { key: 'user-select-interested-category', component: null },  // to be implemented
   { key: 'user-add-work-experience', component: null },  // to be implemented
-  { key: 'user-add-work-experience-active-state', component: UserAddWorkExperienceActiveState },
+  { key: 'user-add-work-experience-active-state', component: <UserAddWorkExperienceActiveState /> },
   { key: 'user-add-work-experience-active-state-not-in-focus', component: null },  // to be implemented
   { key: 'user-add-work-experience-default-state', component: null },  // to be implemented
   { key: 'user-add-education-default-state', component: null },  // to be implemented
@@ -29,16 +29,7 @@ export default function StepsController() {
       <Header />
 
       <div className='flex-1 flex'>
-        {
-          StepComponent ?
-          <StepComponent
-            stepCount={steps.length}
-            currentStep={currentStep}
-            nextStep={nextStep}
-            prevStep={prevStep}
-          /> :
-          <p>This step is not yet implemented.</p>
-        }
+        { StepComponent ? StepComponent : <p>This step is not yet implemented.</p> }
       </div>
     </section>
   )
