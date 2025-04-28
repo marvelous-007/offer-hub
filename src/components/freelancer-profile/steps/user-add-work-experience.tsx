@@ -1,56 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import Header from "@/components/freelancer-profile/steps/header";
 
-type Props = {
-  prevStep: () => void;
-  nextStep: () => void;
-};
-
-export default function UserAddWorkExperience({ prevStep, nextStep }: Props) {
+export default function UserAddWorkExperienceBody() {
   const [role, setRole] = useState("");
 
   return (
-    <div className="flex flex-col gap-y-8 w-full max-w-xl mx-auto p-4">
-      <Header />
-      <div className="text-sm text-gray-500">Step 4/10</div>
-
-      <section>
-        <h1 className="text-2xl font-bold mt-4">
-          Now, Let’s tell the world what you have been about.
-        </h1>
-        <p className="text-gray-600 mt-2">
-          It’s the very first thing clients see, so make it count. Stand out by describing your expertise in your own words.
-        </p>
-      </section>
-
-      <section className="relative mt-6">
-        <input
-          type="text"
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          placeholder="Exp: Creative Writer"
-          className="w-full border p-3 pl-10 rounded"
-        />
-        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-          🔍
-        </span>
-      </section>
-
-      <div className="flex justify-between mt-8">
-        <Button onClick={prevStep} variant="ghost" className="gap-1 rounded-full">
-          <ArrowLeft size={18} /> Back
-        </Button>
-        <Button
-          onClick={nextStep}
-          className="bg-[#149A9B] text-white rounded-full md:min-w-36"
-        >
-          Add Experience
-        </Button>
+    <main className="flex flex-col items-center px-4 pt-8 pb-28">
+      <div className="w-full max-w-xl space-y-8">
+        <div className="text-base font-semibold text-[#B4B9C9]">
+          4/10
+        </div>        <div className="space-y-2">
+          <h1 className="text-[20px] font-semibold leading-none text-[#19213D]">
+            Now, Let tell the world what you have been about.
+          </h1>
+          <p className="text-[12px] font-normal leading-none text-[#19213D]">
+            It’s the very first thing clients see, so make it count. Stand out by describing your expertise in your own words.
+          </p>
+        </div>
+        <div className="flex flex-col gap-2">
+          <label htmlFor="role" className="text-sm font-medium text-[#19213D]">
+            Your professional role
+          </label>
+          <input
+            id="role"
+            type="text"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            placeholder="Example: Design & Creative"
+            className="w-full border border-[#19213D] rounded-[16px] p-4 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#19213D]"
+          />
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
