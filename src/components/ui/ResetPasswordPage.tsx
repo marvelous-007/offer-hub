@@ -43,16 +43,16 @@ const ResetPasswordPage: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <Card className="w-full h-[100vh] md:h-auto max-w-xl py-4 px-6 md:px-14">
+    <div className="flex justify-center items-center bg-gray-100 min-h-[calc(100vh-4rem)] px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md sm:max-w-lg lg:max-w-xl py-4 px-4 sm:px-6 lg:px-8 h-fit">
         <CardHeader className="text-center">
-          <CardTitle className="font-mono text-md md:text-xl">
+          <CardTitle className="font-mono font-bold text-lg sm:text-xl text-[#002333]">
             Reset your password
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 sm:space-y-6">
           <div>
-            <label className="block text-sm  text-gray-700">
+            <label className="block text-sm font-medium text-gray-700">
               Enter password
             </label>
             <div className="relative mt-1">
@@ -62,7 +62,7 @@ const ResetPasswordPage: React.FC = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter new password"
                 aria-label="Enter new password"
-                className="focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-400"
+                className="focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-400 text-sm sm:text-base"
               />
               <button
                 type="button"
@@ -70,19 +70,19 @@ const ResetPasswordPage: React.FC = () => {
                 className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
               >
                 {showPassword ? (
-                  <EyeOff className="h-5 w-5 text-[#B4B9C9]" />
+                  <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-[#B4B9C9]" />
                 ) : (
-                  <Eye className="h-5 w-5 text-[#B4B9C9]" />
+                  <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-[#B4B9C9]" />
                 )}
               </button>
             </div>
             <div className="mt-2">
-              <p className="text-sm font-small text-neutral-600">
-                Strength: <span className="text-gray-500">{getStrength()}</span>
+              <p className="text-sm font-medium text-neutral-600">
+                Strength: <span className="text-gray-500 font-light">{getStrength()}</span>
               </p>
-              <ul className="text-sm mt-1 space-y-1">
+              <ul className="text-xs sm:text-sm mt-1 space-y-1">
                 <li
-                  className={`flex items-center text-xs ${
+                  className={`flex items-center text-xs sm:text-xs ${
                     isLengthValid
                       ? "text-[#00ED27]"
                       : passwordsMatch
@@ -93,18 +93,18 @@ const ResetPasswordPage: React.FC = () => {
                   <span className="inline-flex items-center mr-2">
                     {isLengthValid ? (
                       <CircleCheck
-                        className="h-5 w-5 text-[#00ED27]]"
+                        className="h-4 w-4 sm:h-5 sm:w-5 text-[#00ED27]"
                         fill="currentColor"
                         stroke="white"
                       />
                     ) : (
-                      <Circle className="h-5 w-5 text-gray-300" />
+                      <Circle className="h-4 w-4 sm:h-5 sm:w-5 text-gray-300" />
                     )}
                   </span>
                   <span>At least 8 characters.</span>
                 </li>
                 <li
-                  className={`flex items-center text-xs ${
+                  className={`flex items-center text-xs sm:text-xs ${
                     hasUpperLowerOrNumber
                       ? "text-[#00ED27]"
                       : passwordsMatch
@@ -115,18 +115,18 @@ const ResetPasswordPage: React.FC = () => {
                   <span className="inline-flex items-center mr-2">
                     {hasUpperLowerOrNumber ? (
                       <CircleCheck
-                        className="h-5 w-5 text-[#00ED27]"
+                        className="h-4 w-4 sm:h-5 sm:w-5 text-[#00ED27]"
                         fill="currentColor"
                         stroke="white"
                       />
                     ) : (
-                      <Circle className="h-5 w-5 text-gray-300" />
+                      <Circle className="h-4 w-4 sm:h-5 sm:w-5 text-gray-300" />
                     )}
                   </span>
-                  <span>At least one uppercase, lowercase, or numbers.</span>
+                  <span>At least one uppercase, lowercase characters or numbers.</span>
                 </li>
                 <li
-                  className={`flex items-center text-xs ${
+                  className={`flex items-center text-xs sm:text-xs ${
                     hasSpecialChar
                       ? "text-[#00ED27]"
                       : passwordsMatch
@@ -137,12 +137,12 @@ const ResetPasswordPage: React.FC = () => {
                   <span className="inline-flex items-center mr-2">
                     {hasSpecialChar ? (
                       <CircleCheck
-                        className="h-5 w-5 text-[#00ED27]"
+                        className="h-4 w-4 sm:h-5 sm:w-5 text-[#00ED27]"
                         fill="currentColor"
                         stroke="white"
                       />
                     ) : (
-                      <Circle className="h-5 w-5 text-gray-300" />
+                      <Circle className="h-4 w-4 sm:h-5 sm:w-5 text-gray-300" />
                     )}
                   </span>
                   <span>At least one special character.</span>
@@ -169,7 +169,7 @@ const ResetPasswordPage: React.FC = () => {
                 aria-label="Confirm new password"
                 className={`${
                   !passwordsMatch && confirmPassword ? "border-red-500" : ""
-                } focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-400`}
+                } focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-400 text-sm sm:text-base`}
               />
               <button
                 type="button"
@@ -177,23 +177,23 @@ const ResetPasswordPage: React.FC = () => {
                 className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
               >
                 {showConfirmPassword ? (
-                  <EyeOff className="h-5 w-5 text-[#B4B9C9]" />
+                  <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-[#B4B9C9]" />
                 ) : (
-                  <Eye className="h-5 w-5 text-[#B4B9C9]" />
+                  <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-[#B4B9C9]" />
                 )}
               </button>
             </div>
             {!passwordsMatch && confirmPassword && (
-              <p className="text-red-500 text-sm mt-1">Password mis-match.</p>
+              <p className="text-red-500 text-xs sm:text-sm mt-1">Password mis-match.</p>
             )}
           </div>
           <Button
             disabled={isButtonDisabled}
             className={`w-full ${
               isButtonDisabled
-                ? "bg-[#002333] text-white"
+                ? "bg-[#002333] disabled:bg-[#002333] disabled:opacity-100 text-white"
                 : "bg-blue-900 text-white"
-            } py-2 rounded-3xl`}
+            } py-2 rounded-3xl text-sm sm:text-base`}
           >
             Change password
           </Button>
