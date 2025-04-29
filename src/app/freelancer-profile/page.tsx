@@ -4,28 +4,42 @@ import StepsController from "@/components/freelancer-profile/steps";
 
 import { Button } from "@/components/ui/button";
 import Footer from "@/components/ui/footer";
-import { BackwardIcon } from "../../../public/icon";
+
+import { ArrowLeft } from "lucide-react";
 
 export default function FreelancerProfilePage() {
   return (
-    <div className="min-h-screen px-4 py-8 relative">
-      <div className="max-w-xl mx-auto">
-        <StepsController />
-      </div>
-      {/* steps controller will be used to dynamically change the content of the button */}
-      <Footer>
-        <div className="flex justify-between items-center">
-          <BackwardIcon />
-          <div className="flex gap-2">
-            <Button className="bg-neutral-600 p-4 text-neutral-800 rounded-[20px]">
-              Skip
-            </Button>
-            <Button className="bg-neutral-800 text-neutral-300 rounded-full p-4">
-              Add Education
-            </Button>
+    <div className="relative">
+      <StepsController />
+
+      <div>
+        <Footer>
+          <div className="mx-auto max-w-4xl flex justify-between items-center">
+            <div>
+              <Button variant="ghost" className="gap-1 rounded-full">
+                <ArrowLeft size={18} /> Back
+              </Button>
+            </div>
+
+            <div className="space-x-4">
+              <Button
+                variant="outline"
+                className="border-[#149A9B] text-[#149A9B] hover:text-[#149A9B]
+                  bg-transparent rounded-full md:min-w-36"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                form="add-work-experience-form"
+                className="gap-1 bg-[#149A9B] text-white rounded-full md:min-w-36"
+              >
+                Add Education
+              </Button>
+            </div>
           </div>
-        </div>
-      </Footer>
+        </Footer>
+      </div>
     </div>
   );
 }
