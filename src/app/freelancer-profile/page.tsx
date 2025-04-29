@@ -4,8 +4,8 @@ import StepsController from '@/components/freelancer-profile/steps'
 
 export default function FreelancerProfilePage() {
   return (
-    <div className="min-h-screen px-4 py-8">
-      <div className="max-w-xl mx-auto">
+    <div className="min-h-screen bg-[#F6F6F6]">
+      <div>
         <StepsController />
       </div>
     </div>
