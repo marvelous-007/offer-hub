@@ -1,5 +1,3 @@
-import { Button } from '@/components/ui/button';
-import { ChevronLeft } from 'lucide-react';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
@@ -35,8 +33,8 @@ export default function UserSetHourlyRateActiveState() {
   };
 
   return (
-    <div className='w-full  min-h-screen flex flex-col p-6'>
-      <div className='w-full max-w-full  flex-grow'>
+    <div className='w-full  min-h-screen flex flex-col '>
+      <div className='w-full max-w-xl mx-auto flex-grow'>
         {/*  Import the header component here  */}
         <div className='text-lg font-medium text-gray-500 mb-4'>9/10</div>
         <h1 className='text-3xl font-medium text-[#002333] mb-1'>
@@ -68,29 +66,6 @@ export default function UserSetHourlyRateActiveState() {
               pattern='^[0-9]*\\.?\\d*$'
               inputMode='decimal'
             />
-          </div>
-        </div>
-      </div>
-
-      <div className='fixed bottom-0 left-0 w-full bg-white border-t border-gray-200'>
-        <div className=' w-full max-w-xl mx-auto py-6 mt-auto  flex justify-between items-center'>
-          <Button variant='ghost' className='text-gray-700 hover:text-gray-900'>
-            <ChevronLeft className='h-4 w-4 mr-1' />
-            Back
-          </Button>
-          <div className='flex items-center space-x-3'>
-            <Button
-              variant='outline'
-              className='rounded-full border-[#149A9B] text-[#149A9B] hover:bg-[#149A9B]/10 px-6 py-2'
-            >
-              Skip
-            </Button>
-            <Button
-              variant='default'
-              className='rounded-full bg-[#149A9B] hover:bg-[#0C9E8E] text-white px-6 py-2 shadow'
-            >
-              Photo & Location
-            </Button>
           </div>
         </div>
       </div>
