@@ -2,6 +2,7 @@
 
 import { useFreelancerSteps } from "@/hooks/use-freelancer-steps";
 import UserAddWorkExperienceDefaultState from "./user-add-work-experience-default-state";
+import UserAddBioActiveState from "./user-add-bio-active-state";
 import Header from "../header";
 
 const steps = [
@@ -21,7 +22,7 @@ const steps = [
 
   { key: "user-add-education-default-state", component: null }, // to be implemented
   { key: "user-choose-languaje-active-state", component: null }, // to be implemented
-  { key: "user-write-bio", component: null }, // to be implemented
+  { key: "user-write-bio", component: <UserAddBioActiveState /> },
   { key: "user-enter-service-fee", component: null }, // to be implemented
   { key: "user-setting-up-account-profile-active-state", component: null }, // to be implemented
   { key: "user-profile-photo-active-and-focus-state", component: null }, // to be implemented
