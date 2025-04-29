@@ -7,11 +7,13 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { User } from "./entity";
 import { CreateUserDto, UpdateUserDto } from "./dto";
+import { SearchService } from "../search/search.service";
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
+    private readonly searchService: SearchService,
   ) {}
 
   async findAll(): Promise<User[]> {
@@ -36,7 +38,12 @@ export class UsersService {
       );
 
     const user = this.usersRepository.create(createUserDto);
-    return this.usersRepository.save(user);
+    const savedUser = await this.usersRepository.save(user);
+    
+    // Index the user in Elasticsearch
+    await this.searchService.indexUser(savedUser);
+    
+    return savedUser;
   }
 
   async update(userId: string, updateUserDto: UpdateUserDto): Promise<User> {
@@ -63,12 +70,20 @@ export class UsersService {
     }
 
     Object.assign(user, updateUserDto);
-    return this.usersRepository.save(user);
+    const updatedUser = await this.usersRepository.save(user);
+    
+    // Update the user in Elasticsearch
+    await this.searchService.updateUser(userId, updatedUser);
+    
+    return updatedUser;
   }
 
   async remove(userId: string): Promise<void> {
     const result = await this.usersRepository.delete(userId);
     if (result.affected === 0)
       throw new NotFoundException(`User with ID ${userId} not found`);
+      
+    // Delete the user from Elasticsearch
+    await this.searchService.deleteUser(userId);
   }
 }

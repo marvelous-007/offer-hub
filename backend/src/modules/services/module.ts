@@ -4,11 +4,13 @@ import { ServicesController } from "./controller";
 import { ServicesService } from "./service";
 import { Service } from "./entity";
 import { WebhooksModule } from "../webhooks/module";
+import { SearchModule } from '../search/search.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Service]),
-    WebhooksModule
+    WebhooksModule,
+    SearchModule,
   ],
   controllers: [ServicesController],
   providers: [ServicesService],
