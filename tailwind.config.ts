@@ -21,6 +21,13 @@ export default {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
         },
+        "light-gray": "#E1E4ED",
+        "neutral-800": "#19213D",
+        "neutral-500": "#B4B9C9",
+        "neutral-400": "#E1E4ED",
+        "neutral-300": "#F1F3F7",
+        "neutral-600": "#6D758F",
+        "custom-red": "#FF0000",
         primary: {
           "50": "#e4f7f7",
           "100": "#c0ebeb",
