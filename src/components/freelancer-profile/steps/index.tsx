@@ -1,13 +1,13 @@
 'use client';
-
 import { useFreelancerSteps } from '@/hooks/use-freelancer-steps';
 import UserAddWorkExperienceDefaultState from './user-add-work-experience-default-state';
 import UserSetHourlyRateActiveState from './user-set-hourly-rate-active-state';
+import UserSelectJobType from './user-select-job-type';
 import Header from '../header';
 
 const steps = [
   { key: 'user-choose-role', component: null }, // to be implemented
-  { key: 'user-select-job-type', component: null }, // to be implemented
+  { key: 'user-select-job-type', component: UserSelectJobType },
   { key: 'user-select-interested-category', component: null }, // to be implemented
   { key: 'user-add-work-experience', component: null }, // to be implemented
   { key: 'user-add-work-experience-active-state', component: null }, // to be implemented
@@ -36,27 +36,33 @@ const steps = [
 export default function StepsController() {
   const { currentStep, nextStep, prevStep } = useFreelancerSteps();
   const StepComponent = steps[currentStep]?.component;
-
   return (
-    <section className='flex flex-col gap-y-16 min-h-svh'>
-      <Header />
-
-      <div className='mt-8 flex justify-between'>
-        <button onClick={prevStep} disabled={currentStep === 0}>
-          Back
-        </button>
-        <button onClick={nextStep} disabled={currentStep === steps.length - 1}>
-          Next
-        </button>
-      </div>
-      <div className='flex-1 flex'>
-        {StepComponent ? (
-          StepComponent
+    <>
+      {StepComponent ? (
+        typeof StepComponent === 'function' ? (
+          <StepComponent />
         ) : (
-          <p>This step is not yet implemented.</p>
-        )}
-      </div>
-      {/* <UserAddWorkExperienceDefaultState /> */}
-    </section>
+          StepComponent
+        )
+      ) : (
+        <p>This step is not yet implemented.</p>
+      )}
+
+      <section className='flex flex-col gap-y-16 min-h-svh'>
+        <Header />
+
+        <div className='mt-8 flex justify-between'>
+          <button onClick={prevStep} disabled={currentStep === 0}>
+            Back
+          </button>
+          <button
+            onClick={nextStep}
+            disabled={currentStep === steps.length - 1}
+          >
+            Next
+          </button>
+        </div>
+      </section>
+    </>
   );
 }
