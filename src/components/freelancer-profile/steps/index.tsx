@@ -36,33 +36,31 @@ const steps = [
 export default function StepsController() {
   const { currentStep, nextStep, prevStep } = useFreelancerSteps();
   const StepComponent = steps[currentStep]?.component;
+
   return (
-    <>
-      {StepComponent ? (
-        typeof StepComponent === 'function' ? (
-          <StepComponent />
+    <section className='flex flex-col gap-y-16 min-h-svh'>
+      <Header />
+
+      <div className='mt-8 flex justify-between'>
+        <button onClick={prevStep} disabled={currentStep === 0}>
+          Back
+        </button>
+        <button onClick={nextStep} disabled={currentStep === steps.length - 1}>
+          Next
+        </button>
+      </div>
+      <div className='flex-1 flex'>
+        {StepComponent ? (
+          typeof StepComponent === 'function' ? (
+            <StepComponent />
+          ) : (
+            StepComponent
+          )
         ) : (
-          StepComponent
-        )
-      ) : (
-        <p>This step is not yet implemented.</p>
-      )}
-
-      <section className='flex flex-col gap-y-16 min-h-svh'>
-        <Header />
-
-        <div className='mt-8 flex justify-between'>
-          <button onClick={prevStep} disabled={currentStep === 0}>
-            Back
-          </button>
-          <button
-            onClick={nextStep}
-            disabled={currentStep === steps.length - 1}
-          >
-            Next
-          </button>
-        </div>
-      </section>
-    </>
+          <p>This step is not yet implemented.</p>
+        )}
+      </div>
+      {/* <UserAddWorkExperienceDefaultState /> */}
+    </section>
   );
 }
