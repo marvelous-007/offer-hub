@@ -1,7 +1,7 @@
 'use client'
 
 import { useFreelancerSteps } from '@/hooks/use-freelancer-steps'
-import UserAddLanguagesActiveState from './user-add-languages-active-state'
+
 
 const steps = [
   { key: 'user-choose-role', component: null }, // to be implemented
@@ -12,7 +12,7 @@ const steps = [
   { key: 'user-add-work-experience-active-state-not-in-focus', component: null },  // to be implemented
   { key: 'user-add-work-experience-default-state', component: null },  // to be implemented
   { key: 'user-add-education-default-state', component: null },  // to be implemented
-  { key: 'user-choose-language-active-state', component: <UserAddLanguagesActiveState /> },  // to be implemented
+  { key: 'user-choose-language-active-state', component: null },  // to be implemented
   { key: 'user-write-bio', component: null },  // to be implemented
   { key: 'user-enter-service-fee', component: null },  // to be implemented
   { key: 'user-setting-up-account-profile-active-state', component: null },  // to be implemented
