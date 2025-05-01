@@ -1,4 +1,4 @@
-import ResetPasswordPage from "../../components/ui/ResetPasswordPage";
+import ResetPasswordPage from "@/components/ui/ResetPasswordPage";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
