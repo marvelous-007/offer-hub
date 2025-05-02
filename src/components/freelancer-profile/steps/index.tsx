@@ -6,7 +6,7 @@ import UserSelectJobType from './user-select-job-type'
 
 const steps = [
   { key: 'user-choose-role', component: null }, // to be implemented
-  { key: 'user-select-job-type', component: UserSelectJobType }, // to be implemented
+  { key: 'user-select-job-type', component: <UserSelectJobType /> }, // to be implemented
   { key: 'user-select-interested-category', component: null },  // to be implemented
   { key: 'user-add-work-experience', component: null },  // to be implemented
   { key: 'user-add-work-experience-active-state', component: null },  // to be implemented

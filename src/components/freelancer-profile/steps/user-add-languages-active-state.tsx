@@ -1,6 +1,6 @@
 import {  useState, useRef, useEffect } from 'react';
-import { ChevronDown, Search, X } from 'lucide-react';
-import { Header } from '@/components/freelancer-search/header';
+import { ChevronDown, Info, Search, Trash, X } from 'lucide-react';
+import Header from "@/components/freelancer-profile/steps/header";
 
 type LanguageLevel = 'Basic' | 'Conversational' | 'Fluent' | 'Native or Bilingual';
 
@@ -47,7 +47,7 @@ const levelDescriptions: Record<LanguageLevel, string> = {
   'Native or Bilingual': 'I write and speak fluently in this language'
 };
 
-const UserAddLanguagesActiveState = ({ prevStep, nextStep }: any) => {
+const UserAddLanguagesActiveState = () => {
   // Initialize with English as default
   const [languages, setLanguages] = useState<Language[]>([
     { id: '1', name: 'English', level: 'Native or Bilingual' }
@@ -104,11 +104,6 @@ const UserAddLanguagesActiveState = ({ prevStep, nextStep }: any) => {
     }
   };
 
-  const handleSaveAndContinue = () => {
-    // Here you would save the languages to your state or API
-    nextStep();
-  };
-
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
@@ -117,31 +112,33 @@ const UserAddLanguagesActiveState = ({ prevStep, nextStep }: any) => {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
+    <div className="flex flex-col w-full bg-[#f6f6f6]">
+      <Header title="7/10" />
       
-      <div className="flex-1 max-w-xl mx-auto w-full px-4 py-6">
-        <p className="text-sm text-gray-500 mb-2">7/10</p>
+      <div className="flex-1 mx-auto max-w-6xl px-4 py-6">
+        <div className='w-[65%] space-y-4'>
+          <p className="text-2xl text-[#6D758F] mb-2">7/10</p>
+          
+          <h1 className="text-3xl text-[#002333] font-medium mb-2">
+            Looking good. Next, tell us which languages you speak.
+          </h1>
+          
+          <p className="text-[#6D758F] text-xl mb-8">
+            OfferHub is global, so clients are often interested to know what languages you speak. 
+            English is a must, but do you speak any other languages?
+          </p>
+        </div>
         
-        <h1 className="text-xl font-semibold mb-2">
-          Looking good. Next, tell us which languages you speak.
-        </h1>
-        
-        <p className="text-gray-600 mb-8">
-          OfferHub is global, so clients are often interested to know what languages you speak. 
-          English is a must, but do you speak any other languages?
-        </p>
-        
-        <div className="mb-8">
-          <h2 className="text-sm font-medium mb-4">Language & proficiency</h2>
+        <div className="w-full my-8 border-t border-[#B4B9C9] pt-4">
+          <h2 className="text-2xl text-[#344054] font-medium mb-4 px-3">Add your experience</h2>
           
           {/* Language list */}
-          <div className="space-y-3">
+          <div className="space-y-3 w-full bg-white px-8 py-4 rounded-xl">
             {languages.map((language) => (
-              <div key={language.id} className={`flex items-center gap-3 ${language.name === 'English' ? "border-b-2 border-gray-300 py-4" : ""}`}>
+              <div key={language.id} className={`flex items-center gap-3 border-b border-gray-200 last:border-none py-2 pb-4 ${language.name === 'English' ? "" : "w-full"}`}>
                 {/* Language name */}
-                <div className="w-fit">
-                  <div className={`border border-gray-300 rounded-full px-3 py-2 flex items-center justify-between w-fit ${language.name === 'English' ? 'bg-gray-100' : ''}`}>
+                <div className={`${language.name !== "English" && "w-[50%]"} `}>
+                  <div className={` px-3 py-2 flex items-center justify-between  ${language.name === 'English' ? 'flex-col w-fit' : 'border border-gray-200 rounded-xl w-full'}`}>
                     <span>{language.name}</span>
                     {language.name === 'English' && (
                       <span className="text-xs ml-1 text-gray-500">(default)</span>
@@ -150,24 +147,22 @@ const UserAddLanguagesActiveState = ({ prevStep, nextStep }: any) => {
                 </div>
                 
                 {/* Level dropdown */}
-                <div className="flex items-center space-x-3 flex-1 relative">
+                <div className={`flex items-center space-x-3 ${language.name !== "English" && "w-[50%]"} relative`}>
                   <button
                     type="button"
-                    className="border border-gray-300 rounded-full px-3 py-2 flex items-center justify-between w-fit"
+                    className="border border-gray-200 rounded-xl px-3 py-2 flex items-center justify-between w-full"
                     onClick={() => setIsLevelDropdownOpen(language.id)}
                     disabled={language.name === 'English'}
                   >
-                    <span>{language.level}</span>
+                    <span>{language.level || "My Level is"}</span>
                     <ChevronDown size={16} />
                   </button>
                   <button 
                     onClick={() => removeLanguage(language.id)}
-                    className="text-gray-400 hover:text-gray-600 disabled:text-gray-400"
+                    className="border border-[#D5D7DA] p-2 rounded-xl text-gray-400 hover:text-gray-600 disabled:text-gray-400"
                     disabled = {language.name === 'English'}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="20" viewBox="0 0 18 20" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <path d="M16 5L15.1327 17.1425C15.0579 18.1891 14.187 19 13.1378 19H4.86224C3.81296 19 2.94208 18.1891 2.86732 17.1425L2 5M7 9V15M11 9V15M12 5V2C12 1.44772 11.5523 1 11 1H7C6.44772 1 6 1.44772 6 2V5M1 5H17" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                    <Trash />
                   </button>
                   
                   {isLevelDropdownOpen === language.id && (
@@ -202,9 +197,6 @@ const UserAddLanguagesActiveState = ({ prevStep, nextStep }: any) => {
                   )}
                   
                 </div>
-                
-                {/* Delete button - not for English */}
-                  
 
               </div>
             ))}
@@ -212,14 +204,20 @@ const UserAddLanguagesActiveState = ({ prevStep, nextStep }: any) => {
           
           {/* Add language button */}
           {languages.length < languageOptions.length && (
-            <div className="relative mt-4 border-t-2 border-gray-200 pt-4">
-              <button
-                type="button"
-                className="border border-gray-300 rounded-full px-3 py-2 flex items-center justify-between gap-1 text-sm font-medium"
-                onClick={() => setIsLanguageDropdownOpen(true)}
-              >
-                <span className="text-lg mr-1">+</span> Add a language
-              </button>
+            <div className="relative mt-2 pt-4">
+              <div>
+                <button
+                  type="button"
+                  className="border border-gray-300 rounded-full px-3 py-2 flex items-center justify-between gap-1 text-sm font-medium"
+                  onClick={() => setIsLanguageDropdownOpen(true)}
+                >
+                  <span className="text-lg mr-1">+</span> Add a language
+                </button>
+                <div className='ml-1 mt-0.5 flex items-center space-x-1 text-xs text-[#6D758F]'>
+                  <Info className='h-3 w-3'/>
+                  <p>Add at least one item</p>
+                </div>
+              </div>
               
               {isLanguageDropdownOpen && (
                 <div 
@@ -272,24 +270,6 @@ const UserAddLanguagesActiveState = ({ prevStep, nextStep }: any) => {
         
 
       </div>
-        <footer className="flex h-32 justify-between items-center bg-[#E7EAF6] p-4 ">
-
-            <button
-                type="button"
-                onClick={prevStep}
-                className="flex items-center justify-center w-8 h-8 text-xl border border-[#0A1737] rounded-full text-[#0A1737]"
-            >
-                🠔
-            </button>
-
-            <button
-                type="button"
-                onClick={handleSaveAndContinue}
-                className="px-6 py-2 bg-[#0A1737] text-white rounded-full hover:bg-[#06112D] transition"
-            >
-                Write an Overview
-            </button>
-        </footer>
     </div>
   );
 };
