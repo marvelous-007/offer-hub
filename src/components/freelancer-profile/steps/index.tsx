@@ -30,7 +30,7 @@ const steps = [
   { key: 'user-enter-service-fee', component: null }, // to be implemented
   { key: 'user-setting-up-account-profile-active-state', component: null }, // to be implemented
   { key: 'user-profile-photo-active-and-focus-state', component: null }, // to be implemented
-  { key: 'user-profile-preview-active-state', component: <UserProfilePreviewActiveState /> },
+  { key: 'user-profile-preview-active-state', component: <UserProfilePreviewActiveState  /> },
 ];
 
 export default function StepsController() {
@@ -40,6 +40,15 @@ export default function StepsController() {
   return (
     <section className='flex flex-col gap-y-16 min-h-svh'>
       <Header />
+      
+      <div className='flex-1 flex'>
+        {StepComponent ? (
+          StepComponent
+        ) : (
+          <p>This step is not yet implemented.</p>
+        )}
+      </div>
+      {/* <UserAddWorkExperienceDefaultState /> */}
       <div className='mt-8 flex justify-between'>
         <button onClick={prevStep} disabled={currentStep === 0}>
           Back
@@ -48,18 +57,6 @@ export default function StepsController() {
           Next
         </button>
       </div>
-      <div className='flex-1 flex'>
-        {StepComponent ? (
-          typeof StepComponent === 'function' ? (
-            <StepComponent />
-          ) : (
-            StepComponent
-          )
-        ) : (
-          <p>This step is not yet implemented.</p>
-        )}
-      </div>
-      {/* <UserAddWorkExperienceDefaultState /> */}
     </section>
   );
 }
