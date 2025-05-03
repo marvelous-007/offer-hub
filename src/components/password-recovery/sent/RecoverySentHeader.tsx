@@ -24,10 +24,11 @@ export function RecoverySentHeader() {
         <div className="flex items-center gap-4">
           <Button
             variant="default"
-            className="w-full !rounded-full bg-[#003049] text-white hover:bg-[#00436a] py-2"
+            className="!rounded-full bg-[#003049] text-white hover:bg-[#00436a] text-sm px-10"
           >
             Sign up
           </Button>
+
           <button className="text-gray-700" aria-label="Search">
             <Search size={20} />
           </button>
