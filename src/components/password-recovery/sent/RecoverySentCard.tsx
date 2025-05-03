@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
@@ -11,11 +12,14 @@ export function RecoverySentCard() {
       <Card className="mx-auto w-full max-w-md">
         <CardHeader className="flex flex-col items-center space-y-2 text-center">
           <div className="relative mb-4">
-            <div className="h-24 w-24 text-teal-400">
-              <EnvelopeIcon />
-            </div>
-            <div className="absolute -right-2 -top-2 rounded-full bg-teal-500 p-1 text-white">
-              <CheckCircle className="h-6 w-6" />
+            <div className="h-24 w-24">
+              <Image
+                src="/email.png"
+                alt="Email Icon"
+                width={96}
+                height={96}
+                className="h-full w-full object-contain"
+              />
             </div>
           </div>
           <h1 className="text-2xl font-bold">Check your email</h1>
@@ -27,32 +31,12 @@ export function RecoverySentCard() {
           </p>
           <Button
             asChild
-            className="w-full bg-[#002642] text-white hover:bg-[#00315c]"
+            className="w-full !rounded-full bg-[#003049] text-white hover:bg-[#00436a] py-2"
           >
-            <Link href="/login">Return to login</Link>
+            <Link href="/signup">Sign up</Link>
           </Button>
         </CardContent>
       </Card>
     </div>
-  );
-}
-
-function EnvelopeIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-full w-full"
-    >
-      <path
-        d="M22 8.608V16.75C22 17.9926 20.9926 19 19.75 19H4.25C3.00736 19 2 17.9926 2 16.75V8.608L11.514 13.865C11.8159 14.0461 12.1841 14.0461 12.486 13.865L22 8.608Z"
-        fill="currentColor"
-      />
-      <path
-        d="M22 7.25V7.392L12 12.865L2 7.392V7.25C2 6.00736 3.00736 5 4.25 5H19.75C20.9926 5 22 6.00736 22 7.25Z"
-        fill="currentColor"
-      />
-    </svg>
   );
 }

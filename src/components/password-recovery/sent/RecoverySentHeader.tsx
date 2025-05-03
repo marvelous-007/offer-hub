@@ -24,7 +24,7 @@ export function RecoverySentHeader() {
         <div className="flex items-center gap-4">
           <Button
             variant="default"
-            className="bg-[#0A2540] hover:bg-[#0A2540]/90 rounded-md text-white px-4 py-2 text-sm"
+            className="w-full !rounded-full bg-[#003049] text-white hover:bg-[#00436a] py-2"
           >
             Sign up
           </Button>
