@@ -1,8 +1,7 @@
 import {  useState, useRef, useEffect } from 'react';
 import { ChevronDown, Info, Search, Trash, X } from 'lucide-react';
-import Header from "@/components/freelancer-profile/steps/header";
 
-type LanguageLevel = 'Basic' | 'Conversational' | 'Fluent' | 'Native or Bilingual';
+type LanguageLevel = 'Basic' | 'Conversational' | 'Fluent' | 'Native or Bilingual' | 'My Level is';
 
 type Language = {
   id: string;
@@ -71,7 +70,7 @@ const UserAddLanguagesActiveState = () => {
     setLanguages([...languages, { 
       id: generateId(), 
       name: langName, 
-      level: 'Basic' 
+      level: 'My Level is'
     }]);
     setIsLanguageDropdownOpen(false);
     setSearchQuery('');
@@ -112,11 +111,9 @@ const UserAddLanguagesActiveState = () => {
   }, []);
 
   return (
-    <div className="flex flex-col w-full bg-[#f6f6f6]">
-      <Header title="7/10" />
-      
-      <div className="flex-1 mx-auto max-w-6xl px-4 py-6">
-        <div className='w-[65%] space-y-4'>
+    <div className="flex flex-col w-full bg-[#f6f6f6]">     
+      <div className="flex-1 mx-auto max-w-[95%] p-4">
+        <div className='w-[65%] space-y-3'>
           <p className="text-2xl text-[#6D758F] mb-2">7/10</p>
           
           <h1 className="text-3xl text-[#002333] font-medium mb-2">
@@ -129,7 +126,7 @@ const UserAddLanguagesActiveState = () => {
           </p>
         </div>
         
-        <div className="w-full my-8 border-t border-[#B4B9C9] pt-4">
+        <div className="w-full my-6 border-t border-[#B4B9C9] pt-4">
           <h2 className="text-2xl text-[#344054] font-medium mb-4 px-3">Add your experience</h2>
           
           {/* Language list */}

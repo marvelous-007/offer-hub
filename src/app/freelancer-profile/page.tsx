@@ -9,7 +9,7 @@ import { ArrowLeft } from "lucide-react";
 
 export default function FreelancerProfilePage() {
   return (
-    <div className="">
+    <div className="relative">
       <StepsController />
 
       <div>
