@@ -33,40 +33,44 @@ function UserAddBioActiveState() {
 
   return (
     <div className='flex flex-col gap-y-16 w-full'>
-      <div className='flex-1 max-w-xl w-full mx-auto px-4'>
-        <form id="add-bio-form" onSubmit={handleSubmit}>
-          <Stack className="font-semibold space-y-4">
-            <p className="text-neutral-500">8/10</p>
-            <h1 className="text-lg text-[#19213D]">
-              Great. Now write a bio to tell the world about yourself.
-            </h1>
-            <p className="font-normal text-xs text-[#19213D]">
-              Help people get to know you at a glance. What work do you do best? Tell them clearly. 
-              Using paragraphs or bullet points. You can always edit later; just make sure you proof read now.
-            </p>
-          </Stack>
+      <Stack className="gap-8 mx-auto px-4 font-semibold space-y-4">
+        <p className="text-neutral-500">8/10</p>
+        <h1 className="text-lg text-[#19213D]">
+          Great. Now write a bio to tell the world about yourself.
+        </h1>
+        <p className="font-normal text-xs text-[#19213D]">
+          Help people get to know you at a glance. What work do you do best? Tell them clearly. 
+          Using paragraphs or bullet points. You can always edit later; just make sure you proof read now.
+        </p>
+      </Stack>
+      <div className="flex flex-col md:flex-row gap-8 w-full max-w-6xl mx-auto px-4">
+        <div className="flex-1">
+          <form id="add-bio-form" onSubmit={handleSubmit}>
 
-          <div className="mt-8">
-            <label htmlFor="bio" className="block text-sm font-medium mb-2">Bio</label>
-            <Textarea
-              id="bio"
-              value={bio}
-              onChange={handleBioChange}
-              placeholder="Enter your top skills, experiences, and interests. This is one of the first things clients will see on your profile."
-              className="w-full min-h-32 border border-[#19213D] rounded-lg p-4 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#19213D]"
-            />
-            <div className="flex justify-between mt-2">
-              {bioError && (
-                <span className="text-red-500 text-xs">{bioError}</span>
-              )}
-              <span className={`text-xs ${bio.length < 100 ? 'text-gray-500' : 'text-gray-500'}`}>
-                At least 100 characters ({bio.length}/100)
-              </span>
+            <div className="mt-8">
+              <label htmlFor="bio" className="block text-sm font-medium mb-2">Bio</label>
+              <Textarea
+                id="bio"
+                value={bio}
+                onChange={handleBioChange}
+                placeholder="Enter your top skills, experiences, and interests. This is one of the first things clients will see on your profile."
+                className="w-full min-h-32 border border-[#19213D] rounded-lg p-4 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#19213D]"
+              />
+              <div className="flex justify-between mt-2">
+                {bioError && (
+                  <span className="text-red-500 text-xs">{bioError}</span>
+                )}
+                <span className={`text-xs ${bio.length < 100 ? 'text-gray-500' : 'text-gray-500'}`}>
+                  At least 100 characters ({bio.length}/100)
+                </span>
+              </div>
             </div>
-          </div>
-
+          </form>
+        </div>
+        
+        <div className="md:w-1/3">
           <ExampleBioCard />
-        </form>
+        </div>
       </div>
       
       <Footer className='px-4 flex justify-between'>
