@@ -38,7 +38,7 @@ export default function StepsController() {
   const StepComponent = steps[currentStep]?.component
 
   return (
-      <section className='flex flex-col gap-y-16 min-h-svh'>
+    <section className='flex flex-col gap-y-16 min-h-svh'>
       <Header />
 
       <div className='mt-8 flex justify-between'>
