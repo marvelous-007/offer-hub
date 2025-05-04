@@ -4,9 +4,10 @@ import UserAddWorkExperienceDefaultState from './user-add-work-experience-defaul
 import UserSetHourlyRateActiveState from './user-set-hourly-rate-active-state';
 import UserSelectJobType from './user-select-job-type';
 import Header from '../header';
+import UserChooseRole from './user-choose-role';
 
 const steps = [
-  { key: 'user-choose-role', component: null }, // to be implemented
+  { key: 'user-choose-role', component: <UserChooseRole /> },
   { key: 'user-select-job-type', component: UserSelectJobType },
   { key: 'user-select-interested-category', component: null }, // to be implemented
   { key: 'user-add-work-experience', component: null }, // to be implemented
