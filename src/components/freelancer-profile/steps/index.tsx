@@ -6,10 +6,11 @@ import UserSetHourlyRateActiveState from './user-set-hourly-rate-active-state';
 import UserSelectJobType from './user-select-job-type';
 import UserAddBioActiveState from "./user-add-bio-active-state";
 import Header from '../header';
+import UserChooseRole from './user-choose-role';
 import UserAddLanguagesActiveState from './user-add-languages-active-state';
 
 const steps = [
-  { key: 'user-choose-role', component: null }, // to be implemented
+  { key: 'user-choose-role', component: <UserChooseRole /> },
   { key: 'user-select-job-type', component: <UserSelectJobType /> },
   { key: 'user-select-interested-category', component: null }, // to be implemented
   { key: 'user-add-work-experience', component: null }, // to be implemented
