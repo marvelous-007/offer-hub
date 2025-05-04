@@ -8,11 +8,14 @@ import { Project } from "../projects/entity";
 import { InvoiceModule } from "../invoices/module";
 import { DisputeEntity } from "../disputes/disputes.entity";
 import { WebhooksModule } from "../webhooks/module";
+import { NotificationsModule } from "../notifications/module";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Transaction, User, Project, DisputeEntity]),
-    WebhooksModule,forwardRef(() => InvoiceModule)
+    WebhooksModule,
+    forwardRef(() => InvoiceModule),
+    NotificationsModule,
   ],
   controllers: [TransactionsController],
   providers: [TransactionsService],

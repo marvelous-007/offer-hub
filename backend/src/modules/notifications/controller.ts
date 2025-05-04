@@ -9,14 +9,18 @@ import {
 } from "@nestjs/common";
 import { NotificationsService } from "./service";
 import { CreateNotificationDto, UpdateNotificationDto } from "./dto";
+import { NotificationsGateway } from "./notification.gateway";
 
 @Controller("notifications")
 export class NotificationsController {
-  constructor(private readonly notificationsService: NotificationsService) {}
+  constructor(
+    private readonly notificationsService: NotificationsService,
+    private readonly notificationGateway: NotificationsGateway
+  ) {}
 
   @Post()
   async create(@Body() dto: CreateNotificationDto) {
-    return this.notificationsService.create(dto);
+    const notification = await this.notificationsService.create(dto);
   }
 
   @Get()
@@ -32,7 +36,7 @@ export class NotificationsController {
   @Patch("/:notification_id")
   async update(
     @Param("notification_id") notification_id: string,
-    @Body() dto: UpdateNotificationDto,
+    @Body() dto: UpdateNotificationDto
   ) {
     return this.notificationsService.update(notification_id, dto);
   }

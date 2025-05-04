@@ -1,11 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Service } from './entity';
-import { CreateServiceDto, UpdateServiceDto } from './dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Service } from "./entity";
+import { CreateServiceDto, UpdateServiceDto } from "./dto";
 import { WebhooksService } from "../webhooks/service";
-import { WebhookEvent } from '../webhooks/entity';
-import { SearchService } from '../search/search.service';
+import { WebhookEvent } from "../webhooks/entity";
+import { SearchService } from "../search/search.service";
+import { NotificationsService } from "../notifications/service";
 
 @Injectable()
 export class ServicesService {
@@ -14,25 +15,34 @@ export class ServicesService {
     private readonly serviceRepository: Repository<Service>,
     private readonly webhooksService: WebhooksService,
     private readonly searchService: SearchService,
+    private readonly notification: NotificationsService
   ) {}
 
   async create(createServiceDto: CreateServiceDto): Promise<Service> {
     const service = this.serviceRepository.create(createServiceDto);
     const savedService = await this.serviceRepository.save(service);
-    
+
     // Index the service in ElasticSearch
     await this.searchService.indexService(savedService);
-    
+
+    await this.notification.create({
+      user_id: savedService.freelancer_id,
+      type: "service_booked",
+      title: "New Service Booking",
+      content: `Your service "${savedService.title}" was successfully booked.`,
+      action_url: `/dashboard/services/${savedService.service_id}`, // Optional
+    });
+
     // Webhook trigger
     const webhookData = {
-      event: WebhookEvent.SERVICE_BOOKED, 
+      event: WebhookEvent.SERVICE_BOOKED,
       data: {
-        savedService
-      }
+        savedService,
+      },
     };
-  
+
     await this.webhooksService.triggerWebhook(webhookData);
-  
+
     return savedService;
   }
 
@@ -57,7 +67,10 @@ export class ServicesService {
     });
   }
 
-  async update(id: string, updateServiceDto: UpdateServiceDto): Promise<Service> {
+  async update(
+    id: string,
+    updateServiceDto: UpdateServiceDto
+  ): Promise<Service> {
     const service = await this.findById(id);
     if (!service) {
       throw new NotFoundException(`Service with ID ${id} not found.`);
@@ -65,10 +78,10 @@ export class ServicesService {
 
     Object.assign(service, updateServiceDto);
     const updatedService = await this.serviceRepository.save(service);
-    
+
     // Update the service in ElasticSearch
     await this.searchService.updateService(id, updatedService);
-    
+
     return updatedService;
   }
 
@@ -79,7 +92,7 @@ export class ServicesService {
     }
 
     await this.serviceRepository.remove(service);
-    
+
     // Remove the service from ElasticSearch
     await this.searchService.deleteService(id);
   }

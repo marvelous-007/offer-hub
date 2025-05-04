@@ -14,7 +14,8 @@ import {
 import { Transaction } from "../transactions/entity";
 import { User } from "../users/entity";
 import { WebhooksService } from "../webhooks/service";
-import { WebhookEvent } from '../webhooks/entity';
+import { WebhookEvent } from "../webhooks/entity";
+import { NotificationsService } from "../notifications/service";
 
 @Injectable()
 export class DisputesService {
@@ -27,7 +28,8 @@ export class DisputesService {
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly webhooksService: WebhooksService
+    private readonly webhooksService: WebhooksService,
+    private readonly Notification: NotificationsService
   ) {}
 
   async createDispute(dto: CreateDisputeDto): Promise<DisputeEntity> {
@@ -79,7 +81,7 @@ export class DisputesService {
 
   async updateDispute(
     id: string,
-    dto: UpdateDisputeDto,
+    dto: UpdateDisputeDto
   ): Promise<DisputeEntity> {
     const dispute = await this.getDisputeById(id);
 
@@ -94,17 +96,23 @@ export class DisputesService {
     dispute.updated_at = new Date();
 
     const updatedDispute = await this.disputeRepository.save(dispute);
+
+    await this.Notification.create({
+      user_id: updatedDispute.user.user_id,
+      type: "dispute_status_changed",
+      title: "Dispute Status Update",
+      content: `Dispute updated: ${updatedDispute.reason}`,
+    });
+
     //wWbhook trigger
     if (updatedDispute.status === DisputeStatus.RESOLVED) {
       const webhookData = {
         event: WebhookEvent.DISPUTE_RESOLVED,
-        data: updatedDispute, 
+        data: updatedDispute,
       };
-  
       await this.webhooksService.triggerWebhook(webhookData);
     }
     return this.disputeRepository.save(dispute);
-
   }
 
   async deleteDispute(id: string): Promise<void> {

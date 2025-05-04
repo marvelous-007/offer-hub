@@ -4,6 +4,9 @@ import { Repository } from "typeorm";
 import { CreateNotificationDto, UpdateNotificationDto } from "./dto";
 import { Notification } from "./entity";
 import { User } from "../users/entity";
+import { NotificationsGateway } from "./notification.gateway";
+import { InjectQueue } from "@nestjs/bull";
+import { Queue } from "bull";
 
 @Injectable()
 export class NotificationsService {
@@ -11,6 +14,8 @@ export class NotificationsService {
     @InjectRepository(Notification)
     private readonly repo: Repository<Notification>,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
+    private readonly Gateway: NotificationsGateway,
+    @InjectQueue("notifications") private notificationQueue: Queue
   ) {}
 
   async findAll(): Promise<Notification[]> {
@@ -25,7 +30,19 @@ export class NotificationsService {
       throw new NotFoundException(`User with ID ${dto.user_id} not found.`);
 
     const notification = this.repo.create({ ...dto, user });
-    return this.repo.save(notification);
+    const savedNotification = await this.repo.save(notification);
+
+    await this.notificationQueue.add("send", {
+      user_id: dto.user_id,
+      message: {
+        type: dto.type,
+        title: dto.title,
+        content: dto.content,
+        action_url: dto.action_url,
+      },
+    });
+
+    return savedNotification;
   }
 
   async findById(notification_id: string): Promise<Notification> {
@@ -35,14 +52,14 @@ export class NotificationsService {
     });
     if (!notification)
       throw new NotFoundException(
-        `Notification with ID ${notification_id} not found.`,
+        `Notification with ID ${notification_id} not found.`
       );
     return notification;
   }
 
   async update(
     notification_id: string,
-    dto: UpdateNotificationDto,
+    dto: UpdateNotificationDto
   ): Promise<Notification> {
     const notification = await this.findById(notification_id);
     Object.assign(notification, dto);
@@ -53,7 +70,7 @@ export class NotificationsService {
     const result = await this.repo.delete(notification_id);
     if (result.affected === 0)
       throw new NotFoundException(
-        `Notification with ID ${notification_id} not found.`,
+        `Notification with ID ${notification_id} not found.`
       );
   }
 }

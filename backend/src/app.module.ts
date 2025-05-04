@@ -2,8 +2,8 @@ import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule } from "@nestjs/config";
 import { config } from "dotenv";
-import { CacheModule } from '@nestjs/cache-manager';
-import { APP_GUARD, Reflector } from '@nestjs/core';
+import { CacheModule } from "@nestjs/cache-manager";
+import { APP_GUARD, Reflector } from "@nestjs/core";
 
 config(); // Load .env file
 
@@ -58,7 +58,7 @@ import { AchievementsModule } from "./modules/achievements/module";
 import { ServicesModule } from "./modules/services/module";
 import { ServiceCategoriesModule } from "./modules/service-categories/module";
 import { DisputesModule } from "./modules/disputes/disputes.module";
-import { InvoiceModule } from './modules/invoices/module';
+import { InvoiceModule } from "./modules/invoices/module";
 import { VerificationsModule } from "./modules/verification/verification.module";
 import { WebhooksModule } from "./modules/webhooks/module";
 // Import the new Gateway and Logs modules
@@ -73,11 +73,11 @@ import { SearchModule } from "./modules/search/search.module";
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: ".env",
       load: [
         () => ({
-          ELASTICSEARCH_HOST: process.env.ELASTICSEARCH_HOST || 'elasticsearch',
-          ELASTICSEARCH_PORT: process.env.ELASTICSEARCH_PORT || '9200',
+          ELASTICSEARCH_HOST: process.env.ELASTICSEARCH_HOST || "elasticsearch",
+          ELASTICSEARCH_PORT: process.env.ELASTICSEARCH_PORT || "9200",
         }),
       ],
     }),
@@ -91,10 +91,10 @@ import { SearchModule } from "./modules/search/search.module";
       host:
         process.env.DATABASE_HOST ||
         (process.env.DOCKER_ENV ? "offer_hub_database" : "localhost"),
-        port: parseInt(process.env.DATABASE_PORT || "5432", 10),
-        username: process.env.DATABASE_USER || "offerhub_admin",
-        password: process.env.DATABASE_PASSWORD || "offerhub_pass",
-        database: process.env.DATABASE_NAME || "offer_hub_database",
+      port: parseInt(process.env.DATABASE_PORT || "5432", 10),
+      username: process.env.DATABASE_USER || "offerhub_admin",
+      password: process.env.DATABASE_PASSWORD || "offerhub_pass",
+      database: process.env.DATABASE_NAME || "offer_hub_database",
       entities: [
         Achievement,
         ActivityLogs,
@@ -148,21 +148,17 @@ import { SearchModule } from "./modules/search/search.module";
     InvoiceModule,
     WebhooksModule,
     PrometheusModule,
-    
+
     // New modules for API Gateway
     RateLimitModule,
     LogsModule,
     GatewayModule,
     SearchModule,
   ],
-  providers: [
-    Reflector,
-  ],
+  providers: [Reflector],
 })
 export class AppModule {
-  configure(consumer: MiddlewareConsumer){
-    consumer
-      .apply(LogginMiddleware)
-      .forRoutes('*');
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LogginMiddleware).forRoutes("*");
   }
 }
