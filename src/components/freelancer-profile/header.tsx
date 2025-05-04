@@ -9,10 +9,10 @@ type Props = {
 function Header({ className, ...props }: Props) {
   return (
     <header
-      className={`border-b border-[#6D758F] px-4 ${className}`}
+      className={`border-b bg-[#f6f6f6] border-[#6D758F] px-4 ${className}`}
       {...props}
     >
-      <div className="max-w-6xl mx-auto py-4 flex justify-between items-center">
+      <div className="max-w-[95%] mx-auto py-4 flex justify-between items-center">
         <Link href="/" className="flex items-center gap-4">
           <Image
             src="/oh-logo.png"
