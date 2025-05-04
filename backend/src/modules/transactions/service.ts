@@ -15,6 +15,7 @@ import { DisputeEntity } from "../disputes/disputes.entity";
 import { DisputeStatus } from "../disputes/disputes.dto";
 import { WebhooksService } from "../webhooks/service";
 import { WebhookEvent } from "../webhooks/entity";
+import { NotificationsService } from "../notifications/service";
 
 @Injectable()
 export class TransactionsService {
@@ -29,6 +30,7 @@ export class TransactionsService {
     private readonly invoiceService: InvoiceService,
     @InjectRepository(DisputeEntity)
     private readonly disputerepo: Repository<DisputeEntity>,
+    private readonly notification: NotificationsService
   ) {}
 
   async findAll(): Promise<Transaction[]> {
@@ -41,7 +43,7 @@ export class TransactionsService {
     });
     if (!fromUser)
       throw new NotFoundException(
-        `User with ID ${dto.from_user_id} not found.`,
+        `User with ID ${dto.from_user_id} not found.`
       );
 
     const toUser = await this.userRepo.findOne({
@@ -55,7 +57,7 @@ export class TransactionsService {
     });
     if (!project)
       throw new NotFoundException(
-        `Project with ID ${dto.project_id} not found.`,
+        `Project with ID ${dto.project_id} not found.`
       );
 
     const transaction = this.repo.create({
@@ -71,15 +73,20 @@ export class TransactionsService {
 
     const savedTransaction = await this.repo.save(transaction);
     //Trigger webhook
-    if (savedTransaction.status === TransactionStatus.COMPLETED) { 
-    
+    if (savedTransaction.status === TransactionStatus.COMPLETED) {
       const webhookData = {
-        event: WebhookEvent.PAYMENT_COMPLETED, 
-        data: {  
-          savedTransaction
-        }
+        event: WebhookEvent.PAYMENT_COMPLETED,
+        data: {
+          savedTransaction,
+        },
       };
-      
+      await this.notification.create({
+        user_id: savedTransaction.toUser.user_id,
+        type: "transaction_status_changed",
+        title: "Payment Received",
+        content: `You have received a payment of $${savedTransaction.amount} for project "${savedTransaction.project.title}"`,
+        action_url: `/dashboard/transactions/${savedTransaction.transaction_id}`,
+      });
       await this.webhooksService.triggerWebhook(webhookData);
     }
 
@@ -91,7 +98,7 @@ export class TransactionsService {
       try {
         const invoicePath =
           await this.invoiceService.generateInvoiceForTransaction(
-            savedTransaction.transaction_id,
+            savedTransaction.transaction_id
           );
 
         // Save the reference to the PDF in the database
@@ -105,7 +112,7 @@ export class TransactionsService {
       } catch (error) {
         console.error(
           `Error generating invoice for transaction ${savedTransaction.transaction_id}:`,
-          error,
+          error
         );
       }
     }
@@ -120,14 +127,14 @@ export class TransactionsService {
     });
     if (!transaction)
       throw new NotFoundException(
-        `Transaction with ID ${transaction_id} not found.`,
+        `Transaction with ID ${transaction_id} not found.`
       );
     return transaction;
   }
 
   async update(
     transaction_id: string,
-    dto: UpdateTransactionDto,
+    dto: UpdateTransactionDto
   ): Promise<Transaction> {
     const transaction = await this.findById(transaction_id);
     const oldStatus = transaction.status;
@@ -140,6 +147,14 @@ export class TransactionsService {
       oldStatus !== TransactionStatus.COMPLETED
     ) {
       transaction.completed_at = new Date();
+
+      await this.notification.create({
+        user_id: transaction.toUser.user_id,
+        type: "transaction_status_changed",
+        title: "Payment Received",
+        content: `You have received a payment of $${transaction.amount} for project "${transaction.project.title}"`,
+        action_url: `/dashboard/transactions/${transaction.transaction_id}`,
+      });
     }
 
     const updatedTransaction = await this.repo.save(transaction);
@@ -154,13 +169,13 @@ export class TransactionsService {
       try {
         const invoicePath =
           await this.invoiceService.generateInvoiceForTransaction(
-            updatedTransaction.transaction_id,
+            updatedTransaction.transaction_id
           );
 
         // Save the reference to the PDF in the database
         // For this, we would need to add an invoice_path field to the Transaction entity
         console.log(
-          `Invoice automatically generated upon transaction completion: ${invoicePath}`,
+          `Invoice automatically generated upon transaction completion: ${invoicePath}`
         );
 
         // Ideally, update the transaction with the invoice path
@@ -169,7 +184,7 @@ export class TransactionsService {
       } catch (error) {
         console.error(
           `Error generating invoice for transaction ${updatedTransaction.transaction_id}:`,
-          error,
+          error
         );
       }
     }
@@ -181,7 +196,7 @@ export class TransactionsService {
     const result = await this.repo.delete(transaction_id);
     if (result.affected === 0)
       throw new NotFoundException(
-        `Transaction with ID ${transaction_id} not found.`,
+        `Transaction with ID ${transaction_id} not found.`
       );
   }
 
