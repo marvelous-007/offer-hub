@@ -1,8 +1,11 @@
 import MetricCard from "@/components/admin/components/MetricCard";
+import Notification from "@/components/notification/notificaton";
 import { BarChart3Icon, BoxIcon, UsersIcon } from "lucide-react";
 
 export default function Dashboard() {
   return (
+    <>
+    
     <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-3">
       <MetricCard
         title="Total User"
@@ -31,5 +34,8 @@ export default function Dashboard() {
         iconColor="bg-green-100 text-green-500"
       />
     </div>
+
+   
+    </>
   );
 }
