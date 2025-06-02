@@ -1,56 +1,24 @@
 "use client";
 
-import { useState, useEffect } from 'react';
 import { Search, ArrowLeft } from 'lucide-react';
 import Header from './header';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useFreelancerSteps } from '@/hooks/use-freelancer-steps';
 import { ProfileStepProps } from '@/app/types/freelancer-profile';
+import { useFreelancerSkills } from '@/hooks/use-freelancer-skills';
+import { SUGGESTED_SKILLS } from '@/data/mock-freelancer-skills';
 
-const SUGGESTED_SKILLS = [
-    'Illustration',
-    'Brand Development',
-    'Web Design',
-    'UI/UX Design',
-    'Graphic Design',
-    'Logo Design',
-    'Social Media Marketing',
-    'Content Writing',
-    'Video Editing',
-    'Photography',
-];
-
-export default function UserSelectInterestedCategory({ userData, updateUserData }: ProfileStepProps) {
+export default function UserSelectInterestedCategory(props: ProfileStepProps) {
     const { nextStep, prevStep } = useFreelancerSteps();
-    const [skills, setSkills] = useState<string[]>(userData?.skills || []);
-    const [searchInput, setSearchInput] = useState('');
-
-    // Update parent component when skills change
-    useEffect(() => {
-        if (updateUserData) {
-            updateUserData({ skills });
-        }
-    }, [skills, updateUserData]);
-
-    const handleAddSkill = (skill: string) => {
-        if (skills.length >= 15) return;
-        if (!skills.includes(skill)) {
-            setSkills([...skills, skill]);
-        }
-    };
-
-    const handleRemoveSkill = (skillToRemove: string) => {
-        setSkills(skills.filter(skill => skill !== skillToRemove));
-    };
-
-    const handleSearchSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (searchInput.trim() && !skills.includes(searchInput.trim())) {
-            handleAddSkill(searchInput.trim());
-            setSearchInput('');
-        }
-    };
+    const {
+        skills,
+        searchInput,
+        setSearchInput,
+        handleAddSkill,
+        handleRemoveSkill,
+        handleSearchSubmit,
+    } = useFreelancerSkills(props);
 
     return (
         <div className="space-y-6">

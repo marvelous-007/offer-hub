@@ -12,8 +12,9 @@ import UserAddLanguagesActiveState from './user-add-languages-active-state';
 import UserAddBioActiveState from './user-add-bio-active-state';
 import UserProfilePreviewActiveState from './user-profile-preview-active-state';
 import UserSelectInterestedCategory from './user-select-interested-category';
+import { ProfileStepProps } from '@/app/types/freelancer-profile';
 
-const steps = [
+const steps: { key: string; component: React.ReactNode }[] = [
   { key: 'user-choose-role', component: <UserChooseRole /> },
   { key: 'user-select-job-type', component: <UserSelectJobType /> },
   { key: 'user-select-interested-category', component: <UserSelectInterestedCategory /> },
