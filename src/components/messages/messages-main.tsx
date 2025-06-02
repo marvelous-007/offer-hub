@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-import { useState, useRef } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,61 +7,18 @@ import { Send, Upload, Camera, FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
 import maskGroup from "../../../public/maskGroup.svg"
 import Icon from "../../../public/Icon.svg"
-
-interface Message {
-  id: number
-  content: string
-  timestamp: string
-  isOutgoing: boolean
-  type: "text" | "file"
-  fileData?: {
-    name: string
-    size: string
-    uploadDate: string
-    status: string
-  }
-}
-
-interface Conversation {
-  id: number
-  name: string
-  avatar: string
-  lastMessage: string
-  timestamp: string
-  isOnline: boolean
-  unreadCount?: number
-}
-
-interface MessagesMainProps {
-  activeConversation?: Conversation
-  messages: Message[]
-  onSendMessage: (content: string, file?: File) => void
-}
+import type { MessagesMainProps } from "@/types"
+import { useMessages } from "@/hooks/use-message"
 
 export function MessagesMain({ activeConversation, messages, onSendMessage }: MessagesMainProps) {
-  const [newMessage, setNewMessage] = useState("")
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      onSendMessage(newMessage)
-      setNewMessage("")
-    }
-  }
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      onSendMessage(file.name, file)
-    }
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSendMessage()
-    }
-  }
+  const {
+    newMessage,
+    setNewMessage,
+    fileInputRef,
+    handleSendMessage,
+    handleFileUpload,
+    handleKeyPress,
+  } = useMessages(onSendMessage)
 
   if (!activeConversation) {
     return (
@@ -75,7 +30,6 @@ export function MessagesMain({ activeConversation, messages, onSendMessage }: Me
 
   return (
     <div className="flex-1 flex flex-col">
-      {/* Header - Left aligned with container padding */}
       <div className="p-4 px-16">
         <div className="bg-[#DEEFE7] rounded-lg px-4 py-3 flex items-center gap-3">
           <Avatar className="h-10 w-10">
@@ -91,7 +45,6 @@ export function MessagesMain({ activeConversation, messages, onSendMessage }: Me
         </div>
       </div>
 
-      {/* Project Status - Centered */}
       <div className="px-6 py-4 flex items-center justify-center border-b border-gray-100">
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <div className="w-5 h-5 rounded flex items-center justify-center">
@@ -102,7 +55,6 @@ export function MessagesMain({ activeConversation, messages, onSendMessage }: Me
         </div>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.map((message) => (
           <div key={message.id} className={cn("flex", message.isOutgoing ? "justify-end" : "justify-start")}>
@@ -129,7 +81,6 @@ export function MessagesMain({ activeConversation, messages, onSendMessage }: Me
                 </div>
               )}
 
-              {/* Message bubble with tail */}
               <div className="relative">
                 <div
                   className={cn(
@@ -140,15 +91,12 @@ export function MessagesMain({ activeConversation, messages, onSendMessage }: Me
                   )}
                 >
                   <p className="text-sm">{message.content}</p>
-
-                  {/* Speech bubble tail */}
                   {message.isOutgoing ? (
                     <div className="absolute bottom-0 right-0 w-0 h-0 border-l-[8px] border-l-blue-500 border-t-[8px] border-t-transparent"></div>
                   ) : (
                     <div className="absolute bottom-0 left-0 w-0 h-0 border-r-[8px] border-r-gray-200 border-t-[8px] border-t-transparent"></div>
                   )}
                 </div>
-
                 <div className={cn("text-xs mt-1 text-gray-500", message.isOutgoing ? "text-right" : "text-left")}>
                   {message.timestamp}
                 </div>
@@ -158,7 +106,6 @@ export function MessagesMain({ activeConversation, messages, onSendMessage }: Me
         ))}
       </div>
 
-      {/* Message Input */}
       <div className="p-6 border-t border-gray-100">
         <div className="flex items-center gap-3">
           <div className="flex-1 relative">
