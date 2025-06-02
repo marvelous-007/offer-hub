@@ -1,4 +1,3 @@
-// app/hooks/useMessages.ts
 "use client"
 import { useState, useRef } from "react"
 import type React from "react"
