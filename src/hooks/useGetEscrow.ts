@@ -37,7 +37,7 @@ export const useGetEscrow = () => {
     handleGetEscrow,
     data: escrow,
     loading: isPending,
-    error: isError ? new Error('Failed to fetch escrow') : error,
+    error: error || (isError ? new Error('Trustless Work error occurred') : null),
     isSuccess,
   };
 };
