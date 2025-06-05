@@ -2,13 +2,6 @@ import { useState } from 'react';
 import { useGetEscrow as usePackageGetEscrow } from '@trustless-work/escrow/dist/hooks';
 import { GetEscrowParams } from '@trustless-work/escrow/dist/types';
 
-class EscrowError extends Error {
-  constructor(message: string, public code: string) {
-    super(message);
-    this.name = 'EscrowError';
-  }
-}
-
 /**
  * Hook to fetch escrow details using the @trustless-work/escrow package.
  * @Note:
@@ -17,35 +10,26 @@ class EscrowError extends Error {
  */
 export const useGetEscrow = () => {
   const { getEscrow, escrow, isPending, isError, isSuccess } = usePackageGetEscrow();
-  const [error, setError] = useState<EscrowError | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   const handleGetEscrow = async (contractId: string, signer: string) => {
+    if (!contractId || !signer) {
+      throw new Error('Contract ID and signer are required');
+    }
+
+    const payload: GetEscrowParams = {
+      contractId,
+      signer,
+    };
+
     try {
-      if (!contractId) {
-        throw new EscrowError('Contract ID is required', 'MISSING_CONTRACT_ID');
-      }
-      if (!signer) {
-        throw new EscrowError('Signer address is required', 'MISSING_SIGNER');
-      }
-
-      const payload: GetEscrowParams = {
-        contractId,
-        signer,
-      };
-
       await getEscrow({ 
         payload, 
         type: 'multi-release' 
       });
     } catch (err) {
-      const escrowError = err instanceof EscrowError 
-        ? err 
-        : new EscrowError(
-            err instanceof Error ? err.message : 'Failed to fetch escrow',
-            'FETCH_ERROR'
-          );
-      setError(escrowError);
-      throw escrowError;
+      setError(err instanceof Error ? err : new Error('Failed to fetch escrow'));
+      throw err;
     }
   };
 
@@ -53,7 +37,7 @@ export const useGetEscrow = () => {
     handleGetEscrow,
     data: escrow,
     loading: isPending,
-    error: isError ? new EscrowError('Failed to fetch escrow', 'API_ERROR') : error,
+    error: isError ? new Error('Failed to fetch escrow') : error,
     isSuccess,
   };
 };
