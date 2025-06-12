@@ -27,7 +27,7 @@ export const useUpdateEscrow = () => {
         try {
             const { unsignedTransaction } = await updateEscrow({
                 payload,
-                type: 'multi-release' // for milestone updates
+                type: 'multi-release' // for multiple releases of funds
             });
 
             if (!unsignedTransaction) {
