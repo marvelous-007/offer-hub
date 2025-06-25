@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TrustlessWorkProvider } from "@/providers/TrustlessWorkProvider";
 import { WalletProvider } from "@/providers/wallet.provider"
-import { EscrowProvider } from "@/providers/escrow.provider";
+import { EscrowProvider } from "@/providers/scrow.provider";
 import { Toaster } from "sonner"
 
 const geistSans = Geist({
