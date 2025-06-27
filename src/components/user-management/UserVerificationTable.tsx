@@ -31,16 +31,6 @@ import {
 } from "@/components/ui/select";
 import NotificationModal from "./notify";
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  emailValidated: boolean;
-  identityCard: string;
-  status: "Pending" | "Approved";
-  submissionDate: string;
-}
-
 export default function UserVerificationTable() {
   const [userType, setUserType] = useState<"Freelancer" | "Customer">(
     "Freelancer"
