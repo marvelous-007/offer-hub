@@ -1,35 +1,43 @@
-// components/Header.tsx
-"use client";
-
-import React from "react";
-import Link from "next/link";
-import { Menu } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
+"use client"
+import Link from "next/link"
+import { useRouter, usePathname } from "next/navigation"
+import { Menu } from "lucide-react"
+import { Avatar, AvatarImage } from "@/components/ui/avatar"
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface HeaderProps {
-  onMenuClick?: () => void;
-  showMenuButton?: boolean;
+  onMenuClick?: () => void
+  showMenuButton?: boolean
 }
 
 export default function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
+  const router = useRouter()
+  const pathname = usePathname()
+
+  const handleProfileClick = () => {
+    // Always navigate to verification page with profile tab
+    router.push("/user-management/verification?tab=profile")
+  }
+
+  const handleLogout = () => {
+    // Add your logout logic here
+    console.log("Logout clicked")
+  }
+
   return (
     <header className="bg-white border-b sticky top-0 z-10">
       <div className="flex items-center justify-between px-6 py-3">
         {/* Logo and menu button */}
         <div className="flex items-center gap-4">
           {showMenuButton && (
-            <button 
-              onClick={onMenuClick}
-              className="md:hidden p-2 rounded-md text-gray-700"
-            >
+            <button onClick={onMenuClick} className="md:hidden p-2 rounded-md text-gray-700">
               <Menu size={24} />
             </button>
           )}
@@ -38,7 +46,7 @@ export default function Header({ onMenuClick, showMenuButton = false }: HeaderPr
             <span>Offer Hub</span>
           </Link>
         </div>
-        
+
         {/* Right actions */}
         <div className="flex items-center ml-auto gap-4">
           {/* User dropdown */}
@@ -53,14 +61,18 @@ export default function Header({ onMenuClick, showMenuButton = false }: HeaderPr
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleProfileClick} className="cursor-pointer">
+                Profile
+              </DropdownMenuItem>
               <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600">Logout</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer">
+                Logout
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
     </header>
-  );
+  )
 }
