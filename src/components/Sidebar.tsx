@@ -9,7 +9,7 @@ import {
   Activity,
   FileText,
   LogOut,
-  X
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -60,7 +60,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           </button>
         </div>
       )}
-      
+
       {/* Navigation */}
       <nav className="flex-grow overflow-y-auto pt-4 ">
         <ul className="space-y-2 px-2">
@@ -75,10 +75,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
                     : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                 )}
               >
-                <item.icon
-                  className="mr-3 h-5 w-5"
-                  aria-hidden="true"
-                />
+                <item.icon className="mr-3 h-5 w-5" aria-hidden="true" />
                 <span>{item.name}</span>
               </Link>
             </li>

@@ -72,8 +72,8 @@ importers:
         specifier: ^1.1.8
         version: 1.2.4(@types/react-dom@19.0.3(@types/react@19.0.6))(@types/react@19.0.6)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@trustless-work/escrow':
-        specifier: ^0.3.2
-        version: 0.3.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+        specifier: ^1.0.2
+        version: 1.0.5(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       axios:
         specifier: ^1.9.0
         version: 1.9.0
@@ -1356,8 +1356,8 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
-  '@trustless-work/escrow@0.3.2':
-    resolution: {integrity: sha512-3TRfW3l3RfrX0JVrwUgXOsirhs+Jrix3lBsW0NvgZCpiLEvPBt7+h0qiQKzvPtSLKa2T53oZSe5OfV0htsMkgg==}
+  '@trustless-work/escrow@1.0.5':
+    resolution: {integrity: sha512-WJDWmTxV9jIFBt0rQdXLVo6fSp4M2a+6FvLLMz8H61xmsKoYZsJKUPMq6k/hUdm+6VnSi19ebcHQ9hiuw9a1cA==}
     peerDependencies:
       react: '>=18.0.0 <20.0.0'
       react-dom: '>=18.0.0 <20.0.0'
@@ -5128,7 +5128,7 @@ snapshots:
       '@tanstack/query-core': 5.80.5
       react: 19.0.0
 
-  '@trustless-work/escrow@0.3.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+  '@trustless-work/escrow@1.0.5(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
       '@tanstack/react-query': 5.80.5(react@19.0.0)
       axios: 1.9.0

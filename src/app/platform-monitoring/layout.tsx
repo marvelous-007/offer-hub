@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import React, { useState } from "react";
 
-export default function UserManagementLayout({
+export default function PlatformMonitoringLayout({
   children,
 }: {
   children: React.ReactNode;
