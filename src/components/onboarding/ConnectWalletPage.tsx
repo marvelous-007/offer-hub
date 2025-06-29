@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useWallet } from './useWallet.hook';
 import { 
   FREIGHTER_ID, 
@@ -17,11 +17,11 @@ interface WalletOption {
   color: string;
   bgColor: string;
   borderColor: string;
-  available: boolean;
 }
 
 const WalletConnectPage: React.FC = () => {
   const { connectWallet, isConnecting, error, isConnected, walletAddress } = useWallet();
+  const [connectingWalletId, setConnectingWalletId] = useState<string | null>(null);
 
   const walletOptions: WalletOption[] = [
     {
@@ -30,8 +30,7 @@ const WalletConnectPage: React.FC = () => {
       icon: '🚀',
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
-      borderColor: 'border-orange-200 hover:border-orange-300',
-      available: true
+      borderColor: 'border-orange-200 hover:border-orange-300'
     },
     {
       id: ALBEDO_ID,
@@ -39,8 +38,7 @@ const WalletConnectPage: React.FC = () => {
       icon: '⭐',
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200 hover:border-blue-300',
-      available: true
+      borderColor: 'border-blue-200 hover:border-blue-300'
     },
     {
       id: XBULL_ID,
@@ -48,8 +46,7 @@ const WalletConnectPage: React.FC = () => {
       icon: '🐂',
       color: 'text-red-600',
       bgColor: 'bg-red-50',
-      borderColor: 'border-red-200 hover:border-red-300',
-      available: true
+      borderColor: 'border-red-200 hover:border-red-300'
     },
     {
       id: RABET_ID,
@@ -57,8 +54,7 @@ const WalletConnectPage: React.FC = () => {
       icon: '🐰',
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
-      borderColor: 'border-purple-200 hover:border-purple-300',
-      available: true
+      borderColor: 'border-purple-200 hover:border-purple-300'
     },
     {
       id: LOBSTR_ID,
@@ -66,23 +62,23 @@ const WalletConnectPage: React.FC = () => {
       icon: '🦞',
       color: 'text-teal-600',
       bgColor: 'bg-teal-50',
-      borderColor: 'border-teal-200 hover:border-teal-300',
-      available: true
+      borderColor: 'border-teal-200 hover:border-teal-300'
     }
   ];
 
   const handleWalletConnect = async (walletId: string) => {
+    setConnectingWalletId(walletId);
+    
     const result = await connectWallet(walletId);
     
     if (result.success) {
       console.log(`Successfully connected to wallet: ${result.address}`);
-      // Aquí puedes redirigir o mostrar mensaje de éxito
     } else {
       console.error(`Failed to connect: ${result.error}`);
+      setConnectingWalletId(null);
     }
   };
 
-  // Si ya está conectado, mostrar estado conectado
   if (isConnected && walletAddress) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -125,85 +121,103 @@ const WalletConnectPage: React.FC = () => {
         {/* Error Message */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-600 text-sm">{error}</p>
+            <div className="flex items-center justify-between">
+              <p className="text-red-600 text-sm">{error}</p>
+              <button
+                onClick={() => setConnectingWalletId(null)}
+                className="text-red-600 hover:text-red-800 text-sm underline"
+              >
+                Try again
+              </button>
+            </div>
           </div>
         )}
 
         {/* Wallet Options */}
         <div className="space-y-3">
-          {walletOptions.map((wallet, index) => (
-            <button
-              key={index}
-              onClick={() => handleWalletConnect(wallet.id)}
-              disabled={isConnecting || !wallet.available}
-              className={`
-                w-full px-4 py-4 sm:py-5 
-                bg-white border-2 rounded-full 
-                ${wallet.borderColor}
-                ${isConnecting || !wallet.available 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'transition-all duration-200 ease-in-out hover:shadow-md hover:scale-[1.02] active:scale-[0.98]'
-                }
-                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50
-                group
-              `}
-            >
-              <div className="flex items-center justify-center space-x-4">
-                {/* Icon */}
-                <div className={`
-                  w-10 h-10 sm:w-12 sm:h-12 
-                  ${wallet.bgColor} 
-                  rounded-xl flex items-center justify-center
-                  text-lg sm:text-xl
-                  ${!isConnecting && wallet.available ? 'group-hover:scale-110 transition-transform duration-200' : ''}
-                `}>
-                  {isConnecting ? (
-                    <div className="animate-spin w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full"></div>
-                  ) : (
-                    wallet.icon
-                  )}
+          {walletOptions.map((wallet, index) => {
+            const isThisWalletConnecting = connectingWalletId === wallet.id && isConnecting;
+            const isDisabled = isConnecting && connectingWalletId !== wallet.id;
+            
+            return (
+              <button
+                key={index}
+                onClick={() => handleWalletConnect(wallet.id)}
+                disabled={isDisabled}
+                className={`
+                  w-full px-4 py-4 sm:py-5 
+                  bg-white border-2 rounded-full 
+                  ${wallet.borderColor}
+                  ${isDisabled
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'transition-all duration-200 ease-in-out hover:shadow-md hover:scale-[1.02] active:scale-[0.98]'
+                  }
+                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50
+                  group
+                `}
+              >
+                <div className="flex items-center justify-center space-x-4">
+                  {/* Icon */}
+                  <div className={`
+                    w-10 h-10 sm:w-12 sm:h-12 
+                    ${wallet.bgColor} 
+                    rounded-xl flex items-center justify-center
+                    text-lg sm:text-xl
+                    ${!isDisabled ? 'group-hover:scale-110 transition-transform duration-200' : ''}
+                  `}>
+                    {isThisWalletConnecting ? (
+                      <div className="animate-spin w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full"></div>
+                    ) : (
+                      wallet.icon
+                    )}
+                  </div>
+                  
+                  {/* Wallet Name */}
+                  <span className={`
+                    flex-1 text-left font-semibold text-base sm:text-lg
+                    ${wallet.color}
+                    ${!isDisabled ? 'group-hover:text-opacity-80 transition-colors duration-200' : ''}
+                  `}>
+                    {wallet.name}
+                    {isThisWalletConnecting && (
+                      <span className="text-gray-500 text-sm block">Connecting...</span>
+                    )}
+                  </span>
+                  
+                  {/* Arrow */}
+                  <div className={`
+                    text-gray-400 
+                    ${!isDisabled ? 'group-hover:text-gray-600 transition-colors duration-200' : ''}
+                  `}>
+                    <svg 
+                      className="w-5 h-5" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M9 5l7 7-7 7" 
+                      />
+                    </svg>
+                  </div>
                 </div>
-                
-                {/* Wallet Name */}
-                <span className={`
-                  flex-1 text-left font-semibold text-base sm:text-lg
-                  ${wallet.color}
-                  ${!isConnecting && wallet.available ? 'group-hover:text-opacity-80 transition-colors duration-200' : ''}
-                `}>
-                  {wallet.name}
-                  {!wallet.available && (
-                    <span className="text-gray-400 text-sm block">Not available</span>
-                  )}
-                </span>
-                
-                {/* Arrow */}
-                <div className={`
-                  text-gray-400 
-                  ${!isConnecting && wallet.available ? 'group-hover:text-gray-600 transition-colors duration-200' : ''}
-                `}>
-                  <svg 
-                    className="w-5 h-5" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
-                      d="M9 5l7 7-7 7" 
-                    />
-                  </svg>
-                </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
 
         {/* Loading State */}
-        {isConnecting && (
+        {isConnecting && connectingWalletId && (
           <div className="mt-6 text-center">
-            <p className="text-gray-600 text-sm">Connecting to wallet...</p>
+            <p className="text-gray-600 text-sm">
+              Connecting to {walletOptions.find(w => w.id === connectingWalletId)?.name}...
+            </p>
+            <p className="text-gray-500 text-xs mt-1">
+              Check your wallet extension for connection prompt
+            </p>
           </div>
         )}
 
