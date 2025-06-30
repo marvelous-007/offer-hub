@@ -1,3 +1,5 @@
+import { ReactNode } from "react"
+
 export interface Message {
   id: number
   content: string
@@ -26,4 +28,25 @@ export interface MessagesMainProps {
   activeConversation?: Conversation
   messages: Message[]
   onSendMessage: (content: string, file?: File) => void
+}
+
+
+export interface DisputeRow {
+  date: string;
+  name: string;
+  ticket: string;
+  email: string;
+}
+
+
+export interface TabItem {
+  label: string;
+  value: string;
+  component: ReactNode; 
+}
+
+export interface PillTabsProps {
+  tabs: TabItem[];
+  defaultValue?: string;
+  className?: string;
 }
