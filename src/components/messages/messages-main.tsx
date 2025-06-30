@@ -10,7 +10,7 @@ import Icon from "../../../public/Icon.svg"
 import type { MessagesMainProps } from "@/types"
 import { useMessages } from "@/hooks/use-message"
 
-export function MessagesMain({ activeConversation, messages, onSendMessage }: MessagesMainProps) {
+export function MessagesMain({ activeConversation, messages, onSendMessage , chatHeaderItem }: MessagesMainProps) {
   const {
     newMessage,
     setNewMessage,
@@ -31,8 +31,10 @@ export function MessagesMain({ activeConversation, messages, onSendMessage }: Me
   return (
     <div className="flex-1 flex flex-col">
       <div className="p-4 px-16">
-        <div className="bg-[#DEEFE7] rounded-lg px-4 py-3 flex items-center gap-3">
-          <Avatar className="h-10 w-10">
+        <div className="bg-[#DEEFE7] rounded-lg px-4 py-3 flex items-center justify-between gap-3">
+
+            <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10">
             <AvatarImage src={maskGroup.src || "/placeholder.svg"} alt={activeConversation.name} />
             <AvatarFallback className="bg-gray-200 text-gray-600">
               {activeConversation.name
@@ -42,6 +44,11 @@ export function MessagesMain({ activeConversation, messages, onSendMessage }: Me
             </AvatarFallback>
           </Avatar>
           <h2 className="font-medium text-gray-900">{activeConversation.name}</h2>
+            </div>
+
+          <div>
+             {chatHeaderItem}
+          </div>
         </div>
       </div>
 

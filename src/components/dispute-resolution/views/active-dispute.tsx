@@ -3,7 +3,7 @@ import FilterToolbar from "@/components/platform-monitoring/filter-toolbar";
 import DisputeTable, { DisputeTableColumn } from "@/components/table/DisputeTable";
 import { FaRegCopy } from "react-icons/fa";
 import { faker } from "@faker-js/faker";
-
+import Link from "next/link";
 
 interface DisputeRow {
   date: string;
@@ -11,7 +11,6 @@ interface DisputeRow {
   ticket: string;
   email: string;
 }
-
 
 const columns: DisputeTableColumn<DisputeRow>[] = [
   { key: "date", label: "Date initiated" },
@@ -35,12 +34,16 @@ const columns: DisputeTableColumn<DisputeRow>[] = [
   {
     key: "action",
     label: "Action",
-    render: () => (
-      <a href="#" className="text-blue-500 hover:underline">View dispute</a>
+    render: (row) => (
+      <Link
+        href={`/admin/dispute-resolution/${row.ticket}/chat`}
+        className="text-blue-500 hover:underline"
+      >
+        View dispute
+      </Link>
     ),
   },
 ];
-
 
 const data: DisputeRow[] = Array.from({ length: 8 }).map(() => ({
   date: faker.date
@@ -58,7 +61,6 @@ const data: DisputeRow[] = Array.from({ length: 8 }).map(() => ({
   ticket: faker.string.alphanumeric(9).toLowerCase(),
   email: faker.internet.email(),
 }));
-
 
 export default function ActiveDispute() {
   return (

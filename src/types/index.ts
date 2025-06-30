@@ -1,4 +1,4 @@
-import { ReactNode } from "react"
+import { JSX, ReactNode } from "react"
 
 export interface Message {
   id: number
@@ -27,6 +27,7 @@ export interface Conversation {
 export interface MessagesMainProps {
   activeConversation?: Conversation
   messages: Message[]
+  chatHeaderItem?: JSX.Element
   onSendMessage: (content: string, file?: File) => void
 }
 
