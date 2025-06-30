@@ -51,15 +51,13 @@ impl JobPostingContract {
         }
     }
 
-    pub fn close_job(e: Env, job_id: u32, caller: Address) -> Result<(), JobPostingError> {
+    pub fn close_job(e: Env, job_id: u32) -> Result<(), JobPostingError> {
         let mut job: JobData = match e.storage().persistent().get(&Datakey::JOBPOST(job_id)) {
             Some(x) => x,
             None => return Err(JobPostingError::JobNotFound),
         };
 
-        if job.owner != caller {
-            return Err(JobPostingError::Unauthorized);
-        }
+        job.owner.require_auth();
 
         if job.status == JobStatus::CLOSED {
             return Err(JobPostingError::AlreadyClosed);
@@ -79,4 +77,5 @@ impl JobPostingContract {
 
 mod error;
 mod events;
+mod test;
 mod types;
