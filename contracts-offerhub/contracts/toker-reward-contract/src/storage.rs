@@ -1,8 +1,10 @@
-use soroban_sdk::{Address, Env, Vec, String, Symbol};
 use crate::types::RewardData;
+use soroban_sdk::{Address, Env, String, Symbol, Vec};
 
 pub fn set_admin(env: &Env, admin: &Address) {
-    env.storage().instance().set(&Symbol::new(env, "admin"), admin);
+    env.storage()
+        .instance()
+        .set(&Symbol::new(env, "admin"), admin);
 }
 
 pub fn get_admin(env: &Env) -> Option<Address> {
@@ -11,7 +13,10 @@ pub fn get_admin(env: &Env) -> Option<Address> {
 
 pub fn get_user_rewards(env: &Env, user: &Address) -> Vec<RewardData> {
     let key = (Symbol::new(env, "user_rewards"), user);
-    env.storage().persistent().get(&key).unwrap_or_else(|| Vec::new(env))
+    env.storage()
+        .persistent()
+        .get(&key)
+        .unwrap_or_else(|| Vec::new(env))
 }
 
 pub fn add_user_reward(env: &Env, user: &Address, reward: &RewardData) {
@@ -29,4 +34,4 @@ pub fn is_event_claimed(env: &Env, user: &Address, event_key: &String) -> bool {
 pub fn mark_event_claimed(env: &Env, user: &Address, event_key: &String, timestamp: u64) {
     let key = (Symbol::new(env, "claimed"), user, event_key.clone());
     env.storage().persistent().set(&key, &timestamp);
-} 
+}

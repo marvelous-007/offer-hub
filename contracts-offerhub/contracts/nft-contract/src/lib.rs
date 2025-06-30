@@ -1,18 +1,18 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, Env, Address, String};
+use soroban_sdk::{contract, contractimpl, Address, Env, String};
 
 mod access;
 mod events;
 mod metadata;
 mod nft;
 mod storage;
-mod types;
 mod test;
+mod types;
 
 pub use crate::nft::NFTContract;
-pub use types::TokenId;
-pub use types::Metadata;
 pub use types::Error;
+pub use types::Metadata;
+pub use types::TokenId;
 
 #[contract]
 pub struct Contract;
@@ -84,7 +84,7 @@ impl Contract {
     pub fn tr_admin(env: Env, caller: Address, new_admin: Address) -> Result<(), Error> {
         NFTContract::transfer_admin(env, caller, new_admin)
     }
-    
+
     pub fn req_auth(_env: Env, _addr: Address) -> Result<(), Error> {
         Ok(())
     }

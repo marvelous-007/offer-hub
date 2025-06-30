@@ -1,13 +1,13 @@
-use soroban_sdk::{String, Env};
-use crate::{TokenId, Metadata, Error};
-use crate::storage::{save_token_metadata, get_token_metadata};
+use crate::storage::{get_token_metadata, save_token_metadata};
+use crate::{Error, Metadata, TokenId};
+use soroban_sdk::{Env, String};
 
 pub fn store_metadata(
-    env: &Env, 
-    token_id: &TokenId, 
-    name: String, 
-    description: String, 
-    uri: String
+    env: &Env,
+    token_id: &TokenId,
+    name: String,
+    description: String,
+    uri: String,
 ) -> Result<(), Error> {
     let metadata = Metadata {
         name,
@@ -20,4 +20,4 @@ pub fn store_metadata(
 
 pub fn get_metadata(env: &Env, token_id: &TokenId) -> Result<Metadata, Error> {
     get_token_metadata(env, token_id)
-} 
+}

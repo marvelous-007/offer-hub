@@ -1,4 +1,4 @@
-use soroban_sdk::{Address, String, Env, contracterror, contracttype};
+use soroban_sdk::{contracterror, contracttype, Address, Env, String};
 
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
@@ -19,4 +19,4 @@ pub enum Error {
 pub fn require_auth(_env: &Env, address: &Address) -> Result<(), Error> {
     address.require_auth();
     Ok(())
-} 
+}

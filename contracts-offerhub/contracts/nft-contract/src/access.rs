@@ -1,7 +1,10 @@
-use soroban_sdk::{Address, Env};
-use crate::types::{Error, require_auth};
-use crate::storage::{is_admin, is_minter, get_admin, add_minter as add_minter_storage, remove_minter as remove_minter_storage};
 use crate::events::{emit_admin_changed, emit_minter_added, emit_minter_removed};
+use crate::storage::{
+    add_minter as add_minter_storage, get_admin, is_admin, is_minter,
+    remove_minter as remove_minter_storage,
+};
+use crate::types::{require_auth, Error};
+use soroban_sdk::{Address, Env};
 
 pub fn check_admin(env: &Env, address: &Address) -> Result<(), Error> {
     if !is_admin(env, address) {
@@ -47,4 +50,4 @@ pub fn remove_minter(env: &Env, caller: &Address, minter: &Address) -> Result<()
     remove_minter_storage(env, minter);
     emit_minter_removed(env, caller, minter);
     Ok(())
-} 
+}

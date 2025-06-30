@@ -1,4 +1,4 @@
-use soroban_sdk::{Address, String, Env, contracterror, contracttype};
+use soroban_sdk::{contracterror, contracttype, Address, Env, String};
 
 pub type TokenId = u64;
 
@@ -28,4 +28,4 @@ pub const MINTER: &[u8] = &[3];
 pub fn require_auth(_env: &Env, address: &Address) -> Result<(), Error> {
     address.require_auth();
     Ok(())
-} 
+}
