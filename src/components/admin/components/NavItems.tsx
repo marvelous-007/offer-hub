@@ -1,11 +1,14 @@
+'use client'
 import type React from "react";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface NavItemProps {
   icon: React.ReactNode;
   label: string;
   active?: boolean;
   className?: string;
+  path: string
 }
 
 export default function NavItem({
@@ -13,7 +16,11 @@ export default function NavItem({
   label,
   active,
   className,
+  path = '/admin'
 }: NavItemProps) {
+
+  const { push } = useRouter()
+
   return (
     <div
       className={cn(
@@ -21,6 +28,7 @@ export default function NavItem({
         active && "bg-gray-100 text-gray-900",
         className
       )}
+      onClick={() => push(path)}
     >
       {icon}
       <span>{label}</span>
