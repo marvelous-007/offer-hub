@@ -25,7 +25,7 @@ export default function NavItem({
     <div
       className={cn(
         "flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100",
-        active && "bg-gray-100 text-gray-900",
+        active && "text-secondary-1000",
         className
       )}
       onClick={() => push(path)}

@@ -27,7 +27,7 @@ export default function FilterToolbar() {
     alert("Report export initiated. This feature is currently stubbed.");
   };
   return (
-    <div className="flex flex-col md:flex-row flex-wrap items-start md:items-center justify-between gap-4 bg-white p-3 rounded border-b">
+    <div className="flex flex-col md:flex-row flex-wrap items-start md:items-center justify-between gap-4 bg-white p-3 rounded border-b mt-2">
       {/* Left side controls - stack on mobile */}
       <div className="flex flex-col sm:flex-row w-full md:w-auto flex-wrap items-start sm:items-center gap-3 md:gap-4">
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">

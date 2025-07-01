@@ -9,26 +9,29 @@ import {
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import NavItem from "../components/NavItems";
+import { LuFolderPen } from "react-icons/lu";
+import { MdDashboard, MdOutlineSavedSearch } from "react-icons/md";
+import { FaPlus } from "react-icons/fa6";
 
 const navItems = [
   {
     path: "/admin",
-    icon: <BarChart3Icon className="h-5 w-5" />,
+    icon: <MdDashboard className="h-5 w-5" />,
     label: "Dashboard",
   },
   {
     path: "/admin/user-management",
-    icon: <UsersIcon className="h-5 w-5" />,
+    icon: <FaPlus className="h-5 w-5" />,
     label: "User management",
   },
   {
     path: "/admin/platform-monitoring",
-    icon: <BarChart3Icon className="h-5 w-5" />,
+    icon: <MdOutlineSavedSearch className="h-5 w-5" />,
     label: "Platform monitoring",
   },
   {
     path: "/admin/dispute-resolution",
-    icon: <BoxIcon className="h-5 w-5" />,
+    icon: <LuFolderPen className="h-5 w-5" />,
     label: "Dispute resolution",
   },
 ];
