@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
   "contracts/*",
+  "src/rating",
 ]
 
 [workspace.dependencies]
