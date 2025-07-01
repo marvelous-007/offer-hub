@@ -7,7 +7,7 @@ use soroban_sdk::{testutils::Address as _, Address, Env, String};
 fn test_init() {
     let env = Env::default();
     env.mock_all_auths();
-    
+
     let admin = Address::generate(&env);
     let contract_id = env.register(Contract, ());
 
@@ -27,7 +27,7 @@ fn test_init() {
 fn test_claim_reward_success() {
     let env = Env::default();
     env.mock_all_auths();
-    
+
     let admin = Address::generate(&env);
     let user = Address::generate(&env);
     let contract_id = env.register(Contract, ());
@@ -56,7 +56,7 @@ fn test_claim_reward_success() {
 fn test_claim_reward_duplicate() {
     let env = Env::default();
     env.mock_all_auths();
-    
+
     let admin = Address::generate(&env);
     let user = Address::generate(&env);
     let contract_id = env.register(Contract, ());
@@ -69,7 +69,7 @@ fn test_claim_reward_duplicate() {
     // Test duplicate claim in separate context
     env.as_contract(&contract_id, || {
         let event_key = String::from_str(&env, "5_star_rating");
-        
+
         // First claim should succeed
         let result1 = Contract::claim_reward(env.clone(), user.clone(), event_key.clone());
         assert!(result1.is_ok());
@@ -77,9 +77,13 @@ fn test_claim_reward_duplicate() {
 
     env.as_contract(&contract_id, || {
         let event_key = String::from_str(&env, "5_star_rating");
-        
+
         // Verify first claim worked
-        assert!(Contract::has_claimed(env.clone(), user.clone(), event_key.clone()));
+        assert!(Contract::has_claimed(
+            env.clone(),
+            user.clone(),
+            event_key.clone()
+        ));
 
         // Second claim should fail
         let result2 = Contract::claim_reward(env.clone(), user, event_key);
@@ -91,7 +95,7 @@ fn test_claim_reward_duplicate() {
 fn test_claim_reward_invalid_event() {
     let env = Env::default();
     env.mock_all_auths();
-    
+
     let admin = Address::generate(&env);
     let user = Address::generate(&env);
     let contract_id = env.register(Contract, ());
@@ -111,7 +115,7 @@ fn test_claim_reward_invalid_event() {
 fn test_get_rewards_multiple() {
     let env = Env::default();
     env.mock_all_auths();
-    
+
     let admin = Address::generate(&env);
     let user = Address::generate(&env);
     let contract_id = env.register(Contract, ());
@@ -126,13 +130,13 @@ fn test_get_rewards_multiple() {
         let event1 = String::from_str(&env, "job_completed");
         Contract::claim_reward(env.clone(), user.clone(), event1).unwrap();
     });
-    
+
     // Claim second reward
     env.as_contract(&contract_id, || {
         let event2 = String::from_str(&env, "5_star_rating");
         Contract::claim_reward(env.clone(), user.clone(), event2).unwrap();
     });
-    
+
     // Claim third reward
     env.as_contract(&contract_id, || {
         let event3 = String::from_str(&env, "consistent_participation");
@@ -159,7 +163,7 @@ fn test_get_rewards_multiple() {
 fn test_get_rewards_empty() {
     let env = Env::default();
     env.mock_all_auths();
-    
+
     let admin = Address::generate(&env);
     let user = Address::generate(&env);
     let contract_id = env.register(Contract, ());
@@ -178,7 +182,7 @@ fn test_get_rewards_empty() {
 fn test_has_claimed_false() {
     let env = Env::default();
     env.mock_all_auths();
-    
+
     let admin = Address::generate(&env);
     let user = Address::generate(&env);
     let contract_id = env.register(Contract, ());
@@ -188,7 +192,7 @@ fn test_has_claimed_false() {
         Contract::init(env.clone(), admin).unwrap();
 
         let event_key = String::from_str(&env, "job_completed");
-        
+
         // Should return false for unclaimed event
         let claimed = Contract::has_claimed(env.clone(), user, event_key);
         assert!(!claimed);
@@ -199,7 +203,7 @@ fn test_has_claimed_false() {
 fn test_multiple_users() {
     let env = Env::default();
     env.mock_all_auths();
-    
+
     let admin = Address::generate(&env);
     let user1 = Address::generate(&env);
     let user2 = Address::generate(&env);
@@ -223,7 +227,7 @@ fn test_multiple_users() {
 
         let rewards1 = Contract::get_rewards(env.clone(), user1);
         let rewards2 = Contract::get_rewards(env.clone(), user2);
-        
+
         assert_eq!(rewards1.len(), 1);
         assert_eq!(rewards2.len(), 1);
     });

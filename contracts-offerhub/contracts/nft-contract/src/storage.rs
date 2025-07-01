@@ -1,6 +1,6 @@
-use soroban_sdk::{Address, Env, Map, Bytes, BytesN};
-use crate::{TokenId, Metadata, Error};
-use crate::types::{TOKEN_OWNER, TOKEN_METADATA, ADMIN, MINTER};
+use crate::types::{ADMIN, MINTER, TOKEN_METADATA, TOKEN_OWNER};
+use crate::{Error, Metadata, TokenId};
+use soroban_sdk::{Address, Bytes, BytesN, Env, Map};
 
 pub fn save_token_owner(env: &Env, token_id: &TokenId, owner: &Address) {
     let key_bytes = create_token_key(env, TOKEN_OWNER, token_id);
@@ -9,7 +9,11 @@ pub fn save_token_owner(env: &Env, token_id: &TokenId, owner: &Address) {
 
 pub fn get_token_owner(env: &Env, token_id: &TokenId) -> Result<Address, Error> {
     let key_bytes = create_token_key(env, TOKEN_OWNER, token_id);
-    if let Some(owner) = env.storage().persistent().get::<BytesN<32>, Address>(&key_bytes) {
+    if let Some(owner) = env
+        .storage()
+        .persistent()
+        .get::<BytesN<32>, Address>(&key_bytes)
+    {
         return Ok(owner);
     }
     Err(Error::TokenDoesNotExist)
@@ -27,7 +31,11 @@ pub fn save_token_metadata(env: &Env, token_id: &TokenId, metadata: &Metadata) {
 
 pub fn get_token_metadata(env: &Env, token_id: &TokenId) -> Result<Metadata, Error> {
     let key_bytes = create_token_key(env, TOKEN_METADATA, token_id);
-    if let Some(metadata) = env.storage().persistent().get::<BytesN<32>, Metadata>(&key_bytes) {
+    if let Some(metadata) = env
+        .storage()
+        .persistent()
+        .get::<BytesN<32>, Metadata>(&key_bytes)
+    {
         return Ok(metadata);
     }
     Err(Error::TokenDoesNotExist)
@@ -77,7 +85,10 @@ pub fn is_minter(env: &Env, address: &Address) -> bool {
 
 fn get_minters(env: &Env) -> Map<Address, bool> {
     let key_bytes = create_simple_key(env, MINTER);
-    env.storage().persistent().get(&key_bytes).unwrap_or_else(|| Map::new(env))
+    env.storage()
+        .persistent()
+        .get(&key_bytes)
+        .unwrap_or_else(|| Map::new(env))
 }
 
 fn create_simple_key(env: &Env, key_data: &[u8]) -> BytesN<32> {
@@ -85,4 +96,4 @@ fn create_simple_key(env: &Env, key_data: &[u8]) -> BytesN<32> {
     key_bytes.extend_from_slice(key_data);
     let hash = env.crypto().sha256(&key_bytes);
     BytesN::from_array(env, &hash.into())
-} 
+}

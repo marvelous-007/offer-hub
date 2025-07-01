@@ -1,5 +1,5 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, Env, Address, String, Vec};
+use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
 
 mod events;
 mod reward;
@@ -10,7 +10,7 @@ mod types;
 mod test;
 
 pub use crate::reward::TokenRewardContract;
-pub use types::{RewardData, Error};
+pub use types::{Error, RewardData};
 
 #[contract]
 pub struct Contract;
