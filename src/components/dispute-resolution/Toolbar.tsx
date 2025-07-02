@@ -67,7 +67,11 @@ export default function DisputeToolbar({ onSearch, onFilter, onExport }: Toolbar
 
         {/* Status Filter */}
         <Select value={status} onValueChange={setStatus}>
+
           <SelectTrigger className="w-full sm:w-[140px] h-10 border-gray-300 bg-[#149A9B]">
+
+          <SelectTrigger className="w-full sm:w-[140px] h-10 border-gray-300">
+
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -127,7 +131,11 @@ export default function DisputeToolbar({ onSearch, onFilter, onExport }: Toolbar
 
         {/* Export Button */}
         <Button
+
           className="h-10 px-4 bg-[#002333] text-white rounded-lg w-full sm:w-auto"
+
+          className="h-10 px-4 bg-[#149A9B] hover:bg-[#108080] text-white rounded-lg w-full sm:w-auto"
+
           onClick={handleExport}
         >
           Export Report

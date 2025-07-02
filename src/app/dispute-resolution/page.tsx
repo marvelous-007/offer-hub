@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useSearchParams } from "next/navigation";
@@ -18,3 +19,9 @@ export default function DisputeResolutionPage() {
     </div>
   );
 }
+
+import DisputeResolutionPage from "@/components/dispute-resolution/DisputeResolutionPage";
+
+export default function Page() {
+  return <DisputeResolutionPage />;
+} 

@@ -37,6 +37,8 @@ export interface DisputeRow {
   name: string;
   ticket: string;
   email: string;
+  userId?: string;
+  amount?: string;
 }
 
 
