@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@creit.tech/stellar-wallets-kit':
+        specifier: ^1.6.1
+        version: 1.7.5(@stellar/stellar-base@13.1.0)(@stellar/stellar-sdk@12.3.0)(@trezor/connect@9.5.1(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(tslib@2.8.1)(typescript@5.7.3)(utf-8-validate@5.0.10)(ws@7.5.10(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(@types/react@19.0.6)(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(near-api-js@5.1.1)(react@19.0.0)(tslib@2.8.1)(typescript@5.7.3)(utf-8-validate@5.0.10)(ws@7.5.10(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      '@faker-js/faker':
+        specifier: ^9.8.0
+        version: 9.9.0
       '@hookform/resolvers':
         specifier: ^3.10.0
         version: 3.10.0(react-hook-form@7.54.2(react@19.0.0))
@@ -389,6 +395,32 @@ packages:
   '@eslint/plugin-kit@0.2.5':
     resolution: {integrity: sha512-lB05FkqEdUg2AA0xEbUz0SnkXT1LcCTa438W4IWTUh4hdOnVbQyOJ81OrDXsJk/LSiJHubgGEFoR5EHq1NsH1A==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@ethereumjs/common@4.4.0':
+    resolution: {integrity: sha512-Fy5hMqF6GsE6DpYTyqdDIJPJgUtDn4dL120zKw+Pswuo+iLyBsEYuSyzMw6NVzD2vDzcBG9fE4+qX4X2bPc97w==}
+
+  '@ethereumjs/rlp@5.0.2':
+    resolution: {integrity: sha512-DziebCdg4JpGlEqEdGgXmjqcFoJi+JGulUXwEjsZGAscAQ7MyD/7LE/GVCP29vEQxKc7AAwjT3A2ywHp2xfoCA==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  '@ethereumjs/tx@5.4.0':
+    resolution: {integrity: sha512-SCHnK7m/AouZ7nyoR0MEXw1OO/tQojSbp88t8oxhwes5iZkZCtfFdUrJaiIb72qIpH2FVw6s1k1uP7LXuH7PsA==}
+    engines: {node: '>=18'}
+
+  '@ethereumjs/util@9.1.0':
+    resolution: {integrity: sha512-XBEKsYqLGXLah9PNJbgdkigthkG7TAGvlD/sH12beMXEyHDyigfcbdvHhmLyDWgDyOJn4QwiQUaF7yeuhnjdog==}
+    engines: {node: '>=18'}
+
+  '@everstake/wallet-sdk-solana@2.0.5':
+    resolution: {integrity: sha512-U5v5+wqkDyqENvKjAVMBNDSXhU7uNVxg1+p6HoWtdtsXBlsIKGpEywrKv3WkQItHmzTgqeix8csMMEB508cCww==}
+
+  '@faker-js/faker@9.9.0':
+    resolution: {integrity: sha512-OEl393iCOoo/z8bMezRlJu+GlRGlsKbUAN7jKB6LhnKoqKve5DXRpalbItIIcwnCjs1k/FOPjFzcA6Qn+H+YbA==}
+    engines: {node: '>=18.0.0', npm: '>=9.0.0'}
+
+  '@fivebinaries/coin-selection@3.0.0':
+    resolution: {integrity: sha512-h25Pn1ZA7oqQBQDodGAgIsQt66T2wDge9onBKNqE66WNWL0KJiKJbpij8YOLo5AAlEIg5IS7EB1QjBgDOIg6DQ==}
 
   '@floating-ui/core@1.6.9':
     resolution: {integrity: sha512-uMXCuQ3BItDUbAMhIXw7UPXRfAlOAvZzdK9BWpE60MCn+Svt3aLn9jsPTi/WNGlRUu2uI0v5S7JiIUsbsvh3fw==}
@@ -2280,6 +2312,7 @@ packages:
 
   '@walletconnect/modal@2.6.2':
     resolution: {integrity: sha512-eFopgKi8AjKf/0U4SemvcYw9zlLpx9njVN8sf6DAkowC2Md0gPU/UNEbH1Wwj407pEKnEds98pKWib1NN1ACoA==}
+    deprecated: Please follow the migration guide on https://docs.reown.com/appkit/upgrade/wcm
 
   '@walletconnect/relay-api@1.0.11':
     resolution: {integrity: sha512-tLPErkze/HmC9aCmdZOhtVmYZq1wKfWTJtygQHoWtgg722Jd4homo54Cs4ak2RUFUZIGO2RsOpIcWipaua5D5Q==}
@@ -3885,6 +3918,7 @@ packages:
 
   lodash.isequal@4.5.0:
     resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
+    deprecated: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
 
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
@@ -5895,6 +5929,42 @@ snapshots:
     dependencies:
       '@eslint/core': 0.10.0
       levn: 0.4.1
+
+  '@ethereumjs/common@4.4.0':
+    dependencies:
+      '@ethereumjs/util': 9.1.0
+
+  '@ethereumjs/rlp@5.0.2': {}
+
+  '@ethereumjs/tx@5.4.0':
+    dependencies:
+      '@ethereumjs/common': 4.4.0
+      '@ethereumjs/rlp': 5.0.2
+      '@ethereumjs/util': 9.1.0
+      ethereum-cryptography: 2.2.1
+
+  '@ethereumjs/util@9.1.0':
+    dependencies:
+      '@ethereumjs/rlp': 5.0.2
+      ethereum-cryptography: 2.2.1
+
+  '@everstake/wallet-sdk-solana@2.0.5(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(ws@7.5.10(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
+    dependencies:
+      '@solana-program/compute-budget': 0.6.1(@solana/web3.js@2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(ws@7.5.10(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
+      '@solana-program/stake': 0.1.0(@solana/web3.js@2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(ws@7.5.10(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
+      '@solana-program/system': 0.6.2(@solana/web3.js@2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(ws@7.5.10(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
+      '@solana/web3.js': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.7.3)(ws@7.5.10(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+    transitivePeerDependencies:
+      - fastestsmallesttextencoderdecoder
+      - typescript
+      - ws
+
+  '@faker-js/faker@9.9.0': {}
+
+  '@fivebinaries/coin-selection@3.0.0':
+    dependencies:
+      '@emurgo/cardano-serialization-lib-browser': 13.2.1
+      '@emurgo/cardano-serialization-lib-nodejs': 13.2.0
 
   '@floating-ui/core@1.6.9':
     dependencies:
@@ -8219,7 +8289,7 @@ snapshots:
 
   '@walletconnect/relay-api@1.0.11':
     dependencies:
-      '@walletconnect/jsonrpc-types': 1.0.3
+      '@walletconnect/jsonrpc-types': 1.0.4
 
   '@walletconnect/relay-auth@1.1.0':
     dependencies:
