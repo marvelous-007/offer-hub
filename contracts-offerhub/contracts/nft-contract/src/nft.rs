@@ -1,9 +1,14 @@
-use soroban_sdk::{Address, Env, String};
-use crate::{TokenId, Metadata, Error};
-use crate::storage::{save_token_owner, get_token_owner, token_exists, save_admin, get_admin, is_minter};
+use crate::access::{
+    add_minter as add_minter_impl, check_minter, check_owner, remove_minter as remove_minter_impl,
+    transfer_admin as transfer_admin_impl,
+};
 use crate::events::{emit_minted, emit_transferred};
-use crate::access::{check_minter, check_owner, transfer_admin as transfer_admin_impl, add_minter as add_minter_impl, remove_minter as remove_minter_impl};
-use crate::metadata::{store_metadata, get_metadata as get_token_metadata};
+use crate::metadata::{get_metadata as get_token_metadata, store_metadata};
+use crate::storage::{
+    get_admin, get_token_owner, is_minter, save_admin, save_token_owner, token_exists,
+};
+use crate::{Error, Metadata, TokenId};
+use soroban_sdk::{Address, Env, String};
 
 pub struct NFTContract;
 
@@ -45,12 +50,12 @@ impl NFTContract {
     pub fn transfer(env: Env, from: Address, to: Address, token_id: TokenId) -> Result<(), Error> {
         // Check if token exists and get owner
         let owner = get_token_owner(&env, &token_id)?;
-        
+
         // Validate that from is the owner
         if owner != from {
             return Err(Error::Unauthorized);
         }
-        
+
         // Check authorization from the owner
         check_owner(&env, &from)?;
 
@@ -90,4 +95,4 @@ impl NFTContract {
     pub fn transfer_admin(env: Env, caller: Address, new_admin: Address) -> Result<(), Error> {
         transfer_admin_impl(&env, &caller, &new_admin)
     }
-} 
+}
