@@ -41,9 +41,9 @@ export default function Sidebar({ onClose }: SidebarProps) {
     },
     {
       name: "Dispute resolution",
-      href: "/admin/dispute-resolution",
+      href: "/dispute-resolution",
       icon: FileText,
-      active: pathname.includes("/admin/dispute-resolution"),
+      active: pathname.includes("/dispute-resolution"),
     },
   ];
 
