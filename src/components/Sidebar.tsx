@@ -45,6 +45,11 @@ export default function Sidebar({ onClose }: SidebarProps) {
       icon: FileText,
       active: pathname.includes("/dispute-resolution"),
     },
+    {
+  label: "Resolved dispute",
+  href: "/dispute-resolution?tab=resolved",
+}
+
   ];
 
   return (
