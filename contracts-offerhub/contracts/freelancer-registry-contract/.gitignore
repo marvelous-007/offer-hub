@@ -1,0 +1,17 @@
+# Build artifacts
+/target/
+**/*.rs.bk
+*.wasm
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# Test artifacts
+test_snapshots/
+
+# Cargo lock file (uncomment if you want to ignore it)
+# Cargo.lock
