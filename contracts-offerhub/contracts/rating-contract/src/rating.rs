@@ -43,7 +43,7 @@ impl RatingContract {
         };
         
         // Store the rating
-        save_rating(&env, &target, job_id, &rating);
+        save_rating(&env, &rating);
         
         // Add to the user's ratings list
         let mut user_ratings = get_user_ratings(&env, &target);
