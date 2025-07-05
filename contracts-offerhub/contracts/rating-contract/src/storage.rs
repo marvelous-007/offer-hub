@@ -40,7 +40,9 @@ pub fn get_user_ratings(env: &Env, target: &Address) -> Vec<RatingData> {
 fn create_rating_key(env: &Env, target: &Address, job_id: u32) -> BytesN<32> {
     let mut key_data = Bytes::new(env);
     key_data.extend_from_slice(RATING_KEY_PREFIX);
-    key_data.extend_from_slice(&target.to_xdr(env));
+    // Convert Address to bytes for storage key
+    let addr_bytes = env.storage().instance().get_unchecked(target).unwrap();
+    key_data.extend_from_slice(addr_bytes.to_vec().as_slice());
     key_data.extend_from_slice(&job_id.to_be_bytes());
     let hash = env.crypto().sha256(&key_data);
     BytesN::from_array(env, &hash.into())
@@ -50,7 +52,9 @@ fn create_rating_key(env: &Env, target: &Address, job_id: u32) -> BytesN<32> {
 fn create_user_key(env: &Env, target: &Address) -> BytesN<32> {
     let mut key_data = Bytes::new(env);
     key_data.extend_from_slice(USER_RATINGS_PREFIX);
-    key_data.extend_from_slice(&target.to_xdr(env));
+    // Convert Address to bytes for storage key
+    let addr_bytes = env.storage().instance().get_unchecked(target).unwrap();
+    key_data.extend_from_slice(addr_bytes.to_vec().as_slice());
     let hash = env.crypto().sha256(&key_data);
     BytesN::from_array(env, &hash.into())
 }
