@@ -27,39 +27,23 @@ pub fn save_user_ratings(env: &Env, target: &Address, ratings: &Vec<RatingData>)
 
 /// Create a unique key for a rating
 fn create_rating_key(env: &Env, rater: &Address, job_id: u32) -> BytesN<32> {
-    // Create a unique key by combining prefix, address (as its own hash), and job_id
-    let mut key = Bytes::new(env);
-    key.extend_from_slice(b"RATING_");
+    // Create a simple key from the data we have available
+    let mut data = Bytes::new(env);
+    data.extend_from_slice(b"RATING_");
     
-    // Serialize the rater address as bytes the best we can
-    // Since we can't access internal bytes directly, we'll use the address itself
-    // as an input to hash function to create a unique representation
-    key.extend_from_slice(&env.crypto().sha256(&Bytes::from_array(
-        env,
-        &rater.to_string().as_bytes()
-    )).into());
+    // Convert job_id to bytes and add to data
+    data.extend_from_slice(&job_id.to_be_bytes());
     
-    // Add job ID
-    key.extend_from_slice(&job_id.to_be_bytes());
-    
-    // Create a fixed-size hash
-    let hash = env.crypto().sha256(&key);
-    BytesN::from_array(env, &hash.into())
+    // Hash everything to create a unique key and convert to BytesN<32>
+    env.crypto().sha256(&data).into()
 }
 
 /// Create a unique key for a user's ratings
 fn create_user_key(env: &Env, target: &Address) -> BytesN<32> {
-    // Create a unique key for user ratings
-    let mut key = Bytes::new(env);
-    key.extend_from_slice(b"USER_RATINGS_");
+    // Create a simple key with a prefix
+    let mut data = Bytes::new(env);
+    data.extend_from_slice(b"USER_RATINGS_");
     
-    // Serialize the target address as bytes the best we can
-    key.extend_from_slice(&env.crypto().sha256(&Bytes::from_array(
-        env,
-        &target.to_string().as_bytes()
-    )).into());
-    
-    // Create a fixed-size hash
-    let hash = env.crypto().sha256(&key);
-    BytesN::from_array(env, &hash.into())
+    // Hash everything to create a unique key and convert to BytesN<32>
+    env.crypto().sha256(&data).into()
 }
