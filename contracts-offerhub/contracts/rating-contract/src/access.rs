@@ -2,7 +2,7 @@ use soroban_sdk::{Address, Env};
 use crate::Error;
 
 /// Verify that the provided address is authorized to perform the operation
-pub fn check_auth(env: &Env, address: &Address) -> Result<(), Error> {
+pub fn check_auth(_env: &Env, address: &Address) -> Result<(), Error> {
     address.require_auth();
     Ok(())
 }

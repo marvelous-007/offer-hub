@@ -1,4 +1,4 @@
-use soroban_sdk::{Address, Env, String, Vec, i32};
+use soroban_sdk::{Address, Env, String, Vec};
 use crate::{RatingData, Error};
 use crate::storage::{save_rating, rating_exists, get_user_ratings, save_user_ratings};
 use crate::events::emit_rating_submitted;

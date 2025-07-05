@@ -1,5 +1,5 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, Env, Address, String, Vec, i32};
+use soroban_sdk::{contract, contractimpl, Env, Address, String, Vec};
 
 mod access;
 mod events;

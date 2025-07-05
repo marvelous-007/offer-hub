@@ -1,4 +1,5 @@
-use soroban_sdk::{Address, Env, Vec, BytesN, Bytes, Map};
+use soroban_sdk::{Address, Env, Vec, BytesN, Bytes};
+use soroban_sdk::xdr::ToXdr;
 use crate::{RatingData, Error};
 use crate::types::{RATING_KEY_PREFIX, USER_RATINGS_PREFIX};
 

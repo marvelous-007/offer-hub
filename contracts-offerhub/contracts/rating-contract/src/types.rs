@@ -1,4 +1,4 @@
-use soroban_sdk::{contracttype, Address, String, Env};
+use soroban_sdk::{contracttype, Address, String};
 
 /// Represents a rating given by one user to another for a specific job
 #[contracttype]
@@ -15,12 +15,36 @@ pub struct RatingData {
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Error {
+    // Authentication errors
+    Unauthorized,
+    
+    // Validation errors
     InvalidScore,
     DuplicateRating,
-    JobNotCompleted,
+    JobNotComplete,
     NotJobParticipant,
-    Unauthorized,
     UserNotFound,
+}
+
+impl From<soroban_sdk::Error> for Error {
+    fn from(_e: soroban_sdk::Error) -> Self {
+        // Default to Unauthorized for any SDK errors
+        Error::Unauthorized
+    }
+}
+
+impl From<Error> for soroban_sdk::Error {
+    fn from(_e: Error) -> Self {
+        // Map our custom errors to generic contract error
+        soroban_sdk::Error::from_contract_error(1)
+    }
+}
+
+impl From<&Error> for soroban_sdk::Error {
+    fn from(_e: &Error) -> Self {
+        // Map our custom errors to generic contract error
+        soroban_sdk::Error::from_contract_error(1)
+    }
 }
 
 /// Storage keys for the contract's persistent data
