@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from "react";
-import DisputeTabs from "@/components/dispute-resolution/tabs";
+import DisputeTabs from "@/components/dispute-resolution/Tabs";
 import UnassignedDispute from "@/components/dispute-resolution/views/unassigned-dispute";
 import ResolvedDispute from "@/components/dispute-resolution/views/resolved-dispute";
 import ActiveDispute from "@/components/dispute-resolution/views/active-dispute";
