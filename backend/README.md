@@ -1,81 +1,115 @@
 # 🚀 OFFER-HUB Backend
 
-Backend for **OFFER-HUB**, a blockchain-based freelance services platform using Stellar.
+This is the backend for **OFFER-HUB**, a freelance platform powered by Supabase and Node.js. It handles user management, services, project workflows, reviews, and more — using Express and PostgreSQL.
 
 ---
 
-## 📌 **Prerequisites**
+## ⚙️ Technologies Used
 
-- **Node.js** (LTS recommended)
-- **NPM** or `yarn`
-- **Docker & Docker Compose**
+* **Node.js**
+* **Express**
+* **TypeScript**
+* **Supabase (PostgreSQL)**
+* **ts-node**
+* **dotenv**
+* **CORS**
 
 ---
 
-## ⚡ **Setup & Installation**
+## 📁 Folder Structure
 
-### 1️⃣ **Clone the repository**
-
-```sh
-git clone https://github.com/user/offer-hub.git
-cd offer-hub/backend
+```
+backend/
+├── src/
+│   ├── controller/         # Route handlers
+│   ├── routes/             # API route definitions
+│   ├── services/           # Business logic
+│   └── index.ts            # App entry point
+├── supabase/
+│   └── migrations/         # One .sql file per DB table
+├── .env.example
+├── README.md
 ```
 
-### 2️⃣ **Install dependencies**
+---
 
-```sh
+## 🔐 Environment Setup
+
+1. Duplicate the `.env.example` file and rename it to `.env`
+2. Add your Supabase credentials:
+
+```env
+# =================================
+#  PORT
+# ================================
+
+PORT=4000
+
+# =================================
+#  SUPABASE
+# ================================
+
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+```
+
+> You can find these keys in your Supabase [dashboard](https://supabase.com/dashboard), under **Project Settings → API**.
+
+---
+
+## 🧪 Database Setup with Supabase
+
+### 1. Create a Supabase Project
+
+* Go to [https://supabase.com](https://supabase.com)
+* Create a new project
+* Save the project ref and password
+
+### 2. Link Your Supabase Project
+
+```bash
+npx supabase login
+npx supabase link --project-ref YOUR_PROJECT_REF
+```
+
+You’ll be asked to enter your database password.
+
+---
+
+### 3. Apply Migrations
+
+Once linked, push your SQL migrations:
+
+```bash
+npx supabase db push
+```
+
+This will create all tables defined in `supabase/migrations/` in your Supabase project.
+
+---
+
+## 🚀 Run the Backend
+
+### Development Mode
+
+```bash
 npm install
+npm run dev
 ```
 
-### 3️⃣ **Set up environment variables**
+### Production Mode
 
-Create a `.env` file in `backend/` with:
-
-```typescript
-DATABASE_HOST=offer_hub_database
-DATABASE_PORT=5432
-DATABASE_USER=offerhub_admin
-DATABASE_PASSWORD=offerhub_pass
-DATABASE_NAME=offer_hub_database
-DOCKER_ENV=true
-PORT=3002
-HASURA_GRAPHQL_DATABASE_URL=postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}
-HASURA_GRAPHQL_ADMIN_SECRET=offerhub_secret
-WEBHOOK_SECRET=secret//Secret webhook must be incororpored to do test local
+```bash
+npm run start
 ```
 
 ---
 
-## 🛠 **Starting Backend & Database**
+## ✅ Notes
 
-### 1️⃣ **Start Database, Hasura & Backend**
-
-```sh
-docker compose up --build
-```
-
-### 2️⃣ **Verify Database**
-
-```sh
-docker logs offer_hub_database
-```
+* Do **not** commit your real `.env` file — it’s ignored via `.gitignore`.
+* Each migration is in its own file and auto-applies via `supabase db push`.
+* You must test each endpoint with the **Supabase DB** and provide **screenshots** before any pull request is approved.
 
 ---
-
-## ✅ **Useful Commands**
-
-| Command                          | Description                      |
-| -------------------------------- | -------------------------------- |
-| `npm install`                    | Install dependencies             |
-| `docker compose up --build`      | Start database, Hasura & Backend |
-| `docker logs offer_hub_database` | Check database logs              |
-
----
-
-## 🎯 **Next Steps**
-
-- Set up **GraphQL APIs** in Hasura
-- Configure **authentication & authorization**
-- Implement **Stellar blockchain transactions**
-
-🚀 **OFFER-HUB** development in progress! 🚀
