@@ -12,7 +12,7 @@ export default function FreelancerProfilePage() {
     <div className="relative">
       <StepsController />
 
-      {/* <div>
+      <div>
         <Footer>
           <div className="mx-auto max-w-4xl flex justify-between items-center">
             <div>
@@ -39,7 +39,7 @@ export default function FreelancerProfilePage() {
             </div>
           </div>
         </Footer>
-      </div> */}
+      </div> 
     </div>
   );
 }
