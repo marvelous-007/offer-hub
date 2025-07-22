@@ -17,7 +17,7 @@ const navigationItems = [
   {
     title: "Dashboard",
     icon: LayoutDashboard,
-    href: "/dashboard",
+    href: "/onboarding/dashboard",
   },
   {
     title: "Create project",
@@ -27,7 +27,7 @@ const navigationItems = [
   {
     title: "Search Talent",
     icon: Search,
-    href: "/dashboard/search-talent",
+    href: "/onboarding/dashboard/talent",
   },
   {
     title: "Manage project",

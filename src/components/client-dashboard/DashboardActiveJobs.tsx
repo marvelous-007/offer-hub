@@ -8,6 +8,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import Link from "next/link";
+
 interface JobPost {
   id: string;
   title: string;
@@ -99,7 +101,11 @@ function JobCard({ job }: { job: JobPost }) {
           </div>
         </div>
 
-        <Button className="w-full bg-gray-800 hover:bg-gray-900 text-white py-3 rounded-full">
+        <Link href="/onboarding/dashboard/job">
+          <Button className="w-full bg-gray-800 hover:bg-gray-900 text-white py-3 rounded-full">
+            Search talents
+          </Button>
+        </Link>
           Search talents
         </Button>
       </CardContent>
