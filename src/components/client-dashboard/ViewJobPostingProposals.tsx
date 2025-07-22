@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MoreHorizontal } from "lucide-react";
+import Link from "next/link";
 
 export default function Component() {
   const jobPostings = [
@@ -36,16 +37,6 @@ export default function Component() {
 
   return (
     <div className="max-w-md mx-auto bg-white">
-      {/* Header Tabs */}
-      <div className="flex">
-        <button className="flex-1 bg-slate-700 text-white py-3 px-4 text-sm font-medium">
-          View job postings
-        </button>
-        <button className="flex-1 bg-teal-500 text-white py-3 px-4 text-sm font-medium">
-          Responses
-        </button>
-      </div>
-
       {/* Job Postings List */}
       <div className="space-y-4 p-4">
         {jobPostings.map((job) => (
@@ -77,9 +68,11 @@ export default function Component() {
               {job.description}
             </p>
 
-            <Button className="w-full bg-slate-700 hover:bg-slate-800 text-white">
-              Hire
-            </Button>
+            <Link href="/onboarding/dashboard/view-job">
+              <Button className="w-full bg-slate-700 hover:bg-slate-800 text-white">
+                Hire
+              </Button>
+            </Link>
           </Card>
         ))}
       </div>
