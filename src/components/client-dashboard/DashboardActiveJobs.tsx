@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 import Link from "next/link";
 
 interface JobPost {
@@ -105,6 +106,8 @@ function JobCard({ job }: { job: JobPost }) {
             Search talents
           </Button>
         </Link>
+          Search talents
+        </Button>
       </CardContent>
     </Card>
   );
