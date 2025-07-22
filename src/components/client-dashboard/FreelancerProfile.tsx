@@ -1,225 +1,276 @@
-import Image from "next/image";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Heart, Star, ChevronLeft, ChevronRight } from "lucide-react";
+"use client";
 
-export default function ProfilePage() {
+import { useState } from "react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
+
+const portfolioItems = [
+  {
+    id: 1,
+    title: "Mobile app design",
+    image: "/portfolio/mobile1.png",
+    date: "August 2024",
+  },
+  {
+    id: 2,
+    title: "Mobile app design",
+    image: "/portfolio/mobile2.png",
+    date: "August 2024",
+  },
+  {
+    id: 3,
+    title: "Website design",
+    image: "/portfolio/website.png",
+    date: "August 2024",
+  },
+  {
+    id: 4,
+    title: "Landing page design",
+    image: "/portfolio/landing.png",
+    date: "August 2024",
+  },
+  {
+    id: 5,
+    title: "Dashboard design",
+    image: "/portfolio/dashboard1.png",
+    date: "August 2024",
+  },
+  {
+    id: 6,
+    title: "Dashboard design",
+    image: "/portfolio/dashboard2.png",
+    date: "August 2024",
+  },
+];
+
+const reviews = [
+  {
+    id: 1,
+    name: "John Doe",
+    date: "March 20, 2024",
+    rating: 4,
+    text: "Very helpful, and insightful. We look forward to a long lasting relationship with Mohsin and his team of lead generation experts.",
+  },
+  {
+    id: 2,
+    name: "Alex Smith",
+    date: "April 15, 2025",
+    rating: 5,
+    text: "Incredibly useful and enlightening. We are excited about building a lasting partnership with Sarah and her team of marketing specialists.",
+  },
+  {
+    id: 3,
+    name: "Emily Johnson",
+    date: "April 15, 2025",
+    rating: 5,
+    text: "Incredibly useful and enlightening. We are excited about building a lasting partnership with Sarah and her team of marketing specialists.",
+  },
+];
+
+export default function FreelancerProfile() {
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 6;
+  const totalPages = Math.ceil(portfolioItems.length / itemsPerPage);
+
+  const visibleItems = portfolioItems.slice(
+    currentPage * itemsPerPage,
+    currentPage * itemsPerPage + itemsPerPage
+  );
+
+  const handleNext = () =>
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1));
+  const handleBack = () => setCurrentPage((prev) => Math.max(prev - 1, 0));
+
+  const [currentReviewPage, setCurrentReviewPage] = useState(0);
+  const reviewsPerPage = 3;
+  const totalReviewPages = Math.ceil(reviews.length / reviewsPerPage);
+
+  const visibleReviews = reviews.slice(
+    currentReviewPage * reviewsPerPage,
+    currentReviewPage * reviewsPerPage + reviewsPerPage
+  );
+
+  const handleReviewsNext = () =>
+    setCurrentReviewPage((prev) => Math.min(prev + 1, totalReviewPages - 1));
+  const handleReviewsBack = () =>
+    setCurrentReviewPage((prev) => Math.max(prev - 1, 0));
+
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8 lg:p-12">
-      {/* Profile Header Section */}
-      <section className="bg-white rounded-lg shadow-md p-6 mb-8">
+    <div className="space-y-10 px-4 pb-10 max-w-6xl mx-auto">
+      {/* --- FREELANCER PROFILE SECTION --- */}
+      <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex items-center gap-4 mb-6">
           <Avatar className="w-20 h-20">
-            <AvatarImage
+            <Image
               src="/placeholder.svg?height=80&width=80"
               alt="John D"
+              width={80}
+              height={80}
+              className="rounded-full object-cover"
             />
             <AvatarFallback>JD</AvatarFallback>
           </Avatar>
-          <div>
-            <p className="text-sm text-gray-500">John D</p>
-            <h1 className="text-2xl font-bold">
+          <div className="flex flex-col">
+            <p className="text-gray-600 text-lg font-semibold">John D</p>
+            <h2 className="text-gray-900 text-2xl font-bold leading-tight">
               UI/UX designer | Brand designer |
-            </h1>
-            <p className="text-lg font-medium">Figma pro</p>
-            <p className="text-sm text-gray-500">Canada</p>
+              <br /> Figma pro
+            </h2>
+            <p className="text-teal-600 text-base mt-1">Canada</p>
           </div>
         </div>
-        <p className="text-gray-700 mb-6">
+
+        <p className="text-gray-700 text-base leading-relaxed mb-8">
           I am a UI/UX designer with 4 years of experience in creating
-          user-friendly intHello! I came across your job posting for a market
-          survey freelancer in Kaduna, and I believe I would be a great fit for
-          this role. With my extensive experience in market research and a solid
-          grasp of local market dynamics, I am confident in my ability to gather
-          and analyze data effectively. I am detail-oriented and committed to
-          providing actionable insights that can help your business thrive. I
-          would love the opportunity to discuss how I can contribute to your
-          project interfaces and enhancing user experiences. My passion lies in
-          understanding user needs and translating them into intuitive designs
-          that drive engagement and satisfaction.
+          user-friendly interfaces and enhancing user experiences. My passion
+          lies in understanding user needs and translating them into intuitive
+          designs that drive engagement and satisfaction.
         </p>
+
         <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-full w-10 h-10 bg-transparent"
+          <button
+            className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+            aria-label="Like"
           >
             <Heart className="w-5 h-5" />
-          </Button>
+          </button>
           <Button
-            variant="outline"
-            className="flex-1 max-w-[200px] py-2 px-4 rounded-full bg-transparent"
+            variant="ghost"
+            className="flex-1 rounded-full border border-gray-300 text-gray-800 bg-white hover:bg-gray-50 px-8 py-3 text-lg font-medium"
           >
             Message
           </Button>
-          <Button className="flex-1 max-w-[200px] py-2 px-4 rounded-full bg-gray-900 text-white hover:bg-gray-800">
+          <Button
+            variant="default"
+            className="flex-1 bg-[#002333] rounded-full text-white hover:bg-[#002333]/90 px-8 py-3 text-lg font-medium"
+          >
             Hire
           </Button>
         </div>
-      </section>
+      </div>
 
-      {/* Portfolio Section */}
-      <section className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-xl font-bold mb-6">Portfolio</h2>
-        <div className="overflow-x-auto pb-4">
-          <div className="flex gap-6 min-w-max">
-            <div className="flex-shrink-0 w-[200px] text-center">
+      {/* --- PORTFOLIO SECTION --- */}
+      <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Portfolio</h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-6">
+          {visibleItems.map((item) => (
+            <div
+              key={item.id}
+              className="bg-white border rounded-lg overflow-hidden shadow-sm"
+            >
               <Image
-                src="/placeholder.svg?height=150&width=200"
-                alt="Mobile app design"
-                width={200}
-                height={150}
-                className="rounded-lg object-cover mb-2"
+                src={item.image}
+                alt={item.title}
+                width={400}
+                height={260}
+                className="w-full h-44 object-cover"
               />
-              <p className="font-semibold text-sm">Mobile app design</p>
-              <p className="text-xs text-gray-500">August 2024</p>
+              <div className="p-4">
+                <h3 className="font-medium text-lg text-gray-900">
+                  {item.title}
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">{item.date}</p>
+              </div>
             </div>
-            <div className="flex-shrink-0 w-[200px] text-center">
-              <Image
-                src="/placeholder.svg?height=150&width=200"
-                alt="Mobile app design"
-                width={200}
-                height={150}
-                className="rounded-lg object-cover mb-2"
-              />
-              <p className="font-semibold text-sm">Mobile app design</p>
-              <p className="text-xs text-gray-500">August 2024</p>
-            </div>
-            <div className="flex-shrink-0 w-[200px] text-center">
-              <Image
-                src="/placeholder.svg?height=150&width=200"
-                alt="Website design"
-                width={200}
-                height={150}
-                className="rounded-lg object-cover mb-2"
-              />
-              <p className="font-semibold text-sm">Website design</p>
-              <p className="text-xs text-gray-500">August 2024</p>
-            </div>
-            <div className="flex-shrink-0 w-[200px] text-center">
-              <Image
-                src="/placeholder.svg?height=150&width=200"
-                alt="Landing page design"
-                width={200}
-                height={150}
-                className="rounded-lg object-cover mb-2"
-              />
-              <p className="font-semibold text-sm">Landing page design</p>
-              <p className="text-xs text-gray-500">August 2024</p>
-            </div>
-            <div className="flex-shrink-0 w-[200px] text-center">
-              <Image
-                src="/placeholder.svg?height=150&width=200"
-                alt="Dashboard design"
-                width={200}
-                height={150}
-                className="rounded-lg object-cover mb-2"
-              />
-              <p className="font-semibold text-sm">Dashboard design</p>
-              <p className="text-xs text-gray-500">August 2024</p>
-            </div>
-            <div className="flex-shrink-0 w-[200px] text-center">
-              <Image
-                src="/placeholder.svg?height=150&width=200"
-                alt="Dashboard design"
-                width={200}
-                height={150}
-                className="rounded-lg object-cover mb-2"
-              />
-              <p className="font-semibold text-sm">Dashboard design</p>
-              <p className="text-xs text-gray-500">August 2024</p>
-            </div>
-          </div>
+          ))}
         </div>
-        <div className="flex justify-between items-center mt-4">
-          <Button variant="ghost" className="text-gray-500">
-            <ChevronLeft className="w-4 h-4 mr-1" /> Back
-          </Button>
+
+        <div className="flex items-center justify-center gap-6">
+          <button
+            onClick={handleBack}
+            disabled={currentPage === 0}
+            className="text-sm text-gray-500 hover:text-teal-600 disabled:opacity-40 flex items-center gap-1"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Back
+          </button>
           <div className="flex gap-2">
-            <div className="w-2 h-2 bg-gray-300 rounded-full" />
-            <div className="w-2 h-2 bg-gray-900 rounded-full" />
-            <div className="w-2 h-2 bg-gray-300 rounded-full" />
-            <div className="w-2 h-2 bg-gray-300 rounded-full" />
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <span
+                key={i}
+                className={`w-2 h-2 rounded-full ${
+                  i === currentPage ? "bg-teal-600" : "bg-gray-300"
+                }`}
+              />
+            ))}
           </div>
-          <Button variant="ghost" className="text-gray-500">
-            Next <ChevronRight className="w-4 h-4 ml-1" />
-          </Button>
+          <button
+            onClick={handleNext}
+            disabled={currentPage === totalPages - 1}
+            className="text-sm text-teal-600 hover:text-teal-700 flex items-center gap-1"
+          >
+            Next
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
-      </section>
+      </div>
 
-      {/* Reviews Section */}
-      <section className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-bold mb-6">Reviews</h2>
-        <div className="space-y-6">
-          {/* Review 1 */}
-          <div>
-            <h3 className="font-semibold text-lg">John Doe</h3>
-            <p className="text-sm text-gray-500 mb-2">March 20, 2024</p>
-            <div className="flex items-center gap-0.5 mb-2">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            </div>
-            <p className="text-gray-700">
-              &quot;Very helpful, and insightful. We look forward to a long
-              lasting relationship with Mohsin and his team of lead generation
-              experts.&quot;
-            </p>
-          </div>
+      {/* --- REVIEWS SECTION --- */}
+      <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Reviews</h2>
 
-          {/* Review 2 */}
-          <div>
-            <h3 className="font-semibold text-lg">Alex Smith</h3>
-            <p className="text-sm text-gray-500 mb-2">April 15, 2025</p>
-            <div className="flex items-center gap-0.5 mb-2">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <Star className="w-4 h-4 text-gray-300" /> {/* One empty star */}
+        <div className="space-y-6 mb-6">
+          {visibleReviews.map((review) => (
+            <div key={review.id} className="border-b border-gray-200 pb-4">
+              <div className="flex justify-between items-start mb-1">
+                <div>
+                  <p className="font-semibold text-gray-900">{review.name}</p>
+                  <p className="text-sm text-gray-500">{review.date}</p>
+                </div>
+                <div className="flex">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <svg
+                      key={i}
+                      className={`w-4 h-4 fill-current ${
+                        i < review.rating ? "text-yellow-400" : "text-gray-300"
+                      }`}
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M10 15l-5.878 3.09L5.64 12.09.763 7.91l6.36-.924L10 1l2.877 5.986 6.36.924-4.878 4.18 1.518 5.998z" />
+                    </svg>
+                  ))}
+                </div>
+              </div>
+              <p className="text-gray-700 text-base leading-relaxed">
+                {review.text}
+              </p>
             </div>
-            <p className="text-gray-700">
-              &quot;Incredibly useful and enlightening. We are excited about
-              building a lasting partnership with Sarah and her team of
-              marketing specialists.&quot;
-            </p>
-          </div>
-
-          {/* Review 3 */}
-          <div>
-            <h3 className="font-semibold text-lg">Emily Johnson</h3>
-            <p className="text-sm text-gray-500 mb-2">April 15, 2025</p>
-            <div className="flex items-center gap-0.5 mb-2">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <Star className="w-4 h-4 text-gray-300" /> {/* One empty star */}
-            </div>
-            <p className="text-gray-700">
-              &quot;Incredibly useful and enlightening. We are excited about
-              building a lasting partnership with Sarah and her team of
-              marketing specialists.&quot;
-            </p>
-          </div>
+          ))}
         </div>
-        <div className="flex justify-between items-center mt-6">
-          <Button variant="ghost" className="text-gray-500">
-            <ChevronLeft className="w-4 h-4 mr-1" /> Back
-          </Button>
+
+        <div className="flex items-center justify-center gap-6">
+          <button
+            onClick={handleReviewsBack}
+            disabled={currentReviewPage === 0}
+            className="text-sm text-gray-500 hover:text-teal-600 disabled:opacity-40 flex items-center gap-1"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Back
+          </button>
           <div className="flex gap-2">
-            <div className="w-2 h-2 bg-gray-300 rounded-full" />
-            <div className="w-2 h-2 bg-gray-900 rounded-full" />
-            <div className="w-2 h-2 bg-gray-300 rounded-full" />
-            <div className="w-2 h-2 bg-gray-300 rounded-full" />
+            {Array.from({ length: totalReviewPages }).map((_, i) => (
+              <span
+                key={i}
+                className={`w-2 h-2 rounded-full ${
+                  i === currentReviewPage ? "bg-teal-600" : "bg-gray-300"
+                }`}
+              />
+            ))}
           </div>
-          <Button variant="ghost" className="text-gray-500">
-            Next <ChevronRight className="w-4 h-4 ml-1" />
-          </Button>
+          <button
+            onClick={handleReviewsNext}
+            disabled={currentReviewPage === totalReviewPages - 1}
+            className="text-sm text-teal-600 hover:text-teal-700 flex items-center gap-1"
+          >
+            Next
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
-      </section>
+      </div>
     </div>
   );
 }
