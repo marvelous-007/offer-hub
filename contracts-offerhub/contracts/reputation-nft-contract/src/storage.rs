@@ -98,7 +98,7 @@ fn create_simple_key(env: &Env, key_data: &[u8]) -> BytesN<32> {
     BytesN::from_array(env, &hash.into())
 }
 
-pub const TOKEN_ID_COUNTER: &[u8] = &[4];
+const TOKEN_ID_COUNTER: &[u8] = &[4];
 
 pub fn next_token_id(env: &Env) -> TokenId {
     let key_bytes = create_simple_key(env, TOKEN_ID_COUNTER);

@@ -1,7 +1,7 @@
 #![cfg(test)]
 
 use crate::{Contract, Error, ReputationNFTContract, TokenId};
-use soroban_sdk::{symbol_short, testutils::Address as _, vec, Address, Env, IntoVal, String, Symbol};
+use soroban_sdk::{symbol_short, testutils::Address as _, vec, Address, Env, IntoVal, String};
 
 // For direct access to storage functions for testing
 use crate::metadata;

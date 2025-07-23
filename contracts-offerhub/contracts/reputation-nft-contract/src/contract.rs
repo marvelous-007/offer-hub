@@ -8,7 +8,7 @@ use crate::storage::{
     get_admin, get_token_owner, is_minter, save_admin, save_token_owner, token_exists, next_token_id,
 };
 use crate::{Error, Metadata, TokenId};
-use soroban_sdk::{Address, Env, String, Symbol};
+use soroban_sdk::{Address, Env, String, Symbol, symbol_short};
 
 pub struct ReputationNFTContract;
 
@@ -41,17 +41,17 @@ impl ReputationNFTContract {
         check_minter(&env, &caller)?;
         let token_id = next_token_id(&env);
         let (name, description, uri) = match &nft_type {
-            s if *s == Symbol::short("tencontr") => (
+            s if *s == symbol_short!("tencontr") => (
                 String::from_str(&env, "10 Completed Contracts"),
                 String::from_str(&env, "Awarded for completing 10 contracts successfully."),
                 String::from_str(&env, "ipfs://10-completed-contracts"),
             ),
-            s if *s == Symbol::short("5stars5x") => (
+            s if *s == symbol_short!("5stars5x") => (
                 String::from_str(&env, "5 Stars 5 Times"),
                 String::from_str(&env, "Awarded for receiving five 5-star reviews."),
                 String::from_str(&env, "ipfs://5-stars-5-times"),
             ),
-            s if *s == Symbol::short("toprated") => (
+            s if *s == symbol_short!("toprated") => (
                 String::from_str(&env, "Top Rated Freelancer"),
                 String::from_str(&env, "Awarded for being a top-rated freelancer."),
                 String::from_str(&env, "ipfs://top-rated-freelancer"),
