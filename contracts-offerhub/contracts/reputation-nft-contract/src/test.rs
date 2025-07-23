@@ -1,6 +1,6 @@
 #![cfg(test)]
 
-use crate::{Contract, Error, NFTContract, TokenId};
+use crate::{Contract, Error, ReputationNFTContract, TokenId};
 use soroban_sdk::{symbol_short, testutils::Address as _, vec, Address, Env, IntoVal, String};
 
 // For direct access to storage functions for testing
@@ -141,11 +141,11 @@ fn test_init() {
 
     // Initialize the contract within a contract context
     env.as_contract(&contract_id, || {
-        let result = NFTContract::init(env.clone(), admin.clone());
+        let result = ReputationNFTContract::init(env.clone(), admin.clone());
         assert!(result.is_ok());
 
         // Verify that the admin is correct
-        let admin_result = NFTContract::get_admin(env.clone()).unwrap();
+        let admin_result = ReputationNFTContract::get_admin(env.clone()).unwrap();
         assert_eq!(admin_result, admin);
     });
 }
@@ -157,14 +157,14 @@ fn test_get_storage_functions() {
     // Execute basic initialization and query operations
     env.as_contract(&contract_id, || {
         // Initialize the contract
-        NFTContract::init(env.clone(), admin.clone()).unwrap();
+        ReputationNFTContract::init(env.clone(), admin.clone()).unwrap();
 
         // Verify that the admin was saved correctly
-        let stored_admin = NFTContract::get_admin(env.clone()).unwrap();
+        let stored_admin = ReputationNFTContract::get_admin(env.clone()).unwrap();
         assert_eq!(stored_admin, admin);
 
         // Verify that we can check the status of a minter
-        let is_admin_minter = NFTContract::is_minter(env.clone(), admin.clone()).unwrap();
+        let is_admin_minter = ReputationNFTContract::is_minter(env.clone(), admin.clone()).unwrap();
         // The admin is not a minter by default, but can mint tokens
         assert!(!is_admin_minter);
     });
@@ -176,10 +176,10 @@ fn test_token_existence_error() {
 
     env.as_contract(&contract_id, || {
         // Initialize contract
-        NFTContract::init(env.clone(), admin.clone()).unwrap();
+        ReputationNFTContract::init(env.clone(), admin.clone()).unwrap();
 
         // Verify error when token doesn't exist
-        let result = NFTContract::get_owner(env.clone(), 999);
+        let result = ReputationNFTContract::get_owner(env.clone(), 999);
         assert_eq!(result, Err(Error::TokenDoesNotExist));
     });
 }
@@ -191,7 +191,7 @@ fn test_mock_mint_and_get_metadata() {
 
     // Initialize the contract
     env.as_contract(&contract_id, || {
-        NFTContract::init(env.clone(), admin.clone()).unwrap();
+        ReputationNFTContract::init(env.clone(), admin.clone()).unwrap();
     });
 
     // Instead of calling mint, we directly simulate the effects
@@ -208,11 +208,11 @@ fn test_mock_mint_and_get_metadata() {
             .unwrap();
 
         // Verify ownership
-        let owner = NFTContract::get_owner(env.clone(), 1).unwrap();
+        let owner = ReputationNFTContract::get_owner(env.clone(), 1).unwrap();
         assert_eq!(owner, user);
 
         // Verify metadata
-        let metadata = NFTContract::get_metadata(env.clone(), 1).unwrap();
+        let metadata = ReputationNFTContract::get_metadata(env.clone(), 1).unwrap();
         assert_eq!(metadata.name, name);
         assert_eq!(metadata.description, description);
         assert_eq!(metadata.uri, uri);
@@ -227,7 +227,7 @@ fn test_mock_transfer() {
 
     // Initialize contract and prepare tokens
     env.as_contract(&contract_id, || {
-        NFTContract::init(env.clone(), admin.clone()).unwrap();
+        ReputationNFTContract::init(env.clone(), admin.clone()).unwrap();
 
         // Simulate an existing token that belongs to original_owner
         storage::save_token_owner(&env, &1, &original_owner);
@@ -236,7 +236,7 @@ fn test_mock_transfer() {
         storage::save_token_owner(&env, &1, &new_owner);
 
         // Verify the new ownership
-        let owner = NFTContract::get_owner(env.clone(), 1).unwrap();
+        let owner = ReputationNFTContract::get_owner(env.clone(), 1).unwrap();
         assert_eq!(owner, new_owner);
     });
 }
@@ -248,20 +248,20 @@ fn test_mock_minter_role() {
 
     env.as_contract(&contract_id, || {
         // Initialize contract
-        NFTContract::init(env.clone(), admin.clone()).unwrap();
+        ReputationNFTContract::init(env.clone(), admin.clone()).unwrap();
 
         // Simulate adding a minter (without calling add_minter)
         storage::add_minter(&env, &minter);
 
         // Verify that the minter was added
-        let is_minter_role = NFTContract::is_minter(env.clone(), minter.clone()).unwrap();
+        let is_minter_role = ReputationNFTContract::is_minter(env.clone(), minter.clone()).unwrap();
         assert!(is_minter_role);
 
         // Simulate removing the minter
         storage::remove_minter(&env, &minter);
 
         // Verify that the minter was removed
-        let is_still_minter = NFTContract::is_minter(env.clone(), minter.clone()).unwrap();
+        let is_still_minter = ReputationNFTContract::is_minter(env.clone(), minter.clone()).unwrap();
         assert!(!is_still_minter);
     });
 }
@@ -273,10 +273,10 @@ fn test_admin_can_mint_without_being_minter() {
 
     env.as_contract(&contract_id, || {
         // Initialize contract and set admin
-        NFTContract::init(env.clone(), admin.clone()).unwrap();
+        ReputationNFTContract::init(env.clone(), admin.clone()).unwrap();
 
         // Verify that the admin is not a minter
-        let is_admin_minter = NFTContract::is_minter(env.clone(), admin.clone()).unwrap();
+        let is_admin_minter = ReputationNFTContract::is_minter(env.clone(), admin.clone()).unwrap();
         assert!(!is_admin_minter);
 
         // The check_minter function in access.rs allows minting if the caller is admin, even if not a minter
@@ -286,7 +286,7 @@ fn test_admin_can_mint_without_being_minter() {
         storage::save_token_owner(&env, &1, &user);
 
         // Verify ownership
-        let owner = NFTContract::get_owner(env.clone(), 1).unwrap();
+        let owner = ReputationNFTContract::get_owner(env.clone(), 1).unwrap();
         assert_eq!(owner, user);
     });
 }
@@ -298,13 +298,13 @@ fn test_transfer_admin_role() {
 
     env.as_contract(&contract_id, || {
         // Initialize contract
-        NFTContract::init(env.clone(), admin.clone()).unwrap();
+        ReputationNFTContract::init(env.clone(), admin.clone()).unwrap();
 
         // Simulate admin transfer
         storage::save_admin(&env, &new_admin);
 
         // Verify that the new admin is correct
-        let admin_result = NFTContract::get_admin(env.clone()).unwrap();
+        let admin_result = ReputationNFTContract::get_admin(env.clone()).unwrap();
         assert_eq!(admin_result, new_admin);
     });
 }
@@ -317,7 +317,7 @@ fn test_multiple_tokens() {
 
     env.as_contract(&contract_id, || {
         // Initialize contract
-        NFTContract::init(env.clone(), admin.clone()).unwrap();
+        ReputationNFTContract::init(env.clone(), admin.clone()).unwrap();
 
         // Simulate multiple tokens with different owners
         // Token 1 for user1
@@ -327,8 +327,8 @@ fn test_multiple_tokens() {
         storage::save_token_owner(&env, &2, &user2);
 
         // Verify owners
-        let owner1 = NFTContract::get_owner(env.clone(), 1).unwrap();
-        let owner2 = NFTContract::get_owner(env.clone(), 2).unwrap();
+        let owner1 = ReputationNFTContract::get_owner(env.clone(), 1).unwrap();
+        let owner2 = ReputationNFTContract::get_owner(env.clone(), 2).unwrap();
 
         assert_eq!(owner1, user1);
         assert_eq!(owner2, user2);
@@ -341,7 +341,7 @@ fn test_metadata_functionality() {
 
     env.as_contract(&contract_id, || {
         // Initialize contract
-        NFTContract::init(env.clone(), admin.clone()).unwrap();
+        ReputationNFTContract::init(env.clone(), admin.clone()).unwrap();
 
         // Create metadata directly
         let token_id = 1;
@@ -360,13 +360,13 @@ fn test_metadata_functionality() {
         .unwrap();
 
         // Verify metadata
-        let metadata = NFTContract::get_metadata(env.clone(), token_id).unwrap();
+        let metadata = ReputationNFTContract::get_metadata(env.clone(), token_id).unwrap();
         assert_eq!(metadata.name, name);
         assert_eq!(metadata.description, description);
         assert_eq!(metadata.uri, uri);
 
         // Try to retrieve metadata for a non-existent token
-        let result = NFTContract::get_metadata(env.clone(), 999);
+        let result = ReputationNFTContract::get_metadata(env.clone(), 999);
         assert_eq!(result, Err(Error::TokenDoesNotExist));
     });
 }
@@ -378,7 +378,7 @@ fn test_token_uri_update() {
 
     env.as_contract(&contract_id, || {
         // Initialize contract
-        NFTContract::init(env.clone(), admin.clone()).unwrap();
+        ReputationNFTContract::init(env.clone(), admin.clone()).unwrap();
 
         // Create initial metadata
         let name = String::from_str(&env, "Original NFT");
@@ -397,7 +397,7 @@ fn test_token_uri_update() {
         .unwrap();
 
         // Verify initial metadata
-        let initial_metadata = NFTContract::get_metadata(env.clone(), token_id).unwrap();
+        let initial_metadata = ReputationNFTContract::get_metadata(env.clone(), token_id).unwrap();
         assert_eq!(initial_metadata.uri, uri);
 
         // Update with new URI
@@ -416,7 +416,7 @@ fn test_token_uri_update() {
         .unwrap();
 
         // Verify updated metadata
-        let updated_metadata = NFTContract::get_metadata(env.clone(), token_id).unwrap();
+        let updated_metadata = ReputationNFTContract::get_metadata(env.clone(), token_id).unwrap();
         assert_eq!(updated_metadata.uri, new_uri);
         assert_eq!(updated_metadata.name, updated_name);
         assert_eq!(updated_metadata.description, updated_description);
@@ -431,7 +431,7 @@ fn test_unauthorized_access() {
 
     // Initialize contract and set up token
     env.as_contract(&contract_id, || {
-        NFTContract::init(env.clone(), admin.clone()).unwrap();
+        ReputationNFTContract::init(env.clone(), admin.clone()).unwrap();
         storage::save_token_owner(&env, &token_id, &admin);
     });
 
@@ -454,7 +454,7 @@ fn test_batch_operations() {
 
     env.as_contract(&contract_id, || {
         // Initialize contract
-        NFTContract::init(env.clone(), admin.clone()).unwrap();
+        ReputationNFTContract::init(env.clone(), admin.clone()).unwrap();
 
         // Batch mint three tokens to different users
         let token_ids = [1, 2, 3];
@@ -491,10 +491,10 @@ fn test_batch_operations() {
 
         // Verify all tokens were minted correctly
         for i in 0..token_ids.len() {
-            let owner = NFTContract::get_owner(env.clone(), token_ids[i]).unwrap();
+            let owner = ReputationNFTContract::get_owner(env.clone(), token_ids[i]).unwrap();
             assert_eq!(&owner, owners[i]);
 
-            let metadata = NFTContract::get_metadata(env.clone(), token_ids[i]).unwrap();
+            let metadata = ReputationNFTContract::get_metadata(env.clone(), token_ids[i]).unwrap();
             let expected_name = match token_ids[i] {
                 1 => String::from_str(&env, "Token 1"),
                 2 => String::from_str(&env, "Token 2"),
@@ -513,7 +513,7 @@ fn test_mint_and_query() {
     let token_id: TokenId = 1;
 
     // Create client
-    let client = ContractClient::new(env.clone(), contract_id);
+    let client = ContractClient::new(env.clone(), contract_id.clone());
 
     // Initialize contract
     client.init(admin.clone()).unwrap();
@@ -554,7 +554,7 @@ fn test_transfer() {
     let token_id: TokenId = 1;
 
     // Create client
-    let client = ContractClient::new(env.clone(), contract_id);
+    let client = ContractClient::new(env.clone(), contract_id.clone());
 
     // Initialize contract
     client.init(admin.clone()).unwrap();
@@ -598,7 +598,7 @@ fn test_minter_role() {
     let token_id: TokenId = 1;
 
     // Create client
-    let client = ContractClient::new(env.clone(), contract_id);
+    let client = ContractClient::new(env.clone(), contract_id.clone());
 
     // Initialize contract
     client.init(admin.clone()).unwrap();
@@ -645,7 +645,7 @@ fn test_admin_transfer() {
     let new_admin = Address::generate(&env);
 
     // Create client
-    let client = ContractClient::new(env.clone(), contract_id);
+    let client = ContractClient::new(env.clone(), contract_id.clone());
 
     // Initialize contract
     client.init(admin.clone()).unwrap();
@@ -659,4 +659,24 @@ fn test_admin_transfer() {
     // Verify new admin
     let current_admin = client.get_admin().unwrap();
     assert_eq!(current_admin, new_admin);
+}
+
+#[test]
+fn test_mint_for_achievement() {
+    let (env, admin, contract_id) = setup();
+    let user = Address::generate(&env);
+    let client = ContractClient::new(env.clone(), contract_id.clone());
+    client.init(admin.clone()).unwrap();
+    env.mock_all_auths();
+    // Add admin as minter for test
+    client.add_minter(admin.clone(), admin.clone()).unwrap();
+    // Mint achievement NFT
+    let nft_type = symbol_short!("tencontr");
+    let result: Result<(), Error> = env.invoke_contract(&contract_id.clone(), &symbol_short!("mint_achv"), vec![&env, admin.clone().into_val(&env), user.clone().into_val(&env), nft_type.into_val(&env)]);
+    assert!(result.is_ok());
+    // Check that token_id 1 exists and is owned by user
+    let owner = client.get_owner(1).unwrap();
+    assert_eq!(owner, user);
+    let metadata = client.get_metadata(1).unwrap();
+    assert_eq!(metadata.name, String::from_str(&env, "10 Completed Contracts"));
 }

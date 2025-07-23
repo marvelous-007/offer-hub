@@ -97,3 +97,13 @@ fn create_simple_key(env: &Env, key_data: &[u8]) -> BytesN<32> {
     let hash = env.crypto().sha256(&key_bytes);
     BytesN::from_array(env, &hash.into())
 }
+
+const TOKEN_ID_COUNTER: &[u8] = &[4];
+
+pub fn next_token_id(env: &Env) -> TokenId {
+    let key_bytes = create_simple_key(env, TOKEN_ID_COUNTER);
+    let mut counter: TokenId = env.storage().persistent().get(&key_bytes).unwrap_or(0);
+    counter += 1;
+    env.storage().persistent().set(&key_bytes, &counter);
+    counter
+}

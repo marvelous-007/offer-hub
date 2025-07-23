@@ -1,14 +1,14 @@
-# NFT (Non-Fungible Token) Smart Contract
+# Reputation NFT Smart Contract
 
-This contract implements a non-fungible token (NFT) using Soroban, the smart contract platform on the Stellar blockchain.
+This contract implements a reputation-based NFT system using Soroban, the smart contract platform on the Stellar blockchain.
 
 ## Features
 
-- **NFT Minting**: Only authorized users (admin or minter role) can mint NFTs.
+- **Achievement NFT Minting**: Only authorized users (admin or minter role) can mint NFTs for user achievements.
 - **NFT Transfers**: Owners can transfer NFTs to other Stellar addresses.
 - **Metadata Management**: Metadata is stored on-chain (name, description, URI).
 - **Ownership Tracking**: The contract maintains a registry of owners.
-- **Events**: Emits events for external tracking (minting, transfers, admin changes).
+- **Events**: Emits events for external tracking (minting, achievement minting, transfers, admin changes).
 - **Access Control**: Implements roles (admin, minters) for privileged operations.
 
 ## Project Structure
@@ -16,7 +16,7 @@ This contract implements a non-fungible token (NFT) using Soroban, the smart con
 The contract is organized into modules to facilitate maintenance and understanding:
 
 - `lib.rs`: Contract entry point and public interface definition.
-- `nft.rs`: Main implementation of NFT functionality.
+- `contract.rs`: Main implementation of Reputation NFT functionality.
 - `storage.rs`: Data storage management.
 - `events.rs`: Event emission.
 - `access.rs`: Access control and authorization.
