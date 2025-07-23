@@ -1,7 +1,7 @@
 #![cfg(test)]
 
 use crate::{Contract, storage::{get_verified_users, set_verified_users}};
-use soroban_sdk::{testutils::Address as _, Address, Env, Map};
+use soroban_sdk::{testutils::Address as _, Address, Env};
 
 #[test]
 fn test_unregistered_user_is_not_verified() {
