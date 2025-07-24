@@ -241,7 +241,7 @@ export const deleteServiceHandler = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const userId = req.body.user_id;
+    // const userId = req.body.user_id;
 
     // Validate UUID format
     const uuidRegex =
@@ -254,7 +254,7 @@ export const deleteServiceHandler = async (
       return;
     }
 
-    const deleted = await serviceService.deleteService(id, userId);
+    const deleted = await serviceService.deleteService(id,);
 
     if (!deleted) {
       res.status(404).json({
