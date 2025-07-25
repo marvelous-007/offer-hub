@@ -24,3 +24,5 @@ yarn-error.log*
 
 # TypeScript cache
 *.tsbuildinfo
+
+supabase/.temp/
