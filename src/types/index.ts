@@ -25,6 +25,7 @@ export interface Conversation {
 }
 
 export interface MessagesMainProps {
+  dispute?: DisputeRow
   activeConversation?: Conversation
   messages: Message[]
   chatHeaderItem?: JSX.Element

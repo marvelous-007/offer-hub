@@ -13,17 +13,20 @@ export const mockUsers = (length = 12, status?: User['status']): User[] =>
         createdAt: format(subHours(new Date(), (length - i) * 12), 'd MMMM yyyy : HH:mm:ss'),
     }));
 
-export const mockDisputes = (length = 12, status?: DisputeRow['status']): DisputeRow[] =>
-    Array.from({ length }).map((_, i) => ({
-        name: faker.person.fullName(),
+export const mockDisputes = (length = 12, status?: DisputeRow['status']): DisputeRow[] => {
+    const parties = mockUsers(faker.number.int({ min: 2, max: 3 }), 'active')
+
+    return Array.from({ length }).map((_, i) => ({
+        name: parties[0].name,
         ticket: (faker.string.alpha(4) + faker.string.numeric(4) + faker.string.alpha(1)).toLowerCase(),
-        userId: (faker.string.alpha(4) + faker.string.numeric(4) + faker.string.alpha(1)).toLowerCase(),
-        email: faker.internet.email(),
+        userId: parties[0].id,
+        email: parties[0].email,
         amount: faker.commerce.price({ min: 700, max: 900, dec: 0 }),
         status: status ?? ['active', 'unassigned', 'resolved'][faker.number.int({ min: 0, max: 2 })] as DisputeRow['status'],
-        parties: mockUsers(faker.number.int({ min: 2, max: 3 }), 'active'),
+        parties,
         createdAt: format(subHours(new Date(), (length - i) * 12), 'd MMMM yyyy : HH:mm:ss'),
     }));
+}
 
 export const useMockDisputes = (length = 12, status?: DisputeRow['status']) => {
     const [searchTerm, setSearchTerm] = useState('')
@@ -66,4 +69,21 @@ export const useMockDisputes = (length = 12, status?: DisputeRow['status']) => {
         search,
         filter,
     }
+}
+
+
+export const simulateDisputResolution = async (dispute: DisputeRow, recipient: User): Promise<{
+    data: DisputeRow,
+    recipient: User,
+}> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            dispute.status = 'resolved'
+
+            resolve({
+                data: dispute,
+                recipient,
+            })
+        }, 3200);
+    })
 }

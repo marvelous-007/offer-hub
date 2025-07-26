@@ -5,6 +5,7 @@ import { Camera, FileText, Send, Upload } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import Icon from '../../../public/Icon.svg';
+import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import type { MessagesMainProps } from '@/types';
 import { cn } from '@/lib/utils';
@@ -13,6 +14,7 @@ import { useMessages } from '@/hooks/use-message';
 
 export function MessagesMain({
   activeConversation,
+  dispute,
   messages,
   onSendMessage,
   chatHeaderItem,
@@ -40,20 +42,31 @@ export function MessagesMain({
     <div className="flex flex-col flex-1">
       <div className="bg-[#DEEFE7] rounded-lg px-4 py-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Avatar className="w-10 h-10">
-            <AvatarImage
-              src={maskGroup.src || '/placeholder.svg'}
-              alt={activeConversation.name}
-            />
-            <AvatarFallback className="text-gray-600 bg-gray-200">
-              {activeConversation.name
-                .split(' ')
-                .map((n) => n[0])
-                .join('')}
-            </AvatarFallback>
-          </Avatar>
+          <div className="*:data-[slot=avatar]:ring-background flex -space-x-7 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:grayscale">
+            {(dispute?.parties ?? [{ id: '1' }]).map((e) => {
+              return (
+                <Avatar className="w-10 h-10 border border-white" key={e.id}>
+                  <AvatarImage
+                    src={maskGroup.src || '/placeholder.svg'}
+                    alt={activeConversation.name}
+                  />
+                  <AvatarFallback className="text-gray-600 bg-gray-200">
+                    {activeConversation.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')}
+                  </AvatarFallback>
+                </Avatar>
+              );
+            })}
+          </div>
           <h2 className="font-medium text-gray-900">
-            {activeConversation.name}
+            {dispute?.parties
+              ? dispute.parties
+                  .map((e) => e.name)
+                  .join(', ')
+                  .slice(0, 15 * 3) + '...'
+              : activeConversation.name}
           </h2>
         </div>
 
@@ -63,7 +76,13 @@ export function MessagesMain({
       <div className="flex items-center justify-center px-6 py-4 border-b border-gray-100">
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <div className="flex items-center justify-center w-5 h-5 rounded">
-            <img src={Icon.src} alt="icon" className="w-4 h-4 mt-4" />
+            <Image
+              src={Icon.src}
+              alt="icon"
+              width={16}
+              height={16}
+              className="w-4 h-4"
+            />
           </div>
           <span>Pending: Milestone 1 - </span>
           <span className="text-gray-900 underline cursor-pointer">
