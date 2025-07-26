@@ -11,7 +11,7 @@ export default function DisputeResolutionPage() {
     <div className="p-0">
       <DisputeTabs
         defaultValue="unassigned"
-        tabsListclassName="!bg-white !rounded-none !p-4 !h-auto"
+        tabsListclassName="!bg-white !rounded-none !p-4 !h-auto border-b"
         tabs={[
           {
             label: 'Unassigned dispute',

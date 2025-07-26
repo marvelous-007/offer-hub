@@ -7,10 +7,10 @@ import React, { useState } from 'react';
 import { DisputeRow } from '@/types';
 import Link from 'next/link';
 import { SlMagnifier } from 'react-icons/sl';
-import { useMockDisputes } from '@/data/use-mock-data';
+import { useMockDisputes } from '@/data/generic-mock-data';
 
 const columns: DisputeTableColumn<DisputeRow>[] = [
-  { key: 'date', label: 'Date Initiated' },
+  { key: 'createdAt', label: 'Date Initiated' },
   { key: 'name', label: 'Customer Name' },
   {
     key: 'ticket',
@@ -36,7 +36,7 @@ const columns: DisputeTableColumn<DisputeRow>[] = [
     label: 'Action',
     render: (row) => (
       <Link
-        href={`/dispute-resolution/${row.ticket}/chat`}
+        href={`/admin/dispute-resolution/${row.ticket}/chat`}
         className="text-blue-500 hover:underline"
       >
         View Dispute

@@ -32,14 +32,24 @@ export interface MessagesMainProps {
 }
 
 
+export interface User {
+  id?: string;
+  name: string;
+  email: string;
+  status?: 'active' | 'restricted' | 'blocked';
+  createdAt: string;
+}
+
+
 export interface DisputeRow {
-  date: string;
   name: string;
   email: string;
   ticket: string;
   userId?: string;
   amount?: string;
   status?: 'unassigned' | 'active' | 'resolved';
+  parties: User[]
+  createdAt: string;
 }
 
 
