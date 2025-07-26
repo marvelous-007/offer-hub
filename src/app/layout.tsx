@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TrustlessWorkProvider } from "@/providers/TrustlessWorkProvider";
-import { WalletProvider } from "@/providers/wallet.provider"
 import { EscrowProvider } from "@/providers/scrow.provider";
+import { WalletProvider } from '@/components/onboarding/WalletContext'
 import { Toaster } from "sonner"
 
 const geistSans = Geist({

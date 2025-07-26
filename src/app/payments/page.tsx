@@ -29,7 +29,7 @@ function SimpleHeader() {
               <a href="/post-project" className="text-[#002333] hover:text-[#15949C]">
                 Post a Project
               </a>
-              <a href="/my-chats" className="text-[#002333] hover:text-[#15949C]">
+              <a href="/messages" className="text-[#002333] hover:text-[#15949C]">
                 Messages
               </a>
               <a href="/payments" className="text-[#15949C] font-medium">

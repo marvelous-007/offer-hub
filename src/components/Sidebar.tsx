@@ -1,4 +1,3 @@
-// components/Sidebar.tsx
 "use client";
 import React from "react";
 import Link from "next/link";
@@ -9,7 +8,7 @@ import {
   Activity,
   FileText,
   LogOut,
-  X
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -43,13 +42,18 @@ export default function Sidebar({ onClose }: SidebarProps) {
       name: "Dispute resolution",
       href: "/dispute-resolution",
       icon: FileText,
-      active: pathname.includes("/dispute-resolution"),
+      active: pathname.includes("/dispute-resolution") && !pathname.includes("resolved"),
+    },
+    {
+      name: "Resolved dispute",
+      href: "/dispute-resolution?tab=resolved",
+      icon: FileText,
+      active: pathname.includes("/dispute-resolution") && pathname.includes("resolved"),
     },
   ];
 
   return (
     <div className="flex flex-col h-full bg-white border-r w-64">
-      {/* Mobile close button */}
       {onClose && (
         <div className="md:hidden flex justify-end p-2">
           <button
@@ -60,8 +64,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           </button>
         </div>
       )}
-      
-      {/* Navigation */}
+
       <nav className="flex-grow overflow-y-auto pt-4 ">
         <ul className="space-y-2 px-2">
           {navigation.map((item) => (
@@ -75,10 +78,9 @@ export default function Sidebar({ onClose }: SidebarProps) {
                     : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                 )}
               >
-                <item.icon
-                  className="mr-3 h-5 w-5"
-                  aria-hidden="true"
-                />
+                {item.icon && (
+                  <item.icon className="mr-3 h-5 w-5" aria-hidden="true" />
+                )}
                 <span>{item.name}</span>
               </Link>
             </li>
@@ -86,7 +88,6 @@ export default function Sidebar({ onClose }: SidebarProps) {
         </ul>
       </nav>
 
-      {/* Logout - positioned at the bottom */}
       <div className="p-4 border-t sticky bottom-0 bg-white">
         <Link
           href="/logout"
