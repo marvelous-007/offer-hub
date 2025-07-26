@@ -35,10 +35,11 @@ export interface MessagesMainProps {
 export interface DisputeRow {
   date: string;
   name: string;
-  ticket: string;
   email: string;
+  ticket: string;
   userId?: string;
   amount?: string;
+  status?: 'unassigned' | 'active' | 'resolved';
 }
 
 

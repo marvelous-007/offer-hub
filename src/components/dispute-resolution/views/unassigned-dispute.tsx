@@ -7,18 +7,21 @@ import React, { useState } from 'react';
 import { DisputeRow } from '@/types';
 import Link from 'next/link';
 import { SlMagnifier } from 'react-icons/sl';
-import { faker } from '@faker-js/faker';
+import { useMockDisputes } from '@/data/use-mock-data';
 
 const columns: DisputeTableColumn<DisputeRow>[] = [
   { key: 'date', label: 'Date Initiated' },
   { key: 'name', label: 'Customer Name' },
   {
-    key: 'userId',
+    key: 'ticket',
     label: 'Ticket ID',
     render: (row) => (
       <span className="flex items-center gap-2 text-blue-600">
-        <span className="underline cursor-pointer">{row.userId}</span>
-        <FaRegCopy className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />
+        <span className="underline cursor-pointer">{row.ticket}</span>
+        <FaRegCopy
+          className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600"
+          onClick={() => navigator.clipboard.writeText(row.ticket)}
+        />
       </span>
     ),
   },
@@ -42,21 +45,16 @@ const columns: DisputeTableColumn<DisputeRow>[] = [
   },
 ];
 
-const data: DisputeRow[] = Array.from({ length: 12 }).map(() => ({
-  date: '4 April 2025 : 14:03:09',
-  name: faker.person.fullName(),
-  ticket: faker.string.alphanumeric(9).toLowerCase(),
-  userId: 'wdsh1245w',
-  email: faker.internet.email(),
-  amount: faker.commerce.price({ min: 700, max: 900, dec: 0 }),
-}));
-
 export default function UnassignedDispute() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [activeTab, setActiveTab] = useState('all');
   const [selectedRole, setSelectedRole] = useState('freelancer');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
+  const {
+    disputes: data,
+    searchTerm,
+    selectedDate,
+    search,
+  } = useMockDisputes(10);
 
   return (
     <div
@@ -119,9 +117,9 @@ export default function UnassignedDispute() {
           <div className="relative flex justify-around border rounded-sm">
             <input
               type="text"
-              placeholder="Search by customer name"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by customer name"
+              onChange={(e) => search(e.target.value)}
               className="w-full px-3 py-1 text-sm border border-transparent border-gray-300 rounded-sm pr-7 focus:outline-none focus:ring-0"
               style={{
                 paddingRight: '40px',
@@ -140,7 +138,7 @@ export default function UnassignedDispute() {
             <input
               type="date"
               value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
+              onChange={(e) => search(e.target.value, 'date')}
               className="px-4 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Select date"
             />
