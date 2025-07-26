@@ -30,7 +30,7 @@ const DisputeTable = <T,>({
 
   return (
     <div className="overflow-x-auto">
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+      <div className="bg-white border shadow-sm">
         <table className="min-w-full">
           <thead>
             <tr className="text-left text-sm border-b border-gray-200 bg-[#F9FAFB]">
@@ -46,7 +46,7 @@ const DisputeTable = <T,>({
               ))}
             </tr>
           </thead>
-          <tbody className="text-sm text-gray-700 divide-y divide-gray-200">
+          <tbody className="text-sm text-gray-700">
             {data.length === 0 ? (
               <tr>
                 <td
