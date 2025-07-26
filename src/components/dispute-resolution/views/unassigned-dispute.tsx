@@ -50,6 +50,8 @@ export default function UnassignedDispute() {
   const [activeTab, setActiveTab] = useState('all');
   const [selectedRole, setSelectedRole] = useState('freelancer');
   const {
+    loading,
+    filtering,
     disputes: data,
     searchTerm,
     selectedDate,
@@ -164,7 +166,12 @@ export default function UnassignedDispute() {
         </div>
       </div>
 
-      <DisputeTable columns={columns} data={data} />
+      <DisputeTable
+        columns={columns}
+        data={data}
+        isLoading={loading}
+        isFiltering={filtering}
+      />
     </div>
   );
 }

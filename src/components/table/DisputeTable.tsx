@@ -1,3 +1,4 @@
+import { Progress } from '@/components/ui/progress';
 import React from 'react';
 
 export interface DisputeTableColumn<T = any> {
@@ -11,6 +12,7 @@ export interface DisputeTableProps<T = any> {
   columns: DisputeTableColumn<T>[];
   data: T[];
   isLoading?: boolean;
+  isFiltering?: boolean;
   emptyMessage?: string;
 }
 
@@ -18,6 +20,7 @@ const DisputeTable = <T,>({
   columns,
   data,
   isLoading,
+  isFiltering,
   emptyMessage = 'No disputes found',
 }: DisputeTableProps<T>) => {
   if (isLoading) {
@@ -29,8 +32,17 @@ const DisputeTable = <T,>({
   }
 
   return (
-    <div className="overflow-x-auto">
-      <div className="bg-white shadow-sm">
+    <div
+      className={
+        isLoading || isFiltering ? 'overflow-x-hidden' : 'overflow-x-auto'
+      }
+    >
+      <div className="relative bg-white shadow-sm">
+        {isLoading || isFiltering ? (
+          <Progress indeterminate={isLoading || isFiltering} className="!h-2" />
+        ) : (
+          ''
+        )}
         <table className="min-w-full">
           <thead>
             <tr className="text-left text-sm border-b border-gray-200 bg-[#F9FAFB]">
