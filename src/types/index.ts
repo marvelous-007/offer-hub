@@ -39,6 +39,7 @@ export interface User {
   email: string;
   status?: 'active' | 'restricted' | 'blocked';
   createdAt: string;
+  avatarUrl: string;
 }
 
 

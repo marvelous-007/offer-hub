@@ -22,7 +22,6 @@ export default function DisputeChat() {
 
   const { disputes } = useMockDisputes(1);
   const dispute = disputes[0];
-  console.log(dispute);
 
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -35,6 +34,7 @@ export default function DisputeChat() {
   const closeDisputeButton = (
     <Button
       className="py-5 text-white rounded-full bg-secondary-500"
+      disabled={dispute.status === 'resolved'}
       onClick={handleOpenModal}
     >
       <MdGavel /> Close conflict

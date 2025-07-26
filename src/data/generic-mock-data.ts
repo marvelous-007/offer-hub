@@ -1,6 +1,7 @@
 import { DisputeRow, User } from "@/types";
 import { format, subHours } from "date-fns";
 
+import avatarGroup from '../../public/maskGroup.svg';
 import { faker } from '@faker-js/faker';
 import { useState } from 'react'
 
@@ -10,6 +11,7 @@ export const mockUsers = (length = 12, status?: User['status']): User[] =>
         name: faker.person.fullName(),
         email: faker.internet.email(),
         status: status ?? ['active', 'restricted', 'blocked'][faker.number.int({ min: 0, max: 2 })] as User['status'],
+        avatarUrl: avatarGroup.src || '/placeholder.svg',
         createdAt: format(subHours(new Date(), (length - i) * 12), 'd MMMM yyyy : HH:mm:ss'),
     }));
 

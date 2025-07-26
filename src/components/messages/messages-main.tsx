@@ -43,11 +43,15 @@ export function MessagesMain({
       <div className="bg-[#DEEFE7] rounded-lg px-4 py-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="*:data-[slot=avatar]:ring-background flex -space-x-7 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:grayscale">
-            {(dispute?.parties ?? [{ id: '1' }]).map((e) => {
+            {(
+              dispute?.parties ?? [
+                { id: '1', avatarUrl: maskGroup.src || '/placeholder.svg' },
+              ]
+            ).map((e) => {
               return (
                 <Avatar className="w-10 h-10 border border-white" key={e.id}>
                   <AvatarImage
-                    src={maskGroup.src || '/placeholder.svg'}
+                    src={e.avatarUrl}
                     alt={activeConversation.name}
                   />
                   <AvatarFallback className="text-gray-600 bg-gray-200">
