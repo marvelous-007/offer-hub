@@ -45,11 +45,12 @@ export interface DisputeRow {
 export interface TabItem {
   label: string;
   value: string;
-  component: ReactNode; 
+  component: ReactNode;
 }
 
 export interface PillTabsProps {
   tabs: TabItem[];
   defaultValue?: string;
   className?: string;
+  tabsListclassName?: string;
 }

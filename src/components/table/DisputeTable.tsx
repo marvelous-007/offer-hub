@@ -30,7 +30,7 @@ const DisputeTable = <T,>({
 
   return (
     <div className="overflow-x-auto">
-      <div className="bg-white border shadow-sm">
+      <div className="bg-white shadow-sm">
         <table className="min-w-full">
           <thead>
             <tr className="text-left text-sm border-b border-gray-200 bg-[#F9FAFB]">

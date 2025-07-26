@@ -60,11 +60,9 @@ export default function ResolvedDispute() {
 
   return (
     <div
-      className="space-y-6"
+      className="p-6 space-y-6"
       style={{
-        backgroundColor: '#F0F0F3',
         minHeight: '100vh',
-        padding: '20px',
       }}
     >
       {/* Header with All transaction button and Security Alerts */}

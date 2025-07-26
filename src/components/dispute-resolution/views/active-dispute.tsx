@@ -60,7 +60,7 @@ export default function ActiveDispute() {
 
   return (
     <div
-      className="space-y-6"
+      className="p-6 space-y-6"
       style={{
         minHeight: '100vh',
       }}
