@@ -1,7 +1,7 @@
 import DisputeTable, {
   DisputeTableColumn,
 } from '@/components/table/DisputeTable';
-import { FaCaretDown, FaRegCopy, FaSearch } from 'react-icons/fa';
+import { FaCaretDown, FaRegCopy } from 'react-icons/fa';
 import React, { useState } from 'react';
 
 import { DisputeRow } from '@/types';
@@ -52,6 +52,7 @@ const data: DisputeRow[] = Array.from({ length: 12 }).map(() => ({
 }));
 
 export default function UnassignedDispute() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [activeTab, setActiveTab] = useState('all');
   const [selectedRole, setSelectedRole] = useState('freelancer');
   const [searchTerm, setSearchTerm] = useState('');

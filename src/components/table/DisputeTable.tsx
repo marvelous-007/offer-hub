@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export interface DisputeTableColumn<T = any> {
   key: string;
@@ -14,7 +14,12 @@ export interface DisputeTableProps<T = any> {
   emptyMessage?: string;
 }
 
-const DisputeTable = <T,>({ columns, data, isLoading, emptyMessage = "No disputes found" }: DisputeTableProps<T>) => {
+const DisputeTable = <T,>({
+  columns,
+  data,
+  isLoading,
+  emptyMessage = 'No disputes found',
+}: DisputeTableProps<T>) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-32">
@@ -30,25 +35,38 @@ const DisputeTable = <T,>({ columns, data, isLoading, emptyMessage = "No dispute
           <thead>
             <tr className="text-left text-sm border-b border-gray-200 bg-[#F9FAFB]">
               {columns.map((col) => (
-                <th key={col.key} className={`py-4 px-6 font-medium text-gray-700 ${col.className || ""}`}>
+                <th
+                  key={col.key}
+                  className={`py-4 px-6 font-medium text-gray-700 ${
+                    col.className || ''
+                  }`}
+                >
                   {col.label}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="text-gray-700 text-sm divide-y divide-gray-200">
+          <tbody className="text-sm text-gray-700 divide-y divide-gray-200">
             {data.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="py-8 px-6 text-center text-gray-500">
+                <td
+                  colSpan={columns.length}
+                  className="px-6 py-8 text-center text-gray-500"
+                >
                   {emptyMessage}
                 </td>
               </tr>
             ) : (
               data.map((row, idx) => (
-                <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                <tr key={idx} className="transition-colors hover:bg-gray-50">
                   {columns.map((col) => (
-                    <td key={col.key} className={`py-4 px-6 ${col.className || ""}`}>
-                      {col.render ? col.render(row) : String((row as any)[col.key])}
+                    <td
+                      key={col.key}
+                      className={`py-4 px-6 ${col.className || ''}`}
+                    >
+                      {col.render
+                        ? col.render(row)
+                        : String((row as any)[col.key])}
                     </td>
                   ))}
                 </tr>
@@ -61,4 +79,4 @@ const DisputeTable = <T,>({ columns, data, isLoading, emptyMessage = "No dispute
   );
 };
 
-export default DisputeTable; 
+export default DisputeTable;
