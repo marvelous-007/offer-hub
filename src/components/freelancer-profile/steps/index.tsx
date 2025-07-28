@@ -1,85 +1,74 @@
-"use client";
+"use client"
 
-import { useFreelancerSteps } from "@/hooks/use-freelancer-steps";
-import Header from "../header";
-import UserChooseRole from "./user-choose-role";
-import UserSelectJobType from "./user-select-job-type";
-import UserAddWorkExperience from "@/components/freelancer-profile/steps/user-add-work-experience";
-import UserAddWorkExperienceDefaultState from "./user-add-work-experience-default-state";
-import UserSetAccountProfileActiveState from "@/components/freelancer-profile/steps/user-set-account-profile-active-state";
-import UserSetHourlyRateActiveState from "./user-set-hourly-rate-active-state";
-import UserAddLanguagesActiveState from "./user-add-languages-active-state";
-import UserAddBioActiveState from "./user-add-bio-active-state";
-import UserProfilePreviewActiveState from "./user-profile-preview-active-state";
-import UserSelectInterestedCategory from "./user-select-interested-category";
-import UserAddEducationActiveState from "./user-add-education-active-state";
+import type { UserProfileData, ProfileStepProps } from "@/app/types/freelancer-profile"
+import Header from "../header"
 
-const steps: { key: string; component: React.ReactNode }[] = [
-  { key: "user-choose-role", component: <UserChooseRole /> },
-  { key: "user-select-job-type", component: <UserSelectJobType /> },
-  {
-    key: "user-select-interested-category",
-    component: <UserSelectInterestedCategory />,
-  }, // fue null en main, pero ya implementado en feat
-  { key: "user-add-work-experience", component: <UserAddWorkExperience /> },
-  { key: "user-add-work-experience-active-state", component: null }, // to be implemented
-  {
-    key: "user-add-work-experience-active-state-not-in-focus",
-    component: null,
-  }, // to be implemented
-  {
-    key: "user-add-work-experience-default-state",
-    component: <UserAddWorkExperienceDefaultState />,
-  },
-  { key: "user-add-education-default-state", component: null }, // to be implemented
-  {
-    key: "user-add-education-active-state",
-    component: <UserAddEducationActiveState />,
-  },
-  {
-    key: "user-set-hourly-rate-active-state",
-    component: <UserSetHourlyRateActiveState />,
-  },
-  {
-    key: "user-choose-languaje-active-state",
-    component: <UserAddLanguagesActiveState />,
-  },
-  { key: "user-write-bio", component: <UserAddBioActiveState /> },
-  { key: "user-enter-service-fee", component: null }, // to be implemented
-  {
-    key: "user-set-account-profile-active-state",
-    component: <UserSetAccountProfileActiveState />,
-  },
-  { key: "user-profile-photo-active-and-focus-state", component: null }, // to be implemented
-  {
-    key: "user-profile-preview-active-state",
-    component: <UserProfilePreviewActiveState />,
-  },
-];
+// Import all step components
+import UserChooseRole from "./user-choose-role"
+import UserSelectJobType from "./user-select-job-type"
+import UserSelectInterestedCategory from "./user-select-interested-category"
+import UserAddWorkExperience from "./user-add-work-experience"
+import UserAddWorkExperienceActiveState from "./user-add-work-experience-active-state"
+import UserAddEducationActiveState from "./user-add-education-active-state"
+import UserAddLanguagesActiveState from "./user-add-languages-active-state"
+import UserAddBioActiveState from "./user-add-bio-active-state"
+import UserSetHourlyRateActiveState from "./user-set-hourly-rate-active-state"
+import UserSetAccountProfileActiveState from "./user-set-account-profile-active-state"
+import UserProfilePreviewActiveState from "./user-profile-preview-active-state"
 
-export default function StepsController() {
-  const { currentStep, nextStep, prevStep } = useFreelancerSteps();
-  const StepComponent = steps[currentStep]?.component;
+interface StepsControllerProps {
+  currentStep: number
+  userData: UserProfileData
+  nextStep: () => void
+  prevStep: () => void
+  updateUserData: (data: Partial<UserProfileData>) => void
+}
+
+const steps = [
+  UserChooseRole,
+  UserSelectJobType,
+  UserSelectInterestedCategory,
+  UserAddWorkExperience,
+  UserAddWorkExperienceActiveState,
+  UserAddEducationActiveState,
+  UserAddLanguagesActiveState,
+  UserAddBioActiveState,
+  UserSetHourlyRateActiveState,
+  UserSetAccountProfileActiveState,
+  UserProfilePreviewActiveState,
+]
+
+export default function StepsController({
+  currentStep,
+  userData,
+  nextStep,
+  prevStep,
+  updateUserData,
+}: StepsControllerProps) {
+  const CurrentStepComponent = steps[currentStep]
+
+  const props: ProfileStepProps = {
+    userData,
+    updateUserData,
+    nextStep,
+    prevStep,
+  }
 
   return (
-    <section className="flex flex-col gap-y-16 min-h-svh">
+    <div className="flex flex-col min-h-screen">
       <Header />
-      <div className="flex-1 flex">
-        {StepComponent ? (
-          StepComponent
-        ) : (
-          <p>This step is not yet implemented.</p>
-        )}
-      </div>
-      {/* <UserAddWorkExperienceDefaultState /> */}
-      <div className="mt-8 flex justify-between">
-        <button onClick={prevStep} disabled={currentStep === 0}>
-          Back
-        </button>
-        <button onClick={nextStep} disabled={currentStep === steps.length - 1}>
-          Next
-        </button>
-      </div>
-    </section>
-  );
+      <main className="flex-1 flex items-center justify-center w-full">
+        <div className="w-full">
+          {CurrentStepComponent ? (
+            <CurrentStepComponent {...props} />
+          ) : (
+            <div className="text-center">
+              <h2 className="text-2xl font-bold">Congratulations!</h2>
+              <p>You have completed the onboarding process.</p>
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  )
 }

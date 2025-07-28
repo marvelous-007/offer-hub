@@ -1,237 +1,154 @@
-import {  useState, useRef, useEffect } from 'react';
-import { ChevronDown, Info, Search, Trash, X } from 'lucide-react';
+"use client"
 
-type LanguageLevel = 'Basic' | 'Conversational' | 'Fluent' | 'Native or Bilingual' | 'My Level is';
+import { useState, useRef, useEffect } from "react"
+import { ChevronDown, Search, Trash, ArrowLeft, Plus } from "lucide-react"
+import type { ProfileStepProps, Language, LanguageLevel } from "@/app/types/freelancer-profile"
+import { Button } from "@/components/ui/button"
+import Footer from "../footer"
 
-type Language = {
-  id: string;
-  name: string;
-  level: LanguageLevel;
-};
-
-const languageLevels: LanguageLevel[] = [
-  'Basic',
-  'Conversational',
-  'Fluent',
-  'Native or Bilingual'
-];
-
+const languageLevels: LanguageLevel[] = ["Basic", "Conversational", "Fluent", "Native or Bilingual"]
 const languageOptions = [
-  'English',
-  'Spanish',
-  'French',
-  'German',
-  'Portuguese',
-  'Russian',
-  'Japanese',
-  'Chinese',
-  'Arabic',
-  'Hindi',
-  'Italian',
-  'Dutch',
-  'Korean',
-  'Turkish',
-  'Swedish',
-  'Polish',
-  'Vietnamese',
-  'Catalan',
-  'Valencian',
-  // Add more languages as needed
-];
-
+  "Spanish",
+  "French",
+  "German",
+  "Portuguese",
+  "Russian",
+  "Japanese",
+  "Chinese",
+  "Arabic",
+  "Hindi",
+  "Italian",
+  "Dutch",
+  "Korean",
+  "Turkish",
+  "Swedish",
+  "Polish",
+  "Vietnamese",
+  "Catalan",
+  "Valencian",
+]
 const levelDescriptions: Record<LanguageLevel, string> = {
-  'Basic': 'I know the basics in this language',
-  'Conversational': 'I write and speak clearly in this language',
-  'Fluent': 'I write and speak easily in this language',
-  'Native or Bilingual': 'I write and speak fluently in this language'
-};
+  Basic: "I know the basics in this language",
+  Conversational: "I write and speak clearly in this language",
+  Fluent: "I write and speak easily in this language",
+  "Native or Bilingual": "I write and speak fluently in this language",
+  "My Level is": "Select your proficiency level",
+}
 
-const UserAddLanguagesActiveState = () => {
-  // Initialize with English as default
-  const [languages, setLanguages] = useState<Language[]>([
-    { id: '1', name: 'English', level: 'Native or Bilingual' }
-  ]);
-  const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
-  const [isLevelDropdownOpen, setIsLevelDropdownOpen] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const languageDropdownRef = useRef<HTMLDivElement>(null);
-  const levelDropdownRef = useRef<HTMLDivElement>(null);
-
-  const generateId = () => Math.random().toString(36).substr(2, 9);
+const UserAddLanguagesActiveState = ({ userData, updateUserData, nextStep, prevStep }: ProfileStepProps) => {
+  const languages = userData.languages || []
+  const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false)
+  const [isLevelDropdownOpen, setIsLevelDropdownOpen] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const filteredLanguages = languageOptions.filter(
-    (lang) => lang.toLowerCase().includes(searchQuery.toLowerCase()) && 
-    !languages.some((l) => l.name === lang)
-  );
+    (lang) => lang.toLowerCase().includes(searchQuery.toLowerCase()) && !languages.some((l) => l.name === lang),
+  )
 
   const addLanguage = (langName: string) => {
-    if (languages.some(lang => lang.name === langName)) return;
-    
-    setLanguages([...languages, { 
-      id: generateId(), 
-      name: langName, 
-      level: 'My Level is'
-    }]);
-    setIsLanguageDropdownOpen(false);
-    setSearchQuery('');
-  };
+    if (languages.some((lang) => lang.name === langName)) return
+    const newLang: Language = { id: Date.now().toString(), name: langName, level: "My Level is" }
+    updateUserData({ languages: [...languages, newLang] })
+    setIsLanguageDropdownOpen(false)
+    setSearchQuery("")
+  }
 
   const removeLanguage = (id: string) => {
-    setLanguages(languages.filter(lang => lang.id !== id));
-  };
+    updateUserData({ languages: languages.filter((lang) => lang.id !== id) })
+  }
 
   const updateLanguageLevel = (id: string, level: LanguageLevel) => {
-    setLanguages(languages.map(lang => 
-      lang.id === id ? { ...lang, level } : lang
-    ));
-    setIsLevelDropdownOpen(null);
-  };
-
-  const handleClickOutside = (event: MouseEvent) => {
-    if (
-      languageDropdownRef.current && 
-      !languageDropdownRef.current.contains(event.target as Node)
-    ) {
-      setIsLanguageDropdownOpen(false);
-    }
-
-    if (
-      levelDropdownRef.current && 
-      !levelDropdownRef.current.contains(event.target as Node)
-    ) {
-      setIsLevelDropdownOpen(null);
-    }
-  };
+    updateUserData({ languages: languages.map((lang) => (lang.id === id ? { ...lang, level } : lang)) })
+    setIsLevelDropdownOpen(null)
+  }
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsLanguageDropdownOpen(false)
+        setIsLevelDropdownOpen(null)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   return (
-    <div className="flex flex-col w-full bg-[#f6f6f6]">     
-      <div className="flex-1 mx-auto max-w-[95%] p-4">
-        <div className='w-[65%] space-y-3'>
-          <p className="text-2xl text-[#6D758F] mb-2">7/10</p>
-          
+    <div className="flex flex-col w-full pb-28">
+      <div className="flex-1 mx-auto max-w-4xl p-4">
+        <div className="space-y-3">
+          <p className="text-lg text-[#6D758F] mb-2">7/11</p>
           <h1 className="text-3xl text-[#002333] font-medium mb-2">
             Looking good. Next, tell us which languages you speak.
           </h1>
-          
-          <p className="text-[#6D758F] text-xl mb-8">
-            OfferHub is global, so clients are often interested to know what languages you speak. 
-            English is a must, but do you speak any other languages?
+          <p className="text-[#6D758F] text-lg mb-8">
+            OfferHub is global, so clients are often interested to know what languages you speak. English is a must, but
+            do you speak any other languages?
           </p>
         </div>
-        
         <div className="w-full my-6 border-t border-[#B4B9C9] pt-4">
-          <h2 className="text-2xl text-[#344054] font-medium mb-4 px-3">Add your experience</h2>
-          
-          {/* Language list */}
+          <h2 className="text-2xl text-[#344054] font-medium mb-4">Your Languages</h2>
           <div className="space-y-3 w-full bg-white px-8 py-4 rounded-xl">
             {languages.map((language) => (
-              <div key={language.id} className={`flex items-center gap-3 border-b border-gray-200 last:border-none py-2 pb-4 ${language.name === 'English' ? "" : "w-full"}`}>
-                {/* Language name */}
-                <div className={`${language.name !== "English" && "w-[50%]"} `}>
-                  <div className={` px-3 py-2 flex items-center justify-between  ${language.name === 'English' ? 'flex-col w-fit' : 'border border-gray-200 rounded-xl w-full'}`}>
-                    <span>{language.name}</span>
-                    {language.name === 'English' && (
-                      <span className="text-xs ml-1 text-gray-500">(default)</span>
-                    )}
-                  </div>
+              <div
+                key={language.id}
+                className="grid grid-cols-2 items-center gap-4 border-b border-gray-200 last:border-none py-3"
+              >
+                <div className="font-medium">
+                  {language.name}{" "}
+                  {language.name === "English" && <span className="text-xs text-gray-500">(default)</span>}
                 </div>
-                
-                {/* Level dropdown */}
-                <div className={`flex items-center space-x-3 ${language.name !== "English" && "w-[50%]"} relative`}>
-                  <button
-                    type="button"
-                    className="border border-gray-200 rounded-xl px-3 py-2 flex items-center justify-between w-full"
-                    onClick={() => setIsLevelDropdownOpen(language.id)}
-                    disabled={language.name === 'English'}
-                  >
-                    <span>{language.level || "My Level is"}</span>
-                    <ChevronDown size={16} />
-                  </button>
-                  <button 
-                    onClick={() => removeLanguage(language.id)}
-                    className="border border-[#D5D7DA] p-2 rounded-xl text-gray-400 hover:text-gray-600 disabled:text-gray-400"
-                    disabled = {language.name === 'English'}
-                  >
-                    <Trash />
-                  </button>
-                  
-                  {isLevelDropdownOpen === language.id && (
-                    <div 
-                      ref={levelDropdownRef}
-                      className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded shadow-lg"
+                <div className="flex items-center gap-2 relative">
+                  <div className="w-full" ref={isLevelDropdownOpen === language.id ? dropdownRef : null}>
+                    <button
+                      type="button"
+                      className="border border-gray-300 rounded-lg px-3 py-2 flex items-center justify-between w-full text-left"
+                      onClick={() => setIsLevelDropdownOpen(language.id)}
+                      disabled={language.name === "English"}
                     >
-                      <div className="p-2 border-b border-gray-200 flex justify-between items-center">
-                        <span className="font-medium">Select language level</span>
-                        <button 
-                          onClick={() => setIsLevelDropdownOpen(null)}
-                          className="text-gray-500 hover:text-gray-700"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                      <div className="max-h-64 overflow-y-auto">
+                      <span>{language.level}</span> <ChevronDown size={16} />
+                    </button>
+                    {isLevelDropdownOpen === language.id && (
+                      <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded shadow-lg">
                         {languageLevels.map((level) => (
                           <button
                             key={level}
-                            className={`w-full text-left px-4 py-3 hover:bg-gray-100 flex flex-col ${language.level === level ? 'bg-gray-100' : ''}`}
+                            className="w-full text-left px-4 py-3 hover:bg-gray-100 flex flex-col"
                             onClick={() => updateLanguageLevel(language.id, level)}
                           >
                             <span className="font-medium">{level}</span>
                             <span className="text-sm text-gray-500">{levelDescriptions[level]}</span>
                           </button>
-                          
                         ))}
                       </div>
-                    </div>
-                    
-                  )}
-                  
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeLanguage(language.id)}
+                    disabled={language.name === "English"}
+                  >
+                    <Trash className="text-gray-500" />
+                  </Button>
                 </div>
-
               </div>
             ))}
           </div>
-          
-          {/* Add language button */}
           {languages.length < languageOptions.length && (
-            <div className="relative mt-2 pt-4">
-              <div>
-                <button
-                  type="button"
-                  className="border border-gray-300 rounded-full px-3 py-2 flex items-center justify-between gap-1 text-sm font-medium"
-                  onClick={() => setIsLanguageDropdownOpen(true)}
-                >
-                  <span className="text-lg mr-1">+</span> Add a language
-                </button>
-                <div className='ml-1 mt-0.5 flex items-center space-x-1 text-xs text-[#6D758F]'>
-                  <Info className='h-3 w-3'/>
-                  <p>Add at least one item</p>
-                </div>
-              </div>
-              
+            <div className="relative mt-4" ref={isLanguageDropdownOpen ? dropdownRef : null}>
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-full bg-transparent"
+                onClick={() => setIsLanguageDropdownOpen(true)}
+              >
+                <Plus className="mr-2 h-4 w-4" /> Add a language
+              </Button>
               {isLanguageDropdownOpen && (
-                <div 
-                  ref={languageDropdownRef}
-                  className="absolute z-10 mt-2 w-full bg-white border border-gray-300 rounded shadow-lg"
-                >
-                  <div className="p-2 border-b border-gray-200 flex justify-between items-center">
-                    <span className="font-medium">Select language</span>
-                    <button 
-                      onClick={() => setIsLanguageDropdownOpen(false)}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                  
-                  <div className="p-2 border-b border-gray-200">
+                <div className="absolute z-10 mt-2 w-72 bg-white border border-gray-300 rounded shadow-lg">
+                  <div className="p-2 border-b">
                     <div className="relative">
                       <input
                         type="text"
@@ -243,7 +160,6 @@ const UserAddLanguagesActiveState = () => {
                       <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                     </div>
                   </div>
-                  
                   <div className="max-h-64 overflow-y-auto">
                     {filteredLanguages.length > 0 ? (
                       filteredLanguages.map((language) => (
@@ -264,11 +180,21 @@ const UserAddLanguagesActiveState = () => {
             </div>
           )}
         </div>
-        
-
       </div>
+      <Footer className="px-4 mt-auto flex justify-between">
+        <div>
+          <Button onClick={prevStep} variant="ghost" className="gap-1 rounded-full">
+            <ArrowLeft size={18} /> Back
+          </Button>
+        </div>
+        <div className="space-x-4">
+          <Button onClick={nextStep} className="gap-1 bg-[#149A9B] text-white rounded-full md:min-w-36">
+            Next, Write Bio
+          </Button>
+        </div>
+      </Footer>
     </div>
-  );
-};
+  )
+}
 
-export default UserAddLanguagesActiveState;
+export default UserAddLanguagesActiveState
