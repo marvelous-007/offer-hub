@@ -1,70 +1,47 @@
+"use client"
+
 import { useForm } from "react-hook-form"
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Textarea } from '@/components/ui/text-area'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/ui/button"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Experience } from '@/app/types/freelancer-profile'
+import type { WorkExperience } from "@/app/types/freelancer-profile"
+import { useEffect } from "react"
 
 type Props = {
-  addExperience: (experience: Experience) => void
+  addExperience: (experience: WorkExperience) => void
+  initialData?: WorkExperience | null
 }
 
-const formSchema = z.object({
-  title: z.string().min(2, {
-    message: "Title must be at least 2 characters.",
-  }),
-  company: z.string().min(2, {
-    message: "Company name must be at least 2 characters.",
-  }),
-  location: z.string().min(2, {
-    message: "Location must be at least 2 characters.",
-  }),
-  country: z.string({
-    required_error: "Please select an email to display.",
-  }),
-  currentlyWorking: z.boolean(),
-  startDateMonth: z.string().nonempty({
-    message: "Start month is required.",
-  }),
-  startDateYear: z.string().nonempty({
-    message: "Start year is required.",
-  }),
-  endDateMonth: z.string().nonempty({
-    message: "End month is required.",
-  }),
-  endDateYear: z.string().nonempty({
-    message: "End year is required.",
-  }),
-  description: z.string()
-    .min(10, {
-      message: "Description must be at least 10 characters.",
-    })
-    .max(160, {
-      message: "Description must not be longer than 30 characters.",
-    }),
-})
+const formSchema = z
+  .object({
+    title: z.string().min(2, { message: "Title must be at least 2 characters." }),
+    company: z.string().min(2, { message: "Company name must be at least 2 characters." }),
+    location: z.string().min(2, { message: "Location must be at least 2 characters." }),
+    country: z.string({ required_error: "Please select a country." }),
+    currentlyWorking: z.boolean().default(false),
+    startDateMonth: z.string().nonempty({ message: "Start month is required." }),
+    startDateYear: z.string().nonempty({ message: "Start year is required." }),
+    endDateMonth: z.string().optional(),
+    endDateYear: z.string().optional(),
+    description: z
+      .string()
+      .min(10, { message: "Description must be at least 10 characters." })
+      .max(500, { message: "Description must not be longer than 500 characters." }),
+  })
+  .refine((data) => data.currentlyWorking || (data.endDateMonth && data.endDateYear), {
+    message: "End date is required if not currently working",
+    path: ["endDateMonth"],
+  })
 
-const AddWorkExperienceForm = ({ addExperience }: Props) => {
+const AddWorkExperienceForm = ({ addExperience, initialData }: Props) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       title: "",
       company: "",
       location: "",
@@ -77,19 +54,21 @@ const AddWorkExperienceForm = ({ addExperience }: Props) => {
       description: "",
     },
   })
- 
+
+  useEffect(() => {
+    if (initialData) {
+      form.reset(initialData)
+    }
+  }, [initialData, form])
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    addExperience(values)
+    addExperience({ ...values, id: initialData?.id || "" })
     form.reset()
   }
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4"
-        id="add-work-experience-form"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-4" id="add-work-experience-form">
         <FormField
           control={form.control}
           name="title"
@@ -99,14 +78,10 @@ const AddWorkExperienceForm = ({ addExperience }: Props) => {
               <FormControl>
                 <Input placeholder="Software Engineer" {...field} />
               </FormControl>
-              <FormDescription>
-                This is a hint text to help user.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="company"
@@ -120,7 +95,6 @@ const AddWorkExperienceForm = ({ addExperience }: Props) => {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="location"
@@ -134,7 +108,6 @@ const AddWorkExperienceForm = ({ addExperience }: Props) => {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="country"
@@ -157,17 +130,13 @@ const AddWorkExperienceForm = ({ addExperience }: Props) => {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="currentlyWorking"
           render={({ field }) => (
             <FormItem className="flex flex-row items-start space-x-3 space-y-0">
               <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
+                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel>I am currently working in this role.</FormLabel>
@@ -175,8 +144,7 @@ const AddWorkExperienceForm = ({ addExperience }: Props) => {
             </FormItem>
           )}
         />
-
-        <div className='grid grid-cols-2 gap-4 items-end'>
+        <div className="grid grid-cols-2 gap-4 items-end">
           <FormField
             control={form.control}
             name="startDateMonth"
@@ -190,30 +158,36 @@ const AddWorkExperienceForm = ({ addExperience }: Props) => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="jan">January</SelectItem>
-                    <SelectItem value="feb">February</SelectItem>
-                    <SelectItem value="mar">March</SelectItem>
-                    <SelectItem value="apr">April</SelectItem>
-                    <SelectItem value="may">May</SelectItem>
-                    <SelectItem value="jun">June</SelectItem>
-                    <SelectItem value="jul">July</SelectItem>
-                    <SelectItem value="aug">August</SelectItem>
-                    <SelectItem value="sep">September</SelectItem>
-                    <SelectItem value="oct">October</SelectItem>
-                    <SelectItem value="nov">November</SelectItem>
-                    <SelectItem value="dec">December</SelectItem>
+                    {[
+                      "January",
+                      "February",
+                      "March",
+                      "April",
+                      "May",
+                      "June",
+                      "July",
+                      "August",
+                      "September",
+                      "October",
+                      "November",
+                      "December",
+                    ].map((m) => (
+                      <SelectItem key={m} value={m}>
+                        {m}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="startDateYear"
             render={({ field }) => (
               <FormItem>
+                <FormLabel>&nbsp;</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -221,9 +195,9 @@ const AddWorkExperienceForm = ({ addExperience }: Props) => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {Array.from({ length: 26 }, (_, index) => (
-                      <SelectItem key={index} value={`${index + 2000}`}>
-                        {index + 2000}
+                    {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map((y) => (
+                      <SelectItem key={y} value={`${y}`}>
+                        {y}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -232,79 +206,72 @@ const AddWorkExperienceForm = ({ addExperience }: Props) => {
               </FormItem>
             )}
           />
-
-          {!form.watch("currentlyWorking") ? <>
-          <FormField
-            control={form.control}
-            name="endDateMonth"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>End Date*</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Month" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="jan">January</SelectItem>
-                    <SelectItem value="feb">February</SelectItem>
-                    <SelectItem value="mar">March</SelectItem>
-                    <SelectItem value="apr">April</SelectItem>
-                    <SelectItem value="may">May</SelectItem>
-                    <SelectItem value="jun">June</SelectItem>
-                    <SelectItem value="jul">July</SelectItem>
-                    <SelectItem value="aug">August</SelectItem>
-                    <SelectItem value="sep">September</SelectItem>
-                    <SelectItem value="oct">October</SelectItem>
-                    <SelectItem value="nov">November</SelectItem>
-                    <SelectItem value="dec">December</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="endDateYear"
-            render={({ field }) => (
-              <FormItem>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Year" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {Array.from({ length: 26 }, (_, index) => (
-                      <SelectItem key={index} value={`${index + 2000}`}>
-                        {index + 2000}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          </> :
-          <FormField
-            control={form.control}
-            name="endDateYear"
-            render={({ field }) => (
-              <FormItem className="col-span-2">
-                <FormLabel>End Date*</FormLabel>
-                <Input
-                  placeholder="Present"
-                  disabled
-                />
-              </FormItem>
-            )}
-          />}
+          {!form.watch("currentlyWorking") && (
+            <>
+              <FormField
+                control={form.control}
+                name="endDateMonth"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End Date*</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Month" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {[
+                          "January",
+                          "February",
+                          "March",
+                          "April",
+                          "May",
+                          "June",
+                          "July",
+                          "August",
+                          "September",
+                          "October",
+                          "November",
+                          "December",
+                        ].map((m) => (
+                          <SelectItem key={m} value={m}>
+                            {m}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="endDateYear"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>&nbsp;</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Year" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map((y) => (
+                          <SelectItem key={y} value={`${y}`}>
+                            {y}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
         </div>
-
         <FormField
           control={form.control}
           name="description"
@@ -312,16 +279,15 @@ const AddWorkExperienceForm = ({ addExperience }: Props) => {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Enter a description..."
-                  className="resize-none"
-                  {...field}
-                />
+                <Textarea placeholder="Enter a description..." className="resize-none" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+        <Button type="submit" className="w-full bg-[#149A9B] text-white rounded-full">
+          Save
+        </Button>
       </form>
     </Form>
   )
