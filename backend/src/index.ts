@@ -6,6 +6,7 @@ import express from "express";
 import cors from "cors";
 import serviceRequestRoutes from "@/routes/service-request.routes";
 import serviceRoutes from "@/routes/service.routes";
+import applicationRoutes from "@/routes/application.routes";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -16,6 +17,7 @@ app.use(express.json());
 // Routes
 app.use("/api/service-requests", serviceRequestRoutes);
 app.use('/api/services', serviceRoutes);
+app.use('/api/applications', applicationRoutes);
 
 
 app.get("/", (_req, res) => {
