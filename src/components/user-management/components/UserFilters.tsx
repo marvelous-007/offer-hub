@@ -64,7 +64,7 @@ export function UserFilters({
             View {userType.toLowerCase()}
           </Button>
         </div>
-        {/* Status filter */}
+
         <Select
           value={statusFilter}
           onValueChange={setStatusFilter}
@@ -80,7 +80,6 @@ export function UserFilters({
           </SelectContent>
         </Select>
 
-        {/* Search input */}
         <div className="relative w-full sm:w-[250px]">
           <Input
             placeholder="Search by customer name"
@@ -95,9 +94,7 @@ export function UserFilters({
         </div>
       </div>
 
-      {/* Right side controls */}
       <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-start sm:justify-end mt-3 md:mt-0">
-        {/* Date filter */}
         <div className="flex flex-wrap items-cente rounded-sm gap-2 w-full sm:w-auto">
           <Popover>
             <PopoverTrigger asChild>
@@ -126,7 +123,6 @@ export function UserFilters({
           </Button>
         </div>
 
-        {/* Export button */}
         <Button
           className="h-10 px-4 bg-[#002333] hover:bg-[#001a26] text-white rounded-full w-full sm:w-auto"
           onClick={handleExport}
