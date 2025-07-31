@@ -11,6 +11,7 @@ import applicationRoutes from "@/routes/application.routes";
 import nftRoutes from "@/routes/nft.routes";
 import contractRoutes from "@/routes/contract.routes";
 import projectRoutes from '@/routes/project.routes';
+import userRoutes from '@/routes/user.routes';
 
 
 const app = express();
@@ -27,6 +28,7 @@ app.use('/api/applications', applicationRoutes);
 app.use('/api/nfts-awarded', nftRoutes);
 app.use('/api/contracts', contractRoutes);
 app.use('/api/projects', projectRoutes);
+app.use('/api/users', userRoutes);
 
 
 app.get("/", (_req, res) => {
