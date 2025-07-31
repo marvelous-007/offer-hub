@@ -9,6 +9,7 @@ import { reviewRoutes } from "./routes/review.routes";
 import serviceRoutes from "@/routes/service.routes";
 import nftRoutes from "@/routes/nft.routes";
 import contractRoutes from "@/routes/contract.routes";
+import userRoutes from '@/routes/user.routes';
 
 
 const app = express();
@@ -23,6 +24,7 @@ app.use("/api/reviews" , reviewRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/nfts-awarded', nftRoutes);
 app.use('/api/contracts', contractRoutes);
+app.use('/api/users', userRoutes);
 
 
 app.get("/", (_req, res) => {
