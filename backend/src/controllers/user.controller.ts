@@ -56,3 +56,38 @@ export const getUserByIdHandler = async (req: Request, res: Response, next: Next
     next(error);
   }
 };
+
+export const updateUserHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) throw new AppError("User_ID_is_required", 400);
+    
+    if (!uuidRegex.test(id)) throw new AppError("Invalid_user_ID_format", 400);
+
+    const updateData = req.body;
+    const updatedUser = await userService.updateUser(id, updateData);
+
+    if (!updatedUser) throw new AppError("User_not_found", 404);
+
+    // Prepare response with only changed fields
+    const changedFields: Record<string, any> = {};
+    for (const key of Object.keys(updateData)) {
+      if (updatedUser[key] !== undefined) {
+        changedFields[key] = updatedUser[key];
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User_updated_successfully",
+      data: changedFields,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
