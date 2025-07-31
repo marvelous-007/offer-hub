@@ -39,3 +39,60 @@ export const getProjectById = async (id: string) => {
     client_name: project.users?.name || null,
   };
 };
+
+export const updateProject = async (
+  id: string,
+  updates: Partial<CreateProjectDTO>,
+  client_id: string
+) => {
+  const { data: existing, error } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error || !existing) {
+    return { success: false, status: 404, message: 'Project_not_found' };
+  }
+
+  if (existing.client_id !== client_id) {
+    return { success: false, status: 403, message: 'Unauthorized_client' };
+  }
+
+  if (updates.status) {
+    const validTransitions: Record<string, string[]> = {
+      pending: ['in_progress'],
+      in_progress: ['completed'],
+    };
+
+    const allowed = validTransitions[existing.status] || [];
+    if (!allowed.includes(updates.status)) {
+      return {
+        success: false,
+        status: 400,
+        message: 'Invalid_status_transition',
+      };
+    }
+  }
+
+  const allowedFields = ['title', 'description', 'budget', 'status'];
+  const cleanUpdates: Record<string, any> = {};
+  for (const key of allowedFields) {
+    if (updates[key as keyof CreateProjectDTO] !== undefined) {
+      cleanUpdates[key] = updates[key as keyof CreateProjectDTO];
+    }
+  }
+
+  const { data: updated, error: updateError } = await supabase
+    .from('projects')
+    .update(cleanUpdates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (updateError) {
+    return { success: false, status: 500, message: 'Update_failed' };
+  }
+
+  return { success: true, status: 200, data: updated };
+};
