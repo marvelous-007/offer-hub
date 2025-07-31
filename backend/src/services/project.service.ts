@@ -25,3 +25,17 @@ export const getAllProjects = async (filters: any) => {
   if (error) throw new Error(error.message);
   return data;
 };
+
+export const getProjectById = async (id: string) => {
+  const { data: project, error } = await supabase
+    .from('projects')
+    .select(`*, users!projects_client_id_fkey(name)`)
+    .eq('id', id)
+    .single();
+
+  if (error) throw new Error(error.message);
+  return {
+    ...project,
+    client_name: project.users?.name || null,
+  };
+};

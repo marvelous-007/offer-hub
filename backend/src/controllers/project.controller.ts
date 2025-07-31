@@ -23,3 +23,16 @@ export const getAllProjectsHandler = async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const getProjectByIdHandler = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const project = await projectService.getProjectById(id);
+    if (!project) {
+      return res.status(404).json({ success: false, message: 'Project_not_found' });
+    }
+    return res.json({ success: true, data: project });
+  } catch (error: any) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
