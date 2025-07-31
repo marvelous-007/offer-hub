@@ -7,8 +7,10 @@ import cors from "cors";
 import serviceRequestRoutes from "@/routes/service-request.routes";
 import { reviewRoutes } from "./routes/review.routes";
 import serviceRoutes from "@/routes/service.routes";
+import applicationRoutes from "@/routes/application.routes";
 import nftRoutes from "@/routes/nft.routes";
 import contractRoutes from "@/routes/contract.routes";
+import projectRoutes from '@/routes/project.routes';
 import userRoutes from '@/routes/user.routes';
 
 
@@ -22,8 +24,10 @@ app.use(express.json());
 app.use("/api/service-requests", serviceRequestRoutes);
 app.use("/api/reviews" , reviewRoutes);
 app.use('/api/services', serviceRoutes);
+app.use('/api/applications', applicationRoutes);
 app.use('/api/nfts-awarded', nftRoutes);
 app.use('/api/contracts', contractRoutes);
+app.use('/api/projects', projectRoutes);
 app.use('/api/users', userRoutes);
 
 
