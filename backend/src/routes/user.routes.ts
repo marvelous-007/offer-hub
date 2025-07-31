@@ -1,14 +1,14 @@
 import { Router } from 'express';
 import {
   createUserHandler,
-  //getUserByIdHandler,
+  getUserByIdHandler,
   //updateUserHandler
 } from '@/controllers/user.controller';
 
 const router = Router();
 
 router.post('/', createUserHandler);
-//router.get('/:id', getUserByIdHandler);
+router.get('/:id', getUserByIdHandler);
 //router.patch('/:id', updateUserHandler);
 
 export default router;

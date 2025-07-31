@@ -38,6 +38,17 @@ class UserService {
     if (insertError) throw new AppError("Error_creating_user", 500);
     return newUser;
   }
+
+    async getUserById(id: string) {
+    const { data, error } = await supabase
+        .from("users")
+        .select("id, wallet_address, username, name, bio, is_freelancer")
+        .eq("id", id)
+        .single();
+
+    if (error) return null;
+    return data;
+    }
 }
 
 export const userService = new UserService();
