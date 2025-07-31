@@ -13,3 +13,13 @@ export const createProjectHandler = async (req: Request, res: Response) => {
     return res.status(400).json({ success: false, message: error.message });
   }
 };
+
+export const getAllProjectsHandler = async (req: Request, res: Response) => {
+  try {
+    const filters = req.query;
+    const projects = await projectService.getAllProjects(filters);
+    return res.json({ success: true, data: projects });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
