@@ -53,3 +53,16 @@ export const updateProjectHandler = async (req: Request, res: Response) => {
 
   return res.status(result.status).json(result);
 };
+
+export const deleteProjectHandler = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const client_id = req.body.client_id;
+
+  if (!uuidRegex.test(id) || !uuidRegex.test(client_id)) {
+    return res.status(400).json({ success: false, message: 'Invalid_UUID' });
+  }
+
+  const result = await projectService.deleteProject(id, client_id);
+
+  return res.status(result.status).json(result);
+};
