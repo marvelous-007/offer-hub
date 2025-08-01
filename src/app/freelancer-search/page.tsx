@@ -35,7 +35,7 @@ export default function Home() {
   const [selectedLocation, setSelectedLocation] = useState("Any location")
 
   const [sortBy, setSortBy] = useState("Recommended")
-  const [viewType, setViewType] = useState("grid")
+
 
   const [matchingCount, setMatchingCount] = useState(12)
 
