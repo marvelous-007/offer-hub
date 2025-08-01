@@ -1,10 +1,11 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import RoleSelector from '@/components/auth/RoleSelector';
 import SignInForm from '@/components/auth/SignInForm';
 
-const SignInNotFoundPage: React.FC = () => {
+// Component that uses useSearchParams - needs to be wrapped in Suspense
+const SignInNotFoundContent: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -88,6 +89,15 @@ const SignInNotFoundPage: React.FC = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+// Main component that wraps SignInNotFoundContent in Suspense
+const SignInNotFoundPage: React.FC = () => {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+      <SignInNotFoundContent />
+    </Suspense>
   );
 };
 
