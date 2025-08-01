@@ -17,6 +17,8 @@ import TalentMarketInsights from "@/components/find-workers/talent-market-insigh
 import TalentCategories from "@/components/find-workers/talent-categories"
 import TalentFeatured from "@/components/find-workers/talent-featured"
 import TalentDetailDialog from "@/components/find-workers/talent-detail-dialog"
+import Link from "next/link"
+import type { Freelancer } from "@/app/freelancer-search/page"
 
 // Simple Header component defined inline
 function SimpleHeader() {
@@ -25,22 +27,22 @@ function SimpleHeader() {
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <a href="/" className="flex items-center">
+            <Link href="/" className="flex items-center">
               <span className="text-xl font-bold text-[#15949C]">Offer Hub</span>
-            </a>
+            </Link>
             <nav className="ml-10 hidden space-x-8 md:flex">
-              <a href="/find-workers" className="text-[#15949C] font-medium">
+              <Link href="/find-workers" className="text-[#15949C] font-medium">
                 Find Talent
-              </a>
-              <a href="/post-project" className="text-[#002333] hover:text-[#15949C]">
+              </Link>
+              <Link href="/post-project" className="text-[#002333] hover:text-[#15949C]">
                 Post a Project
-              </a>
-              <a href="/my-chats" className="text-[#002333] hover:text-[#15949C]">
+              </Link>
+              <Link href="/my-chats" className="text-[#002333] hover:text-[#15949C]">
                 Messages
-              </a>
-              <a href="/payments" className="text-[#002333] hover:text-[#15949C]">
+              </Link>
+              <Link href="/payments" className="text-[#002333] hover:text-[#15949C]">
                 Payments
-              </a>
+              </Link>
             </nav>
           </div>
           <div className="flex items-center space-x-4">
@@ -148,7 +150,7 @@ export default function FindWorkersPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedFreelancers, setSelectedFreelancers] = useState<string[]>([])
   const [showCompare, setShowCompare] = useState(false)
-  const [selectedFreelancer, setSelectedFreelancer] = useState<any>(null)
+  const [selectedFreelancer, setSelectedFreelancer] = useState<Freelancer | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   // Simulate loading
@@ -180,7 +182,7 @@ export default function FindWorkersPage() {
     }
   }
 
-  const openFreelancerDetail = (freelancer: any) => {
+  const openFreelancerDetail = (freelancer: Freelancer) => {
     setSelectedFreelancer(freelancer)
   }
 
@@ -239,7 +241,7 @@ export default function FindWorkersPage() {
                     {selectedFreelancers.length} freelancer{selectedFreelancers.length > 1 ? "s" : ""} selected
                   </span>
                   <div className="flex -space-x-2">
-                    {selectedFreelancers.map((id, index) => (
+                    {selectedFreelancers.map((id) => (
                       <div
                         key={id}
                         className="h-10 w-10 rounded-full bg-[#DEEFE7] border-2 border-white flex items-center justify-center"
@@ -430,8 +432,8 @@ export default function FindWorkersPage() {
         <TalentDetailDialog
           freelancer={selectedFreelancer}
           onClose={closeFreelancerDetail}
-          isSelected={selectedFreelancers.includes(selectedFreelancer.id)}
-          onToggleSelect={() => toggleFreelancerSelection(selectedFreelancer.id)}
+          isSelected={selectedFreelancers.includes(String(selectedFreelancer.id))}
+          onToggleSelect={() => toggleFreelancerSelection(String(selectedFreelancer.id))}
         />
       )}
     </div>

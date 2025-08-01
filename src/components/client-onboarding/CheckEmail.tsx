@@ -8,7 +8,7 @@ interface CheckEmailProps {
 }
 
 const CheckEmail: React.FC<CheckEmailProps> = ({
-  email,
+  email: _email,
   onBackToSignIn
 }) => {
   return (

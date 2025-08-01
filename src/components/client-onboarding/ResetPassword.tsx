@@ -9,7 +9,7 @@ interface ResetPasswordProps {
 
 const ResetPassword: React.FC<ResetPasswordProps> = ({
   onResetPassword,
-  onBack
+  onBack: _onBack
 }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
