@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 import OnboardingHeader from '@/components/layout/OnboardingHeader';
 
 interface SignInAccountNotFoundProps {
+  email?: string;
   onCreateAccount: () => void;
   onSignIn?: () => void;
 }
 
 const SignInAccountNotFound: React.FC<SignInAccountNotFoundProps> = ({
+  email,
   onCreateAccount,
   onSignIn
 }) => {
