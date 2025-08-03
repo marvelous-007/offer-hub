@@ -6,12 +6,14 @@ interface EnterPasswordProps {
   email?: string;
   onPasswordSubmit: (password: string) => void;
   onRecoverPassword: () => void;
+  onBack?: () => void;
 }
 
 const EnterPassword: React.FC<EnterPasswordProps> = ({
   email,
   onPasswordSubmit,
-  onRecoverPassword
+  onRecoverPassword,
+  onBack
 }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
