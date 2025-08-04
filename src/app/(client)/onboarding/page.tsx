@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import LandingPage from '@/components/client-onboarding/LandingPage';
 import ConnectWallet from '@/components/client-onboarding/ConnectWallet';
@@ -29,7 +29,8 @@ interface OnboardingState {
   userRole?: 'client' | 'freelancer';
 }
 
-const OnboardingPage: React.FC = () => {
+// Component that uses useSearchParams - needs to be wrapped in Suspense
+const OnboardingContent: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -194,6 +195,15 @@ const OnboardingPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       {renderCurrentStep()}
     </div>
+  );
+};
+
+// Main component that wraps OnboardingContent in Suspense
+const OnboardingPage: React.FC = () => {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+      <OnboardingContent />
+    </Suspense>
   );
 };
 

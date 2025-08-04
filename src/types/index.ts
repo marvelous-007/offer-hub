@@ -40,6 +40,18 @@ export interface User {
   status?: 'active' | 'restricted' | 'blocked';
   createdAt: string;
   avatarUrl: string;
+  location?: string;
+  role?: string;
+  analytics?: {
+    totalClients: number;
+    clientsChange: number;
+    completedJobs: number;
+    jobsChange: number;
+    totalPayments: number;
+    paymentsChange: number;
+    profileViews: number;
+    viewsChange: number;
+  };
 }
 
 
