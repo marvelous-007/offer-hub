@@ -59,6 +59,45 @@ const mockProjectData: ProjectData = {
   ],
 };
 
+function PaymentCard({
+  title,
+  amount,
+  buttonText,
+  buttonVariant,
+  icon,
+  borderColor,
+}: {
+  title: string;
+  amount: string;
+  buttonText: string;
+  buttonVariant: "default" | "secondary";
+  icon: React.ReactNode;
+  borderColor: string;
+}) {
+  return (
+    <Card className={`w-full border-l-4 ${borderColor} bg-white`}>
+      <CardContent className="p-6">
+        <div className="flex items-center gap-3 mb-4">
+          {icon}
+          <div>
+            <p className="text-2xl font-bold text-gray-900">{amount}</p>
+            <p className="text-sm text-gray-500">{title}</p>
+          </div>
+        </div>
+        <Button
+          className={`w-full ${
+            buttonVariant === "default"
+              ? "bg-teal-600 hover:bg-teal-700 text-white"
+              : "bg-gray-800 hover:bg-gray-900 text-white"
+          }`}
+        >
+          {buttonText}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function ActiveProjectManagement() {
   const project = mockProjectData;
 
@@ -111,12 +150,24 @@ export function ActiveProjectManagement() {
             </div>
           </div>
 
-          {/* Payment Timeline */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Payment Timeline
-            </h3>
-            <div className="space-y-1"></div>
+          {/* Payment Management Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <PaymentCard
+              title="Total payment"
+              amount={project.totalPayment}
+              buttonText="Make payment to escrow"
+              buttonVariant="default"
+              icon={<DollarSign className="h-6 w-6 text-teal-600" />}
+              borderColor="border-teal-500"
+            />
+            <PaymentCard
+              title="In Escrow"
+              amount={project.inEscrow}
+              buttonText="Release payment"
+              buttonVariant="secondary"
+              icon={<Clock className="h-6 w-6 text-orange-500" />}
+              borderColor="border-orange-500"
+            />
           </div>
         </CardContent>
       </Card>
