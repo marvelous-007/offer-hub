@@ -1,21 +1,23 @@
 "use client"
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft } from "lucide-react"
-import Footer from '@/components/freelancer-profile/footer'
-import { useFreelancerSteps } from '@/hooks/use-freelancer-steps'
-import { Stack } from '@/components/ui/stack'
-import { Textarea } from '@/components/ui/textarea'
-import ExampleBioCard from './user-add-bio-example-card'
+import { useState } from "react"
+import type React from "react"
 
-function UserAddBioActiveState() {
-  const { nextStep, prevStep } = useFreelancerSteps()
-  const [bio, setBio] = useState("")
+import { Button } from "@/components/ui/button"
+import { ArrowLeft } from "lucide-react"
+import Footer from "@/components/freelancer-profile/footer"
+import { Textarea } from "@/components/ui/textarea"
+import ExampleBioCard from "./user-add-bio-example-card"
+import type { ProfileStepProps } from "@/app/types/freelancer-profile"
+
+function UserAddBioActiveState({ userData, updateUserData, nextStep, prevStep }: ProfileStepProps) {
+  const [bio, setBio] = useState(userData.bio || "")
   const [bioError, setBioError] = useState("")
-  
+
   const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setBio(e.target.value)
-    if (e.target.value.length < 100) {
+    const newBio = e.target.value
+    setBio(newBio)
+    updateUserData({ bio: newBio })
+    if (newBio.length < 100) {
       setBioError("Bio must be at least 100 characters")
     } else {
       setBioError("")
@@ -24,76 +26,70 @@ function UserAddBioActiveState() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (bio.length < 100) {
+    if (bio.length >= 100) {
+      nextStep()
+    } else {
       setBioError("Bio must be at least 100 characters")
-      return
     }
-    nextStep()
   }
 
   return (
-    <div className='flex flex-col gap-y-16 w-full'>
-      <Stack className="gap-8 mx-auto px-4 font-semibold space-y-4">
-        <p className="text-neutral-500">8/10</p>
-        <h1 className="text-lg text-[#19213D]">
-          Great. Now write a bio to tell the world about yourself.
-        </h1>
-        <p className="font-normal text-xs text-[#19213D]">
-          Help people get to know you at a glance. What work do you do best? Tell them clearly. 
-          Using paragraphs or bullet points. You can always edit later; just make sure you proof read now.
+    <div className="flex flex-col gap-y-16 w-full pb-28">
+      <div className="gap-8 mx-auto px-4 font-semibold space-y-4 max-w-4xl">
+        <p className="text-neutral-500">8/11</p>
+        <h1 className="text-3xl text-[#19213D]">Great. Now write a bio to tell the world about yourself.</h1>
+        <p className="font-normal text-lg text-[#19213D]">
+          Help people get to know you at a glance. What work do you do best? Tell them clearly, using paragraphs or
+          bullet points. You can always edit later; just make sure you proofread now.
         </p>
-      </Stack>
-      <div className="flex flex-col md:flex-row gap-8 w-full max-w-6xl mx-auto px-4">
+      </div>
+      <div className="flex flex-col md:flex-row gap-8 w-full max-w-4xl mx-auto px-4">
         <div className="flex-1">
           <form id="add-bio-form" onSubmit={handleSubmit}>
-
             <div className="mt-8">
-              <label htmlFor="bio" className="block text-sm font-medium mb-2">Bio</label>
+              <label htmlFor="bio" className="block text-sm font-medium mb-2">
+                Bio
+              </label>
               <Textarea
                 id="bio"
                 value={bio}
                 onChange={handleBioChange}
                 placeholder="Enter your top skills, experiences, and interests. This is one of the first things clients will see on your profile."
-                className="w-full min-h-32 border border-[#19213D] rounded-lg p-4 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#19213D]"
+                className="w-full min-h-48 border border-[#19213D] rounded-lg p-4 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#19213D]"
               />
               <div className="flex justify-between mt-2">
-                {bioError && (
-                  <span className="text-red-500 text-xs">{bioError}</span>
-                )}
-                <span className={`text-xs ${bio.length < 100 ? 'text-gray-500' : 'text-gray-500'}`}>
+                {bioError && <span className="text-red-500 text-xs">{bioError}</span>}
+                <span className={`text-xs ml-auto ${bio.length < 100 ? "text-gray-500" : "text-green-600"}`}>
                   At least 100 characters ({bio.length}/100)
                 </span>
               </div>
             </div>
           </form>
         </div>
-        
         <div className="md:w-1/3">
           <ExampleBioCard />
         </div>
       </div>
-      
-      <Footer className='px-4 flex justify-between'>
+      <Footer className="px-4 flex justify-between">
         <div>
-          <Button
-            onClick={prevStep}
-            variant="ghost" className='gap-1 rounded-full'>
+          <Button onClick={prevStep} variant="ghost" className="gap-1 rounded-full">
             <ArrowLeft size={18} /> Back
           </Button>
         </div>
-
-        <div className='space-x-4'>
+        <div className="space-x-4">
           <Button
             onClick={nextStep}
             variant="outline"
-            className='border-[#149A9B] text-[#149A9B] hover:text-[#149A9B]
-            bg-transparent rounded-full md:min-w-36'>
+            className="border-[#149A9B] text-[#149A9B] hover:text-[#149A9B] bg-transparent rounded-full md:min-w-36"
+          >
             Skip
           </Button>
           <Button
-            type='submit'
-            form='add-bio-form'
-            className='gap-1 bg-[#149A9B] text-white rounded-full md:min-w-36'>
+            type="submit"
+            form="add-bio-form"
+            className="gap-1 bg-[#149A9B] text-white rounded-full md:min-w-36"
+            disabled={bio.length < 100}
+          >
             Set your rate
           </Button>
         </div>

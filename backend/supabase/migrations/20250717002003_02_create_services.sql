@@ -7,5 +7,6 @@ CREATE TABLE services (
   min_price DECIMAL NOT NULL,
   max_price DECIMAL NOT NULL,
   is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMP DEFAULT NOW()
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
 );

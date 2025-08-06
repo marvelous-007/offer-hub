@@ -1,57 +1,69 @@
 // Type definitions for the freelancer profile flow
 
-// Work experience entry type
 export interface WorkExperience {
   id: string
   title: string
   company: string
-  startDate: string
-  endDate: string
+  location: string
+  country: string
+  currentlyWorking: boolean
+  startDateMonth: string
+  startDateYear: string
+  endDateMonth?: string
+  endDateYear?: string
   description: string
-  location?: string
 }
 
-// Education entry type
 export interface Education {
   id: string
+  university: string
   degree: string
-  institution: string
-  startDate: string
-  endDate: string
-  description?: string
-  location?: string
+  fieldOfStudy: string
+  startYear: number
+  endYear: number
+  location: string
+  description: string
 }
 
-// Language entry type
+export type LanguageLevel = "Basic" | "Conversational" | "Fluent" | "Native or Bilingual" | "My Level is"
 export interface Language {
   id: string
-  language: string
-  level: string
+  name: string
+  level: LanguageLevel
 }
 
-// User data type for the freelancer profile
+export interface ProfileDetails {
+  dateOfBirth?: Date
+  country?: string
+  streetAddress?: string
+  aptSuite?: string
+  city?: string
+  stateProvince?: string
+  zipPostalCode?: string
+  phoneNumber?: string
+}
+
+// Main user data type for the freelancer profile
 export interface UserProfileData {
-  name?: string
-  email?: string
-  location?: string
-  profilePicture?: string
-  title?: string
-  bio?: string
-  bulletPoints?: string[]
-  hourlyRate?: string
+  role?: "freelancer" | "client"
+  jobCategory?: string
+  jobTypes?: string[]
   skills?: string[]
   workExperience?: WorkExperience[]
   education?: Education[]
   languages?: Language[]
-  achievements?: string[]
+  bio?: string
+  hourlyRate?: number | string
+  profilePicture?: string
+  profileDetails?: ProfileDetails
+  name?: string
+  email?: string
 }
 
 // Props type for profile step components
 export interface ProfileStepProps {
-  userData?: UserProfileData
-  updateUserData?: (data: Partial<UserProfileData>) => void
-  nextStep?: () => void
-  prevStep?: () => void
-  goToStep?: (stepKey: string) => void
-  onComplete?: (data: UserProfileData) => Promise<void>
+  userData: UserProfileData
+  updateUserData: (data: Partial<UserProfileData>) => void
+  nextStep: () => void
+  prevStep: () => void
 }

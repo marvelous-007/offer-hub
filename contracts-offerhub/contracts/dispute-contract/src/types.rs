@@ -7,6 +7,7 @@ pub enum DisputeOutcome {
     None,
     FavorFreelancer,
     FavorClient,
+    Split,
 }
 
 #[contracttype]

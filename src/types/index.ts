@@ -25,6 +25,7 @@ export interface Conversation {
 }
 
 export interface MessagesMainProps {
+  dispute?: DisputeRow
   activeConversation?: Conversation
   messages: Message[]
   chatHeaderItem?: JSX.Element
@@ -32,26 +33,51 @@ export interface MessagesMainProps {
 }
 
 
-export interface DisputeRow {
-  date: string;
+export interface User {
+  id?: string;
   name: string;
-  ticket: string;
   email: string;
+  status?: 'active' | 'restricted' | 'blocked';
+  createdAt: string;
+  avatarUrl: string;
+  location?: string;
+  role?: string;
+  analytics?: {
+    totalClients: number;
+    clientsChange: number;
+    completedJobs: number;
+    jobsChange: number;
+    totalPayments: number;
+    paymentsChange: number;
+    profileViews: number;
+    viewsChange: number;
+  };
+}
+
+
+export interface DisputeRow {
+  name: string;
+  email: string;
+  ticket: string;
   userId?: string;
   amount?: string;
+  status?: 'unassigned' | 'active' | 'resolved';
+  parties: User[]
+  createdAt: string;
 }
 
 
 export interface TabItem {
   label: string;
   value: string;
-  component: ReactNode; 
+  component: ReactNode;
 }
 
 export interface PillTabsProps {
   tabs: TabItem[];
   defaultValue?: string;
   className?: string;
+  tabsListclassName?: string;
 }
 
 // Active Project Management Types

@@ -10,6 +10,8 @@ import { SecuritySettings } from "@/components/account-settings/security-setting
 import { NotificationSettings } from "@/components/account-settings/notification-settings";
 import { ServiceSettings } from "@/components/account-settings/service-settings";
 import { ConversionRates, Service } from "@/components/account-settings/types";
+import { useProfileApi } from "@/hooks/api-connections/use-profile-api";
+import { User } from '@/types/user.types';
 
 
 
@@ -22,6 +24,7 @@ const fallbackConversionRates: ConversionRates = {
 export default function AccountSettings() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const [isUserActive, setIsUserActive] = useState(true)
+    const [currentUser, setCurrentUser] = useState<User | null>(null)
     const [walletAddress, setWalletAddress] = useState("")
     const [walletPlaceholder, setWalletPlaceholder] = useState("0x1234...x30d")
     const [password, setPassword] = useState("")
@@ -41,6 +44,27 @@ export default function AccountSettings() {
     const [newServiceCurrency, setNewServiceCurrency] = useState("XLM")
     const [conversionRates, setConversionRates] = useState<ConversionRates>(fallbackConversionRates)
     const [apiError, setApiError] = useState<string | null>(null)
+    
+    const { user, isLoading: profileLoading, error: profileError, fetchProfile } = useProfileApi()
+
+    // TODO: Replace with actual user ID from authentication context
+    const TEMP_USER_ID = "550e8400-e29b-41d4-a716-446655440000";
+
+    // Fetch user profile
+    useEffect(() => {
+        fetchProfile(TEMP_USER_ID);
+    }, [fetchProfile]);
+
+    useEffect(() => {
+        if (user) {
+            setCurrentUser(user);
+            // Update wallet placeholder if user has a wallet address
+            if (user.wallet_address) {
+                const address = user.wallet_address;
+                setWalletPlaceholder(`${address.slice(0, 6)}...${address.slice(-4)}`);
+            }
+        }
+    }, [user]);
 
     // Fetch conversion rates from CoinGecko API
     useEffect(() => {
@@ -133,7 +157,22 @@ export default function AccountSettings() {
                 )}
                 <div className="flex-1 p-4 sm:p-8">
                     <div className="max-w-5xl">
-                        <UserInfo isUserActive={isUserActive} />
+                        <UserInfo 
+                            user={currentUser} 
+                            isUserActive={isUserActive} 
+                            isLoading={profileLoading}
+                        />
+                        {profileError && (
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                                <p className="text-red-600">{profileError.message}</p>
+                                <button 
+                                    onClick={() => fetchProfile(TEMP_USER_ID)}
+                                    className="mt-2 text-sm text-red-700 underline hover:no-underline"
+                                >
+                                    Retry loading profile
+                                </button>
+                            </div>
+                        )}
                         <Tabs defaultValue="wallet" className="w-full">
                             <TabsList className="grid grid-cols-4 sm:grid-cols-4 mb-8 bg-[#F1F3F7] rounded-full items-center h-13 px-0 sm:px-2 py-1">
                                 <TabsTrigger
