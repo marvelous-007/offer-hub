@@ -53,3 +53,26 @@ export interface PillTabsProps {
   defaultValue?: string;
   className?: string;
 }
+
+// Active Project Management Types
+export interface Milestone {
+  id: string;
+  name: string;
+  amount: string;
+  status: "paid" | "in-escrow" | "pending";
+  icon: ReactNode;
+}
+
+export interface ProjectData {
+  id: string;
+  title: string;
+  freelancer: {
+    name: string;
+    avatar: string;
+    location: string;
+    timezone: string;
+  };
+  totalPayment: string;
+  inEscrow: string;
+  milestones: Milestone[];
+}
