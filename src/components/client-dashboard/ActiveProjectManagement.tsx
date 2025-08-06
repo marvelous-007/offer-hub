@@ -98,6 +98,46 @@ function PaymentCard({
   );
 }
 
+function MilestoneItem({ milestone }: { milestone: Milestone }) {
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "paid":
+        return (
+          <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+            Paid
+          </span>
+        );
+      case "in-escrow":
+        return (
+          <span className="px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
+            In Escrow
+          </span>
+        );
+      case "pending":
+        return (
+          <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+            Pending
+          </span>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+      <div className="flex items-center gap-3">
+        {milestone.icon}
+        <span className="text-gray-900 font-medium">{milestone.name}</span>
+      </div>
+      <div className="flex items-center gap-4">
+        <span className="text-gray-900 font-medium">{milestone.amount}</span>
+        {getStatusBadge(milestone.status)}
+      </div>
+    </div>
+  );
+}
+
 export function ActiveProjectManagement() {
   const project = mockProjectData;
 
@@ -168,6 +208,18 @@ export function ActiveProjectManagement() {
               icon={<Clock className="h-6 w-6 text-orange-500" />}
               borderColor="border-orange-500"
             />
+          </div>
+
+          {/* Payment Timeline */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Payment Timeline
+            </h3>
+            <div className="space-y-1">
+              {project.milestones.map((milestone) => (
+                <MilestoneItem key={milestone.id} milestone={milestone} />
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
