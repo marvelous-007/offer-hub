@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -15,8 +15,14 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Star, ChevronDown, ChevronUp, X, RefreshCw, Clock, DollarSign, Globe, Award, Briefcase } from "lucide-react"
+import { ServiceFilters } from "@/types/service.types"
 
-export default function TalentFilters() {
+interface TalentFiltersProps {
+  onFiltersChange?: (filters: ServiceFilters) => void;
+  currentFilters?: ServiceFilters;
+}
+
+export default function TalentFilters({ onFiltersChange, currentFilters }: TalentFiltersProps) {
   const [priceRange, setPriceRange] = useState([25, 75])
   const [experienceLevel, setExperienceLevel] = useState<string[]>([])
   const [availability, setAvailability] = useState<string[]>([])
@@ -35,6 +41,28 @@ export default function TalentFilters() {
     location: false,
     other: false,
   })
+
+  // Initialize filters from currentFilters prop
+  useEffect(() => {
+    if (currentFilters) {
+      if (currentFilters.min_price !== undefined && currentFilters.max_price !== undefined) {
+        setPriceRange([currentFilters.min_price, currentFilters.max_price])
+      }
+      
+      // Map category back to experience level if present
+      if (currentFilters.category) {
+        const categoryMap: Record<string, string> = {
+          'development': 'entry',
+          'design': 'intermediate',
+          'business': 'expert'
+        }
+        const experience = categoryMap[currentFilters.category]
+        if (experience) {
+          setExperienceLevel([experience])
+        }
+      }
+    }
+  }, [currentFilters])
 
   const toggleSection = (section: string) => {
     setCollapsedSections({
@@ -94,7 +122,47 @@ export default function TalentFilters() {
     setIsOnlineNow(false)
     setHasVerifiedId(false)
     setTopRatedOnly(false)
+    
+    // Notify parent of filter reset
+    if (onFiltersChange) {
+      onFiltersChange({
+        min_price: 25,
+        max_price: 75,
+        page: 1,
+        limit: 10
+      });
+    }
   }
+
+  // Effect to notify parent of filter changes
+  useEffect(() => {
+    if (onFiltersChange) {
+      const filters: ServiceFilters = {
+        min_price: priceRange[0],
+        max_price: priceRange[1],
+        page: 1,
+        limit: 10
+      };
+      
+      // Add category filter if any experience level is selected
+      if (experienceLevel.length > 0) {
+        // Map experience levels to categories (this is a simplified mapping)
+        const categoryMap: Record<string, string> = {
+          'entry': 'development',
+          'intermediate': 'design',
+          'expert': 'business'
+        };
+        
+        // Use the first selected experience level to determine category
+        const category = categoryMap[experienceLevel[0]];
+        if (category) {
+          filters.category = category;
+        }
+      }
+      
+      onFiltersChange(filters);
+    }
+  }, [priceRange, experienceLevel]); // Removed onFiltersChange from dependencies
 
   const SectionHeader = ({ title, section, icon }: { title: string; section: string; icon: React.ReactNode }) => (
     <div className="flex items-center justify-between cursor-pointer py-2" onClick={() => toggleSection(section)}>
