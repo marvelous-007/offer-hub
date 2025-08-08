@@ -62,9 +62,7 @@ export default function TalentLayout({ children }: TalentLayoutProps) {
         {/* Logo */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-bold">oh</span>
-            </div>
+            <img src="/logo.svg" alt="Offer Hub Logo" className="w-8 h-8" />
             <span className="text-xl font-bold text-gray-900">Offer Hub</span>
           </div>
         </div>
