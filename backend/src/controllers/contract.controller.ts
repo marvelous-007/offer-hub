@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { contractService } from "@/services/contract.service";
 import { CreateContractDTO, UpdateContractDTO } from "@/types/contract.types";
-import { UUID_REGEX, CONTRACT_TYPES, ESCROW_STATUSES } from "@/utils/validation";
+import { UUID_REGEX, CONTRACT_TYPES, ESCROW_STATUSES, ACTIVE_ESCROW_STATUSES } from "@/utils/validation";
 
 export const createContractHandler = async (
   req: Request,
@@ -182,7 +182,7 @@ export const updateContractStatusHandler = async (
     }
 
     // Validate escrow status
-    if (!ESCROW_STATUSES.includes(escrow_status)) {
+    if (!ACTIVE_ESCROW_STATUSES.includes(escrow_status)) {
       res.status(400).json({
         success: false,
         message: "escrow_status must be 'funded', 'released', or 'disputed'",
