@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, Paperclip, Image } from 'lucide-react';
+import { Send, Share, Camera, Smile } from 'lucide-react';
 
 interface DisputeMessageInputProps {
   onSendMessage: (content: string, file?: File) => void;
@@ -41,74 +41,70 @@ export function DisputeMessageInput({ onSendMessage }: DisputeMessageInputProps)
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2">
-      {/* File upload buttons */}
-      <div className="flex gap-1">
-        <label className="cursor-pointer">
-          <input
-            type="file"
-            accept="image/*,.pdf,.doc,.docx"
-            onChange={handleFileUpload}
-            className="hidden"
+    <div className="bg-gray-50 rounded-2xl p-3">
+      <form onSubmit={handleSubmit} className="flex items-center gap-3">
+        {/* Emoji button */}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-10 w-10 p-0 text-gray-500 hover:text-gray-700 rounded-full"
+        >
+          <Smile className="h-5 w-5" />
+        </Button>
+
+        {/* Message input container */}
+        <div className="flex-1 relative">
+          <Input
+            type="text"
+            placeholder="Message"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            className="w-full bg-white border-gray-200 rounded-2xl px-4 py-3 pr-20 text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             disabled={isUploading}
           />
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-10 w-10 p-0 text-gray-500 hover:text-gray-700"
-            disabled={isUploading}
-          >
-            <Paperclip className="h-4 w-4" />
-          </Button>
-        </label>
+          
+          {/* Right side icons inside input */}
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+            <label className="cursor-pointer">
+              <input
+                type="file"
+                accept="image/*,.pdf,.doc,.docx"
+                onChange={handleFileUpload}
+                className="hidden"
+                disabled={isUploading}
+              />
+              <Share className="h-4 w-4 text-gray-500 hover:text-gray-700" />
+            </label>
 
-        <label className="cursor-pointer">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileUpload}
-            className="hidden"
-            disabled={isUploading}
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-10 w-10 p-0 text-gray-500 hover:text-gray-700"
-            disabled={isUploading}
-          >
-            <Image className="h-4 w-4" />
-          </Button>
-        </label>
-      </div>
+            <label className="cursor-pointer">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="hidden"
+                disabled={isUploading}
+              />
+              <Camera className="h-4 w-4 text-gray-500 hover:text-gray-700" />
+            </label>
+          </div>
+        </div>
 
-      {/* Message input */}
-      <div className="flex-1">
-        <Input
-          type="text"
-          placeholder="Message"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyPress={handleKeyPress}
-          className="w-full"
-          disabled={isUploading}
-        />
-      </div>
-
-      {/* Send button */}
-      <Button
-        type="submit"
-        size="sm"
-        className="h-10 w-10 p-0 bg-black hover:bg-gray-800 text-white rounded-full"
-        disabled={!message.trim() || isUploading}
-      >
-        {isUploading ? (
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-        ) : (
-          <Send className="h-4 w-4" />
-        )}
-      </Button>
-    </form>
+        {/* Send button */}
+        <Button
+          type="submit"
+          size="sm"
+          className="h-10 w-10 p-0 bg-gray-800 hover:bg-gray-900 text-white rounded-full flex-shrink-0"
+          disabled={!message.trim() || isUploading}
+        >
+          {isUploading ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
+        </Button>
+      </form>
+    </div>
   );
 }

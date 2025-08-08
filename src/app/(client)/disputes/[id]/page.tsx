@@ -16,26 +16,35 @@ export default function DisputeConversationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Back
-          </Button>
-          <h1 className="text-xl font-semibold text-gray-900">Mobile App UI/UX design</h1>
+    <div className="min-h-screen bg-gray-100 p-4 md:p-6">
+      {/* Card Container */}
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden h-[calc(100vh-2rem)] md:h-[calc(100vh-3rem)]">
+        {/* Header */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBack}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 p-2"
+            >
+              <ChevronLeft className="h-5 w-5" />
+              Back
+            </Button>
+            
+            <h1 className="absolute left-1/2 transform -translate-x-1/2 text-lg font-semibold text-gray-900">
+              Mobile App UI/UX design
+            </h1>
+            
+            {/* Spacer for balance */}
+            <div className="w-16"></div>
+          </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="h-[calc(100vh-80px)]">
-        <DisputeConversation disputeId={disputeId} />
+        {/* Main Content */}
+        <div className="h-[calc(100%-80px)]">
+          <DisputeConversation disputeId={disputeId} />
+        </div>
       </div>
     </div>
   );

@@ -30,23 +30,25 @@ export function DisputeMessageDisplay({ messages }: DisputeMessageDisplayProps) 
   }
 
   return (
-    <div className="h-full overflow-y-auto p-4 space-y-4">
+    <div className="h-full overflow-y-auto space-y-3">
       {messages.map((message) => (
         <div
           key={message.id}
           className={`flex ${message.isOutgoing ? 'justify-end' : 'justify-start'}`}
         >
           <div
-            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+            className={`max-w-[70%] px-3 py-3 rounded-2xl relative ${
               message.isOutgoing
-                ? 'bg-blue-600 text-white rounded-br-none'
-                : 'bg-gray-200 text-gray-900 rounded-bl-none'
+                ? 'bg-[#2862FF] text-white'
+                : 'bg-[#F2F2F2] text-gray-900'
             }`}
           >
-            <p className="text-sm">{message.content}</p>
+            <p className="text-sm leading-relaxed mb-1">{message.content}</p>
             <p
-              className={`text-xs mt-1 ${
-                message.isOutgoing ? 'text-blue-100' : 'text-gray-500'
+              className={`text-xs ${
+                message.isOutgoing 
+                  ? 'text-white/80 text-right' 
+                  : 'text-gray-600 text-left'
               }`}
             >
               {message.timestamp}

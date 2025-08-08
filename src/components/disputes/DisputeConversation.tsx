@@ -49,12 +49,12 @@ export function DisputeConversation({ disputeId }: DisputeConversationProps) {
   return (
     <div className="flex flex-col h-full bg-white">
       {/* Messages Display Area */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden px-6 py-4">
         <DisputeMessageDisplay messages={messages} />
       </div>
 
       {/* Message Input Area */}
-      <div className="border-t border-gray-200 p-4">
+      <div className="bg-gray-50 px-6 py-4">
         <DisputeMessageInput onSendMessage={handleSendMessage} />
       </div>
     </div>
