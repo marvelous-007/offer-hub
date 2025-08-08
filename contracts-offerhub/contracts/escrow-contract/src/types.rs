@@ -1,4 +1,4 @@
-use soroban_sdk::{contracterror, contracttype, Address};
+use soroban_sdk::{contracterror, contracttype, Address, String, Vec};
 
 #[contracttype]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -20,6 +20,27 @@ pub enum DisputeResult {
     Split,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[contracttype]
+pub struct MilestoneHistory {
+    pub milestone: Milestone,
+    pub action: String,
+    pub timestamp: u64,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[contracttype]
+pub struct Milestone {
+    pub id: u32,
+    pub description: String,
+    pub amount: i128,
+    pub approved: bool,
+    pub released: bool,
+    pub created_at: u64,
+    pub approved_at: Option<u64>,
+    pub released_at: Option<u64>,
+}
+
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct EscrowData {
@@ -33,6 +54,9 @@ pub struct EscrowData {
     pub released_at: Option<u64>,
     pub disputed_at: Option<u64>,
     pub resolved_at: Option<u64>,
+    pub milestones: Vec<Milestone>,
+    pub milestone_history: Vec<MilestoneHistory>,
+    pub released_amount: i128,
 }
 
 #[contracterror]
@@ -47,4 +71,5 @@ pub enum Error {
     InvalidStatus = 6,
     DisputeNotOpen = 7,
     InvalidDisputeResult = 8,
+    MilestoneNotFound = 9,
 }
