@@ -41,7 +41,7 @@ export function DisputeMessageInput({ onSendMessage }: DisputeMessageInputProps)
   };
 
   return (
-    <div className="bg-gray-50 rounded-2xl p-3">
+    <div className="rounded-2xl">
       <form onSubmit={handleSubmit} className="flex items-center gap-3">
         {/* Emoji button */}
         <Button
@@ -61,7 +61,7 @@ export function DisputeMessageInput({ onSendMessage }: DisputeMessageInputProps)
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="w-full bg-white border-gray-200 rounded-2xl px-4 py-3 pr-20 text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            className="w-full bg-gray-100 border-gray-200 rounded-2xl px-4 py-3 pr-20 text-sm placeholder:text-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             disabled={isUploading}
           />
           

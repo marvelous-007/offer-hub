@@ -54,7 +54,7 @@ export function DisputeConversation({ disputeId }: DisputeConversationProps) {
       </div>
 
       {/* Message Input Area */}
-      <div className="bg-gray-50 px-6 py-4">
+      <div className="px-6">
         <DisputeMessageInput onSendMessage={handleSendMessage} />
       </div>
     </div>
