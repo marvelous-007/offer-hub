@@ -89,27 +89,7 @@ export default function DemoFreelancerProfilePage() {
           ))}
         </div>
 
-        <div className="mt-12 text-center">
-          <Card className="max-w-2xl mx-auto">
-            <CardHeader>
-              <CardTitle>Features Implemented</CardTitle>
-            </CardHeader>
-            <CardContent className="text-left">
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li>✅ Complete freelancer profile with avatar, name, title, and rating</li>
-                <li>✅ Skills section with proficiency levels and categories</li>
-                <li>✅ Work experience timeline with achievements</li>
-                <li>✅ Client reviews with ratings and project details</li>
-                <li>✅ Portfolio gallery with project cards</li>
-                <li>✅ Detailed portfolio project view</li>
-                <li>✅ Navigation tabs between Profile and Portfolio</li>
-                <li>✅ Responsive design for mobile and desktop</li>
-                <li>✅ Loading and error states</li>
-                <li>✅ Mock data for comprehensive testing</li>
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
+       
       </div>
     </TalentLayout>
   );
