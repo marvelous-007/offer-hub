@@ -11,7 +11,6 @@ pub enum EscrowStatus {
     Resolved,
 }
 
-#[contracttype]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(u32)]
 pub enum DisputeResult {
@@ -48,7 +47,7 @@ pub struct EscrowData {
     pub freelancer: Address,
     pub amount: i128,
     pub status: EscrowStatus,
-    pub dispute_result: Option<DisputeResult>,
+    pub dispute_result: u32, // 0 = None, 1 = ClientWins, 2 = FreelancerWins, 3 = Split
     pub created_at: u64,
     pub funded_at: Option<u64>,
     pub released_at: Option<u64>,
@@ -73,3 +72,4 @@ pub enum Error {
     InvalidDisputeResult = 8,
     MilestoneNotFound = 9,
 }
+
