@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import FreelancerProfile from "@/components/talent/FreelancerProfile";
 import { getFreelancerProfile } from "@/lib/mockData/freelancer-profile-mock";
 import { FreelancerProfile as FreelancerProfileType } from "@/lib/mockData/freelancer-profile-mock";
+import TalentLayout from "@/components/talent/TalentLayout";
 
 interface ProfilePageProps {
   params: Promise<{
@@ -76,5 +77,9 @@ function ProfilePageClient({ id }: ProfilePageClientProps) {
     );
   }
 
-  return <FreelancerProfile freelancer={freelancer} />;
+  return (
+    <TalentLayout>
+      <FreelancerProfile freelancer={freelancer} />
+    </TalentLayout>
+  );
 }
