@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, MapPin, DollarSign } from "lucide-react";
 import { mockFreelancerProfiles } from "@/lib/mockData/freelancer-profile-mock";
 import Link from "next/link";
+import TalentLayout from "@/components/talent/TalentLayout";
 
 export default function DemoFreelancerProfilePage() {
   const [selectedFreelancer, setSelectedFreelancer] = useState<string | null>(null);
@@ -25,8 +26,8 @@ export default function DemoFreelancerProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <TalentLayout>
+      <div className="p-6">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
             Freelancer Profile Demo
@@ -88,8 +89,28 @@ export default function DemoFreelancerProfilePage() {
           ))}
         </div>
 
-       
+        <div className="mt-12 text-center">
+          <Card className="max-w-2xl mx-auto">
+            <CardHeader>
+              <CardTitle>Features Implemented</CardTitle>
+            </CardHeader>
+            <CardContent className="text-left">
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li>✅ Complete freelancer profile with avatar, name, title, and rating</li>
+                <li>✅ Skills section with proficiency levels and categories</li>
+                <li>✅ Work experience timeline with achievements</li>
+                <li>✅ Client reviews with ratings and project details</li>
+                <li>✅ Portfolio gallery with project cards</li>
+                <li>✅ Detailed portfolio project view</li>
+                <li>✅ Navigation tabs between Profile and Portfolio</li>
+                <li>✅ Responsive design for mobile and desktop</li>
+                <li>✅ Loading and error states</li>
+                <li>✅ Mock data for comprehensive testing</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
+    </TalentLayout>
   );
 }
