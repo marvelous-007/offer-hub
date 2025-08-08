@@ -20,7 +20,7 @@ pub fn init_contract(env: &Env, client: Address, freelancer: Address, amount: i1
         freelancer,
         amount,
         status: EscrowStatus::Initialized,
-        dispute_result: None,
+        dispute_result: 0, // 0 = None
         created_at: env.ledger().timestamp(),
         funded_at: None,
         released_at: None,
@@ -145,7 +145,11 @@ pub fn resolve_dispute(env: &Env, result: Symbol) {
     };
 
     escrow_data.status = EscrowStatus::Resolved;
-    escrow_data.dispute_result = Some(dispute_result);
+    escrow_data.dispute_result = match dispute_result {
+        DisputeResult::ClientWins => 1,
+        DisputeResult::FreelancerWins => 2,
+        DisputeResult::Split => 3,
+    };
     escrow_data.resolved_at = Some(env.ledger().timestamp());
 
     env.storage().instance().set(&ESCROW_DATA, &escrow_data);
