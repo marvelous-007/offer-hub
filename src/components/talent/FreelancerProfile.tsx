@@ -35,47 +35,49 @@ export default function FreelancerProfile({ freelancer }: FreelancerProfileProps
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Profile Header - Always visible */}
-        <div className="mb-8">
-          <ProfileHeader freelancer={freelancer} />
-        </div>
+    <div className="p-6">
+      {/* Profile Header - Always visible */}
+      <div className="mb-8">
+        <ProfileHeader freelancer={freelancer} />
+      </div>
 
-        {/* Navigation Tabs */}
-        <div className="mb-8">
-          <ProfileNavigation 
-            activeTab={activeTab} 
-            onTabChange={setActiveTab} 
-          />
-        </div>
+      {/* Navigation Tabs */}
+      <div className="mb-8">
+        <ProfileNavigation 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab} 
+        />
+      </div>
 
-        {/* Content */}
-        <div className="space-y-8">
-          {activeTab === "profile" ? (
-            /* Profile Tab */
-            <div className="space-y-8">
+      {/* Content */}
+      <div className="space-y-8">
+        {activeTab === "profile" ? (
+          /* Profile Tab */
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
               <SkillsSection skills={freelancer.skills} />
               <ExperienceSection experience={freelancer.experience} />
+            </div>
+            <div className="space-y-6">
               <ReviewsSection reviews={freelancer.reviews} />
             </div>
-          ) : (
-            /* Portfolio Tab */
-            <div>
-              {selectedProject ? (
-                <PortfolioItem 
-                  project={selectedProject} 
-                  onBack={handleBackToGallery}
-                />
-              ) : (
-                <PortfolioGallery 
-                  projects={portfolioProjects}
-                  onProjectClick={handleProjectClick}
-                />
-              )}
-            </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          /* Portfolio Tab */
+          <div>
+            {selectedProject ? (
+              <PortfolioItem 
+                project={selectedProject} 
+                onBack={handleBackToGallery}
+              />
+            ) : (
+              <PortfolioGallery 
+                projects={portfolioProjects}
+                onProjectClick={handleProjectClick}
+              />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
