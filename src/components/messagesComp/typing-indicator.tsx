@@ -1,10 +1,18 @@
-"use client"
-
 // TypingIndicator: subtle 'John is typing…' with animated dots.
 //
-export function TypingIndicator({ name = "John", align = "left" }: { name?: string; align?: "left" | "right" }) {
+export function TypingIndicator({
+  name = "John",
+  align = "left",
+}: {
+  name?: string;
+  align?: "left" | "right";
+}) {
   return (
-    <div className={`flex w-full ${align === "right" ? "justify-end" : "justify-start"}`}>
+    <div
+      className={`flex w-full ${
+        align === "right" ? "justify-end" : "justify-start"
+      }`}
+    >
       <div className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
         <span className="whitespace-nowrap">{name} is typing</span>
         <span className="flex items-center gap-1">
@@ -14,5 +22,5 @@ export function TypingIndicator({ name = "John", align = "left" }: { name?: stri
         </span>
       </div>
     </div>
-  )
+  );
 }

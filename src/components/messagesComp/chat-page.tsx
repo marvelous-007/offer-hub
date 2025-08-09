@@ -21,7 +21,7 @@ import {
   type Message,
   type Attachment,
   type AttachmentKind,
-} from "./types";
+} from "@/types/messages-types";
 import { formatTime12h } from "@/lib/date";
 
 // Helper: convert selected Files into attachment objects for UI preview.

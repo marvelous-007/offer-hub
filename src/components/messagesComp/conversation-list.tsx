@@ -1,8 +1,5 @@
-"use client";
-
 // Modern desktop conversation list with bulletproof ellipsis.
 // Layout: [Avatar] [Main (name + snippet)] [Meta (time + unread)]
-// The snippet never overflows and always shows … thanks to min-w-0 + text-ellipsis.
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -23,7 +20,7 @@ function last(conv: Conversation) {
 function lastSnippet(conv: Conversation) {
   const m = last(conv);
   if (!m) return "";
-  if (m.text) return trimWithEllipsis(m.text, 120);
+  if (m.text) return trimWithEllipsis(m.text, 40);
   if (m.attachments && m.attachments.length > 0) {
     return m.attachments.length === 1
       ? "Attachment"
@@ -97,25 +94,27 @@ export function ConversationList({
                   </div>
 
                   {/* Main */}
-                  <div className="min-w-0 flex-1">
+
+                  <div className="min-w-0 flex-1 overflow-hidden">
+                    {" "}
+                    {/* Added overflow-hidden */}
                     <div className="flex items-baseline justify-between gap-3">
                       <p className="truncate text-sm font-medium">
                         {c.participant.name}
                       </p>
-                      {/* Meta column fixed width so main can ellipsize */}
-                      <div className="flex w-[80px] flex-shrink-0 items-center justify-end gap-2">
+                      {/* Meta column - removed fixed width */}
+                      <div className="flex-shrink-0 flex items-center gap-2">
                         <span className="text-[11px] text-muted-foreground">
                           {lastTime(c)}
                         </span>
                         {typeof c.unread === "number" && c.unread > 0 ? (
-                          <Badge className="px-1.5 py-0 text-[10px]">
+                          <Badge className="px-1.5 py-0 text-[10px] bg-black text-white">
                             {c.unread}
                           </Badge>
                         ) : null}
                       </div>
                     </div>
-
-                    {/* Snippet row with icons if attachments exist */}
+                    {/* Snippet row */}
                     <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
                       {hasImage && (
                         <ImageIcon
@@ -130,8 +129,9 @@ export function ConversationList({
                         />
                       )}
                       <span
-                        className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap"
+                        className="truncate min-w-0"
                         title={lastSnippet(c)}
+                        style={{ maxWidth: "calc(100% - 20px)" }} // Reserve space for icons
                       >
                         {lastSnippet(c)}
                       </span>

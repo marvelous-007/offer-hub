@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { contractService } from "@/services/contract.service";
 import { CreateContractDTO, UpdateContractDTO } from "@/types/contract.types";
+import { UUID_REGEX, CONTRACT_TYPES, ESCROW_STATUSES, ACTIVE_ESCROW_STATUSES } from "@/utils/validation";
 
 export const createContractHandler = async (
   req: Request,
@@ -13,8 +14,6 @@ export const createContractHandler = async (
     // Validate required fields
     const {
       contract_type,
-      project_id,
-      service_request_id,
       freelancer_id,
       client_id,
       contract_on_chain_id,
@@ -37,7 +36,7 @@ export const createContractHandler = async (
     }
 
     // Validate contract type
-    if (!["project", "service"].includes(contract_type)) {
+    if (!CONTRACT_TYPES.includes(contract_type)) {
       res.status(400).json({
         success: false,
         message: "contract_type must be 'project' or 'service'",
@@ -116,9 +115,7 @@ export const getContractByIdHandler = async (
     const { id } = req.params;
 
     // Validate UUID format
-    const uuidRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(id)) {
+    if (!UUID_REGEX.test(id)) {
       res.status(400).json({
         success: false,
         message: "Invalid contract ID format",
@@ -165,9 +162,7 @@ export const updateContractStatusHandler = async (
     const userId = req.body.user_id; // In a real app, this would come from auth middleware
 
     // Validate UUID format
-    const uuidRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(id)) {
+    if (!UUID_REGEX.test(id)) {
       res.status(400).json({
         success: false,
         message: "Invalid contract ID format",
@@ -187,7 +182,7 @@ export const updateContractStatusHandler = async (
     }
 
     // Validate escrow status
-    if (!["funded", "released", "disputed"].includes(escrow_status)) {
+    if (!ACTIVE_ESCROW_STATUSES.includes(escrow_status)) {
       res.status(400).json({
         success: false,
         message: "escrow_status must be 'funded', 'released', or 'disputed'",
@@ -252,9 +247,7 @@ export const getContractsByUserHandler = async (
     const { userId } = req.params;
 
     // Validate UUID format
-    const uuidRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(userId)) {
+    if (!UUID_REGEX.test(userId)) {
       res.status(400).json({
         success: false,
         message: "Invalid user ID format",
@@ -290,7 +283,7 @@ export const getContractsByStatusHandler = async (
   try {
     const { status } = req.params;
 
-    if (!status || !["pending", "funded", "released", "disputed"].includes(status)) {
+    if (!status || !ESCROW_STATUSES.includes(status as any)) {
       res.status(400).json({
         success: false,
         message: "Valid status is required: pending, funded, released, or disputed",

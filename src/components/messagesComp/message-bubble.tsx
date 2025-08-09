@@ -1,9 +1,7 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import { Check, CheckCheck, FileText, Reply } from "lucide-react";
 import Image from "next/image";
-import { type Attachment, type Message } from "./types";
+import { type Attachment, type Message } from "@/types/messages-types";
 
 function isImage(att: Attachment) {
   return att.kind === "image" || att.mime.startsWith("image/");
