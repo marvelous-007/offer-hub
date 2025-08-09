@@ -280,10 +280,17 @@ mod test {
     fn test_emergency_initialization() {
         let env = Env::default();
         let admin = Address::generate(&env);
+        let contract_id = env.register_contract(None, EmergencyContract);
         
-        EmergencyContract::initialize(&env, admin.clone());
+        // Initialize through the contract
+        env.as_contract(&contract_id, || {
+            EmergencyContract::initialize(&env, admin.clone());
+        });
         
-        let state = EmergencyContract::get_emergency_state(&env);
+        // Get state through the contract
+        let state = env.as_contract(&contract_id, || {
+            EmergencyContract::get_emergency_state(&env)
+        });
         assert_eq!(state.emergency_admin, admin);
         assert_eq!(state.is_paused, false);
     }
@@ -292,23 +299,35 @@ mod test {
     fn test_emergency_pause() {
         let env = Env::default();
         let admin = Address::generate(&env);
+        let contract_id = env.register_contract(None, EmergencyContract);
         
-        EmergencyContract::initialize(&env, admin.clone());
-        
-        // Set current contract as admin for testing
-        env.storage().instance().set(&symbol_short!("STATE"), &EmergencyState {
-            is_paused: false,
-            emergency_admin: env.current_contract_address(),
-            circuit_breaker_threshold: 10,
-            suspicious_activity_count: 0,
-            emergency_fund: 0,
-            emergency_contacts: vec![&env, admin],
-            last_emergency_check: env.ledger().timestamp(),
+        // Initialize through the contract
+        env.as_contract(&contract_id, || {
+            EmergencyContract::initialize(&env, admin.clone());
         });
         
-        EmergencyContract::emergency_pause(&env);
+        // Set current contract as admin for testing through contract context
+        env.as_contract(&contract_id, || {
+            env.storage().instance().set(&symbol_short!("STATE"), &EmergencyState {
+                is_paused: false,
+                emergency_admin: env.current_contract_address(),
+                circuit_breaker_threshold: 10,
+                suspicious_activity_count: 0,
+                emergency_fund: 0,
+                emergency_contacts: vec![&env, admin],
+                last_emergency_check: env.ledger().timestamp(),
+            });
+        });
         
-        let state = EmergencyContract::get_emergency_state(&env);
+        // Call emergency_pause through the contract
+        env.as_contract(&contract_id, || {
+            EmergencyContract::emergency_pause(&env);
+        });
+        
+        // Get state through the contract
+        let state = env.as_contract(&contract_id, || {
+            EmergencyContract::get_emergency_state(&env)
+        });
         assert_eq!(state.is_paused, true);
     }
 
@@ -316,26 +335,41 @@ mod test {
     fn test_circuit_breaker() {
         let env = Env::default();
         let admin = Address::generate(&env);
+        let contract_id = env.register_contract(None, EmergencyContract);
         
-        EmergencyContract::initialize(&env, admin.clone());
-        
-        // Set current contract as admin for testing
-        env.storage().instance().set(&symbol_short!("STATE"), &EmergencyState {
-            is_paused: false,
-            emergency_admin: env.current_contract_address(),
-            circuit_breaker_threshold: 3,
-            suspicious_activity_count: 0,
-            emergency_fund: 0,
-            emergency_contacts: vec![&env, admin],
-            last_emergency_check: env.ledger().timestamp(),
+        // Initialize through the contract
+        env.as_contract(&contract_id, || {
+            EmergencyContract::initialize(&env, admin.clone());
         });
         
-        // Trigger circuit breaker multiple times
-        EmergencyContract::trigger_circuit_breaker(&env);
-        EmergencyContract::trigger_circuit_breaker(&env);
-        EmergencyContract::trigger_circuit_breaker(&env);
+        // Set current contract as admin for testing through contract context
+        env.as_contract(&contract_id, || {
+            env.storage().instance().set(&symbol_short!("STATE"), &EmergencyState {
+                is_paused: false,
+                emergency_admin: env.current_contract_address(),
+                circuit_breaker_threshold: 3,
+                suspicious_activity_count: 0,
+                emergency_fund: 0,
+                emergency_contacts: vec![&env, admin],
+                last_emergency_check: env.ledger().timestamp(),
+            });
+        });
         
-        let state = EmergencyContract::get_emergency_state(&env);
+        // Trigger circuit breaker multiple times through contract context
+        env.as_contract(&contract_id, || {
+            EmergencyContract::trigger_circuit_breaker(&env);
+        });
+        env.as_contract(&contract_id, || {
+            EmergencyContract::trigger_circuit_breaker(&env);
+        });
+        env.as_contract(&contract_id, || {
+            EmergencyContract::trigger_circuit_breaker(&env);
+        });
+        
+        // Get state through the contract
+        let state = env.as_contract(&contract_id, || {
+            EmergencyContract::get_emergency_state(&env)
+        });
         assert_eq!(state.is_paused, true);
     }
 }
