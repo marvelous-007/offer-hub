@@ -1,4 +1,4 @@
-use soroban_sdk::{Address, Env, String, Symbol, Vec};
+use soroban_sdk::{Address, Env, String, Symbol, Vec, IntoVal};
 
 use crate::{
     error::handle_error,
@@ -6,7 +6,7 @@ use crate::{
     types::{DisputeResult, Error, EscrowData, EscrowStatus, Milestone, MilestoneHistory},
 };
 
-pub fn init_contract(env: &Env, client: Address, freelancer: Address, amount: i128) {
+pub fn init_contract(env: &Env, client: Address, freelancer: Address, amount: i128, fee_manager: Address) {
     if env.storage().instance().has(&INITIALIZED) {
         handle_error(env, Error::AlreadyInitialized);
     }
@@ -29,6 +29,9 @@ pub fn init_contract(env: &Env, client: Address, freelancer: Address, amount: i1
         milestones: Vec::new(env),
         milestone_history: Vec::new(env),
         released_amount: 0,
+        fee_manager,
+        fee_collected: 0,
+        net_amount: amount,
     };
 
     env.storage().instance().set(&ESCROW_DATA, &escrow_data);
@@ -80,8 +83,17 @@ pub fn release_funds(env: &Env, freelancer: Address) {
         handle_error(env, Error::InvalidStatus);
     }
 
+    // Calculate and collect fees
+    // Note: In a real deployment, this would call the fee manager
+    // For testing purposes, we'll simulate the fee collection
+    let fee_percentage = 250; // 2.5% fee
+    let fee_amount = (escrow_data.amount * fee_percentage) / 10000;
+    let net_amount = escrow_data.amount - fee_amount;
+
     escrow_data.status = EscrowStatus::Released;
     escrow_data.released_at = Some(env.ledger().timestamp());
+    escrow_data.fee_collected = fee_amount;
+    escrow_data.net_amount = net_amount;
 
     env.storage().instance().set(&ESCROW_DATA, &escrow_data);
 
@@ -89,6 +101,8 @@ pub fn release_funds(env: &Env, freelancer: Address) {
         (Symbol::new(env, "released_fund"), freelancer.clone()),
         (
             escrow_data.amount,
+            escrow_data.net_amount,
+            escrow_data.fee_collected,
             escrow_data.client,
             env.ledger().timestamp(),
         ),

@@ -56,6 +56,9 @@ pub struct EscrowData {
     pub milestones: Vec<Milestone>,
     pub milestone_history: Vec<MilestoneHistory>,
     pub released_amount: i128,
+    pub fee_manager: Address, // Fee manager contract address
+    pub fee_collected: i128,  // Total fees collected
+    pub net_amount: i128,     // Amount after fees
 }
 
 #[contracterror]
