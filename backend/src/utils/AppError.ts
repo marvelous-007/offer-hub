@@ -1,5 +1,6 @@
 import express from "express";
 
+import { Request, Response, NextFunction } from "express";
 export class AppError extends Error {
 	public statusCode: number;
 	constructor(message: string, statusCode = 400) {
@@ -66,13 +67,6 @@ export class UnauthorizedError extends AppError {
 	}
 }
 
-export const RouteErrorHandler =
-	(fn: express.RequestHandler) =>
-	(req:express.Request, res:express.Response, next:express.NextFunction) =>
-		Promise.resolve(fn(req, res, next)).catch(next);
-
-
-  import { Request, Response, NextFunction } from "express";
   
   export function ErrorHandler(
     err: unknown,
