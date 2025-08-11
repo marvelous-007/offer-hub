@@ -12,6 +12,7 @@ import ProjectReview from "@/components/post-project/project-review"
 import ProjectSuccess from "@/components/post-project/project-success"
 import ProjectSteps from "@/components/post-project/project-steps"
 import Link from "next/link"
+import { mapData, useProjectsApi } from "@/hooks/api-connections/use-project-api"
 
 // Simple Header component defined inline
 function SimpleHeader() {
@@ -155,6 +156,7 @@ const initialProjectData = {
 }
 
 export default function PostProjectPage() {
+  const { createProject } = useProjectsApi();
   const [currentStep, setCurrentStep] = useState(1)
   const [projectData, setProjectData] = useState(initialProjectData)
   const totalSteps = 5
@@ -177,9 +179,16 @@ export default function PostProjectPage() {
     }
   }
 
-  const handleSubmit = () => {
-    // In a real app, this would submit the project data to the server
-    setCurrentStep(totalSteps + 1) // Show success screen
+  const handleSubmit = async () => {
+    try {
+      const clientId = "12345";
+      const dto = mapData(projectData, clientId);
+      const response = await createProject(dto);
+      console.log("proyecto creado", response);
+      setCurrentStep(totalSteps + 1) // Show success screen
+    } catch (error: any) {
+      console.error("Error al crear el proyecto", error.message)
+    }
   }
 
   const renderStepContent = () => {

@@ -1,0 +1,24 @@
+export interface CreateProjectDTO {
+    client_id: string;
+    title: string;
+    description: string;
+    category: string;
+    budget: number;
+    status?: string;
+}
+
+export interface ProjectResponse {
+    message: string;
+    success: boolean;
+    model: Project;
+}
+
+export interface Project {
+    id: string;
+    client_id: string;
+    title: string;
+    description: string;
+    category: string;
+    budget: number;
+    status: string;
+}
