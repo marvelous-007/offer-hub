@@ -11,7 +11,7 @@ export class ReviewController {
     res: Response,
     next: NextFunction
   ): Promise<void> => {
-    try {
+
       const { from_id, to_id, contract_id, rating, comment } = req.body;
 
       // Validate required fields
@@ -45,9 +45,7 @@ export class ReviewController {
           created_at: review.created_at,
         },
       });
-    } catch (error) {
-      next(error);
-    }
+   
   };
 
   /**
@@ -58,7 +56,7 @@ export class ReviewController {
     res: Response,
     next: NextFunction
   ): Promise<void> => {
-    try {
+
       const { id } = req.params;
 
       if (!id) {
@@ -79,9 +77,7 @@ export class ReviewController {
         data: reviews,
         count: reviews.length,
       });
-    } catch (error) {
-      next(error);
-    }
+   
   };
 }
 
