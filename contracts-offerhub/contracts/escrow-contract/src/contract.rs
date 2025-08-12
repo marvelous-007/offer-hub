@@ -214,7 +214,9 @@ pub fn dispute(env: &Env, caller: Address) {
     );
 }
 
-pub fn resolve_dispute(env: &Env, result: Symbol) {
+pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
+    caller.require_auth();
+
     if !env.storage().instance().has(&INITIALIZED) {
         handle_error(env, Error::NotInitialized);
     }
@@ -223,6 +225,11 @@ pub fn resolve_dispute(env: &Env, result: Symbol) {
 
     if escrow_data.status != EscrowStatus::Disputed {
         handle_error(env, Error::DisputeNotOpen);
+    }
+
+    // Arbitrator check
+    if escrow_data.arbitrator != Some(caller.clone()) {
+        handle_error(env, Error::Unauthorized);
     }
 
     let dispute_result = if result == Symbol::new(env, "client_wins") {
@@ -235,11 +242,60 @@ pub fn resolve_dispute(env: &Env, result: Symbol) {
         handle_error(env, Error::InvalidDisputeResult);
     };
 
+    // Token payout
+    if let (Some(token), amount) = (escrow_data.token.clone(), escrow_data.amount) {
+        let contract_addr = env.current_contract_address();
+        match dispute_result {
+            DisputeResult::ClientWins => {
+                env.invoke_contract::<()>(
+                    &token,
+                    &Symbol::new(env, TOKEN_TRANSFER),
+                    (contract_addr.clone(), escrow_data.client.clone(), amount).into_val(env),
+                );
+            }
+            DisputeResult::FreelancerWins => {
+                env.invoke_contract::<()>(
+                    &token,
+                    &Symbol::new(env, TOKEN_TRANSFER),
+                    (
+                        contract_addr.clone(),
+                        escrow_data.freelancer.clone(),
+                        amount,
+                    )
+                        .into_val(env),
+                );
+            }
+            DisputeResult::Split => {
+                let half = amount / 2;
+                env.invoke_contract::<()>(
+                    &token,
+                    &Symbol::new(env, TOKEN_TRANSFER),
+                    (contract_addr.clone(), escrow_data.client.clone(), half).into_val(env),
+                );
+                env.invoke_contract::<()>(
+                    &token,
+                    &Symbol::new(env, TOKEN_TRANSFER),
+                    (
+                        contract_addr.clone(),
+                        escrow_data.freelancer.clone(),
+                        amount - half,
+                    )
+                        .into_val(env),
+                );
+            }
+            DisputeResult::None => {
+                handle_error(env, Error::InvalidDisputeResult);
+            }
+        }
+    }
+
     escrow_data.status = EscrowStatus::Resolved;
+    escrow_data.dispute_result = dispute_result as u32;
     escrow_data.dispute_result = match dispute_result {
         DisputeResult::ClientWins => 1,
         DisputeResult::FreelancerWins => 2,
         DisputeResult::Split => 3,
+        DisputeResult::None => handle_error(env, Error::InvalidDisputeResult),
     };
     escrow_data.resolved_at = Some(env.ledger().timestamp());
 
