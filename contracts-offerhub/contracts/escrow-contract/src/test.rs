@@ -205,3 +205,24 @@ fn test_auto_release_panics_if_not_timed_out() {
     // Not yet timed out, should panic
     contract.auto_release();
 }
+
+#[test]
+fn test_init_contract_compatibility() {
+    let env = setup_env();
+    env.mock_all_auths();
+
+    let contract_id = Address::generate(&env);
+    env.register_contract(&contract_id, EscrowContract);
+    let contract = EscrowContractClient::new(&env, &contract_id);
+
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let fee_manager = Address::generate(&env);
+
+    contract.init_contract(&client, &freelancer, &1000, &fee_manager);
+    let data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
+    assert_eq!(data.client, client);
+    assert_eq!(data.freelancer, freelancer);
+    assert_eq!(data.amount, 1000);
+    assert_eq!(data.fee_manager, fee_manager);
+}
