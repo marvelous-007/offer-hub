@@ -152,6 +152,14 @@ pub fn release_funds(env: &Env, freelancer: Address) {
         handle_error(env, Error::InvalidStatus);
     }
 
+    if let (Some(token), amount) = (escrow_data.token.clone(), escrow_data.amount) {
+        env.invoke_contract::<()>(
+            &token,
+            &Symbol::new(env, TOKEN_TRANSFER),
+            (env.current_contract_address(), freelancer.clone(), amount).into_val(env),
+        );
+    }
+
     // Calculate and collect fees
     // Note: In a real deployment, this would call the fee manager
     // For testing purposes, we'll simulate the fee collection
