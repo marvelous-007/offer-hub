@@ -1,4 +1,4 @@
-use soroban_sdk::{Address, Env, String, Symbol, Vec, IntoVal};
+use soroban_sdk::{Address, Env, String, Symbol, Vec};
 
 use crate::{
     error::handle_error,
@@ -6,7 +6,13 @@ use crate::{
     types::{DisputeResult, Error, EscrowData, EscrowStatus, Milestone, MilestoneHistory},
 };
 
-pub fn init_contract(env: &Env, client: Address, freelancer: Address, amount: i128, fee_manager: Address) {
+pub fn init_contract(
+    env: &Env,
+    client: Address,
+    freelancer: Address,
+    amount: i128,
+    fee_manager: Address,
+) {
     if env.storage().instance().has(&INITIALIZED) {
         handle_error(env, Error::AlreadyInitialized);
     }
