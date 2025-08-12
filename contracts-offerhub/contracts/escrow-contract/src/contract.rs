@@ -433,6 +433,38 @@ pub fn get_escrow_data(env: &Env) -> EscrowData {
     env.storage().instance().get(&ESCROW_DATA).unwrap()
 }
 
+pub fn auto_release(env: &Env) {
+    if !env.storage().instance().has(&INITIALIZED) {
+        handle_error(env, Error::NotInitialized);
+    }
+    let mut escrow_data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+    if escrow_data.status != EscrowStatus::Funded {
+        handle_error(env, Error::InvalidStatus);
+    }
+    let funded_at = escrow_data.funded_at.unwrap_or(0);
+    let timeout = escrow_data.timeout_secs.unwrap_or(0);
+    let now = env.ledger().timestamp();
+    if now < funded_at + timeout {
+        handle_error(env, Error::InvalidStatus);
+    }
+    // Token logic
+    if let (Some(token), amount) = (escrow_data.token.clone(), escrow_data.amount) {
+        env.invoke_contract::<()>(
+            &token,
+            &Symbol::new(env, TOKEN_TRANSFER),
+            (
+                env.current_contract_address(),
+                escrow_data.freelancer.clone(),
+                amount,
+            )
+                .into_val(env),
+        );
+    }
+    escrow_data.status = EscrowStatus::Released;
+    escrow_data.released_at = Some(now);
+    env.storage().instance().set(&ESCROW_DATA, &escrow_data);
+}
+
 /// @ryzen-xp
 /// returns all milestones (status and details)
 pub fn get_milestones(env: &Env) -> Vec<Milestone> {
@@ -445,4 +477,8 @@ pub fn get_milestones(env: &Env) -> Vec<Milestone> {
 pub fn get_milestone_history(env: &Env) -> Vec<MilestoneHistory> {
     let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
     escrow.milestone_history.clone()
+}
+
+pub fn set_escrow_data(env: &Env, data: &EscrowData) {
+    env.storage().instance().set(&ESCROW_DATA, data);
 }
