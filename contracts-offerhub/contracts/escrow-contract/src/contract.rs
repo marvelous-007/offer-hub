@@ -1,10 +1,53 @@
-use soroban_sdk::{Address, Env, String, Symbol, Vec, IntoVal};
+use soroban_sdk::{Address, Env, IntoVal, String, Symbol, Vec};
 
 use crate::{
     error::handle_error,
     storage::{ESCROW_DATA, INITIALIZED},
     types::{DisputeResult, Error, EscrowData, EscrowStatus, Milestone, MilestoneHistory},
 };
+
+const TOKEN_TRANSFER: &str = "transfer";
+const TOKEN_BALANCE: &str = "balance";
+
+pub fn init_contract_full(
+    env: &Env,
+    client: Address,
+    freelancer: Address,
+    arbitrator: Address,
+    token: Address,
+    amount: i128,
+    timeout_secs: u64,
+) {
+    if env.storage().instance().has(&INITIALIZED) {
+        handle_error(env, Error::AlreadyInitialized);
+    }
+    if amount <= 0 {
+        handle_error(env, Error::InvalidAmount);
+    }
+    let escrow_data = EscrowData {
+        client: client.clone(),
+        freelancer,
+        arbitrator: Some(arbitrator),
+        token: Some(token),
+        amount,
+        status: EscrowStatus::Initialized,
+        dispute_result: DisputeResult::None as u32,
+        created_at: env.ledger().timestamp(),
+        funded_at: None,
+        released_at: None,
+        disputed_at: None,
+        resolved_at: None,
+        timeout_secs: Some(timeout_secs),
+        milestones: Vec::new(env),
+        milestone_history: Vec::new(env),
+        released_amount: 0,
+        fee_manager: client, // now you can use client here
+        fee_collected: 0,
+        net_amount: amount,
+    };
+    env.storage().instance().set(&ESCROW_DATA, &escrow_data);
+    env.storage().instance().set(&INITIALIZED, &true);
+}
 
 pub fn init_contract(env: &Env, client: Address, freelancer: Address, amount: i128, fee_manager: Address) {
     if env.storage().instance().has(&INITIALIZED) {
