@@ -49,7 +49,13 @@ pub fn init_contract_full(
     env.storage().instance().set(&INITIALIZED, &true);
 }
 
-pub fn init_contract(env: &Env, client: Address, freelancer: Address, amount: i128, fee_manager: Address) {
+pub fn init_contract(
+    env: &Env,
+    client: Address,
+    freelancer: Address,
+    amount: i128,
+    fee_manager: Address,
+) {
     if env.storage().instance().has(&INITIALIZED) {
         handle_error(env, Error::AlreadyInitialized);
     }
@@ -61,18 +67,21 @@ pub fn init_contract(env: &Env, client: Address, freelancer: Address, amount: i1
     let escrow_data = EscrowData {
         client,
         freelancer,
+        arbitrator: None,
+        token: None,
         amount,
         status: EscrowStatus::Initialized,
-        dispute_result: 0, // 0 = None
+        dispute_result: DisputeResult::None as u32,
         created_at: env.ledger().timestamp(),
         funded_at: None,
         released_at: None,
         disputed_at: None,
         resolved_at: None,
+        timeout_secs: None,
         milestones: Vec::new(env),
         milestone_history: Vec::new(env),
         released_amount: 0,
-        fee_manager,
+        fee_manager: fee_manager, // pass this in or use a dummy Address if not available
         fee_collected: 0,
         net_amount: amount,
     };
@@ -96,6 +105,23 @@ pub fn deposit_funds(env: &Env, client: Address) {
 
     if escrow_data.status != EscrowStatus::Initialized {
         handle_error(env, Error::InvalidStatus);
+    }
+
+    if let (Some(token), amount) = (escrow_data.token.clone(), escrow_data.amount) {
+        let balance: i128 = env.invoke_contract::<i128>(
+            &token,
+            &Symbol::new(env, TOKEN_BALANCE),
+            (client.clone(),).into_val(env),
+        );
+        if balance < amount {
+            handle_error(env, Error::InsufficientFunds);
+        }
+
+        env.invoke_contract::<()>(
+            &token,
+            &Symbol::new(env, TOKEN_TRANSFER),
+            (client.clone(), env.current_contract_address(), amount).into_val(env),
+        );
     }
 
     escrow_data.status = EscrowStatus::Funded;
