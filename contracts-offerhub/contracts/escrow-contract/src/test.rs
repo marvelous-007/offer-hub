@@ -155,3 +155,53 @@ fn test_resolve_dispute_unauthorized() {
     contract.resolve_dispute(&client, &Symbol::new(&env, "client_wins"));
 }
 
+#[test]
+fn test_auto_release_after_timeout() {
+    let env = setup_env();
+    env.mock_all_auths();
+
+    let contract_id = Address::generate(&env);
+    env.register_contract(&contract_id, EscrowContract);
+    let contract = EscrowContractClient::new(&env, &contract_id);
+
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let arbitrator = Address::generate(&env);
+    let token = setup_token(&env);
+    let amount = 500;
+    let timeout = 100;
+
+    contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
+    contract.deposit_funds(&client);
+
+    // Advance time
+    env.ledger().with_mut(|l| l.timestamp += timeout + 1);
+
+    contract.auto_release();
+    let data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
+    assert_eq!(data.status, EscrowStatus::Released);
+}
+
+#[test]
+#[should_panic]
+fn test_auto_release_panics_if_not_timed_out() {
+    let env = setup_env();
+    env.mock_all_auths();
+
+    let contract_id = Address::generate(&env);
+    env.register_contract(&contract_id, EscrowContract);
+    let contract = EscrowContractClient::new(&env, &contract_id);
+
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let arbitrator = Address::generate(&env);
+    let token = setup_token(&env);
+    let amount = 500;
+    let timeout = 100;
+
+    contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
+    contract.deposit_funds(&client);
+
+    // Not yet timed out, should panic
+    contract.auto_release();
+}
