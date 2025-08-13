@@ -1,6 +1,17 @@
 import { Request, Response, NextFunction } from "express";
 import { contractService } from "@/services/contract.service";
 import { CreateContractDTO, UpdateContractDTO } from "@/types/contract.types";
+import {
+  UUID_REGEX,
+  CONTRACT_TYPES,
+  ESCROW_STATUSES,
+  ACTIVE_ESCROW_STATUSES,
+} from "@/utils/validation";
+import { HTTP_STATUS } from "../types/api.type";
+import {
+  buildSuccessResponse,
+  buildListResponse,
+} from "../utils/responseBuilder";
 
 export const createContractHandler = async (
   req: Request,
@@ -13,8 +24,6 @@ export const createContractHandler = async (
     // Validate required fields
     const {
       contract_type,
-      project_id,
-      service_request_id,
       freelancer_id,
       client_id,
       contract_on_chain_id,
@@ -28,7 +37,7 @@ export const createContractHandler = async (
       !contract_on_chain_id ||
       amount_locked === undefined
     ) {
-      res.status(400).json({
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message:
           "Missing required fields: contract_type, freelancer_id, client_id, contract_on_chain_id, amount_locked",
@@ -37,8 +46,8 @@ export const createContractHandler = async (
     }
 
     // Validate contract type
-    if (!["project", "service"].includes(contract_type)) {
-      res.status(400).json({
+    if (!CONTRACT_TYPES.includes(contract_type)) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: "contract_type must be 'project' or 'service'",
       });
@@ -47,7 +56,7 @@ export const createContractHandler = async (
 
     // Validate amount
     if (amount_locked <= 0) {
-      res.status(400).json({
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: "amount_locked must be greater than 0",
       });
@@ -56,7 +65,7 @@ export const createContractHandler = async (
 
     // Validate string fields are not empty
     if (contract_on_chain_id.trim().length === 0) {
-      res.status(400).json({
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: "contract_on_chain_id cannot be empty",
       });
@@ -65,14 +74,12 @@ export const createContractHandler = async (
 
     const newContract = await contractService.createContract(contractData);
 
-    res.status(201).json({
-      success: true,
-      message: "Contract created successfully",
-      data: newContract,
-    });
+    res
+      .status(HTTP_STATUS.CREATED)
+      .json(buildSuccessResponse(newContract, "Contract created successfully"));
   } catch (error: any) {
     if (error.message === "Freelancer or client not found") {
-      res.status(404).json({
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: "Freelancer or client not found",
       });
@@ -80,7 +87,7 @@ export const createContractHandler = async (
     }
 
     if (error.message === "Freelancer and client cannot be the same user") {
-      res.status(400).json({
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: "Freelancer and client cannot be the same user",
       });
@@ -88,7 +95,7 @@ export const createContractHandler = async (
     }
 
     if (error.message.includes("is required for")) {
-      res.status(400).json({
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: error.message,
       });
@@ -112,14 +119,12 @@ export const getContractByIdHandler = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  try {
+
     const { id } = req.params;
 
     // Validate UUID format
-    const uuidRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(id)) {
-      res.status(400).json({
+    if (!UUID_REGEX.test(id)) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: "Invalid contract ID format",
       });
@@ -129,29 +134,17 @@ export const getContractByIdHandler = async (
     const contract = await contractService.getContractById(id);
 
     if (!contract) {
-      res.status(404).json({
+      res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
         message: "Contract not found",
       });
       return;
     }
 
-    res.status(200).json({
-      success: true,
-      message: "Contract retrieved successfully",
-      data: contract,
-    });
-  } catch (error: any) {
-    if (error.message === "Invalid contract ID format") {
-      res.status(400).json({
-        success: false,
-        message: "Invalid contract ID format",
-      });
-      return;
-    }
-
-    next(error);
-  }
+    res
+      .status(HTTP_STATUS.OK)
+      .json(buildSuccessResponse(contract, "Contract retrieved successfully"));
+  
 };
 
 export const updateContractStatusHandler = async (
@@ -159,15 +152,13 @@ export const updateContractStatusHandler = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  try {
+
     const { id } = req.params;
     const updateData: UpdateContractDTO = req.body;
     const userId = req.body.user_id; // In a real app, this would come from auth middleware
 
     // Validate UUID format
-    const uuidRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(id)) {
+    if (!UUID_REGEX.test(id)) {
       res.status(400).json({
         success: false,
         message: "Invalid contract ID format",
@@ -179,7 +170,7 @@ export const updateContractStatusHandler = async (
     const { escrow_status } = updateData;
 
     if (!escrow_status) {
-      res.status(400).json({
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: "escrow_status is required",
       });
@@ -187,8 +178,8 @@ export const updateContractStatusHandler = async (
     }
 
     // Validate escrow status
-    if (!["funded", "released", "disputed"].includes(escrow_status)) {
-      res.status(400).json({
+    if (!ACTIVE_ESCROW_STATUSES.includes(escrow_status)) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: "escrow_status must be 'funded', 'released', or 'disputed'",
       });
@@ -202,45 +193,22 @@ export const updateContractStatusHandler = async (
     );
 
     if (!updatedContract) {
-      res.status(404).json({
+      res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
         message: "Contract not found",
       });
       return;
     }
 
-    res.status(200).json({
-      success: true,
-      message: "Contract status updated successfully",
-      data: updatedContract,
-    });
-  } catch (error: any) {
-    if (error.message === "Invalid contract ID format") {
-      res.status(400).json({
-        success: false,
-        message: "Invalid contract ID format",
-      });
-      return;
-    }
-
-    if (error.message.includes("Invalid status transition")) {
-      res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-      return;
-    }
-
-    if (error.message.includes("Only the")) {
-      res.status(403).json({
-        success: false,
-        message: error.message,
-      });
-      return;
-    }
-
-    next(error);
-  }
+    res
+      .status(HTTP_STATUS.OK)
+      .json(
+        buildSuccessResponse(
+          updatedContract,
+          "Contract status updated successfully"
+        )
+      );
+  
 };
 
 export const getContractsByUserHandler = async (
@@ -248,13 +216,11 @@ export const getContractsByUserHandler = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  try {
+
     const { userId } = req.params;
 
     // Validate UUID format
-    const uuidRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(userId)) {
+    if (!UUID_REGEX.test(userId)) {
       res.status(400).json({
         success: false,
         message: "Invalid user ID format",
@@ -264,22 +230,12 @@ export const getContractsByUserHandler = async (
 
     const contracts = await contractService.getContractsByUser(userId);
 
-    res.status(200).json({
-      success: true,
-      message: "User contracts retrieved successfully",
-      data: contracts,
-    });
-  } catch (error: any) {
-    if (error.message === "Invalid user ID format") {
-      res.status(400).json({
-        success: false,
-        message: "Invalid user ID format",
-      });
-      return;
-    }
-
-    next(error);
-  }
+    res
+      .status(HTTP_STATUS.OK)
+      .json(
+        buildListResponse(contracts, "User contracts retrieved successfully")
+      );
+  
 };
 
 export const getContractsByStatusHandler = async (
@@ -287,25 +243,27 @@ export const getContractsByStatusHandler = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  try {
+  
     const { status } = req.params;
 
-    if (!status || !["pending", "funded", "released", "disputed"].includes(status)) {
-      res.status(400).json({
+    if (!status || !ESCROW_STATUSES.includes(status as any)) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        message: "Valid status is required: pending, funded, released, or disputed",
+        message:
+          "Valid status is required: pending, funded, released, or disputed",
       });
       return;
     }
 
     const contracts = await contractService.getContractsByStatus(status);
 
-    res.status(200).json({
-      success: true,
-      message: "Contracts by status retrieved successfully",
-      data: contracts,
-    });
-  } catch (error) {
-    next(error);
-  }
-}; 
+    res
+      .status(HTTP_STATUS.OK)
+      .json(
+        buildListResponse(
+          contracts,
+          "Contracts by status retrieved successfully"
+        )
+      );
+  
+};
