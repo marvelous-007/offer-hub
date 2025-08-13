@@ -2,7 +2,11 @@ import { Request, Response } from 'express';
 import { ConversationService } from '@/services/conversation.service';
 import { CreateConversationDTO } from '@/types/conversation.types';
 import { AppError } from '@/utils/AppError';
-import { validate as isUUID } from 'uuid';
+const isUUID = (str: string): boolean => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(str);
+};
+
 
 export class ConversationController {
   static async createConversation(req: Request, res: Response): Promise<void> {

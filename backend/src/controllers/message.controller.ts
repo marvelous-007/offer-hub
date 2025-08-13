@@ -2,7 +2,11 @@ import { Request, Response } from 'express';
 import { MessageService } from '@/services/message.service';
 import { CreateMessageDTO, MessageType } from '@/types/message.types';
 import { AppError } from '@/utils/AppError';
-import { validate as isUUID } from 'uuid';
+
+const isUUID = (str: string): boolean => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(str);
+};
 
 export class MessageController {
   static async sendMessage(req: Request, res: Response): Promise<void> {
