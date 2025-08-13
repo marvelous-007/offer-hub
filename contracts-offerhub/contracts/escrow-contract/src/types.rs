@@ -1,7 +1,7 @@
-use soroban_sdk::{contracterror, contracttype, Address};
+use soroban_sdk::{contracterror, contracttype, Address, String, Vec};
 
 #[contracttype]
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 #[repr(u32)]
 pub enum EscrowStatus {
     Initialized,
@@ -15,9 +15,31 @@ pub enum EscrowStatus {
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(u32)]
 pub enum DisputeResult {
-    ClientWins,
-    FreelancerWins,
-    Split,
+    None = 0,
+    ClientWins = 1,
+    FreelancerWins = 2,
+    Split = 3,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[contracttype]
+pub struct MilestoneHistory {
+    pub milestone: Milestone,
+    pub action: String,
+    pub timestamp: u64,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[contracttype]
+pub struct Milestone {
+    pub id: u32,
+    pub description: String,
+    pub amount: i128,
+    pub approved: bool,
+    pub released: bool,
+    pub created_at: u64,
+    pub approved_at: Option<u64>,
+    pub released_at: Option<u64>,
 }
 
 #[contracttype]
@@ -25,14 +47,23 @@ pub enum DisputeResult {
 pub struct EscrowData {
     pub client: Address,
     pub freelancer: Address,
+    pub arbitrator: Option<Address>,
+    pub token: Option<Address>,
     pub amount: i128,
     pub status: EscrowStatus,
-    pub dispute_result: Option<DisputeResult>,
+    pub dispute_result: u32,
     pub created_at: u64,
     pub funded_at: Option<u64>,
     pub released_at: Option<u64>,
     pub disputed_at: Option<u64>,
     pub resolved_at: Option<u64>,
+    pub timeout_secs: Option<u64>,
+    pub milestones: Vec<Milestone>,
+    pub milestone_history: Vec<MilestoneHistory>,
+    pub released_amount: i128,
+    pub fee_manager: Address, // Fee manager contract address
+    pub fee_collected: i128,  // Total fees collected
+    pub net_amount: i128,     // Amount after fees
 }
 
 #[contracterror]
@@ -47,4 +78,5 @@ pub enum Error {
     InvalidStatus = 6,
     DisputeNotOpen = 7,
     InvalidDisputeResult = 8,
+    MilestoneNotFound = 9,
 }
