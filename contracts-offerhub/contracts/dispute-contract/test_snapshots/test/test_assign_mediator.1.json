@@ -114,7 +114,6 @@
         }
       ]
     ],
-    [],
     []
   ],
   "ledger": {
@@ -210,7 +209,7 @@
                                     "val": {
                                       "i128": {
                                         "hi": 0,
-                                        "lo": 50000
+                                        "lo": 0
                                       }
                                     }
                                   },
@@ -257,7 +256,7 @@
                                     "val": {
                                       "vec": [
                                         {
-                                          "symbol": "FavorClient"
+                                          "symbol": "None"
                                         }
                                       ]
                                     }
@@ -274,16 +273,14 @@
                                     "key": {
                                       "symbol": "resolution_timestamp"
                                     },
-                                    "val": {
-                                      "u64": 1000
-                                    }
+                                    "val": "void"
                                   },
                                   {
                                     "key": {
                                       "symbol": "resolved"
                                     },
                                     "val": {
-                                      "bool": true
+                                      "bool": false
                                     }
                                   },
                                   {
@@ -293,7 +290,7 @@
                                     "val": {
                                       "vec": [
                                         {
-                                          "symbol": "Resolved"
+                                          "symbol": "UnderMediation"
                                         }
                                       ]
                                     }
