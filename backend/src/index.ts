@@ -13,6 +13,8 @@ import contractRoutes from "@/routes/contract.routes";
 import projectRoutes from '@/routes/project.routes';
 import userRoutes from '@/routes/user.routes';
 
+import conversationRoutes from '@/routes/conversation.routes';
+import messageRoutes from '@/routes/message.routes';
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -29,6 +31,10 @@ app.use('/api/nfts-awarded', nftRoutes);
 app.use('/api/contracts', contractRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/users', userRoutes);
+
+app.use('/api/conversations', conversationRoutes);
+app.use('/api/messages', messageRoutes);
+
 
 
 app.get("/", (_req, res) => {
