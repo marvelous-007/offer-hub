@@ -12,10 +12,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { X, Plus, AlertCircle, Check } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { ProjectDraft } from "@/types/project.types"
 
-interface ProjectRequirementsProps {
+interface ProjectBasicInfoProps {
   projectData: any
-  updateProjectData: (data: any) => void
+  updateProjectData: (data: keyof ProjectDraft, value: any) => void
 }
 
 export default function ProjectRequirements({ projectData, updateProjectData }: ProjectRequirementsProps) {

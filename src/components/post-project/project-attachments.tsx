@@ -10,10 +10,11 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { FileUp, X, File, Image, FileText, AlertCircle } from "lucide-react"
+import { ProjectDraft } from "@/types/project.types"
 
-interface ProjectAttachmentsProps {
+interface ProjectBasicInfoProps {
   projectData: any
-  updateProjectData: (data: any) => void
+  updateProjectData: (data: keyof ProjectDraft, value: any) => void
 }
 
 export default function ProjectAttachments({ projectData, updateProjectData }: ProjectAttachmentsProps) {

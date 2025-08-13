@@ -29,7 +29,7 @@ describe("useProjectApi", () => {
             createdProject = await result.current.createProject(projectData);
         });
         expect(mockData.post).toHaveBeenCalledWith(
-            "api/projects",
+            "/api/projects",
             projectData
         );
         expect(createdProject).toEqual(mockResponse.data);
@@ -56,7 +56,7 @@ describe("useProjectApi", () => {
             projects = await result.current.getProjects();
         });
 
-        expect(mockData.get).toHaveBeenCalledWith("api/projects");
+        expect(mockData.get).toHaveBeenCalledWith("/api/projects");
         expect(projects).toEqual(mockResponse.data);
     });
 

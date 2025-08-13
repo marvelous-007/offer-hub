@@ -8,10 +8,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/text-area"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { InfoIcon } from "lucide-react"
+import { ProjectDraft } from "@/types/project.types"
 
 interface ProjectBasicInfoProps {
   projectData: any
-  updateProjectData: (data: any) => void
+  updateProjectData: (data: keyof ProjectDraft, value: any) => void
 }
 
 export default function ProjectBasicInfo({ projectData, updateProjectData }: ProjectBasicInfoProps) {

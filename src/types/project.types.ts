@@ -10,7 +10,7 @@ export interface CreateProjectDTO {
 export interface ProjectResponse {
     message: string;
     success: boolean;
-    model: Project;
+    data: Project;
 }
 
 export interface Project {
@@ -21,4 +21,17 @@ export interface Project {
     category: string;
     budget: number;
     status: string;
+}
+
+export interface ProjectDraft extends CreateProjectDTO {
+    budgetAmount?: number;
+    subcategory: string;
+    skills: string[];
+    experienceLevel: string;
+    projectType: "on-time" | "ongoing";
+    visibility: "public" | "private";
+    budgetType: "fixed" | "hourly";
+    duration: string;
+    attachments: any[];
+    milestones: any[];
 }

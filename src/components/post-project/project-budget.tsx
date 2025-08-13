@@ -11,10 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { DollarSign, Plus, Trash2, AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { ProjectDraft } from "@/types/project.types"
 
-interface ProjectBudgetProps {
+interface ProjectBasicInfoProps {
   projectData: any
-  updateProjectData: (data: any) => void
+  updateProjectData: (data: keyof ProjectDraft, value: any) => void
 }
 
 export default function ProjectBudget({ projectData, updateProjectData }: ProjectBudgetProps) {
