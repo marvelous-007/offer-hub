@@ -26,7 +26,7 @@ pub struct Rating {
     pub rater: Address,
     pub rated_user: Address,
     pub contract_id: String,
-    pub rating: u8,
+    pub rating: u32, // Changed from u8 to u32 for Soroban compatibility
     pub timestamp: u64,
     pub work_category: String,
 }
@@ -112,8 +112,8 @@ pub const PLATFORM_STATS: &[u8] = &[11];
 pub const USER_RESTRICTIONS: &[u8] = &[12];
 
 // Rating validation constants
-pub const MIN_RATING: u8 = 1;
-pub const MAX_RATING: u8 = 5;
+pub const MIN_RATING: u32 = 1;
+pub const MAX_RATING: u32 = 5;
 pub const MAX_FEEDBACK_LENGTH: u32 = 1000;
 pub const MIN_RATINGS_FOR_STATS: u32 = 3;
 

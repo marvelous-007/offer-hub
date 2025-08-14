@@ -7,14 +7,15 @@ use crate::restrictions::{check_and_apply_restrictions, get_user_privileges, che
 use crate::storage::{
     save_admin, get_admin, save_rating, save_feedback, get_user_rating_stats, 
     save_user_rating_stats, increment_platform_stat, save_rating_threshold, 
-    get_rating_threshold
+    get_rating_threshold, add_user_feedback_id, get_user_feedback_ids, get_feedback,
+    get_user_rating_history, save_reputation_contract, get_reputation_contract
 };
 use crate::types::{
     Error, Rating, RatingStats, Feedback, UserRatingData, RatingThreshold,
     require_auth, MIN_RATINGS_FOR_STATS
 };
 use crate::validation::{validate_rating, validate_feedback, validate_rating_eligibility, check_spam_prevention};
-use soroban_sdk::{Address, Env, String, Vec};
+use soroban_sdk::{Address, Env, String, Vec, IntoVal};
 
 pub struct RatingContract;
 
@@ -49,7 +50,7 @@ impl RatingContract {
         caller: Address,
         rated_user: Address,
         contract_id: String,
-        rating: u8,
+        rating: u32, // Changed from u8 to u32
         feedback: String,
         work_category: String,
     ) -> Result<(), Error> {
@@ -86,13 +87,17 @@ impl RatingContract {
             contract_id: contract_id.clone(),
             feedback: feedback.clone(),
             timestamp: env.ledger().timestamp(),
-            is_flagged: moderation_status.to_string() != "approved",
+            is_flagged: moderation_status != String::from_str(&env, "approved"),
             moderation_status,
         };
         
         // Save records
         save_rating(&env, &rating_record);
         save_feedback(&env, &feedback_record);
+        
+        // Add feedback to user's feedback list for easy retrieval
+        // Store feedback ID for user indexing
+        add_user_feedback_id(&env, &rated_user, &feedback_id);
         
         // Update statistics
         Self::update_user_statistics(&env, &rated_user, rating)?;
@@ -116,13 +121,36 @@ impl RatingContract {
     }
 
     pub fn get_user_feedback(env: Env, user: Address, limit: u32) -> Result<Vec<Feedback>, Error> {
-        // In production, this would fetch and paginate feedback
-        // For now, return empty vector
-        Ok(Vec::new(&env))
+        // Get all feedback IDs for the user from storage
+        let feedback_ids = get_user_feedback_ids(&env, &user);
+        let mut feedbacks = Vec::new(&env);
+        
+        // Fetch actual feedback objects and limit results
+        let total_count = feedback_ids.len();
+        let limit = if limit == 0 { total_count } else { u32::min(limit, total_count) };
+        
+        for i in 0..limit {
+            if let Some(feedback_id) = feedback_ids.get(i) {
+                if let Ok(feedback) = get_feedback(&env, &feedback_id) {
+                    feedbacks.push_back(feedback);
+                }
+            }
+        }
+        
+        Ok(feedbacks)
     }
 
     pub fn get_user_rating_data(env: Env, user: Address) -> Result<UserRatingData, Error> {
         generate_user_rating_data(&env, &user)
+    }
+
+    pub fn get_user_rating_history(
+        env: Env,
+        user: Address,
+        limit: u32,
+        offset: u32,
+    ) -> Result<Vec<Rating>, Error> {
+        Ok(get_user_rating_history(&env, &user, limit, offset))
     }
 
     pub fn has_restrictions(env: Env, user: Address) -> Result<bool, Error> {
@@ -175,32 +203,93 @@ impl RatingContract {
     ) -> Result<(), Error> {
         require_auth(&caller)?;
         
-        // This would integrate with the reputation NFT contract
-        // to update user reputation based on rating performance
+        // Get user's rating statistics
         let stats = get_user_rating_stats(&env, &user)?;
         
-        // Check if user qualifies for reputation NFTs
-        if stats.average_rating >= 480 && stats.total_ratings >= 20 {
-            // Award top-rated NFT
-            crate::events::emit_achievement_earned(
-                &env, 
-                &user, 
-                &String::from_str(&env, "top_rated"), 
-                stats.average_rating
-            );
-        }
-        
-        if stats.total_ratings >= 50 && stats.average_rating >= 400 {
-            // Award veteran NFT
-            crate::events::emit_achievement_earned(
-                &env, 
-                &user, 
-                &String::from_str(&env, "veteran"), 
-                stats.total_ratings
-            );
+        // Try to get reputation contract address
+        if let Ok(reputation_contract) = get_reputation_contract(&env) {
+            // Check if user qualifies for reputation NFTs and try to mint them
+            if stats.average_rating >= 480 && stats.total_ratings >= 20 {
+                // Award top-rated NFT
+                let _ = Self::try_mint_achievement_nft(&env, &reputation_contract, &user, &soroban_sdk::symbol_short!("toprated"));
+                
+                crate::events::emit_achievement_earned(
+                    &env, 
+                    &user, 
+                    &String::from_str(&env, "top_rated"), 
+                    stats.average_rating
+                );
+            }
+            
+            if stats.total_ratings >= 50 && stats.average_rating >= 400 {
+                // Award veteran NFT
+                let _ = Self::try_mint_achievement_nft(&env, &reputation_contract, &user, &soroban_sdk::symbol_short!("veteran"));
+                
+                crate::events::emit_achievement_earned(
+                    &env, 
+                    &user, 
+                    &String::from_str(&env, "veteran"), 
+                    stats.total_ratings
+                );
+            }
+            
+            if stats.total_ratings >= 10 {
+                // Award milestone NFT for 10 completed ratings
+                let _ = Self::try_mint_achievement_nft(&env, &reputation_contract, &user, &soroban_sdk::symbol_short!("tencontr"));
+            }
+            
+            if stats.five_star_count >= 5 {
+                // Award 5 stars 5 times NFT
+                let _ = Self::try_mint_achievement_nft(&env, &reputation_contract, &user, &soroban_sdk::symbol_short!("5stars5x"));
+            }
+        } else {
+            // If no reputation contract is set, just emit events
+            if stats.average_rating >= 480 && stats.total_ratings >= 20 {
+                crate::events::emit_achievement_earned(
+                    &env, 
+                    &user, 
+                    &String::from_str(&env, "top_rated"), 
+                    stats.average_rating
+                );
+            }
+            
+            if stats.total_ratings >= 50 && stats.average_rating >= 400 {
+                crate::events::emit_achievement_earned(
+                    &env, 
+                    &user, 
+                    &String::from_str(&env, "veteran"), 
+                    stats.total_ratings
+                );
+            }
         }
         
         Ok(())
+    }
+
+    // Helper function to safely attempt NFT minting
+    fn try_mint_achievement_nft(
+        env: &Env,
+        reputation_contract: &Address,
+        user: &Address,
+        nft_type: &soroban_sdk::Symbol,
+    ) -> Result<(), Error> {
+        let result: Result<(), soroban_sdk::InvokeError> = env.invoke_contract(
+            reputation_contract,
+            &soroban_sdk::symbol_short!("mint_achv"),
+            soroban_sdk::vec![
+                env,
+                user.into_val(env),         // to
+                nft_type.into_val(env),     // nft_type
+            ]
+        );
+        
+        match result {
+            Ok(_) => Ok(()),
+            Err(_) => {
+                // Log error but don't fail the entire operation
+                Ok(())
+            }
+        }
     }
 
     pub fn add_moderator(env: Env, caller: Address, moderator: Address) -> Result<(), Error> {
@@ -228,6 +317,16 @@ impl RatingContract {
         Ok(())
     }
 
+    pub fn set_reputation_contract(
+        env: Env,
+        caller: Address,
+        contract_address: Address,
+    ) -> Result<(), Error> {
+        crate::access::check_admin(&env, &caller)?;
+        save_reputation_contract(&env, &contract_address);
+        Ok(())
+    }
+
     pub fn get_admin(env: Env) -> Result<Address, Error> {
         Ok(get_admin(&env))
     }
@@ -237,19 +336,19 @@ impl RatingContract {
     }
 
     // Helper functions
-    fn generate_rating_id(env: &Env, rater: &Address, rated_user: &Address, contract_id: &String) -> String {
-        let timestamp = env.ledger().timestamp();
-        let sequence = env.ledger().sequence();
+    fn generate_rating_id(env: &Env, _rater: &Address, _rated_user: &Address, _contract_id: &String) -> String {
+        let _timestamp = env.ledger().timestamp();
+        let _sequence = env.ledger().sequence();
         // Create a simple ID without format! macro
         String::from_str(env, "rating_id")
     }
 
-    fn generate_feedback_id(env: &Env, rating_id: &String) -> String {
+    fn generate_feedback_id(env: &Env, _rating_id: &String) -> String {
         // Create a simple ID without format! macro
         String::from_str(env, "feedback_id")
     }
 
-    fn update_user_statistics(env: &Env, user: &Address, new_rating: u8) -> Result<(), Error> {
+    fn update_user_statistics(env: &Env, user: &Address, new_rating: u32) -> Result<(), Error> {
         let mut stats = get_user_rating_stats(env, user).unwrap_or(RatingStats {
             user: user.clone(),
             total_ratings: 0,

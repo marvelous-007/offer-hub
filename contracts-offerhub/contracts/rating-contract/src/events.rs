@@ -5,12 +5,12 @@ pub fn emit_rating_submitted(
     rater: &Address,
     rated_user: &Address,
     contract_id: &String,
-    rating: u8,
+    rating: u32,
     rating_id: &String,
 ) {
     env.events().publish(
         (symbol_short!("rating"), symbol_short!("submit")),
-        (rater, rated_user, contract_id, rating, rating_id),
+        (rater.clone(), rated_user.clone(), contract_id.clone(), rating, rating_id.clone()),
     );
 }
 
@@ -23,7 +23,7 @@ pub fn emit_feedback_submitted(
 ) {
     env.events().publish(
         (symbol_short!("feedback"), symbol_short!("submit")),
-        (rater, rated_user, feedback_id, contract_id),
+        (rater.clone(), rated_user.clone(), feedback_id.clone(), contract_id.clone()),
     );
 }
 
@@ -47,7 +47,7 @@ pub fn emit_feedback_reported(
 ) {
     env.events().publish(
         (symbol_short!("feedback"), symbol_short!("report")),
-        (reporter, feedback_id, report_id),
+        (reporter.clone(), feedback_id.clone(), report_id.clone()),
     );
 }
 
@@ -59,7 +59,7 @@ pub fn emit_feedback_moderated(
 ) {
     env.events().publish(
         (symbol_short!("feedback"), symbol_short!("moderate")),
-        (moderator, feedback_id, action),
+        (moderator.clone(), feedback_id.clone(), action.clone()),
     );
 }
 
@@ -71,7 +71,7 @@ pub fn emit_restriction_applied(
 ) {
     env.events().publish(
         (symbol_short!("restrict"), symbol_short!("apply")),
-        (user, restriction_type, reason),
+        (user.clone(), restriction_type.clone(), reason.clone()),
     );
 }
 
@@ -82,7 +82,7 @@ pub fn emit_privilege_granted(
 ) {
     env.events().publish(
         (symbol_short!("privilege"), symbol_short!("grant")),
-        (user, privilege),
+        (user.clone(), privilege.clone()),
     );
 }
 
@@ -94,7 +94,7 @@ pub fn emit_incentive_claimed(
 ) {
     env.events().publish(
         (symbol_short!("incentive"), symbol_short!("claim")),
-        (user, incentive_type, reward),
+        (user.clone(), incentive_type.clone(), reward.clone()),
     );
 }
 
@@ -106,7 +106,7 @@ pub fn emit_achievement_earned(
 ) {
     env.events().publish(
         (symbol_short!("achieve"), symbol_short!("earn")),
-        (user, achievement, threshold),
+        (user.clone(), achievement.clone(), threshold),
     );
 }
 
@@ -117,7 +117,7 @@ pub fn emit_reputation_updated(
     new_rating: u32,
 ) {
     env.events().publish(
-        (symbol_short!("reputation"), symbol_short!("update")),
+        (symbol_short!("repute"), symbol_short!("update")),
         (user, old_rating, new_rating),
     );
 }

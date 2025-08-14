@@ -33,7 +33,7 @@ impl Contract {
         caller: Address,
         rated_user: Address,
         contract_id: String,
-        rating: u8,
+        rating: u32, // Changed from u8 to u32
         feedback: String,
         work_category: String,
     ) -> Result<(), Error> {
@@ -53,6 +53,16 @@ impl Contract {
     /// Get detailed rating data for a user including history and trends
     pub fn get_user_rating_data(env: Env, user: Address) -> Result<UserRatingData, Error> {
         RatingContract::get_user_rating_data(env, user)
+    }
+
+    /// Get user's rating history with pagination
+    pub fn get_user_rating_history(
+        env: Env,
+        user: Address,
+        limit: u32,
+        offset: u32,
+    ) -> Result<Vec<Rating>, Error> {
+        RatingContract::get_user_rating_history(env, user, limit, offset)
     }
 
     /// Check if user has rating-based restrictions
@@ -130,6 +140,14 @@ impl Contract {
         value: u32,
     ) -> Result<(), Error> {
         RatingContract::set_rating_threshold(env, caller, threshold_type, value)
+    }
+
+    pub fn set_reputation_contract(
+        env: Env,
+        caller: Address,
+        contract_address: Address,
+    ) -> Result<(), Error> {
+        RatingContract::set_reputation_contract(env, caller, contract_address)
     }
 
     pub fn get_admin(env: Env) -> Result<Address, Error> {

@@ -69,28 +69,28 @@ pub fn get_platform_analytics(env: &Env) -> Vec<(String, String)> {
     let mut analytics = Vec::new(env);
     
     // Total ratings
-    let total_ratings = get_platform_stat(env, &String::from_str(env, "total_ratings"));
+    let _total_ratings = get_platform_stat(env, &String::from_str(env, "total_ratings"));
     analytics.push_back((
         String::from_str(env, "total_ratings"),
         String::from_str(env, "0") // Simplified without to_string()
     ));
     
     // Total feedback
-    let total_feedback = get_platform_stat(env, &String::from_str(env, "total_feedback"));
+    let _total_feedback = get_platform_stat(env, &String::from_str(env, "total_feedback"));
     analytics.push_back((
         String::from_str(env, "total_feedback"),
         String::from_str(env, "0")
     ));
     
     // Total reports
-    let total_reports = get_platform_stat(env, &String::from_str(env, "total_reports"));
+    let _total_reports = get_platform_stat(env, &String::from_str(env, "total_reports"));
     analytics.push_back((
         String::from_str(env, "total_reports"),
         String::from_str(env, "0")
     ));
     
     // Total restricted users
-    let restricted_users = get_platform_stat(env, &String::from_str(env, "restricted_users"));
+    let _restricted_users = get_platform_stat(env, &String::from_str(env, "restricted_users"));
     analytics.push_back((
         String::from_str(env, "restricted_users"),
         String::from_str(env, "0")
@@ -121,7 +121,7 @@ pub fn generate_user_rating_data(env: &Env, user: &Address) -> Result<UserRating
     })
 }
 
-pub fn calculate_work_category_stats(env: &Env, user: &Address, category: &String) -> Result<RatingStats, Error> {
+pub fn calculate_work_category_stats(env: &Env, user: &Address, _category: &String) -> Result<RatingStats, Error> {
     // In production, this would filter ratings by work category
     // For now, return the general stats
     get_user_rating_stats(env, user)

@@ -78,24 +78,28 @@ pub fn get_user_privileges(env: &Env, user: &Address) -> Vec<String> {
 
 pub fn check_restriction_status(env: &Env, user: &Address) -> bool {
     let restriction = get_user_restriction(env, user);
-    restriction.to_string() == "restricted"
+    restriction == String::from_str(env, "restricted")
 }
 
 pub fn can_post_work(env: &Env, user: &Address) -> bool {
     let restriction = get_user_restriction(env, user);
-    match restriction.to_string().as_str() {
-        "restricted" => false,
-        "warning" => true, // Can still post but with limitations
-        _ => true,
+    let restricted = String::from_str(env, "restricted");
+    let warning = String::from_str(env, "warning");
+    
+    if restriction == restricted {
+        false
+    } else if restriction == warning {
+        true // Can still post but with limitations
+    } else {
+        true
     }
 }
 
 pub fn can_bid_on_work(env: &Env, user: &Address) -> bool {
     let restriction = get_user_restriction(env, user);
-    match restriction.to_string().as_str() {
-        "restricted" => false,
-        _ => true,
-    }
+    let restricted = String::from_str(env, "restricted");
+    
+    restriction != restricted
 }
 
 pub fn get_fee_multiplier(env: &Env, user: &Address) -> u32 {

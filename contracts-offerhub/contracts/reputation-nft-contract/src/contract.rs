@@ -123,42 +123,48 @@ impl ReputationNFTContract {
         caller: Address,
         to: Address,
         achievement_type: String,
-        rating_data: String,
+        _rating_data: String,
     ) -> Result<(), Error> {
         check_minter(&env, &caller)?;
         
         let token_id = next_token_id(&env);
-        let (name, description, uri) = match achievement_type.to_string().as_str() {
-            "first_five_star" => (
+        
+        // Since to_string() is not available in Soroban, we'll do direct string comparison
+        let first_five_star = String::from_str(&env, "first_five_star");
+        let ten_ratings = String::from_str(&env, "ten_ratings");
+        let top_rated_professional = String::from_str(&env, "top_rated_professional");
+        let rating_consistency = String::from_str(&env, "rating_consistency");
+        
+        let (name, description, uri) = if achievement_type == first_five_star {
+            (
                 String::from_str(&env, "First Five Star Rating"),
                 String::from_str(&env, "Awarded for receiving first 5-star rating"),
                 String::from_str(&env, "ipfs://first-five-star"),
-            ),
-            "ten_ratings" => (
+            )
+        } else if achievement_type == ten_ratings {
+            (
                 String::from_str(&env, "Ten Ratings Milestone"),
                 String::from_str(&env, "Awarded for receiving 10 ratings"),
                 String::from_str(&env, "ipfs://ten-ratings"),
-            ),
-            "top_rated_professional" => (
+            )
+        } else if achievement_type == top_rated_professional {
+            (
                 String::from_str(&env, "Top Rated Professional"),
                 String::from_str(&env, "Awarded for maintaining excellent ratings"),
                 String::from_str(&env, "ipfs://top-rated-pro"),
-            ),
-            "rating_consistency" => (
+            )
+        } else if achievement_type == rating_consistency {
+            (
                 String::from_str(&env, "Consistency Master"),
                 String::from_str(&env, "Awarded for consistent high-quality ratings"),
                 String::from_str(&env, "ipfs://consistency-master"),
-            ),
-            "improvement_award" => (
-                String::from_str(&env, "Most Improved"),
-                String::from_str(&env, "Awarded for significant rating improvements"),
-                String::from_str(&env, "ipfs://most-improved"),
-            ),
-            _ => (
+            )
+        } else {
+            (
                 String::from_str(&env, "Rating Achievement"),
                 String::from_str(&env, "Special rating-based achievement"),
                 String::from_str(&env, "ipfs://rating-achievement"),
-            ),
+            )
         };
         
         save_token_owner(&env, &token_id, &to);
@@ -167,11 +173,11 @@ impl ReputationNFTContract {
         // Index by user for easy retrieval
         Self::index_user_achievement(&env, &to, &token_id);
         
-        emit_achievement_minted(&env, &to, &Symbol::new(&env, &achievement_type.to_string()), &token_id);
+        emit_achievement_minted(&env, &to, &Symbol::new(&env, "achievement"), &token_id);
         Ok(())
     }
 
-    pub fn get_user_achievements(env: Env, user: Address) -> Result<Vec<TokenId>, Error> {
+    pub fn get_user_achievements(env: Env, _user: Address) -> Result<Vec<TokenId>, Error> {
         // In production, this would retrieve all achievements for a user
         // For now, return empty vector - would need proper indexing implementation
         Ok(Vec::new(&env))
@@ -196,7 +202,7 @@ impl ReputationNFTContract {
     }
 
     // Helper functions
-    fn index_user_achievement(env: &Env, user: &Address, token_id: &TokenId) {
+    fn index_user_achievement(_env: &Env, _user: &Address, _token_id: &TokenId) {
         // In production, maintain an index of user achievements
         // This would use a storage pattern like (USER_ACHIEVEMENTS, user, token_id) -> true
     }
@@ -204,7 +210,8 @@ impl ReputationNFTContract {
     fn store_reputation_score(env: &Env, user: &Address, rating_average: u32, total_ratings: u32) {
         // Store the user's current reputation score
         let reputation_data = (rating_average, total_ratings, env.ledger().timestamp());
-        env.storage().persistent().set(&(b"user_reputation", user), &reputation_data);
+        let reputation_key = (String::from_str(env, "user_reputation"), user);
+        env.storage().persistent().set(&reputation_key, &reputation_data);
     }
 
     fn check_rating_achievements(

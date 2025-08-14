@@ -32,24 +32,39 @@ pub fn is_moderator(env: &Env, address: &Address) -> bool {
 
 // Rating storage
 pub fn save_rating(env: &Env, rating: &Rating) {
-    let key = (RATING, &rating.id);
+    let key = (RATING, rating.id.clone());
     env.storage().persistent().set(&key, rating);
     
-    // Also index by user and contract
-    let user_key = (USER_RATINGS, &rating.rated_user, &rating.id);
-    env.storage().persistent().set(&user_key, &true);
-    
-    let contract_key = (CONTRACT_RATINGS, &rating.contract_id, &rating.id);
-    env.storage().persistent().set(&contract_key, &true);
+    // Also index by user and contract for efficient retrieval
+    add_rating_to_user_index(env, &rating.rated_user, &rating.id);
+    add_rating_to_contract_index(env, &rating.contract_id, &rating.id);
+}
+
+fn add_rating_to_user_index(env: &Env, user: &Address, rating_id: &String) {
+    let key = (soroban_sdk::symbol_short!("u_ratings"), user.clone());
+    let mut rating_ids: Vec<String> = env.storage().persistent()
+        .get(&key)
+        .unwrap_or_else(|| Vec::new(env));
+    rating_ids.push_back(rating_id.clone());
+    env.storage().persistent().set(&key, &rating_ids);
+}
+
+fn add_rating_to_contract_index(env: &Env, contract_id: &String, rating_id: &String) {
+    let key = (soroban_sdk::symbol_short!("c_ratings"), contract_id.clone());
+    let mut rating_ids: Vec<String> = env.storage().persistent()
+        .get(&key)
+        .unwrap_or_else(|| Vec::new(env));
+    rating_ids.push_back(rating_id.clone());
+    env.storage().persistent().set(&key, &rating_ids);
 }
 
 pub fn get_rating(env: &Env, rating_id: &String) -> Result<Rating, Error> {
-    let key = (RATING, rating_id);
+    let key = (RATING, rating_id.clone());
     env.storage().persistent().get(&key).ok_or(Error::ContractNotFound)
 }
 
 pub fn rating_exists(env: &Env, rating_id: &String) -> bool {
-    let key = (RATING, rating_id);
+    let key = (RATING, rating_id.clone());
     env.storage().persistent().has(&key)
 }
 
@@ -58,7 +73,7 @@ pub fn has_rated_contract(env: &Env, rater: &Address, contract_id: &String) -> b
     // In production, this could be optimized with better indexing
     let ratings = get_ratings_by_contract(env, contract_id);
     for rating_id in ratings.iter() {
-        if let Ok(rating) = get_rating(env, rating_id) {
+        if let Ok(rating) = get_rating(env, &rating_id) {
             if rating.rater == *rater {
                 return true;
             }
@@ -68,74 +83,117 @@ pub fn has_rated_contract(env: &Env, rater: &Address, contract_id: &String) -> b
 }
 
 pub fn get_ratings_by_user(env: &Env, user: &Address) -> Vec<String> {
-    // This would need proper iteration in production
-    // For now, return empty vec - implementation depends on Soroban SDK capabilities
-    Vec::new(env)
+    let key = (soroban_sdk::symbol_short!("u_ratings"), user.clone());
+    env.storage().persistent()
+        .get(&key)
+        .unwrap_or_else(|| Vec::new(env))
 }
 
 pub fn get_ratings_by_contract(env: &Env, contract_id: &String) -> Vec<String> {
-    // This would need proper iteration in production
-    // For now, return empty vec - implementation depends on Soroban SDK capabilities
-    Vec::new(env)
+    let key = (soroban_sdk::symbol_short!("c_ratings"), contract_id.clone());
+    env.storage().persistent()
+        .get(&key)
+        .unwrap_or_else(|| Vec::new(env))
+}
+
+// Function to get user's rating history with pagination
+pub fn get_user_rating_history(env: &Env, user: &Address, limit: u32, offset: u32) -> Vec<Rating> {
+    let rating_ids = get_ratings_by_user(env, user);
+    let mut ratings = Vec::new(env);
+    
+    let start = offset as usize;
+    let end = u32::min(limit + offset, rating_ids.len()) as usize;
+    
+    for i in start..end {
+        if let Some(rating_id) = rating_ids.get(i.try_into().unwrap()) {
+            if let Ok(rating) = get_rating(env, &rating_id) {
+                ratings.push_back(rating);
+            }
+        }
+    }
+    
+    ratings
+}
+
+// New function to get user feedback IDs
+pub fn get_user_feedback_ids(env: &Env, user: &Address) -> Vec<String> {
+    let mut feedback_ids = Vec::new(env);
+    let key = (soroban_sdk::symbol_short!("u_feedbck"), user.clone());
+    
+    // Get stored feedback IDs for this user
+    if let Some(stored_ids) = env.storage().persistent().get::<_, Vec<String>>(&key) {
+        feedback_ids = stored_ids;
+    }
+    
+    feedback_ids
+}
+
+// Function to add feedback ID to user's feedback list
+pub fn add_user_feedback_id(env: &Env, user: &Address, feedback_id: &String) {
+    let mut feedback_ids = get_user_feedback_ids(env, user);
+    feedback_ids.push_back(feedback_id.clone());
+    
+    let key = (soroban_sdk::symbol_short!("u_feedbck"), user.clone());
+    env.storage().persistent().set(&key, &feedback_ids);
 }
 
 // Feedback storage
 pub fn save_feedback(env: &Env, feedback: &Feedback) {
-    let key = (FEEDBACK, &feedback.id);
+    let key = (FEEDBACK, feedback.id.clone());
     env.storage().persistent().set(&key, feedback);
 }
 
 pub fn get_feedback(env: &Env, feedback_id: &String) -> Result<Feedback, Error> {
-    let key = (FEEDBACK, feedback_id);
+    let key = (FEEDBACK, feedback_id.clone());
     env.storage().persistent().get(&key).ok_or(Error::FeedbackNotFound)
 }
 
 pub fn update_feedback(env: &Env, feedback: &Feedback) {
-    let key = (FEEDBACK, &feedback.id);
+    let key = (FEEDBACK, feedback.id.clone());
     env.storage().persistent().set(&key, feedback);
 }
 
 // Rating statistics
 pub fn save_user_rating_stats(env: &Env, stats: &RatingStats) {
-    let key = (USER_RATING_STATS, &stats.user);
+    let key = (USER_RATING_STATS, stats.user.clone());
     env.storage().persistent().set(&key, stats);
 }
 
 pub fn get_user_rating_stats(env: &Env, user: &Address) -> Result<RatingStats, Error> {
-    let key = (USER_RATING_STATS, user);
+    let key = (USER_RATING_STATS, user.clone());
     env.storage().persistent().get(&key).ok_or(Error::InsufficientRatings)
 }
 
 // Feedback reports
 pub fn save_feedback_report(env: &Env, report: &FeedbackReport) {
-    let key = (FEEDBACK_REPORTS, &report.id);
+    let key = (FEEDBACK_REPORTS, report.id.clone());
     env.storage().persistent().set(&key, report);
 }
 
 pub fn get_feedback_report(env: &Env, report_id: &String) -> Result<FeedbackReport, Error> {
-    let key = (FEEDBACK_REPORTS, report_id);
+    let key = (FEEDBACK_REPORTS, report_id.clone());
     env.storage().persistent().get(&key).ok_or(Error::FeedbackNotFound)
 }
 
 // Rating thresholds
 pub fn save_rating_threshold(env: &Env, threshold: &RatingThreshold) {
-    let key = (RATING_THRESHOLDS, &threshold.threshold_type);
+    let key = (RATING_THRESHOLDS, threshold.threshold_type.clone());
     env.storage().persistent().set(&key, threshold);
 }
 
 pub fn get_rating_threshold(env: &Env, threshold_type: &String) -> Result<RatingThreshold, Error> {
-    let key = (RATING_THRESHOLDS, threshold_type);
+    let key = (RATING_THRESHOLDS, threshold_type.clone());
     env.storage().persistent().get(&key).ok_or(Error::ThresholdNotFound)
 }
 
 // Incentive records
 pub fn save_incentive_record(env: &Env, record: &IncentiveRecord) {
-    let key = (INCENTIVE_RECORDS, &record.user, &record.incentive_type);
+    let key = (INCENTIVE_RECORDS, record.user.clone(), record.incentive_type.clone());
     env.storage().persistent().set(&key, record);
 }
 
 pub fn get_incentive_record(env: &Env, user: &Address, incentive_type: &String) -> Result<IncentiveRecord, Error> {
-    let key = (INCENTIVE_RECORDS, user, incentive_type);
+    let key = (INCENTIVE_RECORDS, user.clone(), incentive_type.clone());
     env.storage().persistent().get(&key).ok_or(Error::IncentiveNotFound)
 }
 
@@ -161,12 +219,12 @@ pub fn get_user_restriction(env: &Env, user: &Address) -> String {
 
 // Platform statistics
 pub fn increment_platform_stat(env: &Env, stat_name: &String) {
-    let key = (PLATFORM_STATS, stat_name);
+    let key = (PLATFORM_STATS, stat_name.clone());
     let current: u32 = env.storage().persistent().get(&key).unwrap_or(0);
     env.storage().persistent().set(&key, &(current + 1));
 }
 
 pub fn get_platform_stat(env: &Env, stat_name: &String) -> u32 {
-    let key = (PLATFORM_STATS, stat_name);
+    let key = (PLATFORM_STATS, stat_name.clone());
     env.storage().persistent().get(&key).unwrap_or(0)
 }
