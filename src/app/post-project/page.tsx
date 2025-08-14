@@ -25,9 +25,9 @@ import {
   mapData,
   useProjectsApi,
 } from "@/hooks/api-connections/use-project-api";
-import { useProfileApi } from "@/hooks/api-connections/use-profile-api";
 import { ProjectDraft } from "@/types/project.types";
 import { toast } from "sonner";
+import { useAuthApi } from "@/hooks/api-connections/use-auth-api";
 
 // Simple Header component defined inline
 function SimpleHeader() {
@@ -176,8 +176,6 @@ const initialProjectData: ProjectDraft = {
   title: "",
   description: "",
   category: "",
-  budget: 0,
-  status: "draft",
   subcategory: "",
   skills: [],
   experienceLevel: "",
@@ -192,37 +190,36 @@ const initialProjectData: ProjectDraft = {
 
 export default function PostProjectPage() {
   const totalSteps = 5;
-  const { user } = useProfileApi();
+  const { user } = useAuthApi();
   const { createProject } = useProjectsApi();
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [projectData, setProjectData] = useState<ProjectDraft>(initialProjectData);
 
   useEffect(() => {
-    console.log("user: ", user);
-    console.log("projectData: ", projectData);
     if (typeof window !== "undefined" && user?.id) {
-      const saved = localStorage.getItem(`projectDataDraft_${user.id}`);
+      const saved = localStorage.getItem('projectDataDraft');
       if (saved) {
         setProjectData(JSON.parse(saved));
       } else {
         setProjectData({ ...initialProjectData, client_id: user.id });
       }
     }
-  }, [user?.id]);
+  });
 
   useEffect(() => {
     if (typeof window !== "undefined" && user?.id) {
       localStorage.setItem(
-        `projectDataDraft_${user.id}`,
+        'projectDataDraft',
         JSON.stringify(projectData)
       );
     }
-  }, [projectData, user?.id]);
+  }, [projectData]);
 
   const updateProjectData = (data: keyof ProjectDraft, value: any) => {
     setProjectData((prev) => ({ ...prev, [data]: value }));
   };
+
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
@@ -242,13 +239,14 @@ export default function PostProjectPage() {
     setIsLoading(true);
     try {
       if (!user?.id)
-        throw new Error("There aren't any user in the appliaction");
-      const dto = mapData(projectData, user?.id);
+        throw new Error("No authenticated user found");
+      const dto = mapData(projectData, user);
       const response = await createProject(dto);
-      console.log("proyecto creado", response);
+      toast.success("Success!! Project Posted");
+      console.log("Object: ", response);
       setCurrentStep(totalSteps + 1); // Show success screen
       if (typeof window !== "undefined") 
-        localStorage.removeItem(`projectDataDraft_${user?.id}`);
+        localStorage.removeItem('projectDataDraft');
       setProjectData({ ...initialProjectData, client_id: user?.id });
     } catch (error: any) {
       toast.error(error.message || "Error creating project");
@@ -349,10 +347,12 @@ export default function PostProjectPage() {
               ) : (
                 <Button
                   onClick={handleSubmit}
-                  className="bg-[#15949C] hover:bg-[#15949C]/90 flex items-center"
+                  disabled={isLoading}
+                  aria-busy={isLoading}
+                  className="bg-[#15949C] hover:bg-[#15949C]/90 flex items-center disabled:opacity-60"
                 >
-                  Post Project
-                  <Check className="ml-2 h-4 w-4" />
+                  {isLoading ? "Posting..." : "Post Project"}
+                  {!isLoading && <Check className="ml-2 h-4 w-4" />}
                 </Button>
               )}
             </div>

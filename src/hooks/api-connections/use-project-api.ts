@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CreateProjectDTO, ProjectResponse } from "@/types/project.types";
+import { CreateProjectDTO, ProjectDraft, ProjectResponse } from "@/types/project.types";
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL,
+    baseURL: process.env.NEXT_PUBLIC_API_URL || "http:localhost:4000",
     headers: {
         'Content-Type': 'application/json'
     },
@@ -28,7 +28,7 @@ export const useProjectsApi = () => {
     const getProjectById = (id: string) =>
         handleRequest<ProjectResponse>(api.get(`/api/projects/${id}`));
 
-    const updateProject = (id: string, project: CreateProjectDTO) =>
+    const updateProject = (id: string, project: Partial<CreateProjectDTO>) =>
         handleRequest<ProjectResponse>(api.patch(`/api/projects/${id}`, project));
 
     const deleteProject = (id: string) =>
@@ -43,11 +43,11 @@ export const useProjectsApi = () => {
     }
 };
 
-export const mapData = (projectData: any, authenticatedUser: any): CreateProjectDTO => ({
-    client_id: authenticatedUser.id,
+type MinimalUser = { id: string };
+export const mapData = (projectData: ProjectDraft, authenticatedUser: MinimalUser | string): CreateProjectDTO => ({
+    client_id: typeof authenticatedUser === "string" ? authenticatedUser : authenticatedUser.id,
     title: projectData.title,
     description: projectData.description,
     category: projectData.category,
-    budget: projectData.budgetAmount,
-    status: "draft"
-});
+    budget: projectData.budgetAmount
+})

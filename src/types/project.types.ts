@@ -4,7 +4,6 @@ export interface CreateProjectDTO {
     description: string;
     category: string;
     budget: number;
-    status?: string;
 }
 
 export interface ProjectResponse {
@@ -23,8 +22,12 @@ export interface Project {
     status: string;
 }
 
-export interface ProjectDraft extends CreateProjectDTO {
-    budgetAmount?: number;
+export interface ProjectDraft{
+    client_id: string;
+    title: string;
+    description: string;
+    category: string;
+    budgetAmount: number;
     subcategory: string;
     skills: string[];
     experienceLevel: string;
