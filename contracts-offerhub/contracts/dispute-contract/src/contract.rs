@@ -1,4 +1,4 @@
-use soroban_sdk::{panic_with_error, Address, Env, Map, String, Vec};
+use soroban_sdk::{panic_with_error, Address, Env, Map, String, Vec, Symbol, IntoVal};
 
 use crate::{
     access::{is_valid_arbitrator, is_valid_mediator},
@@ -6,11 +6,11 @@ use crate::{
     types::{DisputeData, DisputeLevel, DisputeOutcome, DisputeStatus, Error, Evidence},
 };
 
-// Escrow integration constants (for future use)
-// const ESCROW_RESOLVE_DISPUTE: &str = "resolve_dispute";
-// const ESCROW_CLIENT_WINS: &str = "client_wins";
-// const ESCROW_FREELANCER_WINS: &str = "freelancer_wins";
-// const ESCROW_SPLIT: &str = "split";
+// Escrow integration constants
+const ESCROW_RESOLVE_DISPUTE: &str = "resolve_dispute";
+const ESCROW_CLIENT_WINS: &str = "client_wins";
+const ESCROW_FREELANCER_WINS: &str = "freelancer_wins";
+const ESCROW_SPLIT: &str = "split";
 
 pub fn initialize(
     env: &Env,
@@ -229,13 +229,13 @@ pub fn resolve_dispute(env: &Env, job_id: u32, decision: DisputeOutcome) {
     }
 
     // Authorization check based on dispute level
-    // For now, we'll use a simpler approach - require the arbitrator to be the caller
-    // In a real implementation, you might want to pass the caller as a parameter
+    // Note: In a production environment, you would want to pass the caller explicitly
+    // For now, we'll use a simplified approach that checks the assigned mediator/arbitrator
     match dispute.level {
         DisputeLevel::Mediation => {
             if let Some(ref _mediator) = dispute.mediator {
-                // In a real implementation, check if the caller is the mediator
-                // For now, we'll skip this check
+                // In a real implementation, you would check if the caller is the mediator
+                // For now, we'll assume the mediator is authorized
             } else {
                 panic_with_error!(env, Error::MediationRequired);
             }
@@ -267,21 +267,129 @@ pub fn resolve_dispute(env: &Env, job_id: u32, decision: DisputeOutcome) {
     dispute.resolution_timestamp = Some(env.ledger().timestamp());
 
     // Integrate with escrow contract if available
-    if let Some(_escrow_contract) = dispute.escrow_contract.clone() {
-        let _escrow_result = match decision {
-            DisputeOutcome::FavorClient => "client_wins",
-            DisputeOutcome::FavorFreelancer => "freelancer_wins",
-            DisputeOutcome::Split => "split",
+    if let Some(escrow_contract) = dispute.escrow_contract.clone() {
+        let escrow_result = match decision {
+            DisputeOutcome::FavorClient => ESCROW_CLIENT_WINS,
+            DisputeOutcome::FavorFreelancer => ESCROW_FREELANCER_WINS,
+            DisputeOutcome::Split => ESCROW_SPLIT,
             DisputeOutcome::None => panic_with_error!(env, Error::InvalidDisputeLevel),
         };
 
-        // Note: In a real implementation, you would need to pass the caller address
-        // For now, we'll skip the escrow integration to avoid complexity
-        // env.invoke_contract::<()>(
-        //     &escrow_contract,
-        //     &Symbol::new(env, ESCROW_RESOLVE_DISPUTE),
-        //     (caller, Symbol::new(env, escrow_result)).into_val(env),
-        // );
+        // Call the escrow contract to resolve the dispute
+        // Note: In a production environment, you would need to pass the authorized caller
+        // For now, we'll use the assigned mediator/arbitrator as the caller
+        let escrow_caller = match dispute.level {
+            DisputeLevel::Mediation => dispute.mediator.clone().unwrap(),
+            DisputeLevel::Arbitration => dispute.arbitrator.clone().unwrap(),
+        };
+
+        env.invoke_contract::<()>(
+            &escrow_contract,
+            &Symbol::new(env, ESCROW_RESOLVE_DISPUTE),
+            (escrow_caller, Symbol::new(env, escrow_result)).into_val(env),
+        );
+    }
+
+    disputes.set(job_id, dispute);
+    env.storage().instance().set(&DISPUTES, &disputes);
+
+    env.events().publish(
+        (String::from_str(env, "dispute_resolved"), decision),
+        env.ledger().timestamp(),
+    );
+}
+
+pub fn resolve_dispute_with_auth(
+    env: &Env,
+    job_id: u32,
+    decision: DisputeOutcome,
+    caller: Address,
+) {
+    caller.require_auth();
+    
+    if !env.storage().instance().has(&ARBITRATOR) {
+        panic_with_error!(env, Error::NotInitialized);
+    }
+
+    let mut disputes: Map<u32, DisputeData> = env.storage().instance().get(&DISPUTES).unwrap();
+    let mut dispute = disputes
+        .get(job_id)
+        .unwrap_or_else(|| panic_with_error!(env, Error::DisputeNotFound));
+
+    if dispute.resolved {
+        panic_with_error!(env, Error::DisputeAlreadyResolved);
+    }
+
+    // Check timeout
+    if let Some(timeout) = dispute.timeout_timestamp {
+        if env.ledger().timestamp() > timeout {
+            dispute.status = DisputeStatus::Timeout;
+            dispute.resolved = true;
+            dispute.outcome = DisputeOutcome::Split; // Default timeout outcome
+            dispute.resolution_timestamp = Some(env.ledger().timestamp());
+            disputes.set(job_id, dispute);
+            env.storage().instance().set(&DISPUTES, &disputes);
+            
+            env.events().publish(
+                (String::from_str(env, "dispute_timeout"), job_id),
+                env.ledger().timestamp(),
+            );
+            return;
+        }
+    }
+
+    // Authorization check based on dispute level
+    match dispute.level {
+        DisputeLevel::Mediation => {
+            if let Some(ref mediator) = dispute.mediator {
+                if mediator != &caller {
+                    panic_with_error!(env, Error::Unauthorized);
+                }
+            } else {
+                panic_with_error!(env, Error::MediationRequired);
+            }
+        }
+        DisputeLevel::Arbitration => {
+            if let Some(ref arbitrator) = dispute.arbitrator {
+                if arbitrator != &caller || !is_valid_arbitrator(env, arbitrator) {
+                    panic_with_error!(env, Error::Unauthorized);
+                }
+            } else {
+                panic_with_error!(env, Error::ArbitrationRequired);
+            }
+        }
+    }
+
+    if decision == DisputeOutcome::None {
+        panic_with_error!(env, Error::InvalidDisputeLevel);
+    }
+
+    // Calculate fees
+    let fee_percentage = 500; // 5% fee
+    let fee_amount = (dispute.dispute_amount * fee_percentage) / 10000;
+    let _net_amount = dispute.dispute_amount - fee_amount;
+
+    dispute.resolved = true;
+    dispute.outcome = decision;
+    dispute.status = DisputeStatus::Resolved;
+    dispute.fee_collected = fee_amount;
+    dispute.resolution_timestamp = Some(env.ledger().timestamp());
+
+    // Integrate with escrow contract if available
+    if let Some(escrow_contract) = dispute.escrow_contract.clone() {
+        let escrow_result = match decision {
+            DisputeOutcome::FavorClient => ESCROW_CLIENT_WINS,
+            DisputeOutcome::FavorFreelancer => ESCROW_FREELANCER_WINS,
+            DisputeOutcome::Split => ESCROW_SPLIT,
+            DisputeOutcome::None => panic_with_error!(env, Error::InvalidDisputeLevel),
+        };
+
+        // Call the escrow contract to resolve the dispute
+        env.invoke_contract::<()>(
+            &escrow_contract,
+            &Symbol::new(env, ESCROW_RESOLVE_DISPUTE),
+            (caller, Symbol::new(env, escrow_result)).into_val(env),
+        );
     }
 
     disputes.set(job_id, dispute);

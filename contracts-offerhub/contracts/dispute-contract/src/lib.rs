@@ -77,6 +77,16 @@ impl DisputeResolutionContract {
         Ok(())
     }
 
+    pub fn resolve_dispute_with_auth(
+        env: Env,
+        job_id: u32,
+        decision: DisputeOutcome,
+        caller: Address,
+    ) -> Result<(), Error> {
+        contract::resolve_dispute_with_auth(&env, job_id, decision, caller);
+        Ok(())
+    }
+
     pub fn check_timeout(env: Env, job_id: u32) -> Result<bool, Error> {
         Ok(contract::check_timeout(&env, job_id))
     }
