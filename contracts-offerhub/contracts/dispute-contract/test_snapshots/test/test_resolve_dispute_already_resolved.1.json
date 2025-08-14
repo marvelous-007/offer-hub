@@ -1,6 +1,6 @@
 {
   "generators": {
-    "address": 7,
+    "address": 6,
     "nonce": 0
   },
   "auth": [
@@ -76,9 +76,7 @@
                 {
                   "string": "Job not completed"
                 },
-                {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM"
-                },
+                "void",
                 {
                   "i128": {
                     "hi": 0,
@@ -234,9 +232,7 @@
                                     "key": {
                                       "symbol": "escrow_contract"
                                     },
-                                    "val": {
-                                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM"
-                                    }
+                                    "val": "void"
                                   },
                                   {
                                     "key": {
