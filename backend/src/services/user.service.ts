@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase/supabase";
 import { AppError, BadRequestError, ConflictError, InternalServerError } from "@/utils/AppError";
-import { CreateUserDTO } from "@/types/user.types";
+import { CreateUserDTO, User, UserFilters } from "@/types/user.types";
 
 class UserService {
     async createUser(data: CreateUserDTO) {
@@ -43,7 +43,7 @@ class UserService {
     async getUserById(id: string) {
         const { data, error } = await supabase
             .from("users")
-            .select("id, wallet_address, username, name, bio, is_freelancer")
+            .select("id, wallet_address, username, name, bio, email, is_freelancer, created_at")
             .eq("id", id)
             .single();
 
@@ -79,6 +79,61 @@ class UserService {
 
         if (error) throw new InternalServerError("Error_updating_user");
         return data;
+    }
+
+    async getAllUsers(filters: UserFilters): Promise<{ users: User[]; total: number }> {
+        const {
+            page = 1,
+            limit = 20,
+            search,
+            is_freelancer
+        } = filters;
+
+        let query = supabase
+            .from("users")
+            .select(
+                `
+                id,
+                wallet_address,
+                username,
+                name,
+                bio,
+                email,
+                is_freelancer,
+                created_at
+                `,
+                { count: "exact" }
+            );
+
+        // Apply search filter
+        if (search) {
+            query = query.or(
+                `name.ilike.%${search}%,email.ilike.%${search}%,username.ilike.%${search}%`
+            );
+        }
+
+        // Apply role filter
+        if (is_freelancer !== undefined) {
+            query = query.eq("is_freelancer", is_freelancer);
+        }
+
+        // Add pagination
+        const offset = (page - 1) * limit;
+        query = query.range(offset, offset + limit - 1);
+
+        // Order by creation date (newest first)
+        query = query.order("created_at", { ascending: false });
+
+        const { data: users, error, count } = await query;
+
+        if (error) {
+            throw new InternalServerError(`Failed to fetch users: ${error.message}`);
+        }
+
+        return {
+            users: users || [],
+            total: count || 0
+        };
     }
 }
 
