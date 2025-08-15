@@ -940,6 +940,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "rating-contract"
+version = "1.0.0"
+dependencies = [
+ "soroban-sdk",
+]
+
+[[package]]
 name = "reputation-nft-contract"
 version = "0.0.0"
 dependencies = [
