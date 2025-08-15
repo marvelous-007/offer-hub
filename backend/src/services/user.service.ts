@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase/supabase";
-import { AppError } from "@/utils/AppError";
+import { AppError, BadRequestError, ConflictError, InternalServerError } from "@/utils/AppError";
 import { CreateUserDTO } from "@/types/user.types";
 
 class UserService {
@@ -11,7 +11,7 @@ class UserService {
         .eq("wallet_address", data.wallet_address)
         .single();
 
-    if (walletUser) throw new AppError("Wallet_address_already_registered", 409);
+    if (walletUser) throw new ConflictError("Wallet_address_already_registered");
 
     // Verify unique username
     const { data: usernameUser } = await supabase
@@ -20,7 +20,7 @@ class UserService {
         .eq("username", data.username)
         .single();
 
-    if (usernameUser) throw new AppError("Username_already_taken", 409);
+    if (usernameUser) throw new ConflictError("Username_already_taken");
 
     const { data: newUser, error: insertError } = await supabase
         .from("users")
@@ -35,7 +35,7 @@ class UserService {
         .select()
         .single();
 
-        if (insertError) throw new AppError("Error_creating_user", 500);
+        if (insertError) throw new InternalServerError("Error_creating_user");
         
         return newUser;
     }
@@ -55,7 +55,7 @@ class UserService {
     async updateUser(id: string, updates: Partial<CreateUserDTO>) {
         // Do not allow changes to wallet_address or is_freelancer
         if ('wallet_address' in updates || 'is_freelancer' in updates) {
-        throw new AppError("Cannot_update_restricted_fields", 400);
+        throw new BadRequestError("Cannot_update_restricted_fields");
         }
 
         // Validate unique username
@@ -67,7 +67,7 @@ class UserService {
             .neq("id", id)
             .single();
 
-        if (existing) throw new AppError("Username_already_taken", 409);
+        if (existing) throw new ConflictError("Username_already_taken");
         }
 
         const { data, error } = await supabase
@@ -77,7 +77,7 @@ class UserService {
         .select()
         .single();
 
-        if (error) throw new AppError("Error_updating_user", 500);
+        if (error) throw new InternalServerError("Error_updating_user");
         return data;
     }
 }

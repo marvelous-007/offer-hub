@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase/supabase';
-
+import { ConflictError,BadRequestError,NotFoundError } from '@/utils/AppError';
 export interface ApplicationInput {
   project_id: string;
   freelancer_id: string;
@@ -21,7 +21,7 @@ export const createApplication = async (input: ApplicationInput): Promise<Applic
     .single();
 
   if (existingApplication) {
-    throw new Error('You have already applied to this project');
+    throw new ConflictError('You have already applied to this project');
   }
 
   const { data: project } = await supabase
@@ -31,7 +31,7 @@ export const createApplication = async (input: ApplicationInput): Promise<Applic
     .single();
 
   if (!project || project.status !== 'pending') {
-    throw new Error('This project is not accepting applications');
+    throw new BadRequestError('This project is not accepting applications');
   }
 
   const { data: application, error } = await supabase
@@ -65,11 +65,11 @@ export const updateApplicationStatus = async (
     .single();
 
   if (!existingApplication) {
-    throw new Error('Application not found');
+    throw new NotFoundError('Application not found');
   }
 
   if (existingApplication.status !== 'pending') {
-    throw new Error('Application status can only be updated once');
+    throw new ConflictError('Application status can only be updated once');
   }
 
   if (status === 'accepted') {
@@ -87,7 +87,7 @@ export const updateApplicationStatus = async (
         .eq('status', 'accepted');
 
       if (count && count > 0) {
-        throw new Error('This project already has an accepted application');
+        throw new ConflictError('This project already has an accepted application');
       }
     }
   }

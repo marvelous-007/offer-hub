@@ -1,7 +1,7 @@
 use soroban_sdk::{contracterror, contracttype, Address, String, Vec};
 
 #[contracttype]
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 #[repr(u32)]
 pub enum EscrowStatus {
     Initialized,
@@ -11,12 +11,14 @@ pub enum EscrowStatus {
     Resolved,
 }
 
+#[contracttype]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(u32)]
 pub enum DisputeResult {
-    ClientWins,
-    FreelancerWins,
-    Split,
+    None = 0,
+    ClientWins = 1,
+    FreelancerWins = 2,
+    Split = 3,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -45,14 +47,17 @@ pub struct Milestone {
 pub struct EscrowData {
     pub client: Address,
     pub freelancer: Address,
+    pub arbitrator: Option<Address>,
+    pub token: Option<Address>,
     pub amount: i128,
     pub status: EscrowStatus,
-    pub dispute_result: u32, // 0 = None, 1 = ClientWins, 2 = FreelancerWins, 3 = Split
+    pub dispute_result: u32,
     pub created_at: u64,
     pub funded_at: Option<u64>,
     pub released_at: Option<u64>,
     pub disputed_at: Option<u64>,
     pub resolved_at: Option<u64>,
+    pub timeout_secs: Option<u64>,
     pub milestones: Vec<Milestone>,
     pub milestone_history: Vec<MilestoneHistory>,
     pub released_amount: i128,
@@ -75,4 +80,3 @@ pub enum Error {
     InvalidDisputeResult = 8,
     MilestoneNotFound = 9,
 }
-

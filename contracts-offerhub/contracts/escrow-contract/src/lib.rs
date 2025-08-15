@@ -33,8 +33,32 @@ impl EscrowContract {
         contract::dispute(&env, caller);
     }
 
-    pub fn resolve_dispute(env: Env, result: Symbol) {
-        contract::resolve_dispute(&env, result);
+    pub fn resolve_dispute(env: Env, caller: Address, result: Symbol) {
+        contract::resolve_dispute(&env, caller, result);
+    }
+
+    pub fn init_contract_full(
+        env: Env,
+        client: Address,
+        freelancer: Address,
+        arbitrator: Address,
+        token: Address,
+        amount: i128,
+        timeout_secs: u64,
+    ) {
+        contract::init_contract_full(
+            &env,
+            client,
+            freelancer,
+            arbitrator,
+            token,
+            amount,
+            timeout_secs,
+        );
+    }
+
+    pub fn auto_release(env: Env) {
+        contract::auto_release(&env);
     }
 
     pub fn get_escrow_data(env: Env) -> types::EscrowData {
@@ -60,4 +84,12 @@ impl EscrowContract {
     pub fn get_milestone_history(env: Env) -> Vec<types::MilestoneHistory> {
         contract::get_milestone_history(&env)
     }
+    pub fn test_set_dispute_result(env: Env, result: u32) {
+        let mut data = contract::get_escrow_data(&env);
+        data.dispute_result = result;
+        contract::set_escrow_data(&env, &data);
+    }
 }
+
+#[cfg(test)]
+mod test;

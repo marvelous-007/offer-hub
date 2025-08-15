@@ -119,7 +119,7 @@ export const getContractByIdHandler = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  try {
+
     const { id } = req.params;
 
     // Validate UUID format
@@ -144,17 +144,7 @@ export const getContractByIdHandler = async (
     res
       .status(HTTP_STATUS.OK)
       .json(buildSuccessResponse(contract, "Contract retrieved successfully"));
-  } catch (error: any) {
-    if (error.message === "Invalid contract ID format") {
-      res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        message: "Invalid contract ID format",
-      });
-      return;
-    }
-
-    next(error);
-  }
+  
 };
 
 export const updateContractStatusHandler = async (
@@ -162,7 +152,7 @@ export const updateContractStatusHandler = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  try {
+
     const { id } = req.params;
     const updateData: UpdateContractDTO = req.body;
     const userId = req.body.user_id; // In a real app, this would come from auth middleware
@@ -218,33 +208,7 @@ export const updateContractStatusHandler = async (
           "Contract status updated successfully"
         )
       );
-  } catch (error: any) {
-    if (error.message === "Invalid contract ID format") {
-      res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        message: "Invalid contract ID format",
-      });
-      return;
-    }
-
-    if (error.message.includes("Invalid status transition")) {
-      res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        message: error.message,
-      });
-      return;
-    }
-
-    if (error.message.includes("Only the")) {
-      res.status(HTTP_STATUS.FORBIDDEN).json({
-        success: false,
-        message: error.message,
-      });
-      return;
-    }
-
-    next(error);
-  }
+  
 };
 
 export const getContractsByUserHandler = async (
@@ -252,7 +216,7 @@ export const getContractsByUserHandler = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  try {
+
     const { userId } = req.params;
 
     // Validate UUID format
@@ -271,17 +235,7 @@ export const getContractsByUserHandler = async (
       .json(
         buildListResponse(contracts, "User contracts retrieved successfully")
       );
-  } catch (error: any) {
-    if (error.message === "Invalid user ID format") {
-      res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        message: "Invalid user ID format",
-      });
-      return;
-    }
-
-    next(error);
-  }
+  
 };
 
 export const getContractsByStatusHandler = async (
@@ -289,7 +243,7 @@ export const getContractsByStatusHandler = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  try {
+  
     const { status } = req.params;
 
     if (!status || !ESCROW_STATUSES.includes(status as any)) {
@@ -311,7 +265,5 @@ export const getContractsByStatusHandler = async (
           "Contracts by status retrieved successfully"
         )
       );
-  } catch (error) {
-    next(error);
-  }
+  
 };

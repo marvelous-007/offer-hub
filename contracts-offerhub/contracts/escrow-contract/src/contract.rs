@@ -1,10 +1,53 @@
-use soroban_sdk::{Address, Env, String, Symbol, Vec};
+se soroban_sdk::{Address, Env, IntoVal, String, Symbol, Vec};
 
 use crate::{
     error::handle_error,
     storage::{ESCROW_DATA, INITIALIZED},
     types::{DisputeResult, Error, EscrowData, EscrowStatus, Milestone, MilestoneHistory},
 };
+
+const TOKEN_TRANSFER: &str = "transfer";
+const TOKEN_BALANCE: &str = "balance";
+
+pub fn init_contract_full(
+    env: &Env,
+    client: Address,
+    freelancer: Address,
+    arbitrator: Address,
+    token: Address,
+    amount: i128,
+    timeout_secs: u64,
+) {
+    if env.storage().instance().has(&INITIALIZED) {
+        handle_error(env, Error::AlreadyInitialized);
+    }
+    if amount <= 0 {
+        handle_error(env, Error::InvalidAmount);
+    }
+    let escrow_data = EscrowData {
+        client: client.clone(),
+        freelancer,
+        arbitrator: Some(arbitrator),
+        token: Some(token),
+        amount,
+        status: EscrowStatus::Initialized,
+        dispute_result: DisputeResult::None as u32,
+        created_at: env.ledger().timestamp(),
+        funded_at: None,
+        released_at: None,
+        disputed_at: None,
+        resolved_at: None,
+        timeout_secs: Some(timeout_secs),
+        milestones: Vec::new(env),
+        milestone_history: Vec::new(env),
+        released_amount: 0,
+        fee_manager: client, // now you can use client here
+        fee_collected: 0,
+        net_amount: amount,
+    };
+    env.storage().instance().set(&ESCROW_DATA, &escrow_data);
+    env.storage().instance().set(&INITIALIZED, &true);
+}
 
 pub fn init_contract(
     env: &Env,
@@ -24,18 +67,21 @@ pub fn init_contract(
     let escrow_data = EscrowData {
         client,
         freelancer,
+        arbitrator: None,
+        token: None,
         amount,
         status: EscrowStatus::Initialized,
-        dispute_result: 0, // 0 = None
+        dispute_result: DisputeResult::None as u32,
         created_at: env.ledger().timestamp(),
         funded_at: None,
         released_at: None,
         disputed_at: None,
         resolved_at: None,
+        timeout_secs: None,
         milestones: Vec::new(env),
         milestone_history: Vec::new(env),
         released_amount: 0,
-        fee_manager,
+        fee_manager: fee_manager, // pass this in or use a dummy Address if not available
         fee_collected: 0,
         net_amount: amount,
     };
@@ -59,6 +105,23 @@ pub fn deposit_funds(env: &Env, client: Address) {
 
     if escrow_data.status != EscrowStatus::Initialized {
         handle_error(env, Error::InvalidStatus);
+    }
+
+    if let (Some(token), amount) = (escrow_data.token.clone(), escrow_data.amount) {
+        let balance: i128 = env.invoke_contract::<i128>(
+            &token,
+            &Symbol::new(env, TOKEN_BALANCE),
+            (client.clone(),).into_val(env),
+        );
+        if balance < amount {
+            handle_error(env, Error::InsufficientFunds);
+        }
+
+        env.invoke_contract::<()>(
+            &token,
+            &Symbol::new(env, TOKEN_TRANSFER),
+            (client.clone(), env.current_contract_address(), amount).into_val(env),
+        );
     }
 
     escrow_data.status = EscrowStatus::Funded;
@@ -87,6 +150,14 @@ pub fn release_funds(env: &Env, freelancer: Address) {
 
     if escrow_data.status != EscrowStatus::Funded {
         handle_error(env, Error::InvalidStatus);
+    }
+
+    if let (Some(token), amount) = (escrow_data.token.clone(), escrow_data.amount) {
+        env.invoke_contract::<()>(
+            &token,
+            &Symbol::new(env, TOKEN_TRANSFER),
+            (env.current_contract_address(), freelancer.clone(), amount).into_val(env),
+        );
     }
 
     // Calculate and collect fees
@@ -143,7 +214,9 @@ pub fn dispute(env: &Env, caller: Address) {
     );
 }
 
-pub fn resolve_dispute(env: &Env, result: Symbol) {
+pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
+    caller.require_auth();
+
     if !env.storage().instance().has(&INITIALIZED) {
         handle_error(env, Error::NotInitialized);
     }
@@ -152,6 +225,11 @@ pub fn resolve_dispute(env: &Env, result: Symbol) {
 
     if escrow_data.status != EscrowStatus::Disputed {
         handle_error(env, Error::DisputeNotOpen);
+    }
+
+    // Arbitrator check
+    if escrow_data.arbitrator != Some(caller.clone()) {
+        handle_error(env, Error::Unauthorized);
     }
 
     let dispute_result = if result == Symbol::new(env, "client_wins") {
@@ -164,11 +242,60 @@ pub fn resolve_dispute(env: &Env, result: Symbol) {
         handle_error(env, Error::InvalidDisputeResult);
     };
 
+    // Token payout
+    if let (Some(token), amount) = (escrow_data.token.clone(), escrow_data.amount) {
+        let contract_addr = env.current_contract_address();
+        match dispute_result {
+            DisputeResult::ClientWins => {
+                env.invoke_contract::<()>(
+                    &token,
+                    &Symbol::new(env, TOKEN_TRANSFER),
+                    (contract_addr.clone(), escrow_data.client.clone(), amount).into_val(env),
+                );
+            }
+            DisputeResult::FreelancerWins => {
+                env.invoke_contract::<()>(
+                    &token,
+                    &Symbol::new(env, TOKEN_TRANSFER),
+                    (
+                        contract_addr.clone(),
+                        escrow_data.freelancer.clone(),
+                        amount,
+                    )
+                        .into_val(env),
+                );
+            }
+            DisputeResult::Split => {
+                let half = amount / 2;
+                env.invoke_contract::<()>(
+                    &token,
+                    &Symbol::new(env, TOKEN_TRANSFER),
+                    (contract_addr.clone(), escrow_data.client.clone(), half).into_val(env),
+                );
+                env.invoke_contract::<()>(
+                    &token,
+                    &Symbol::new(env, TOKEN_TRANSFER),
+                    (
+                        contract_addr.clone(),
+                        escrow_data.freelancer.clone(),
+                        amount - half,
+                    )
+                        .into_val(env),
+                );
+            }
+            DisputeResult::None => {
+                handle_error(env, Error::InvalidDisputeResult);
+            }
+        }
+    }
+
     escrow_data.status = EscrowStatus::Resolved;
+    escrow_data.dispute_result = dispute_result as u32;
     escrow_data.dispute_result = match dispute_result {
         DisputeResult::ClientWins => 1,
         DisputeResult::FreelancerWins => 2,
         DisputeResult::Split => 3,
+        DisputeResult::None => handle_error(env, Error::InvalidDisputeResult),
     };
     escrow_data.resolved_at = Some(env.ledger().timestamp());
 
@@ -306,6 +433,38 @@ pub fn get_escrow_data(env: &Env) -> EscrowData {
     env.storage().instance().get(&ESCROW_DATA).unwrap()
 }
 
+pub fn auto_release(env: &Env) {
+    if !env.storage().instance().has(&INITIALIZED) {
+        handle_error(env, Error::NotInitialized);
+    }
+    let mut escrow_data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+    if escrow_data.status != EscrowStatus::Funded {
+        handle_error(env, Error::InvalidStatus);
+    }
+    let funded_at = escrow_data.funded_at.unwrap_or(0);
+    let timeout = escrow_data.timeout_secs.unwrap_or(0);
+    let now = env.ledger().timestamp();
+    if now < funded_at + timeout {
+        handle_error(env, Error::InvalidStatus);
+    }
+    // Token logic
+    if let (Some(token), amount) = (escrow_data.token.clone(), escrow_data.amount) {
+        env.invoke_contract::<()>(
+            &token,
+            &Symbol::new(env, TOKEN_TRANSFER),
+            (
+                env.current_contract_address(),
+                escrow_data.freelancer.clone(),
+                amount,
+            )
+                .into_val(env),
+        );
+    }
+    escrow_data.status = EscrowStatus::Released;
+    escrow_data.released_at = Some(now);
+    env.storage().instance().set(&ESCROW_DATA, &escrow_data);
+}
+
 /// @ryzen-xp
 /// returns all milestones (status and details)
 pub fn get_milestones(env: &Env) -> Vec<Milestone> {
@@ -318,4 +477,8 @@ pub fn get_milestones(env: &Env) -> Vec<Milestone> {
 pub fn get_milestone_history(env: &Env) -> Vec<MilestoneHistory> {
     let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
     escrow.milestone_history.clone()
+}
+
+pub fn set_escrow_data(env: &Env, data: &EscrowData) {
+    env.storage().instance().set(&ESCROW_DATA, data);
 }
