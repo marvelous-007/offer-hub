@@ -1,6 +1,4 @@
-/**
- * Messaging API service
- */
+
 import axios, { AxiosError } from 'axios';
 import type { Conversation, Message, ApiResponse, CreateMessageDTO } from '../../types/messages.types';
 
