@@ -6,6 +6,7 @@ pub enum Error {
     WasmKeyError = 1,
     StorageKeyError = 2,
     EscrowIdNotFoundError = 3,
+    EscrowInfoNotSet = 4
 }
 
 pub fn handle_error(env: &Env, error: Error) -> ! {

@@ -1,19 +1,15 @@
 use crate::error::handle_error;
+use crate::escrow_contract;
 use crate::storage;
 use crate::types::{
     EscrowCreateParams, MilestoneCreateParams, MilestoneCreateResult, MilestoneParams,
 };
+
 use crate::{error::Error, types::DisputeParams};
+use soroban_sdk::BytesN;
 use soroban_sdk::{Address, Env, Vec};
 
-pub mod escrow_contract {
-    soroban_sdk::contractimport!(
-        file = "../../target/wasm32-unknown-unknown/release/escrow_contract.wasm"
-    );
-}
-
-pub fn upload_escrow_wasm(env: Env) {
-    let wasm_hash = env.deployer().upload_contract_wasm(escrow_contract::WASM);
+pub fn upload_escrow_wasm(env: Env, wasm_hash: BytesN<32>) {
     storage::store_escrow_wasm(&env, wasm_hash);
 }
 
@@ -109,7 +105,9 @@ pub fn batch_create_disputes(env: Env, escrow_ids: Vec<u32>, caller: Address) {
     }
 }
 
-pub fn batch_resolve_disputes(env: Env, dispute_params: Vec<DisputeParams>) {
+pub fn batch_resolve_disputes(env: Env, caller: Address, dispute_params: Vec<DisputeParams>) {
+    caller.require_auth();
+
     for param in dispute_params.iter() {
         let escrow_address = storage::escrow_addr_by_id(&env, param.escrow_id);
 
@@ -120,7 +118,7 @@ pub fn batch_resolve_disputes(env: Env, dispute_params: Vec<DisputeParams>) {
         let escrow_address = escrow_address.unwrap();
 
         let escrow_client = escrow_contract::Client::new(&env, &escrow_address);
-        escrow_client.resolve_dispute(&param.result);
+        escrow_client.resolve_dispute(&caller, &param.result);
     }
 }
 
@@ -194,6 +192,30 @@ pub fn batch_release_milestones(
     }
 }
 
+pub fn batch_archive_escrows(env: Env, escrow_ids: Vec<u32>) -> Vec<u32> {
+    let mut archived_escrows = Vec::new(&env);
+
+    for escrow_id in escrow_ids.iter() {
+        let escrow_address = storage::escrow_addr_by_id(&env, escrow_id);
+
+        if escrow_address.is_none() {
+            handle_error(&env, Error::EscrowIdNotFoundError);
+        }
+
+        let escrow_address = escrow_address.unwrap();
+
+        let escrow_client = escrow_contract::Client::new(&env, &escrow_address);
+        let escrow_data = escrow_client.get_escrow_data();
+
+        if escrow_data.status == escrow_contract::EscrowStatus::Released {
+            archived_escrows.push_back(escrow_id.clone());
+            storage::archive_escrow(&env, escrow_id, escrow_address);
+        }
+    }
+
+    archived_escrows
+}
+
 pub fn batch_check_escrow_status(
     env: Env,
     escrow_ids: Vec<u32>,
@@ -242,4 +264,19 @@ pub fn batch_get_escrow_information(
 
 pub fn get_escrow_id_by_address(env: Env, escrow_address: Address) -> Option<u32> {
     storage::escrow_id_by_addr(&env, &escrow_address)
+}
+
+pub fn is_archived(env: Env, escrow_id: Option<u32>, escrow_address: Option<Address>) -> bool {
+    if let Some(id) = escrow_id {
+        return storage::is_archived(&env, id);
+    }
+
+    if let Some(addr) = escrow_address {
+        if let Some(id) = storage::escrow_id_by_addr(&env, &addr) {
+            return storage::is_archived(&env, id);
+        }
+        handle_error(&Env::default(), Error::EscrowIdNotFoundError);
+    }
+
+    handle_error(&Env::default(), Error::EscrowInfoNotSet)
 }

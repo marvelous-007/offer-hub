@@ -11,6 +11,8 @@ pub enum DataKey {
     EscrowById(u32),
     /// escrow contract address -> id
     EscrowIdByAddr(Address),
+    /// ArchivedEscrows
+    Archives(u32)
 }
 
 impl TryFromVal<Env, DataKey> for Val {
@@ -70,9 +72,12 @@ pub fn store_escrow_wasm(e: &Env, wasm_hash: BytesN<32>) {
         .set::<DataKey, BytesN<32>>(&DataKey::EscrowWasm, &wasm_hash);
 }
 
-/// Remove indices (useful when archiving/cleanup).
-pub fn remove_escrow_index(e: &Env, id: &u32, addr: &Address) {
+/// Archives escrow indices 
+pub fn archive_escrow(e: &Env, id: u32, addr: Address) {
     let s = e.storage().instance();
-    s.remove(&DataKey::EscrowById(id.clone()));
-    s.remove(&DataKey::EscrowIdByAddr(addr.clone()));
+    s.set::<DataKey, Address>(&DataKey::Archives(id), &addr);
+}
+
+pub fn is_archived(e: &Env, id: u32) -> bool {
+ e.storage().instance().get::<DataKey, Address>(&DataKey::Archives(id)).is_some()
 }
