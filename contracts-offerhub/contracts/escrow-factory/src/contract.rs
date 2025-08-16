@@ -9,11 +9,23 @@ use crate::{error::Error, types::DisputeParams};
 use soroban_sdk::BytesN;
 use soroban_sdk::{Address, Env, Vec};
 
+const MAX_BATCH_SIZE: u32 = 100;
+
 pub fn upload_escrow_wasm(env: Env, wasm_hash: BytesN<32>) {
     storage::store_escrow_wasm(&env, wasm_hash);
 }
 
 pub fn deploy_new_escrow(env: Env, create_params: EscrowCreateParams) -> Address {
+    // Validate amount is positive
+    if create_params.amount <= 0 {
+        handle_error(&env, Error::InvalidAmountSet)
+    }
+
+    // Validate addresses are distinct
+    if create_params.client == create_params.freelancer {
+        handle_error(&env, Error::AddressesShouldNotMatch)
+    }
+
     let wasm_hash = storage::get_escrow_wasm(&env);
 
     if wasm_hash.is_none() {
@@ -44,6 +56,10 @@ pub fn deploy_new_escrow(env: Env, create_params: EscrowCreateParams) -> Address
 }
 
 pub fn batch_deploy(env: Env, params: Vec<EscrowCreateParams>) -> Vec<Address> {
+    if params.len() > MAX_BATCH_SIZE {
+        handle_error(&env, Error::BatchSizeExceeded)
+    }
+
     let mut deployed_escrows = Vec::new(&env);
 
     for create_params in params.iter() {

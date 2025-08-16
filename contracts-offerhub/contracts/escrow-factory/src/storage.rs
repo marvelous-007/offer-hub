@@ -1,7 +1,9 @@
-use soroban_sdk::{Address, BytesN, ConversionError, Env, IntoVal, TryFromVal, Val};
+// use soroban_sdk::{Address, BytesN, ConversionError, Env, IntoVal, TryFromVal, Val};
+use soroban_sdk::{contracttype, Address, BytesN, Env};
 
 /// Keys for contract storage.
-#[derive(Clone)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[contracttype]
 pub enum DataKey {
     /// WASM/code hash or reference for the escrow implementation.
     EscrowWasm,
@@ -12,15 +14,7 @@ pub enum DataKey {
     /// escrow contract address -> id
     EscrowIdByAddr(Address),
     /// ArchivedEscrows
-    Archives(u32)
-}
-
-impl TryFromVal<Env, DataKey> for Val {
-    type Error = ConversionError;
-
-    fn try_from_val(env: &Env, v: &DataKey) -> Result<Self, Self::Error> {
-        Ok(v.into_val(env))
-    }
+    Archives(u32),
 }
 
 /// Read next ID (defaults to 0 if unset).
@@ -72,12 +66,15 @@ pub fn store_escrow_wasm(e: &Env, wasm_hash: BytesN<32>) {
         .set::<DataKey, BytesN<32>>(&DataKey::EscrowWasm, &wasm_hash);
 }
 
-/// Archives escrow indices 
+/// Archives escrow indices
 pub fn archive_escrow(e: &Env, id: u32, addr: Address) {
     let s = e.storage().instance();
     s.set::<DataKey, Address>(&DataKey::Archives(id), &addr);
 }
 
 pub fn is_archived(e: &Env, id: u32) -> bool {
- e.storage().instance().get::<DataKey, Address>(&DataKey::Archives(id)).is_some()
+    e.storage()
+        .instance()
+        .get::<DataKey, Address>(&DataKey::Archives(id))
+        .is_some()
 }
