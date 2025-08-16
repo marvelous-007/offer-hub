@@ -59,19 +59,60 @@ export function useMessages(userId?: string): UseMessagesResult {
     setActiveConversation(conv);
   }, [activeConversationId, conversations]);
 
-  // Fetch messages for active conversation
+
   useEffect(() => {
     if (!activeConversationId) return;
     setLoadingMessages(true);
     getConversationMessages(activeConversationId)
-      .then((res) => {
-        if (res.error) setErrorMessages(res.error);
-        else setMessages(res.data || []);
+      .then(async (res) => {
+        if (res.error) {
+          setErrorMessages(res.error);
+        } else {
+          const msgs = res.data || [];
+          setMessages(msgs);
+
+          if (userId) {
+            const readRes = await markAsRead(activeConversationId, userId);
+            if (!readRes.success && readRes.error) {
+
+              setErrorMessages((prev) => prev ?? readRes.error);
+            } else {
+              // Optimistically update unread_count and message read flags for incoming messages
+              setConversations((prev) =>
+                prev.map((c) =>
+                  c.id === activeConversationId
+                    ? { ...c, unread_count: 0, last_message: c.last_message ? { ...c.last_message, is_read: true } : c.last_message }
+                    : c
+                )
+              );
+              setMessages((prev) => prev.map((m) => (m.sender_id !== userId ? { ...m, is_read: true } : m)));
+            }
+          }
+        }
       })
       .catch((e) => setErrorMessages(e.message))
       .finally(() => setLoadingMessages(false));
-  }, [activeConversationId]);
+  }, [activeConversationId, userId]);
 
+  // Simple polling for new messages and conversation updates
+  // NB: (we can always change it, if we move to Socket or SSE)
+
+  useEffect(() => {
+    if (!userId) return;
+    const interval = setInterval(() => {
+
+      getUserConversations(userId).then((res) => {
+        if (!res.error && res.data) setConversations(res.data);
+      });
+
+      if (activeConversationId) {
+        getConversationMessages(activeConversationId).then((res) => {
+          if (!res.error && res.data) setMessages(res.data);
+        });
+      }
+    }, 20000);
+    return () => clearInterval(interval);
+  }, [userId, activeConversationId]);
 
   const handleSendMessage = useCallback(
     async (content: string, file?: File) => {
