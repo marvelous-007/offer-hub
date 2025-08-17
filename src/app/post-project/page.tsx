@@ -28,6 +28,7 @@ import {
 import { ProjectDraft } from "@/types/project.types";
 import { toast } from "sonner";
 import { useAuthApi } from "@/hooks/api-connections/use-auth-api";
+import Loading from "./loading";
 
 // Simple Header component defined inline
 function SimpleHeader() {
@@ -241,9 +242,8 @@ export default function PostProjectPage() {
       if (!user?.id)
         throw new Error("No authenticated user found");
       const dto = mapData(projectData, user);
-      const response = await createProject(dto);
+      await createProject(dto);
       toast.success("Success!! Project Posted");
-      console.log("Object: ", response);
       setCurrentStep(totalSteps + 1); // Show success screen
       if (typeof window !== "undefined") 
         localStorage.removeItem('projectDataDraft');
@@ -352,14 +352,13 @@ export default function PostProjectPage() {
                   className="bg-[#15949C] hover:bg-[#15949C]/90 flex items-center disabled:opacity-60"
                 >
                   {isLoading ? "Posting..." : "Post Project"}
-                  {!isLoading && <Check className="ml-2 h-4 w-4" />}
+                  {!isLoading ? <Loading/> : <Check className="ml-2 h-4 w-4" />}
                 </Button>
               )}
             </div>
           )}
         </div>
       </main>
-
       <SimpleFooter />
     </div>
   );
