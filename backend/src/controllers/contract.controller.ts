@@ -13,6 +13,37 @@ import {
   buildListResponse,
 } from "../utils/responseBuilder";
 
+/**
+ * Creates a new contract between a freelancer and client
+ * @param {Request} req - Express request object
+ * @param {CreateContractDTO} req.body - Contract creation data
+ * @param {string} req.body.contract_type - Type of contract ('project' or 'service')
+ * @param {string} req.body.freelancer_id - UUID of the freelancer
+ * @param {string} req.body.client_id - UUID of the client
+ * @param {string} req.body.contract_on_chain_id - On-chain contract identifier
+ * @param {number} req.body.amount_locked - Amount locked in the contract (must be > 0)
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next function for error handling
+ * @returns {Promise<void>} - Returns void, sends JSON response with created contract
+ *
+ * @example
+ * POST /api/contracts
+ * {
+ *   "contract_type": "project",
+ *   "freelancer_id": "123e4567-e89b-12d3-a456-426614174000",
+ *   "client_id": "987fcdeb-51a2-43d7-8f9e-123456789abc",
+ *   "contract_on_chain_id": "chain_contract_123",
+ *   "amount_locked": 1000
+ * }
+ *
+ * @throws {400} - Missing required fields
+ * @throws {400} - Invalid contract type (must be 'project' or 'service')
+ * @throws {400} - Amount must be greater than 0
+ * @throws {400} - Contract on-chain ID cannot be empty
+ * @throws {400} - Freelancer or client not found
+ * @throws {400} - Freelancer and client cannot be the same user
+ * @throws {500} - Internal server error
+ */
 export const createContractHandler = async (
   req: Request,
   res: Response,
@@ -114,6 +145,33 @@ export const createContractHandler = async (
   }
 };
 
+/**
+ * Retrieves a contract by its unique identifier
+ * @param {Request} req - Express request object
+ * @param {string} req.params.id - Contract UUID to retrieve
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next function for error handling
+ * @returns {Promise<void>} - Returns void, sends JSON response with contract details
+ *
+ * @example
+ * GET /api/contracts/123e4567-e89b-12d3-a456-426614174000
+ *
+ * Response:
+ * {
+ *   "success": true,
+ *   "message": "Contract retrieved successfully",
+ *   "data": {
+ *     "id": "123e4567-e89b-12d3-a456-426614174000",
+ *     "contract_type": "project",
+ *     "escrow_status": "pending",
+ *     "amount_locked": 1000
+ *   }
+ * }
+ *
+ * @throws {400} - Invalid contract ID format (must be valid UUID)
+ * @throws {404} - Contract not found
+ * @throws {500} - Internal server error
+ */
 export const getContractByIdHandler = async (
   req: Request,
   res: Response,
@@ -147,6 +205,40 @@ export const getContractByIdHandler = async (
   
 };
 
+/**
+ * Updates the escrow status of an existing contract
+ * @param {Request} req - Express request object
+ * @param {string} req.params.id - Contract UUID to update
+ * @param {UpdateContractDTO} req.body - Contract update data
+ * @param {string} req.body.escrow_status - New escrow status ('funded', 'released', or 'disputed')
+ * @param {string} req.body.user_id - ID of the user making the update (from auth middleware)
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next function for error handling
+ * @returns {Promise<void>} - Returns void, sends JSON response with updated contract
+ *
+ * @example
+ * PATCH /api/contracts/123e4567-e89b-12d3-a456-426614174000/status
+ * {
+ *   "escrow_status": "funded",
+ *   "user_id": "user-uuid-here"
+ * }
+ *
+ * Response:
+ * {
+ *   "success": true,
+ *   "message": "Contract status updated successfully",
+ *   "data": {
+ *     "id": "123e4567-e89b-12d3-a456-426614174000",
+ *     "escrow_status": "funded"
+ *   }
+ * }
+ *
+ * @throws {400} - Invalid contract ID format
+ * @throws {400} - Missing escrow_status field
+ * @throws {400} - Invalid escrow status (must be 'funded', 'released', or 'disputed')
+ * @throws {404} - Contract not found
+ * @throws {500} - Internal server error
+ */
 export const updateContractStatusHandler = async (
   req: Request,
   res: Response,
@@ -211,6 +303,40 @@ export const updateContractStatusHandler = async (
   
 };
 
+/**
+ * Retrieves all contracts associated with a specific user
+ * @param {Request} req - Express request object
+ * @param {string} req.params.userId - User UUID to fetch contracts for
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next function for error handling
+ * @returns {Promise<void>} - Returns void, sends JSON response with array of user's contracts
+ *
+ * @example
+ * GET /api/contracts/user/123e4567-e89b-12d3-a456-426614174000
+ *
+ * Response:
+ * {
+ *   "success": true,
+ *   "message": "User contracts retrieved successfully",
+ *   "data": [
+ *     {
+ *       "id": "contract-uuid-1",
+ *       "contract_type": "project",
+ *       "escrow_status": "funded",
+ *       "amount_locked": 1000
+ *     },
+ *     {
+ *       "id": "contract-uuid-2",
+ *       "contract_type": "service",
+ *       "escrow_status": "pending",
+ *       "amount_locked": 500
+ *     }
+ *   ]
+ * }
+ *
+ * @throws {400} - Invalid user ID format (must be valid UUID)
+ * @throws {500} - Internal server error
+ */
 export const getContractsByUserHandler = async (
   req: Request,
   res: Response,
@@ -238,6 +364,36 @@ export const getContractsByUserHandler = async (
   
 };
 
+/**
+ * Retrieves all contracts filtered by their escrow status
+ * @param {Request} req - Express request object
+ * @param {string} req.params.status - Escrow status to filter by ('pending', 'funded', 'released', or 'disputed')
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next function for error handling
+ * @returns {Promise<void>} - Returns void, sends JSON response with filtered contracts
+ *
+ * @example
+ * GET /api/contracts/status/funded
+ *
+ * Response:
+ * {
+ *   "success": true,
+ *   "message": "Contracts by status retrieved successfully",
+ *   "data": [
+ *     {
+ *       "id": "contract-uuid-1",
+ *       "contract_type": "project",
+ *       "escrow_status": "funded",
+ *       "amount_locked": 1500,
+ *       "freelancer_id": "freelancer-uuid",
+ *       "client_id": "client-uuid"
+ *     }
+ *   ]
+ * }
+ *
+ * @throws {400} - Invalid or missing status (must be 'pending', 'funded', 'released', or 'disputed')
+ * @throws {500} - Internal server error
+ */
 export const getContractsByStatusHandler = async (
   req: Request,
   res: Response,
