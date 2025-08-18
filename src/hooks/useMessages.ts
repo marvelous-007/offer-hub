@@ -77,7 +77,7 @@ export function useMessages(userId?: string): UseMessagesResult {
 
               setErrorMessages((prev) => prev ?? readRes.error);
             } else {
-              // Optimistically update unread_count and message read flags for incoming messages
+             
               setConversations((prev) =>
                 prev.map((c) =>
                   c.id === activeConversationId
