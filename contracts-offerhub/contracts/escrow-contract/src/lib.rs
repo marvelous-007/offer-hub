@@ -1,5 +1,5 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, Address, Env, Symbol};
+use soroban_sdk::{contract, contractimpl, Address, Env, String, Symbol, Vec};
 
 mod contract;
 mod error;
@@ -11,8 +11,14 @@ pub struct EscrowContract;
 
 #[contractimpl]
 impl EscrowContract {
-    pub fn init_contract(env: Env, client: Address, freelancer: Address, amount: i128) {
-        contract::init_contract(&env, client, freelancer, amount);
+    pub fn init_contract(
+        env: Env,
+        client: Address,
+        freelancer: Address,
+        amount: i128,
+        fee_manager: Address,
+    ) {
+        contract::init_contract(&env, client, freelancer, amount, fee_manager);
     }
 
     pub fn deposit_funds(env: Env, client: Address) {
@@ -27,11 +33,63 @@ impl EscrowContract {
         contract::dispute(&env, caller);
     }
 
-    pub fn resolve_dispute(env: Env, result: Symbol) {
-        contract::resolve_dispute(&env, result);
+    pub fn resolve_dispute(env: Env, caller: Address, result: Symbol) {
+        contract::resolve_dispute(&env, caller, result);
+    }
+
+    pub fn init_contract_full(
+        env: Env,
+        client: Address,
+        freelancer: Address,
+        arbitrator: Address,
+        token: Address,
+        amount: i128,
+        timeout_secs: u64,
+    ) {
+        contract::init_contract_full(
+            &env,
+            client,
+            freelancer,
+            arbitrator,
+            token,
+            amount,
+            timeout_secs,
+        );
+    }
+
+    pub fn auto_release(env: Env) {
+        contract::auto_release(&env);
     }
 
     pub fn get_escrow_data(env: Env) -> types::EscrowData {
         contract::get_escrow_data(&env)
     }
+
+    pub fn add_milestone(env: Env, client: Address, desc: String, amount: i128) -> u32 {
+        contract::add_milestone(&env, client, desc, amount)
+    }
+
+    pub fn approve_milestone(env: Env, client: Address, milestone_id: u32) {
+        contract::approve_milestone(&env, client, milestone_id);
+    }
+
+    pub fn release_milestone(env: Env, freelancer: Address, milestone_id: u32) {
+        contract::release_milestone(&env, freelancer, milestone_id);
+    }
+
+    pub fn get_milestones(env: Env) -> Vec<types::Milestone> {
+        contract::get_milestones(&env)
+    }
+
+    pub fn get_milestone_history(env: Env) -> Vec<types::MilestoneHistory> {
+        contract::get_milestone_history(&env)
+    }
+    pub fn test_set_dispute_result(env: Env, result: u32) {
+        let mut data = contract::get_escrow_data(&env);
+        data.dispute_result = result;
+        contract::set_escrow_data(&env, &data);
+    }
 }
+
+#[cfg(test)]
+mod test;
