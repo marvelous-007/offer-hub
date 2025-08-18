@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase/supabase";
 import { CreateProjectDTO } from '@/types/project.type';
-
+import { InternalServerError } from "@/utils/AppError";
 export const createProject = async (data: CreateProjectDTO) => {
   const { data: project, error } = await supabase
     .from('projects')
@@ -8,7 +8,7 @@ export const createProject = async (data: CreateProjectDTO) => {
     .select()
     .single();
 
-  if (error) throw new Error(error.message);
+  if (error) throw new InternalServerError(error.message);
   return project;
 };
 
@@ -22,7 +22,7 @@ export const getAllProjects = async (filters: any) => {
 
   const { data, error } = await query;
 
-  if (error) throw new Error(error.message);
+  if (error) throw new InternalServerError(error.message);
   return data;
 };
 
@@ -33,7 +33,7 @@ export const getProjectById = async (id: string) => {
     .eq('id', id)
     .single();
 
-  if (error) throw new Error(error.message);
+  if (error) throw new InternalServerError(error.message);
   return {
     ...project,
     client_name: project.users?.name || null,
