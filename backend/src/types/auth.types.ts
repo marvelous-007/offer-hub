@@ -1,4 +1,4 @@
-import { User } from "@supabase/supabase-js";
+import { User } from "./user.types";
 
 export type UserRole = "freelancer" | "client" | "admin";
 
@@ -16,11 +16,11 @@ export interface AuthUser extends User {
 export interface RefreshTokenRecord {
   id: string;
   user_id: string;
-  token: string;
+  token_hash: string;
   created_at: string;
 }
 
 export interface LoginDTO {
-  username: string;
   wallet_address: string;
+  signature: string;
 }

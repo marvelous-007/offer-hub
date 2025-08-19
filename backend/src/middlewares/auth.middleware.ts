@@ -1,6 +1,10 @@
 import { supabase } from "@/lib/supabase/supabase";
 import { AppError } from "@/utils/AppError";
-import { verifyAccessToken, verifyRefreshToken } from "@/utils/jwt.utils";
+import {
+  hashToken,
+  verifyAccessToken,
+  verifyRefreshToken,
+} from "@/utils/jwt.utils";
 import { NextFunction, Request, Response } from "express";
 
 export const verifyToken = async (
@@ -64,19 +68,15 @@ export const validateRefreshToken = async (
   if (!refreshToken) {
     return next(new AppError("Refresh token is required", 400));
   }
+  const refreshTokenHash = hashToken(refreshToken);
 
   try {
     const decoded = verifyRefreshToken(refreshToken);
 
-    if (decoded.exp && decoded.exp * 1000 < Date.now()) {
-      await supabase.from("refresh_tokens").delete().eq("token", refreshToken);
-      return next(new AppError("Refresh token has expired", 403));
-    }
-
     const { data: tokenRecord, error } = await supabase
       .from("refresh_tokens")
       .select("*")
-      .eq("token", refreshToken)
+      .eq("token_hash", refreshTokenHash)
       .single();
 
     if (error || !tokenRecord) {
@@ -85,9 +85,22 @@ export const validateRefreshToken = async (
       );
     }
 
+    // We check if the user ID from the token record matches the decoded user ID
+    if (tokenRecord.user_id !== decoded.user_id) {
+      return next(new AppError("Refresh token does not match the user", 403));
+    }
+
     req.refreshTokenRecord = tokenRecord;
     next();
   } catch (err) {
-    return next(new AppError("Invalid or expired refresh token", 403));
+    if ((err as Error).name === "TokenExpiredError") {
+      await supabase
+        .from("refresh_tokens")
+        .delete()
+        .eq("token_hash", refreshTokenHash);
+      return next(new AppError("Refresh token has expired", 403));
+    }
+
+    return next(new AppError("Invalid refresh token", 403));
   }
 };

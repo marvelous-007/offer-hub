@@ -1,4 +1,5 @@
 import {
+  getNonce,
   login,
   logout,
   me,
@@ -15,6 +16,7 @@ import { Router } from "express";
 const router = Router();
 
 router.post("/register", register);
+router.post("/nonce", authLimiter, getNonce);
 router.post("/login", authLimiter, login);
 router.post("/refresh", validateRefreshToken, refresh);
 router.post("/logout", validateRefreshToken, logout);
