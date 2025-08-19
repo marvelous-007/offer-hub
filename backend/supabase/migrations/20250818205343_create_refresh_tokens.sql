@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
   user_id UUID NOT NULL,
   token TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  CONSTRAINT refresh_tokens_user_id_fkey
+    FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE
 );
 
 -- Enable pgcrypto for hashing (digest function)
@@ -28,9 +29,3 @@ CREATE INDEX IF NOT EXISTS ix_refresh_tokens_user_id
 -- Index for cleanup (e.g. deleting expired tokens)
 CREATE INDEX IF NOT EXISTS ix_refresh_tokens_created_at
   ON refresh_tokens(created_at);
-
-ALTER TABLE refresh_tokens
-  DROP CONSTRAINT IF EXISTS refresh_tokens_user_id_fkey,
-  ADD CONSTRAINT refresh_tokens_user_id_fkey
-    FOREIGN KEY (user_id) REFERENCES public.users(id)
-    ON DELETE CASCADE;

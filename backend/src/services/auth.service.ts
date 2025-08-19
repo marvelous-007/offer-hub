@@ -9,10 +9,19 @@ import { supabase } from "@/lib/supabase/supabase";
 import { AuthUser, LoginDTO, RefreshTokenRecord } from "@/types/auth.types";
 import { AppError } from "@/utils/AppError";
 import { randomBytes } from "crypto";
-import { verifyMessage } from "ethers";
+import { utils } from "ethers";
 
 export async function getNonce(wallet_address: string) {
   const nonce = randomBytes(16).toString("hex");
+
+  const { data: existing, error: fetchErr } = await supabase
+    .from("users")
+    .select("id")
+    .eq("wallet_address", wallet_address)
+    .single();
+
+  if (fetchErr || !existing) throw new AppError("User not found", 404);
+
   const { error } = await supabase
     .from("users")
     .update({ nonce })
@@ -65,7 +74,7 @@ export async function login(data: LoginDTO) {
   // Verify signature
   let recoveredAddress: string;
   try {
-    recoveredAddress = verifyMessage(user.nonce, signature);
+    recoveredAddress = utils.verifyMessage(user.nonce, signature);
   } catch {
     throw new AppError("Invalid signature", 401);
   }
@@ -86,15 +95,18 @@ export async function login(data: LoginDTO) {
     user_id: user.id,
   });
 
-  await supabase.from("refresh_tokens").insert([
-    {
-      user_id: user.id,
-      token_hash: refreshTokenHash,
-    },
-  ]);
+  const { error: rtInsertError } = await supabase
+    .from("refresh_tokens")
+    .insert([{ user_id: user.id, token_hash: refreshTokenHash }]);
+
+  if (rtInsertError) {
+    throw new AppError("Failed to persist refresh token", 500);
+  }
+
+  const { nonce, ...safeUser } = user;
 
   return {
-    user,
+    user: safeUser,
     tokens: { accessToken, refreshToken },
   };
 }
@@ -151,5 +163,7 @@ export async function getMe(userId: string) {
 
   if (error || !user) throw new AppError("User not found", 404);
 
-  return user as AuthUser;
+  const { nonce, ...safeUser } = user;
+
+  return safeUser as AuthUser;
 }
