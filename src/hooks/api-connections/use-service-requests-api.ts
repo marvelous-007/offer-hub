@@ -42,7 +42,7 @@ export function useServiceRequestsApi() {
   const res = await fetch(`${API_BASE_URL}/service-requests/${freelancerId}`);
       const result = await res.json();
       if (!res.ok) throw { status: res.status, message: result?.message || 'Error retrieving requests' };
-      return result as ServiceRequest[];
+      return result.data as ServiceRequest[];
     } catch (err: any) {
       setError(err);
       throw err;
@@ -51,14 +51,14 @@ export function useServiceRequestsApi() {
     }
   };
 
-  const updateServiceRequestStatus = async (id: string, status: RequestStatus) => {
+  const updateServiceRequestStatus = async (id: string, status: RequestStatus, freelancerId: string) => {
     setLoading(true);
     setError(null);
     try {
   const res = await fetch(`${API_BASE_URL}/service-requests/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, freelancerId}),
       });
       const result = await res.json();
       if (!res.ok) throw { status: res.status, message: result?.message || 'Error updating status' };
