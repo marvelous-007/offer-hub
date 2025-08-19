@@ -15,6 +15,7 @@ export interface User {
   bio?: string;
   email?: string;
   is_freelancer?: boolean;
+  nonce?: string;
   created_at?: string;
 }
 

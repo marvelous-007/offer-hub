@@ -10,6 +10,7 @@ import { AuthUser, LoginDTO, RefreshTokenRecord } from "@/types/auth.types";
 import { AppError } from "@/utils/AppError";
 import { randomBytes } from "crypto";
 import { utils } from "ethers";
+import { sanitizeUser } from "@/utils/sanitizeUser";
 
 export async function getNonce(wallet_address: string) {
   const nonce = randomBytes(16).toString("hex");
@@ -54,8 +55,10 @@ export async function signup(data: CreateUserDTO) {
     throw new AppError("Failed to persist refresh token", 500);
   }
 
+  const safeUser = sanitizeUser(newUser);
+
   return {
-    user: newUser,
+    user: safeUser,
     tokens: { accessToken, refreshToken },
   };
 }
@@ -103,7 +106,7 @@ export async function login(data: LoginDTO) {
     throw new AppError("Failed to persist refresh token", 500);
   }
 
-  const { nonce, ...safeUser } = user;
+  const safeUser = sanitizeUser(user);
 
   return {
     user: safeUser,
@@ -127,15 +130,18 @@ export async function refreshSession(tokenRecord: RefreshTokenRecord) {
     user_id: user.id,
   });
 
-  const { error: rotateError } = await supabase
+  const { data: rotateData, error: rotateError } = await supabase
     .from("refresh_tokens")
     .update({
       token_hash: refreshTokenHash,
       created_at: new Date().toISOString(),
     })
-    .eq("token_hash", tokenRecord.token_hash);
+    .eq("token_hash", tokenRecord.token_hash)
+    .eq("user_id", tokenRecord.user_id)
+    .eq("created_at", tokenRecord.created_at)
+    .select("id");
 
-  if (rotateError) {
+  if (rotateError || !rotateData || rotateData.length !== 1) {
     throw new AppError("Failed to rotate refresh token", 500);
   }
 
@@ -163,7 +169,7 @@ export async function getMe(userId: string) {
 
   if (error || !user) throw new AppError("User not found", 404);
 
-  const { nonce, ...safeUser } = user;
+  const safeUser = sanitizeUser(user);
 
   return safeUser as AuthUser;
 }
