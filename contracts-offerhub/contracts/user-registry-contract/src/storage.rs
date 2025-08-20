@@ -1,4 +1,4 @@
-use crate::types::{UserProfile, VerificationLevel};
+use crate::types::{PublicationStatus, UserProfile, VerificationLevel};
 use soroban_sdk::{Address, Env, Map, Symbol, String, Vec, symbol_short};
 
 pub const VERIFIED_USERS: Symbol = symbol_short!("VERIFIED");
@@ -6,6 +6,7 @@ pub const USER_PROFILES: Symbol = symbol_short!("PROFILES");
 pub const BLACKLISTED_USERS: Symbol = symbol_short!("BLACKLIST");
 pub const ADMIN: Symbol = symbol_short!("ADMIN");
 pub const MODERATORS: Symbol = symbol_short!("MODS");
+pub const VALIDATORS: Symbol = symbol_short!("VALIDTRS");
 
 // Legacy functions for backward compatibility
 pub fn get_verified_users(env: &Env) -> Map<Address, bool> {
@@ -115,5 +116,46 @@ pub fn create_default_profile(env: &Env, level: VerificationLevel, expires_at: u
         expires_at,
         metadata: String::from_str(env, ""),
         is_blacklisted: false,
+        publication_status: PublicationStatus::Private,
+        validations: Vec::new(env),
     }
+}
+
+// Validators functions
+pub fn get_validators(env: &Env) -> Vec<Address> {
+    env.storage()
+        .instance()
+        .get(&VALIDATORS)
+        .unwrap_or_else(|| Vec::new(env))
+}
+
+pub fn set_validators(env: &Env, validators: &Vec<Address>) {
+    env.storage().instance().set(&VALIDATORS, validators);
+}
+
+pub fn is_validator(env: &Env, address: &Address) -> bool {
+    let validators = get_validators(env);
+    validators.contains(address)
+}
+
+pub fn add_validator(env: &Env, validator: &Address) {
+    let mut validators = get_validators(env);
+    if !validators.contains(validator) {
+        validators.push_back(validator.clone());
+        set_validators(env, &validators);
+    }
+}
+
+pub fn remove_validator(env: &Env, validator: &Address) {
+    let validators = get_validators(env);
+    let mut new_validators = Vec::new(env);
+    
+    for i in 0..validators.len() {
+        let addr = validators.get(i).unwrap();
+        if addr != *validator {
+            new_validators.push_back(addr);
+        }
+    }
+    
+    set_validators(env, &new_validators);
 } 
