@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { userService } from "@/services/user.service";
 import { AppError, MissingFieldsError, NotFoundError, ValidationError } from "@/utils/AppError";
 import { UserFilters } from "@/types/user.types";
+import { buildSuccessResponse, buildPaginatedResponse } from '../utils/responseBuilder';
 
 const uuidRegex =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -23,11 +24,9 @@ export const createUserHandler = async (req: Request, res: Response, next: NextF
       is_freelancer,
     });
 
-    res.status(201).json({
-      success: true,
-      message: "User_created_successfully",
-      data: user,
-    });
+    res.status(201).json(
+      buildSuccessResponse(user, "User created successfully")
+    );
 };
 
 export const getUserByIdHandler = async (req: Request, res: Response, next: NextFunction) => {
@@ -35,21 +34,19 @@ export const getUserByIdHandler = async (req: Request, res: Response, next: Next
     const { id } = req.params;
 
     if (!id) {
-      throw new ValidationError("User_ID_is_required");
+      throw new ValidationError("User ID is required");
     }
 
     if (!uuidRegex.test(id)) {
-      throw new ValidationError("Invalid_user_ID_format");
+      throw new ValidationError("Invalid user ID format");
     }
 
     const user = await userService.getUserById(id);
-    if (!user) throw new NotFoundError("User_not_found");
+    if (!user) throw new NotFoundError("User not found");
 
-    res.status(200).json({
-      success: true,
-      message: "User_fetched_successfully",
-      data: user,
-    });
+    res.status(200).json(
+      buildSuccessResponse(user, "User fetched successfully")
+    );
   
 };
 
@@ -61,14 +58,14 @@ export const updateUserHandler = async (
 
     const { id } = req.params;
 
-    if (!id) throw new MissingFieldsError("User_ID_is_required");
+    if (!id) throw new MissingFieldsError("User ID is required");
     
-    if (!uuidRegex.test(id)) throw new ValidationError("Invalid_user_ID_format");
+    if (!uuidRegex.test(id)) throw new ValidationError("Invalid user ID format");
 
     const updateData = req.body;
     const updatedUser = await userService.updateUser(id, updateData);
 
-    if (!updatedUser) throw new NotFoundError("User_not_found");
+    if (!updatedUser) throw new NotFoundError("User not found");
 
     // Prepare response with only changed fields
     const changedFields: Record<string, any> = {};
@@ -78,11 +75,9 @@ export const updateUserHandler = async (
       }
     }
 
-    res.status(200).json({
-      success: true,
-      message: "User_updated_successfully",
-      data: changedFields,
-    });
+    res.status(200).json(
+      buildSuccessResponse(changedFields, "User updated successfully")
+    );
 
 };
 
@@ -103,25 +98,26 @@ export const getAllUsersHandler = async (
 
     // Validate pagination parameters
     if (filters.page && filters.page < 1) {
-      throw new ValidationError("Page_number_must_be_greater_than_0");
+      throw new ValidationError("Page number must be greater than 0");
     }
 
     if (filters.limit && (filters.limit < 1 || filters.limit > 50)) {
-      throw new ValidationError("Limit_must_be_between_1_and_50");
+      throw new ValidationError("Limit must be between 1 and 50");
     }
 
     const result = await userService.getAllUsers(filters);
 
-    res.status(200).json({
-      success: true,
-      message: "Users_retrieved_successfully",
-      data: result.users,
-      pagination: {
-        current_page: filters.page || 1,
-        total_pages: Math.ceil(result.total / (filters.limit || 20)),
-        total_users: result.total,
-        per_page: filters.limit || 20,
-      },
-    });
+    res.status(200).json(
+      buildPaginatedResponse(
+        result.users,
+        "Users retrieved successfully",
+        {
+          current_page: filters.page || 1,
+          total_pages: Math.ceil(result.total / (filters.limit || 20)),
+          total_items: result.total,
+          per_page: filters.limit || 20,
+        }
+      )
+    );
 
 };
