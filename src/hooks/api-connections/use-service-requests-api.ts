@@ -16,8 +16,6 @@ export function useServiceRequestsApi() {
     setLoading(true);
     setError(null);
 
-    console.log("API BASE URL:", API_BASE_URL);
-
     try {
   const res = await fetch(`${API_BASE_URL}/service-requests`, {
         method: 'POST',
