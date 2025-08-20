@@ -1,7 +1,7 @@
 use crate::access::AccessControl;
 use crate::events::*;
 use crate::storage::*;
-use crate::types::{require_auth, Error, UserProfile, UserStatus, VerificationLevel};
+use crate::types::{require_auth, Error, PublicationStatus, UserProfile, UserStatus, ValidationData, VerificationLevel};
 use soroban_sdk::{Address, Env, String, Vec};
 
 pub struct UserRegistryContract;
@@ -81,6 +81,8 @@ impl UserRegistryContract {
             expires_at,
             metadata,
             is_blacklisted: false,
+            publication_status: PublicationStatus::Private,
+            validations: Vec::new(&env),
         };
 
         set_user_profile(&env, &user, &profile);
@@ -235,6 +237,8 @@ impl UserRegistryContract {
                 expires_at,
                 metadata: metadata.clone(),
                 is_blacklisted: false,
+                publication_status: PublicationStatus::Private,
+                validations: Vec::new(&env),
             };
 
             set_user_profile(&env, &user, &profile);
@@ -288,6 +292,8 @@ impl UserRegistryContract {
                 is_blacklisted: profile.is_blacklisted,
                 verification_expires_at: profile.expires_at,
                 is_expired,
+                publication_status: profile.publication_status.clone(),
+                validation_count: profile.validations.len() as u32,
             }
         } else {
             // Check legacy system
@@ -301,6 +307,8 @@ impl UserRegistryContract {
                 is_blacklisted: is_blacklisted_current,
                 verification_expires_at: 0, // Legacy users don't have expiration
                 is_expired: false,
+                publication_status: PublicationStatus::Private,
+                validation_count: 0,
             }
         }
     }
@@ -359,5 +367,194 @@ impl UserRegistryContract {
 
     fn is_verification_valid(env: &Env, profile: &UserProfile) -> bool {
         !Self::is_verification_expired(env, profile)
+    }
+
+    // ==================== PUBLICATION CONTROLS ====================
+    
+    /// Publish a user profile (user themselves only)
+    pub fn publish_profile(env: Env, user: Address) -> Result<(), Error> {
+        require_auth(&env, &user)?;
+        
+        let mut profile = get_user_profile(&env, &user).ok_or(Error::UserNotFound)?;
+        
+        // Check if already published
+        if profile.publication_status != PublicationStatus::Private {
+            return Err(Error::ProfileAlreadyPublished);
+        }
+        
+        profile.publication_status = PublicationStatus::Published;
+        set_user_profile(&env, &user, &profile);
+        
+        emit_profile_published(&env, &user);
+        Ok(())
+    }
+    
+    /// Unpublish a user profile (user themselves only)
+    pub fn unpublish_profile(env: Env, user: Address) -> Result<(), Error> {
+        require_auth(&env, &user)?;
+        
+        let mut profile = get_user_profile(&env, &user).ok_or(Error::UserNotFound)?;
+        
+        // Check if not published
+        if profile.publication_status == PublicationStatus::Private {
+            return Err(Error::ProfileNotPublished);
+        }
+        
+        profile.publication_status = PublicationStatus::Private;
+        profile.validations = Vec::new(&env); // Clear validations when unpublishing
+        set_user_profile(&env, &user, &profile);
+        
+        emit_profile_unpublished(&env, &user);
+        Ok(())
+    }
+    
+    /// Get publication status of a user profile
+    pub fn get_publication_status(env: Env, user: Address) -> PublicationStatus {
+        if let Some(profile) = get_user_profile(&env, &user) {
+            profile.publication_status
+        } else {
+            PublicationStatus::Private
+        }
+    }
+    
+    // ==================== VALIDATOR CONTROLS ====================
+    
+    /// Add a validator (admin only)
+    pub fn add_validator(env: Env, admin: Address, validator: Address) -> Result<(), Error> {
+        AccessControl::require_admin(&env, &admin)?;
+        
+        add_validator(&env, &validator);
+        emit_validator_added(&env, &validator, &admin);
+        Ok(())
+    }
+    
+    /// Remove a validator (admin only)
+    pub fn remove_validator(env: Env, admin: Address, validator: Address) -> Result<(), Error> {
+        AccessControl::require_admin(&env, &admin)?;
+        
+        remove_validator(&env, &validator);
+        emit_validator_removed(&env, &validator, &admin);
+        Ok(())
+    }
+    
+    /// Check if an address is a validator
+    pub fn is_validator(env: Env, address: Address) -> bool {
+        is_validator(&env, &address)
+    }
+    
+    /// Get all validators
+    pub fn get_validators(env: Env) -> Vec<Address> {
+        get_validators(&env)
+    }
+    
+    // ==================== VALIDATION FUNCTIONS ====================
+    
+    /// Add validation to a user profile (validators only)
+    pub fn add_validation(
+        env: Env,
+        validator: Address,
+        user: Address,
+        signature: String,
+        metadata: String,
+    ) -> Result<(), Error> {
+        require_auth(&env, &validator)?;
+        
+        // Check if validator is authorized
+        if !is_validator(&env, &validator) {
+            return Err(Error::Unauthorized);
+        }
+        
+        let mut profile = get_user_profile(&env, &user).ok_or(Error::UserNotFound)?;
+        
+        // Check if profile is published
+        if profile.publication_status == PublicationStatus::Private {
+            return Err(Error::ProfileNotPublished);
+        }
+        
+        // Create validation data
+        let validation = ValidationData {
+            validator: validator.clone(),
+            timestamp: env.ledger().timestamp(),
+            signature,
+            metadata,
+        };
+        
+        // Check if this validator has already validated this profile
+        for i in 0..profile.validations.len() {
+            let val = profile.validations.get(i).unwrap();
+            if val.validator == validator {
+                // Replace existing validation
+                profile.validations.set(i, validation);
+                set_user_profile(&env, &user, &profile);
+                emit_validation_added(&env, &user, &validator);
+                return Ok(());
+            }
+        }
+        
+        // Add new validation
+        profile.validations.push_back(validation);
+        
+        // Update profile status if this is the first validation
+        if profile.validations.len() == 1 {
+            profile.publication_status = PublicationStatus::Verified;
+        }
+        
+        set_user_profile(&env, &user, &profile);
+        emit_validation_added(&env, &user, &validator);
+        Ok(())
+    }
+    
+    /// Remove validation from a user profile (validators only)
+    pub fn remove_validation(env: Env, validator: Address, user: Address) -> Result<(), Error> {
+        require_auth(&env, &validator)?;
+        
+        // Check if validator is authorized or is the user themselves
+        if !is_validator(&env, &validator) && validator != user {
+            return Err(Error::Unauthorized);
+        }
+        
+        let mut profile = get_user_profile(&env, &user).ok_or(Error::UserNotFound)?;
+        
+        // Check if profile is published
+        if profile.publication_status == PublicationStatus::Private {
+            return Err(Error::ProfileNotPublished);
+        }
+        
+        // Find and remove validation
+        let mut found = false;
+        let mut new_validations = Vec::new(&env);
+        
+        for i in 0..profile.validations.len() {
+            let val = profile.validations.get(i).unwrap();
+            if val.validator != validator {
+                new_validations.push_back(val);
+            } else {
+                found = true;
+            }
+        }
+        
+        if !found {
+            return Err(Error::ValidationFailed);
+        }
+        
+        profile.validations = new_validations;
+        
+        // Update profile status if no validations remain
+        if profile.validations.len() == 0 && profile.publication_status == PublicationStatus::Verified {
+            profile.publication_status = PublicationStatus::Published;
+        }
+        
+        set_user_profile(&env, &user, &profile);
+        emit_validation_removed(&env, &user, &validator);
+        Ok(())
+    }
+    
+    /// Get all validations for a user profile
+    pub fn get_validations(env: Env, user: Address) -> Vec<ValidationData> {
+        if let Some(profile) = get_user_profile(&env, &user) {
+            profile.validations
+        } else {
+            Vec::new(&env)
+        }
     }
 } 
