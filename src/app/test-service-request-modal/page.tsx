@@ -4,7 +4,7 @@ import ServiceRequestModal from '@/components/modals/service-request-modal';
 
 const TestServiceRequestModalPage: React.FC = () => {
   const [open, setOpen] = useState(false);
-  // Usa un serviceId de prueba (UUID válido)
+
   const serviceId = '123e4567-e89b-12d3-a456-426614174000';
 
   return (
