@@ -1,3 +1,5 @@
+type PublicUser = Omit<User, "nonce" | "created_at">;
+
 export interface CreateUserDTO {
   wallet_address: string;
   username: string;
@@ -39,6 +41,6 @@ export interface ApiResponse<T> {
   data: T;
 }
 
-export interface UsersListResponse extends ApiResponse<User[]> {
+export interface UsersListResponse extends ApiResponse<PublicUser[]> {
   pagination: PaginationInfo;
 }
