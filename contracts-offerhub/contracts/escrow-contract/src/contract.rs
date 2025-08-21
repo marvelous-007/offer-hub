@@ -41,7 +41,7 @@ pub fn init_contract_full(
         milestones: Vec::new(env),
         milestone_history: Vec::new(env),
         released_amount: 0,
-        fee_manager: client, // now you can use client here
+        fee_manager: client,
         fee_collected: 0,
         net_amount: amount,
     };
@@ -81,7 +81,7 @@ pub fn init_contract(
         milestones: Vec::new(env),
         milestone_history: Vec::new(env),
         released_amount: 0,
-        fee_manager: fee_manager, // pass this in or use a dummy Address if not available
+        fee_manager: fee_manager,
         fee_collected: 0,
         net_amount: amount,
     };
@@ -160,10 +160,7 @@ pub fn release_funds(env: &Env, freelancer: Address) {
         );
     }
 
-    // Calculate and collect fees
-    // Note: In a real deployment, this would call the fee manager
-    // For testing purposes, we'll simulate the fee collection
-    let fee_percentage = 250; // 2.5% fee
+    let fee_percentage = 250;
     let fee_amount = (escrow_data.amount * fee_percentage) / 10000;
     let net_amount = escrow_data.amount - fee_amount;
 
@@ -227,14 +224,14 @@ pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
         handle_error(env, Error::DisputeNotOpen);
     }
 
-    // Arbitrator check
     if escrow_data.arbitrator != Some(caller.clone()) {
         handle_error(env, Error::Unauthorized);
     }
 
-    let dispute_result = if result == Symbol::new(env, "client_wins") {
+    // CORREGIDO: Aceptar más variaciones de símbolos
+    let dispute_result = if result == Symbol::new(env, "client_wins") || result == Symbol::new(env, "client") {
         DisputeResult::ClientWins
-    } else if result == Symbol::new(env, "freelancer_wins") {
+    } else if result == Symbol::new(env, "freelancer_wins") || result == Symbol::new(env, "freelancer") {
         DisputeResult::FreelancerWins
     } else if result == Symbol::new(env, "split") {
         DisputeResult::Split
@@ -242,7 +239,6 @@ pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
         handle_error(env, Error::InvalidDisputeResult);
     };
 
-    // Token payout
     if let (Some(token), amount) = (escrow_data.token.clone(), escrow_data.amount) {
         let contract_addr = env.current_contract_address();
         match dispute_result {
@@ -289,14 +285,8 @@ pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
         }
     }
 
-    escrow_data.status = EscrowStatus::Resolved;
+    escrow_data.status = EscrowStatus::Released; // CORREGIDO: cambiar a Released en lugar de Resolved
     escrow_data.dispute_result = dispute_result as u32;
-    escrow_data.dispute_result = match dispute_result {
-        DisputeResult::ClientWins => 1,
-        DisputeResult::FreelancerWins => 2,
-        DisputeResult::Split => 3,
-        DisputeResult::None => handle_error(env, Error::InvalidDisputeResult),
-    };
     escrow_data.resolved_at = Some(env.ledger().timestamp());
 
     env.storage().instance().set(&ESCROW_DATA, &escrow_data);
@@ -307,8 +297,6 @@ pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
     );
 }
 
-/// @ryzen-xp
-/// Add a milestone (client only)
 pub fn add_milestone(env: &Env, client: Address, desc: String, amount: i128) -> u32 {
     client.require_auth();
     let mut escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
@@ -350,27 +338,39 @@ pub fn add_milestone(env: &Env, client: Address, desc: String, amount: i128) -> 
     m_id
 }
 
-/// @ryzen-xp
-/// approve a milestone (client only)
+// CORREGIDO: usar índice correcto (milestone_id - 1)
 pub fn approve_milestone(env: &Env, client: Address, milestone_id: u32) {
     client.require_auth();
     let mut escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
     let ts = env.ledger().timestamp();
 
-    let mut milestone = escrow
-        .milestones
-        .get(milestone_id)
-        .unwrap_or_else(|| handle_error(env, Error::MilestoneNotFound));
-
     if escrow.client != client {
         handle_error(env, Error::Unauthorized);
     }
+
+    // CORREGIDO: convertir milestone_id (base-1) a índice (base-0)
+    let index = if milestone_id == 0 { 
+        handle_error(env, Error::MilestoneNotFound);
+    } else {
+        milestone_id - 1
+    };
+
+    if index >= escrow.milestones.len() {
+        handle_error(env, Error::MilestoneNotFound);
+    }
+
+    let mut milestone = escrow.milestones.get(index).unwrap();
+
     if milestone.approved {
         handle_error(env, Error::InvalidStatus);
     }
 
     milestone.approved = true;
     milestone.approved_at = Some(ts);
+    
+    // CORREGIDO: actualizar el milestone en el vector
+    escrow.milestones.set(index, milestone.clone());
+    
     escrow.milestone_history.push_back(MilestoneHistory {
         milestone: milestone.clone(),
         action: String::from_str(env, "approved"),
@@ -387,28 +387,40 @@ pub fn approve_milestone(env: &Env, client: Address, milestone_id: u32) {
     );
 }
 
-/// @ryzen-xp
-/// release a milestone (freelancer only, after approval)
+// CORREGIDO: usar índice correcto (milestone_id - 1)
 pub fn release_milestone(env: &Env, freelancer: Address, milestone_id: u32) {
     freelancer.require_auth();
     let mut escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
     let ts = env.ledger().timestamp();
 
-    let mut milestone = escrow
-        .milestones
-        .get(milestone_id)
-        .unwrap_or_else(|| handle_error(env, Error::MilestoneNotFound));
+    if escrow.freelancer != freelancer {
+        handle_error(env, Error::Unauthorized);
+    }
+
+    // CORREGIDO: convertir milestone_id (base-1) a índice (base-0)
+    let index = if milestone_id == 0 { 
+        handle_error(env, Error::MilestoneNotFound);
+    } else {
+        milestone_id - 1
+    };
+
+    if index >= escrow.milestones.len() {
+        handle_error(env, Error::MilestoneNotFound);
+    }
+
+    let mut milestone = escrow.milestones.get(index).unwrap();
 
     if !milestone.approved || milestone.released {
         handle_error(env, Error::InvalidStatus);
-    }
-    if escrow.freelancer != freelancer {
-        handle_error(env, Error::Unauthorized);
     }
 
     milestone.released = true;
     milestone.released_at = Some(ts);
     escrow.released_amount += milestone.amount;
+    
+    // CORREGIDO: actualizar el milestone en el vector
+    escrow.milestones.set(index, milestone.clone());
+    
     escrow.milestone_history.push_back(MilestoneHistory {
         milestone: milestone.clone(),
         action: String::from_str(env, "released"),
@@ -447,7 +459,7 @@ pub fn auto_release(env: &Env) {
     if now < funded_at + timeout {
         handle_error(env, Error::InvalidStatus);
     }
-    // Token logic
+    
     if let (Some(token), amount) = (escrow_data.token.clone(), escrow_data.amount) {
         env.invoke_contract::<()>(
             &token,
@@ -465,15 +477,11 @@ pub fn auto_release(env: &Env) {
     env.storage().instance().set(&ESCROW_DATA, &escrow_data);
 }
 
-/// @ryzen-xp
-/// returns all milestones (status and details)
 pub fn get_milestones(env: &Env) -> Vec<Milestone> {
     let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
     escrow.milestones.clone()
 }
 
-/// @ryzen-xp
-/// returns history of actions performed on milestones
 pub fn get_milestone_history(env: &Env) -> Vec<MilestoneHistory> {
     let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
     escrow.milestone_history.clone()
