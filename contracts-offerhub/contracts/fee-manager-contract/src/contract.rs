@@ -4,10 +4,9 @@ use crate::{
     error::{handle_error, Error},
     storage::{
         DEFAULT_ARBITRATOR_FEE_PERCENTAGE, DEFAULT_DISPUTE_FEE_PERCENTAGE,
-        DEFAULT_ESCROW_FEE_PERCENTAGE, DISPUTE_FEE, ESCROW_FEE, FEE_CONFIG, FEE_HISTORY,
-        FEE_PRECISION, FEE_STATS, PLATFORM_BALANCE, PREMIUM_USERS,
+        DEFAULT_ESCROW_FEE_PERCENTAGE, FEE_CONFIG, FEE_HISTORY, FEE_STATS, PLATFORM_BALANCE, PREMIUM_USERS,
     },
-    types::{FeeCalculation, FeeConfig, FeeDistribution, FeeRecord, FeeStats, PremiumUser, FEE_TYPE_ESCROW, FEE_TYPE_DISPUTE},
+    types::{FeeCalculation, FeeConfig, FeeRecord, FeeStats, PremiumUser, FEE_TYPE_ESCROW, FEE_TYPE_DISPUTE},
 };
 
 pub fn initialize(env: &Env, admin: Address, platform_wallet: Address) {
@@ -329,16 +328,4 @@ fn calculate_fee_amount(amount: i128, fee_percentage: i128) -> i128 {
     }
 }
 
-// Helper function to distribute fees between platform and arbitrator
-pub fn distribute_dispute_fee(env: &Env, total_fee: i128) -> FeeDistribution {
-    let fee_config: FeeConfig = env.storage().instance().get(&FEE_CONFIG).unwrap();
-    
-    let arbitrator_fee = calculate_fee_amount(total_fee, fee_config.arbitrator_fee_percentage);
-    let platform_fee = total_fee - arbitrator_fee;
-
-    FeeDistribution {
-        platform_fee,
-        arbitrator_fee,
-        total_fee,
-    }
-} 
+ 
