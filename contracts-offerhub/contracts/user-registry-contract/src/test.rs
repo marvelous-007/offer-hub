@@ -505,4 +505,75 @@ fn test_metadata_update() {
         let profile = Contract::get_user_profile(env.clone(), user.clone()).unwrap();
         assert_eq!(profile.metadata, admin_metadata);
     });
+}
+
+// ==================== ADDITIONAL COMPREHENSIVE TESTS ====================
+
+#[test]
+fn test_additional_security_scenarios() {
+    let env = Env::default();
+    let contract_id = env.register(Contract, ());
+    let admin = Address::generate(&env);
+    let user = Address::generate(&env);
+    let attacker = Address::generate(&env);
+
+    // Initialize admin
+    env.mock_all_auths();
+    env.as_contract(&contract_id, || {
+        Contract::initialize_admin(env.clone(), admin.clone()).unwrap();
+    });
+
+    // Test: Double initialization should fail
+    env.mock_all_auths();
+    env.as_contract(&contract_id, || {
+        let result = Contract::initialize_admin(env.clone(), attacker.clone());
+        assert_eq!(result, Err(Error::AlreadyInitialized));
+    });
+
+    // Test: Non-admin cannot verify users
+    env.mock_all_auths();
+    env.as_contract(&contract_id, || {
+        let result = Contract::verify_user(
+            env.clone(),
+            attacker.clone(), // Not admin
+            user.clone(),
+            VerificationLevel::Basic,
+            0,
+            String::from_str(&env, "metadata"),
+        );
+        assert_eq!(result, Err(Error::Unauthorized));
+    });
+
+    // Test: Verify user works with admin
+    env.mock_all_auths();
+    env.as_contract(&contract_id, || {
+        let result = Contract::verify_user(
+            env.clone(),
+            admin.clone(),
+            user.clone(),
+            VerificationLevel::Basic,
+            0,
+            String::from_str(&env, "metadata"),
+        );
+        assert!(result.is_ok());
+    });
+
+    // Test: User profile metadata can be updated
+    env.mock_all_auths();
+    env.as_contract(&contract_id, || {
+        let result = Contract::update_user_metadata(
+            env.clone(),
+            user.clone(),
+            user.clone(),
+            String::from_str(&env, "Updated metadata"),
+        );
+        assert!(result.is_ok());
+    });
+
+    // Test: Non-admin cannot blacklist users
+    env.mock_all_auths();
+    env.as_contract(&contract_id, || {
+        let result = Contract::blacklist_user(env.clone(), attacker.clone(), user.clone());
+        assert_eq!(result, Err(Error::Unauthorized));
+    });
 } 
