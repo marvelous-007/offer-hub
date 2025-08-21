@@ -1,4 +1,4 @@
-use crate::storage::{has_rated_contract, get_user_rating_stats, get_user_restriction};
+use crate::storage::{has_rated_contract, get_user_restriction};
 use crate::types::{Error, MIN_RATING, MAX_RATING, MAX_FEEDBACK_LENGTH};
 use soroban_sdk::{Address, Env, String};
 
@@ -63,8 +63,4 @@ pub fn check_spam_prevention(env: &Env, rater: &Address) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn validate_incentive_type(_incentive_type: &String) -> Result<(), Error> {
-    // Simplified validation for Soroban compatibility
-    // Just return Ok for now - can add proper validation later
-    Ok(())
-}
+
