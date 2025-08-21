@@ -1,7 +1,6 @@
 use crate::types::{
     Error, Feedback, IncentiveRecord, Rating, RatingStats, RatingThreshold,
-    FeedbackReport, ADMIN, MODERATOR, RATING, FEEDBACK, USER_RATING_STATS,
-    USER_RATINGS, CONTRACT_RATINGS, FEEDBACK_REPORTS, RATING_THRESHOLDS,
+    FeedbackReport, ADMIN, MODERATOR, RATING, FEEDBACK, USER_RATING_STATS, FEEDBACK_REPORTS, RATING_THRESHOLDS,
     INCENTIVE_RECORDS, REPUTATION_CONTRACT, PLATFORM_STATS, USER_RESTRICTIONS,
 };
 use soroban_sdk::{Address, Env, String, Vec};
@@ -63,10 +62,7 @@ pub fn get_rating(env: &Env, rating_id: &String) -> Result<Rating, Error> {
     env.storage().persistent().get(&key).ok_or(Error::ContractNotFound)
 }
 
-pub fn rating_exists(env: &Env, rating_id: &String) -> bool {
-    let key = (RATING, rating_id.clone());
-    env.storage().persistent().has(&key)
-}
+
 
 pub fn has_rated_contract(env: &Env, rater: &Address, contract_id: &String) -> bool {
     // Generate a simple check by iterating through user's ratings
@@ -170,10 +166,7 @@ pub fn save_feedback_report(env: &Env, report: &FeedbackReport) {
     env.storage().persistent().set(&key, report);
 }
 
-pub fn get_feedback_report(env: &Env, report_id: &String) -> Result<FeedbackReport, Error> {
-    let key = (FEEDBACK_REPORTS, report_id.clone());
-    env.storage().persistent().get(&key).ok_or(Error::FeedbackNotFound)
-}
+
 
 // Rating thresholds
 pub fn save_rating_threshold(env: &Env, threshold: &RatingThreshold) {
@@ -181,10 +174,7 @@ pub fn save_rating_threshold(env: &Env, threshold: &RatingThreshold) {
     env.storage().persistent().set(&key, threshold);
 }
 
-pub fn get_rating_threshold(env: &Env, threshold_type: &String) -> Result<RatingThreshold, Error> {
-    let key = (RATING_THRESHOLDS, threshold_type.clone());
-    env.storage().persistent().get(&key).ok_or(Error::ThresholdNotFound)
-}
+
 
 // Incentive records
 pub fn save_incentive_record(env: &Env, record: &IncentiveRecord) {
