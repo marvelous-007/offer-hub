@@ -33,8 +33,8 @@ fn test_deploy() {
     let client = EscrowFactoryClient::new(&env, &contract_id);
 
     let create_params = EscrowCreateParams {
-        client: Address::generate(&env),
-        freelancer: Address::generate(&env),
+        client: Address::generate(&env),        // Esto funciona porque está en el módulo de test
+        freelancer: Address::generate(&env),    // y estamos usando testutils::Address as _
         amount: 1000,
         fee_manager: Address::generate(&env),
         salt: gen_random_bytes::<32>(&env),
