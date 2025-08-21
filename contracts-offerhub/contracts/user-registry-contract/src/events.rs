@@ -66,32 +66,4 @@ pub fn emit_moderator_removed(env: &Env, moderator: &Address, admin: &Address) {
     env.events().publish((topic,), (moderator.clone(), admin.clone()));
 }
 
-pub fn emit_validator_added(env: &Env, validator: &Address, admin: &Address) {
-    let topic = Symbol::new(env, "VALIDATOR_ADDED");
-    env.events().publish((topic,), (validator.clone(), admin.clone()));
-}
-
-pub fn emit_validator_removed(env: &Env, validator: &Address, admin: &Address) {
-    let topic = Symbol::new(env, "VALIDATOR_REMOVED");
-    env.events().publish((topic,), (validator.clone(), admin.clone()));
-}
-
-pub fn emit_profile_published(env: &Env, user: &Address) {
-    let topic = Symbol::new(env, "PROFILE_PUBLISHED");
-    env.events().publish((topic,), user.clone());
-}
-
-pub fn emit_profile_unpublished(env: &Env, user: &Address) {
-    let topic = Symbol::new(env, "PROFILE_UNPUBLISHED");
-    env.events().publish((topic,), user.clone());
-}
-
-pub fn emit_validation_added(env: &Env, user: &Address, validator: &Address) {
-    let topic = Symbol::new(env, "VALIDATION_ADDED");
-    env.events().publish((topic,), (user.clone(), validator.clone()));
-}
-
-pub fn emit_validation_removed(env: &Env, user: &Address, validator: &Address) {
-    let topic = Symbol::new(env, "VALIDATION_REMOVED");
-    env.events().publish((topic,), (user.clone(), validator.clone()));
-} 
+ 
