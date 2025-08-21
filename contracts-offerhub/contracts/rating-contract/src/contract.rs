@@ -6,13 +6,12 @@ use crate::moderation::{report_feedback as report_feedback_impl, moderate_feedba
 use crate::restrictions::{check_and_apply_restrictions, get_user_privileges, check_restriction_status};
 use crate::storage::{
     save_admin, get_admin, save_rating, save_feedback, get_user_rating_stats, 
-    save_user_rating_stats, increment_platform_stat, save_rating_threshold, 
-    get_rating_threshold, add_user_feedback_id, get_user_feedback_ids, get_feedback,
+    save_user_rating_stats, increment_platform_stat, save_rating_threshold, add_user_feedback_id, get_user_feedback_ids, get_feedback,
     get_user_rating_history, save_reputation_contract, get_reputation_contract
 };
 use crate::types::{
     Error, Rating, RatingStats, Feedback, UserRatingData, RatingThreshold,
-    require_auth, MIN_RATINGS_FOR_STATS
+    require_auth
 };
 use crate::validation::{validate_rating, validate_feedback, validate_rating_eligibility, check_spam_prevention};
 use soroban_sdk::{Address, Env, String, Vec, IntoVal};
