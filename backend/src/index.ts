@@ -11,10 +11,13 @@ import contractRoutes from "@/routes/contract.routes";
 import projectRoutes from "@/routes/project.routes";
 import userRoutes from "@/routes/user.routes";
 import authRoutes from "@/routes/auth.routes";
-import { ErrorHandler } from "./utils/AppError";
+import { errorHandlerMiddleware, setupGlobalErrorHandlers } from "./middlewares/errorHandler.middleware";
 
 import conversationRoutes from "@/routes/conversation.routes";
 import messageRoutes from "@/routes/message.routes";
+
+// Setup global error handlers for uncaught exceptions and unhandled rejections
+setupGlobalErrorHandlers();
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -39,9 +42,12 @@ app.use("/api/messages", messageRoutes);
 app.get("/", (_req, res) => {
   res.send("💼 OFFER-HUB backend is up and running!");
 });
-app.use(ErrorHandler);
+
+// Use the new error handling middleware
+app.use(errorHandlerMiddleware);
+
 app.listen(port, () => {
   console.log(`🚀 OFFER-HUB server is live at http://localhost:${port}`);
   console.log("🌐 Connecting freelancers and clients around the world...");
-  console.log("💼 Working...");
+  console.log("�� Working...");
 });
