@@ -16,9 +16,9 @@ interface TalentCardProps {
   name: string;
   title: string;
   location: string;
-  category: string;
-  rating: number;
-  hourlyRate: number;
+  category?: string;
+  rating?: number;
+  hourlyRate?: number;
   avatar: string;
   skills: Skill[];
   description: string;
@@ -51,7 +51,7 @@ const TalentCard: React.FC<TalentCardProps> = ({
   return (
     <div className={`bg-gray-50 border-b border-b-gray-200  p-6 ${className}`}>
       {/* Avatar and Header info in same row */}
-      <div className='flex items-start gap-4 mb-4 cursor-pointer' onClick={() => alert("Hello World")}>
+      <div className='flex items-start gap-4 mb-4 cursor-pointer profile-section'  onClick={() => alert("Hello World")}>
         {/* Avatar */}
         <Image
           src={avatar}

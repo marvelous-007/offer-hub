@@ -1,14 +1,14 @@
 "use client";
 
-import Header from '@/components/client-dashboard/Header'
-import { ClientSidebar } from '@/components/client-dashboard/Sidebar'
+// import Header from '@/components/client-dashboard/Header'
+// import { ClientSidebar } from '@/components/client-dashboard/Sidebar'
 import { Button } from '@/components/ui/button';
 import { Heart, Filter } from 'lucide-react'
 import React, { useState, useMemo } from 'react'
 import SearchBar from '@/components/talent/SearchBar';
 import FilterComponent from '@/components/talent/TalentFilters';
 import TalentCard from '@/components/talent/TalentCard';
-import { talentMockData } from '@/lib/mockData/talent-mock-data';
+import { talentProfileData as talentMockData } from '@/lib/mockData/talent-mock-data';
 import { Filters } from '@/lib/mockData/filters-mock-data';
 import { useRouter } from 'next/navigation';
 import TalentLayout from '@/components/talent/talents/TalentLayout';
