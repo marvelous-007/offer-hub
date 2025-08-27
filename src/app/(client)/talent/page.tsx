@@ -142,7 +142,7 @@ const TalentPage = () => {
                 </p>
               </div>
 
-              <div className='space-y-6'>
+              <div className='space-y-0'>
                 {filteredTalents.length > 0 ? (
                   filteredTalents.map((talent) => (
                     <TalentCard

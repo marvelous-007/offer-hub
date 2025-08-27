@@ -28,7 +28,7 @@ export const talentMockData: Talent[] = [
     hourlyRate: 85,
     avatar: "/avatar.png",
     skills: [
-      { name: "UI/UX", color: "bg-gray-500" },
+      { name: "UI/UX", color: "bg-slate-600" },
       { name: "Design", color: "bg-red-500" },
       { name: "Figma", color: "bg-purple-500" },
       { name: "Product design", color: "bg-blue-400" },
@@ -49,7 +49,7 @@ export const talentMockData: Talent[] = [
     skills: [
       { name: "User Experience", color: "bg-gray-500" },
       { name: "Creative Solutions", color: "bg-red-500" },
-      { name: "Sketch", color: "bg-purple-400" },
+      { name: "Sketch", color: "bg-purple-500" },
       { name: "Interface Design", color: "bg-blue-400" },
       { name: "Webflow", color: "bg-yellow-200 text-black" }
     ],

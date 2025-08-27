@@ -49,7 +49,7 @@ const TalentCard: React.FC<TalentCardProps> = ({
   };
 
   return (
-    <div className={`bg-gray-50 rounded-lg p-6 ${className}`}>
+    <div className={`bg-gray-50 border-b border-b-gray-200  p-6 ${className}`}>
       {/* Avatar and Header info in same row */}
       <div className='flex items-start gap-4 mb-4'>
         {/* Avatar */}
@@ -81,7 +81,7 @@ const TalentCard: React.FC<TalentCardProps> = ({
         {skills.map((skill, index) => (
           <span
             key={index}
-            className={`px-3 py-1 rounded-full text-sm font-medium text-white ${skill.color}`}
+            className={`px-3 py-1 rounded-full text-sm font-medium text-white ${skill.color} ${index ==0 && "bg-slate-500"}`}
           >
             {skill.name}
           </span>
@@ -95,7 +95,7 @@ const TalentCard: React.FC<TalentCardProps> = ({
       
       {/* Action Buttons Row */}
       <div className='flex items-center gap-4'>
-        <SaveTalent talentId={id} />
+        <SaveTalent talentId={id} size='lg' />
         <Button 
           onClick={handleActionClick}
           className='bg-slate-800 hover:bg-slate-700 text-white rounded-full flex-1 py-3 font-medium'
