@@ -51,7 +51,7 @@ const TalentCard: React.FC<TalentCardProps> = ({
   return (
     <div className={`bg-gray-50 border-b border-b-gray-200  p-6 ${className}`}>
       {/* Avatar and Header info in same row */}
-      <div className='flex items-start gap-4 mb-4'>
+      <div className='flex items-start gap-4 mb-4 cursor-pointer' onClick={() => alert("Hello World")}>
         {/* Avatar */}
         <Image
           src={avatar}
@@ -60,7 +60,7 @@ const TalentCard: React.FC<TalentCardProps> = ({
           height={60}
           className='rounded-full object-cover flex-shrink-0'
         />
-        
+
         {/* Header info */}
         <div className='flex-1'>
           <div className='flex items-center gap-2 mb-1'>
@@ -75,28 +75,28 @@ const TalentCard: React.FC<TalentCardProps> = ({
           </div>
         </div>
       </div>
-      
+
       {/* Skills */}
       <div className='flex flex-wrap gap-2 mb-4'>
         {skills.map((skill, index) => (
           <span
             key={index}
-            className={`px-3 py-1 rounded-full text-sm font-medium text-white ${skill.color} ${index ==0 && "bg-slate-500"}`}
+            className={`px-3 py-1 rounded-full text-sm font-medium text-white ${skill.color} ${index == 0 && "bg-slate-500"}`}
           >
             {skill.name}
           </span>
         ))}
       </div>
-      
+
       {/* Description */}
       <p className='text-gray-600 text-sm mb-6 leading-relaxed'>
         {description}
       </p>
-      
+
       {/* Action Buttons Row */}
       <div className='flex items-center gap-4'>
         <SaveTalent talentId={id} size='lg' />
-        <Button 
+        <Button
           onClick={handleActionClick}
           className='bg-slate-800 hover:bg-slate-700 text-white rounded-full flex-1 py-3 font-medium'
         >
