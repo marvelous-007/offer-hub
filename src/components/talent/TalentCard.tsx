@@ -51,7 +51,7 @@ const TalentCard: React.FC<TalentCardProps> = ({
   return (
     <div className={`bg-gray-50 border-b border-b-gray-200  p-6 ${className}`}>
       {/* Avatar and Header info in same row */}
-      <div className='flex items-start gap-4 mb-4 cursor-pointer profile-section'  onClick={() => alert("Hello World")}>
+      <div className='flex items-start gap-4 mb-4 cursor-pointer profile-section'>
         {/* Avatar */}
         <Image
           src={avatar}

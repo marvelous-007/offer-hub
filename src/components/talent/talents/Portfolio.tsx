@@ -21,7 +21,7 @@ interface PortfolioCarouselProps {
 export default function PortfolioCarousel({
   title = "Portfolio",
   items,
-  itemsPerPage = 3,
+  itemsPerPage = 6,
 }: PortfolioCarouselProps) {
   const [index, setIndex] = useState(0);
 
@@ -38,49 +38,32 @@ export default function PortfolioCarousel({
   return (
     <div className="bg-white rounded-lg p-6 border">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6">
         <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={prev}
-            variant="outline"
-            size="sm"
-            className="p-2 bg-transparent"
-            disabled={items.length <= itemsPerPage}
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
-          <span className="text-sm text-gray-500">
-            {Math.floor(index / itemsPerPage) + 1} /{" "}
-            {Math.ceil(items.length / itemsPerPage)}
-          </span>
-          <Button
-            onClick={next}
-            variant="outline"
-            size="sm"
-            className="p-2 bg-transparent"
-            disabled={items.length <= itemsPerPage}
-          >
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        </div>
+        <div className="border-b border-gray-200" />
       </div>
 
       {/* Items */}
       {items.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {items.slice(index, index + itemsPerPage).map((item) => (
-            <div key={item.id} className="bg-gray-50 rounded-lg overflow-hidden">
-              <Image
-                src={item.image || "/placeholder.svg"}
-                alt={item.title}
-                width={300}
-                height={200}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <h4 className="font-semibold text-gray-900 mb-1">{item.title}</h4>
-                <p className="text-sm text-gray-600 mb-2">{item.description}</p>
+            <div
+              key={item.id}
+              className="rounded-lg overflow-hidden hover:cursor-pointer"
+            >
+              {/* image wrapper with scale on hover */}
+              <div className="overflow-hidden">
+                <Image
+                  src={item.image || "/placeholder.svg"}
+                  alt={item.title}
+                  width={300}
+                  height={200}
+                  className="w-full h-40 object-cover object-center transform transition-transform duration-300 ease-in-out hover:scale-110"
+                />
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-gray-900 mt-1">{item.title}</h4>
                 <p className="text-xs text-gray-500">{item.date}</p>
               </div>
             </div>
@@ -88,21 +71,46 @@ export default function PortfolioCarousel({
         </div>
       )}
 
-      {/* Pagination dots */}
-      <div className="flex justify-center mt-6">
+      {/* Pagination */}
+      <div className="flex items-center justify-between mt-6">
+        <Button
+          onClick={prev}
+          variant="outline"
+          size="sm"
+          className="bg-transparent shadow-none border-none text-gray-500 cursor-pointer"
+          disabled={items.length <= itemsPerPage}
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Back
+        </Button>
+
         <div className="flex gap-2">
-          {Array.from({ length: Math.ceil(items.length / itemsPerPage) }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => setIndex(i * itemsPerPage)}
-              className={`w-2 h-2 rounded-full ${
-                Math.floor(index / itemsPerPage) === i
-                  ? "bg-gray-800"
-                  : "bg-gray-300"
-              }`}
-            />
-          ))}
+          {Array.from(
+            { length: Math.ceil(items.length / itemsPerPage) },
+            (_, i) => (
+              <button
+                key={i}
+                onClick={() => setIndex(i * itemsPerPage)}
+                className={`w-2 h-2 rounded-full ${
+                  Math.floor(index / itemsPerPage) === i
+                    ? "bg-gray-800"
+                    : "bg-gray-300"
+                }`}
+              />
+            )
+          )}
         </div>
+
+        <Button
+          onClick={next}
+          variant="outline"
+          size="sm"
+          className="bg-transparent shadow-none border-none text-gray-500 cursor-pointer"
+          disabled={items.length <= itemsPerPage}
+        >
+          Next
+          <ChevronRight className="w-4 h-4" />
+        </Button>
       </div>
     </div>
   );
