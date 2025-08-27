@@ -99,10 +99,9 @@ const TalentProfilePage = () => {
 
                     {/* Reviews Section */}
                     <ReviewsCarousel
+                        itemsPerPage={3}
                         reviews={talent.reviews}
-                        renderStars={(rating) => Array.from({ length: 5 }).map((_, i) => (
-                            <span key={i}>{i < rating ? "⭐" : "☆"}</span>
-                        ))}
+                        renderStars={() => renderStars(5)}
                     />
                 </div>
             </TalentLayout>
