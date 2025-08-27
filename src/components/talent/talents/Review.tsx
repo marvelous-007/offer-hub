@@ -36,7 +36,7 @@ export default function ReviewsCarousel({
     );
 
   return (
-    <div className="bg-gray-50 rounded-lg p-6 border">
+    <div className="bg-gray-50  p-6 border">
       {/* Header */}
       <div className="mb-6">
         <h3 className="text-xl font-semibold text-gray-900">{title}</h3>

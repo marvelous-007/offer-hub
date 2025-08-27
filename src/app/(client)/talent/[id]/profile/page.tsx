@@ -2,14 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Heart, ArrowLeft, ChevronLeft, ChevronRight, Star } from "lucide-react"
+import { Star } from "lucide-react"
 import { useTalentData } from "@/hooks/talent/useTalentData"
 import type { TalentProfile } from "@/lib/mockData/talent-mock-data"
 import TalentLayout from "@/components/talent/talents/TalentLayout"
 import TalentCard from "@/components/talent/TalentCard"
-import { unknown } from "zod"
 import PortfolioCarousel from "@/components/talent/talents/Portfolio"
 import ReviewsCarousel from "@/components/talent/talents/Review"
 
@@ -93,6 +91,7 @@ const TalentProfilePage = () => {
 
                     {/* Portfolio Section */}
                     <PortfolioCarousel
+                        talentId={String(talent.id)}
                         title="Portfolio"
                         items={talent.portfolio}
                     />

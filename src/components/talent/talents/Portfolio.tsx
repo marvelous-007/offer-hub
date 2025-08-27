@@ -1,42 +1,48 @@
 "use client"
-import { useState } from "react";
-import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState } from "react"
+import Image from "next/image"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
 
 interface PortfolioItem {
-  id: string | number;
-  title: string;
-  description: string;
-  date: string;
-  image?: string;
+  id: string | number
+  title: string
+  description: string
+  date: string
+  image?: string
 }
 
 interface PortfolioCarouselProps {
-  title?: string;
-  items: PortfolioItem[];
-  itemsPerPage?: number;
+  title?: string
+  items: PortfolioItem[]
+  itemsPerPage?: number
+  talentId: string
 }
 
 export default function PortfolioCarousel({
   title = "Portfolio",
   items,
   itemsPerPage = 6,
+  talentId,
 }: PortfolioCarouselProps) {
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(0)
+  const router = useRouter()
 
   const prev = () => {
-    setIndex((prev) => Math.max(prev - itemsPerPage, 0));
-  };
+    setIndex((prev) => Math.max(prev - itemsPerPage, 0))
+  }
 
   const next = () => {
-    setIndex((prev) =>
-      Math.min(prev + itemsPerPage, items.length - itemsPerPage)
-    );
-  };
+    setIndex((prev) => Math.min(prev + itemsPerPage, items.length - itemsPerPage))
+  }
+
+  const handleProjectClick = (projectId: string | number) => {
+    router.push(`/talent/${talentId}/portfolio/${projectId}`)
+  }
 
   return (
-    <div className="bg-gray-50 rounded-lg p-6 border">
+    <div className="bg-gray-50  p-6 border">
       {/* Header */}
       <div className="mb-6">
         <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
@@ -50,6 +56,7 @@ export default function PortfolioCarousel({
             <div
               key={item.id}
               className="rounded-lg overflow-hidden hover:cursor-pointer"
+              onClick={() => handleProjectClick(item.id)}
             >
               {/* image wrapper with scale on hover */}
               <div className="overflow-hidden">
@@ -85,20 +92,15 @@ export default function PortfolioCarousel({
         </Button>
 
         <div className="flex gap-2">
-          {Array.from(
-            { length: Math.ceil(items.length / itemsPerPage) },
-            (_, i) => (
-              <button
-                key={i}
-                onClick={() => setIndex(i * itemsPerPage)}
-                className={`w-2 h-2 rounded-full ${
-                  Math.floor(index / itemsPerPage) === i
-                    ? "bg-gray-800"
-                    : "bg-gray-300"
-                }`}
-              />
-            )
-          )}
+          {Array.from({ length: Math.ceil(items.length / itemsPerPage) }, (_, i) => (
+            <button
+              key={i}
+              onClick={() => setIndex(i * itemsPerPage)}
+              className={`w-2 h-2 rounded-full ${
+                Math.floor(index / itemsPerPage) === i ? "bg-gray-800" : "bg-gray-300"
+              }`}
+            />
+          ))}
         </div>
 
         <Button
@@ -113,5 +115,5 @@ export default function PortfolioCarousel({
         </Button>
       </div>
     </div>
-  );
+  )
 }
