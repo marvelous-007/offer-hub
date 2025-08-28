@@ -18,6 +18,7 @@ pub enum Error {
     ProfileAlreadyPublished = 13,
     ValidationFailed = 14,
     InvalidValidationData = 15,
+    RateLimitExceeded = 16,
 }
 
 #[contracttype]
