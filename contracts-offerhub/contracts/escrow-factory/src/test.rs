@@ -4,7 +4,6 @@ use soroban_sdk::{testutils::Address as _, Address, BytesN, Env, Vec};
 use rand::rngs::OsRng;
 use rand::RngCore;
 
-use crate::escrow_contract;
 use crate::types::EscrowCreateParams;
 use crate::EscrowFactory;
 use crate::EscrowFactoryClient;
@@ -18,8 +17,8 @@ fn gen_random_bytes<const N: usize>(env: &Env) -> BytesN<N> {
     BytesN::from_array(env, &random_bytes)
 }
 
-const WASM: &[u8] =
-    include_bytes!("../../../target/wasm32-unknown-unknown/release/escrow_contract.wasm");
+// WASM path kept for reference if needed in future integration tests:
+// ../../../target/wasm32v1-none/release/escrow_contract.wasm
 
 #[test]
 fn test_escrow_factory_registration() {
