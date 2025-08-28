@@ -87,7 +87,7 @@ export default function ProjectDetailPage() {
                     {/* Hire Button */}
                     <div className="">
                         <Button
-                            onClick={() => router.push(`/talent/${talentId}`)}
+                            onClick={() => router.push(`/talent/${talentId}/send-offer`)}
                             className='bg-slate-800 w-full hover:bg-slate-700 text-white rounded-full flex-1 py-3 font-medium'
                         >
                             Hire
