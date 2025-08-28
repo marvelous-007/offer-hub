@@ -4,6 +4,8 @@
 
 # 🌟 OFFER-HUB | Decentralized Freelance Platform
 
+[![Frontend CI/CD](https://github.com/OFFER-HUB/offer-hub/workflows/Frontend%20CI%20CD/badge.svg)](https://github.com/OFFER-HUB/offer-hub/actions/workflows/frontend-ci.yml)
+
 Welcome to **OFFER-HUB**! This platform aims to revolutionize the freelance marketplace by leveraging **blockchain technology**, **cryptocurrency payments**, and **smart contracts** to create a secure and efficient environment for freelancers and clients worldwide.
 
 Our mission is to remove intermediaries, reduce fees, and empower users with tools to collaborate seamlessly in areas like design, programming, writing, and consulting. 🚀
