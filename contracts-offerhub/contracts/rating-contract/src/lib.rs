@@ -157,4 +157,12 @@ impl Contract {
     pub fn transfer_admin(env: Env, caller: Address, new_admin: Address) -> Result<(), Error> {
         RatingContract::transfer_admin(env, caller, new_admin)
     }
+
+    pub fn set_rate_limit_bypass(env: Env, admin: Address, user: Address, bypass: bool) -> Result<(), Error> {
+        RatingContract::set_rate_limit_bypass(env, admin, user, bypass)
+    }
+
+    pub fn reset_rate_limit(env: Env, admin: Address, user: Address, limit_type: String) -> Result<(), Error> {
+        RatingContract::reset_rate_limit(env, admin, user, limit_type)
+    }
 }

@@ -2,8 +2,9 @@ use crate::types::{
     Error, Feedback, IncentiveRecord, Rating, RatingStats, RatingThreshold,
     FeedbackReport, ADMIN, MODERATOR, RATING, FEEDBACK, USER_RATING_STATS, FEEDBACK_REPORTS, RATING_THRESHOLDS,
     INCENTIVE_RECORDS, REPUTATION_CONTRACT, PLATFORM_STATS, USER_RESTRICTIONS,
+    RATE_LIMITS, RATE_LIMIT_BYPASS, RateLimitEntry,
 };
-use soroban_sdk::{Address, Env, String, Vec};
+use soroban_sdk::{Address, Env, String, Symbol, Vec};
 
 // Admin and moderator management
 pub fn save_admin(env: &Env, admin: &Address) {
@@ -217,4 +218,63 @@ pub fn increment_platform_stat(env: &Env, stat_name: &String) {
 pub fn get_platform_stat(env: &Env, stat_name: &String) -> u32 {
     let key = (PLATFORM_STATS, stat_name.clone());
     env.storage().persistent().get(&key).unwrap_or(0)
+}
+
+// ================= Rate limiting =================
+fn rl_key<'a>(user: &'a Address, limit_type: &'a String) -> ( &'static [u8], Address, String) {
+    (RATE_LIMITS, user.clone(), limit_type.clone())
+}
+
+fn bypass_key(user: &Address) -> (&'static [u8], Address) {
+    (RATE_LIMIT_BYPASS, user.clone())
+}
+
+pub fn get_rate_limit(env: &Env, user: &Address, limit_type: &String) -> RateLimitEntry {
+    env.storage()
+        .persistent()
+        .get(&rl_key(user, limit_type))
+        .unwrap_or(RateLimitEntry { current_calls: 0, window_start: env.ledger().timestamp() })
+}
+
+pub fn set_rate_limit(env: &Env, user: &Address, limit_type: &String, entry: &RateLimitEntry) {
+    env.storage().persistent().set(&rl_key(user, limit_type), entry);
+}
+
+pub fn reset_rate_limit(env: &Env, user: &Address, limit_type: &String) {
+    let entry = RateLimitEntry { current_calls: 0, window_start: env.ledger().timestamp() };
+    set_rate_limit(env, user, limit_type, &entry);
+}
+
+pub fn set_rate_limit_bypass(env: &Env, admin: &Address, user: &Address, bypass: bool) -> Result<(), Error> {
+    // Simple admin check using stored admin
+    let current_admin = get_admin(env);
+    if &current_admin != admin {
+        return Err(Error::Unauthorized);
+    }
+    env.storage().persistent().set(&bypass_key(user), &bypass);
+    Ok(())
+}
+
+pub fn has_rate_limit_bypass(env: &Env, user: &Address) -> bool {
+    env.storage().persistent().get(&bypass_key(user)).unwrap_or(false)
+}
+
+pub fn check_rate_limit(env: &Env, user: &Address, limit_type: &String, max_calls: u32, time_window: u64) -> Result<(), Error> {
+    if has_rate_limit_bypass(env, user) {
+        return Ok(());
+    }
+    let now = env.ledger().timestamp();
+    let mut entry = get_rate_limit(env, user, limit_type);
+    if now.saturating_sub(entry.window_start) > time_window {
+        entry.current_calls = 0;
+        entry.window_start = now;
+    }
+    if entry.current_calls >= max_calls {
+        return Err(Error::RateLimitExceeded);
+    }
+    entry.current_calls += 1;
+    set_rate_limit(env, user, limit_type, &entry);
+    // emit a basic rate_limit event
+    env.events().publish((Symbol::new(env, "rate_limit"), user.clone()), (limit_type.clone(), entry.current_calls, entry.window_start));
+    Ok(())
 }
