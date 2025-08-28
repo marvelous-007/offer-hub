@@ -1,7 +1,7 @@
 #![cfg(test)]
 use super::*;
-use soroban_sdk::{testutils::{Address as _}, Address, Env, String, Vec};
-use crate::{Contract, Error, RatingStats, Feedback, UserRatingData};
+use soroban_sdk::{testutils::{Address as _, Ledger}, Address, Env, String, Vec};
+use crate::Contract;
 
 fn create_contract(e: &Env) -> Address {
     e.register(Contract, ())
@@ -10,7 +10,6 @@ fn create_contract(e: &Env) -> Address {
 #[test]
 fn test_rating_contract_initialization() {
     let env = Env::default();
-    env.mock_all_auths();
 
     // Test basic contract registration
     let contract_id = create_contract(&env);
@@ -19,6 +18,72 @@ fn test_rating_contract_initialization() {
     // Test that we can create a client
     let client = ContractClient::new(&env, &contract_id);
     assert!(client.address == contract_id);
+}
+
+#[test]
+#[should_panic]
+fn test_rate_limit_submit_rating_panics_on_6th() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let contract_id = create_contract(&env);
+    let client = ContractClient::new(&env, &contract_id);
+
+    // Init admin
+    let admin = Address::generate(&env);
+    client.init(&admin);
+
+    let caller = Address::generate(&env);
+    let rated_user = Address::generate(&env);
+    let _contract_str = String::from_str(&env, "c1");
+    let feedback = String::from_str(&env, "ok");
+    let category = String::from_str(&env, "web");
+
+    // Set a stable timestamp window start
+    env.ledger().with_mut(|l| l.timestamp = 10_000);
+
+    // 5 calls should pass with different contract IDs, 6th should panic due to rate limit
+    for i in 0..5 {
+        let cid = String::from_str(&env, match i {0=>"c1",1=>"c2",2=>"c3",3=>"c4",_=>"c5"});
+        client.submit_rating(&caller, &rated_user, &cid, &5u32, &feedback, &category);
+    }
+    let cid6 = String::from_str(&env, "c6");
+    client.submit_rating(&caller, &rated_user, &cid6, &5u32, &feedback, &category);
+}
+
+#[test]
+fn test_rate_limit_window_and_bypass() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let contract_id = create_contract(&env);
+    let client = ContractClient::new(&env, &contract_id);
+
+    // Init admin
+    let admin = Address::generate(&env);
+    client.init(&admin);
+
+    let caller = Address::generate(&env);
+    let rated_user = Address::generate(&env);
+    let contract_str = String::from_str(&env, "c1");
+    let feedback = String::from_str(&env, "ok");
+    let category = String::from_str(&env, "web");
+
+    // Set a stable timestamp window start
+    env.ledger().with_mut(|l| l.timestamp = 10_000);
+
+    for i in 0..5 {
+        let cid = String::from_str(&env, match i {0=>"w1",1=>"w2",2=>"w3",3=>"w4",_=>"w5"});
+        client.submit_rating(&caller, &rated_user, &cid, &5u32, &feedback, &category);
+    }
+    // window advance resets
+    env.ledger().with_mut(|l| l.timestamp += 3601);
+    client.submit_rating(&caller, &rated_user, &contract_str, &5u32, &feedback, &category);
+
+    // Bypass
+    client.set_rate_limit_bypass(&admin, &caller, &true);
+    for i in 0..3 {
+        let cid = String::from_str(&env, match i {0=>"b1",1=>"b2",_=>"b3"});
+        client.submit_rating(&caller, &rated_user, &cid, &5u32, &feedback, &category);
+    }
 }
 
 #[test]
@@ -55,8 +120,7 @@ fn test_rating_data_structures() {
     assert_ne!(rater, rated_user);
     
     // Test timestamp
-    let timestamp = env.ledger().timestamp();
-    assert!(timestamp >= 0); // Timestamp can be 0 in test environment
+    let _timestamp = env.ledger().timestamp();
 }
 
 #[test]
