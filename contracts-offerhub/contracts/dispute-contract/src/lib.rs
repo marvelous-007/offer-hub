@@ -5,6 +5,10 @@ mod contract;
 mod storage;
 mod test;
 mod types;
+mod validation;
+
+#[cfg(test)]
+mod validation_test;
 
 use crate::types::{DisputeData, DisputeOutcome, Error, Evidence, ArbitratorData};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};

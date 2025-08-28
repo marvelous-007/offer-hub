@@ -7,6 +7,7 @@ mod storage;
 mod types;
 mod test;
 mod basic_test;
+mod validation;
 
 use crate::contract::UserRegistryContract;
 use crate::types::{Error, UserProfile, UserStatus, VerificationLevel};

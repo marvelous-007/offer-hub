@@ -13,7 +13,7 @@ use crate::types::{
     Error, Rating, RatingStats, Feedback, UserRatingData, RatingThreshold,
     require_auth
 };
-use crate::validation::{validate_rating, validate_feedback, validate_rating_eligibility, check_spam_prevention};
+use crate::validation::{validate_submit_rating, validate_report_feedback, validate_address};
 use soroban_sdk::{Address, Env, String, Vec, IntoVal};
 
 pub struct RatingContract;
@@ -55,11 +55,8 @@ impl RatingContract {
     ) -> Result<(), Error> {
         require_auth(&caller)?;
         
-        // Validate inputs
-        validate_rating(rating)?;
-        validate_feedback(&feedback)?;
-        validate_rating_eligibility(&env, &caller, &rated_user, &contract_id)?;
-        check_spam_prevention(&env, &caller)?;
+        // Comprehensive input validation
+        validate_submit_rating(&env, &caller, &rated_user, &contract_id, rating, &feedback, &work_category)?;
         
         // Generate unique IDs
         let rating_id = Self::generate_rating_id(&env, &caller, &rated_user, &contract_id);
@@ -166,6 +163,8 @@ impl RatingContract {
         feedback_id: String,
         reason: String,
     ) -> Result<(), Error> {
+        // Input validation
+        validate_report_feedback(&env, &caller, &feedback_id, &reason)?;
         report_feedback_impl(&env, &caller, &feedback_id, &reason)
     }
 

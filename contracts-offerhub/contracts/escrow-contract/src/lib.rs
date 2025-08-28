@@ -5,6 +5,10 @@ mod contract;
 mod error;
 mod storage;
 mod types;
+mod validation;
+
+#[cfg(test)]
+mod validation_test;
 
 #[contract]
 pub struct EscrowContract;

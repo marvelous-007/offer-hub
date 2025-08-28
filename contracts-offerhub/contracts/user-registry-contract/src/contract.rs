@@ -2,6 +2,7 @@ use crate::access::AccessControl;
 use crate::events::*;
 use crate::storage::*;
 use crate::types::{require_auth, Error, PublicationStatus, UserProfile, UserStatus, VerificationLevel};
+use crate::validation::{validate_user_verification, validate_bulk_verification, validate_metadata_update, validate_address};
 use soroban_sdk::{Address, Env, String, Vec};
 
 pub struct UserRegistryContract;
@@ -69,6 +70,9 @@ impl UserRegistryContract {
         metadata: String,
     ) -> Result<(), Error> {
         AccessControl::require_admin_or_moderator(&env, &admin)?;
+        
+        // Input validation
+        validate_user_verification(&env, &admin, &user, &level, expires_at, &metadata)?;
         
         // Check if user is blacklisted
         if is_blacklisted(&env, &user) {
@@ -221,6 +225,9 @@ impl UserRegistryContract {
     ) -> Result<(), Error> {
         AccessControl::require_admin(&env, &admin)?;
         
+        // Input validation
+        validate_bulk_verification(&env, &admin, &users, &level, expires_at, &metadata)?;
+        
         let mut verified_count = 0u32;
         
         for i in 0..users.len() {
@@ -265,6 +272,9 @@ impl UserRegistryContract {
         user: Address,
         metadata: String,
     ) -> Result<(), Error> {
+        // Input validation
+        validate_metadata_update(&env, &caller, &user, &metadata)?;
+        
         // User can update their own metadata, or admin/moderator can update any user's metadata
         if caller != user {
             AccessControl::require_admin_or_moderator(&env, &caller)?;
