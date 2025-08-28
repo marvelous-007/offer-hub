@@ -39,7 +39,7 @@ fn test_deposit_and_release_token() {
     let arbitrator = Address::generate(&env);
     let token = setup_token(&env);
     let amount = 500;
-    let timeout = 100;
+    let timeout = 3600; // 1 hour (minimum allowed)
 
     contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
     contract.deposit_funds(&client);
@@ -65,7 +65,7 @@ fn test_deposit_insufficient_balance() {
     let arbitrator = Address::generate(&env);
     let token = setup_token(&env);
     let amount = 500_000_000;
-    let timeout = 100;
+    let timeout = 3600; // 1 hour (minimum allowed)
 
     contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
     contract.deposit_funds(&client);
@@ -85,7 +85,7 @@ fn test_resolve_dispute_arbitrator_only_panics_for_non_arbitrator() {
     let arbitrator = Address::generate(&env);
     let token = setup_token(&env);
     let amount = 500;
-    let timeout = 100;
+    let timeout = 3600; // 1 hour (minimum allowed)
 
     contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
     contract.deposit_funds(&client);
@@ -111,7 +111,7 @@ fn test_resolve_dispute_panics_for_non_arbitrator() {
     let arbitrator = Address::generate(&env);
     let token = setup_token(&env);
     let amount = 500;
-    let timeout = 100;
+    let timeout = 3600; // 1 hour (minimum allowed)
 
     contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
     contract.deposit_funds(&client);
@@ -134,7 +134,7 @@ fn test_resolve_dispute_unauthorized() {
     let arbitrator = Address::generate(&env);
     let token = setup_token(&env);
     let amount = 500;
-    let timeout = 100;
+    let timeout = 3600; // 1 hour (minimum allowed)
 
     contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
     contract.deposit_funds(&client);
@@ -159,7 +159,7 @@ fn test_auto_release_after_timeout() {
     let arbitrator = Address::generate(&env);
     let token = setup_token(&env);
     let amount = 500;
-    let timeout = 100;
+    let timeout = 3600; // 1 hour (minimum allowed)
 
     contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
     contract.deposit_funds(&client);
@@ -185,7 +185,7 @@ fn test_auto_release_panics_if_not_timed_out() {
     let arbitrator = Address::generate(&env);
     let token = setup_token(&env);
     let amount = 500;
-    let timeout = 100;
+    let timeout = 3600; // 1 hour (minimum allowed)
 
     contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
     contract.deposit_funds(&client);
@@ -260,7 +260,7 @@ fn test_dispute_resolution() {
     let arbitrator = Address::generate(&env);
     let token = setup_token(&env);
     let amount = 1000;
-    let timeout = 100;
+    let timeout = 3600; // 1 hour (minimum allowed)
 
     contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
     contract.deposit_funds(&client);
@@ -293,7 +293,7 @@ fn test_basic_authorization() {
     contract.init_contract(&client, &freelancer, &amount, &fee_manager);
     contract.deposit_funds(&client);
 
-    let milestone_desc = String::from_str(&env, "Task");
+    let milestone_desc = String::from_str(&env, "Task Description");
     let milestone_id = contract.add_milestone(&client, &milestone_desc, &500);
     
     let milestones = contract.get_milestones();
@@ -318,12 +318,12 @@ fn test_timeout_functionality() {
     let arbitrator = Address::generate(&env);
     let token = setup_token(&env);
     let amount = 1000;
-    let timeout = 100;
+    let timeout = 3600; // 1 hour (minimum allowed)
 
     contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
     contract.deposit_funds(&client);
 
-    env.ledger().with_mut(|l| l.timestamp = 1200);
+    env.ledger().with_mut(|l| l.timestamp = 5000); // After timeout (1000 + 3600 = 4600)
 
     contract.auto_release();
     let data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
@@ -392,7 +392,7 @@ fn test_successful_escrow_flow() {
     let funded_data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
     assert_eq!(funded_data.status, EscrowStatus::Funded);
 
-    let milestone_desc = String::from_str(&env, "Task");
+    let milestone_desc = String::from_str(&env, "Task Description");
     let milestone_id = contract.add_milestone(&client, &milestone_desc, &500);
     let milestones = contract.get_milestones();
     assert_eq!(milestones.len(), 1);

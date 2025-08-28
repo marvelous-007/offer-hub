@@ -243,7 +243,7 @@ fn test_verification_expiration() {
     env.mock_all_auths();
     env.as_contract(&contract_id, || {
         let metadata = String::from_str(&env, "Short-lived verification");
-        let expires_at = env.ledger().timestamp() + 1; // 1 second
+        let expires_at = env.ledger().timestamp() + 86400; // 1 day (minimum allowed)
         
         Contract::verify_user(
             env.clone(),

@@ -43,7 +43,7 @@ pub fn validate_withdrawal_amount(amount: i128, balance: i128) -> Result<(), Err
 /// Validate fee type
 pub fn validate_fee_type(fee_type: u32) -> Result<(), Error> {
     match fee_type {
-        1 | 2 => Ok(), // FEE_TYPE_ESCROW = 1, FEE_TYPE_DISPUTE = 2
+        1 | 2 => Ok(()), // FEE_TYPE_ESCROW = 1, FEE_TYPE_DISPUTE = 2
         _ => Err(Error::InvalidFeeType),
     }
 }

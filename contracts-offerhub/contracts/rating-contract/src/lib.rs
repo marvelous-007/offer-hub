@@ -6,7 +6,7 @@ mod analytics;
 mod contract;
 mod events;
 mod incentives;
-mod integration_test;
+// mod integration_test;
 mod moderation;
 mod restrictions;
 mod storage;

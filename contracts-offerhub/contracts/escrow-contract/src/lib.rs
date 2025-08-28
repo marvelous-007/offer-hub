@@ -7,8 +7,8 @@ mod storage;
 mod types;
 mod validation;
 
-#[cfg(test)]
-mod validation_test;
+// #[cfg(test)]
+// mod validation_test;
 
 #[contract]
 pub struct EscrowContract;

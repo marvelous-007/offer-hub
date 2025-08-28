@@ -21,8 +21,8 @@ pub fn validate_metadata(metadata: &String) -> Result<(), Error> {
 pub fn validate_verification_level(level: &VerificationLevel) -> Result<(), Error> {
     match level {
         VerificationLevel::Basic | 
-        VerificationLevel::Enhanced | 
-        VerificationLevel::Premium => Ok(()),
+        VerificationLevel::Premium | 
+        VerificationLevel::Enterprise => Ok(()),
         // Add any invalid cases if needed
     }
 }
@@ -30,7 +30,7 @@ pub fn validate_verification_level(level: &VerificationLevel) -> Result<(), Erro
 /// Validate expiration timestamp
 pub fn validate_expiration(env: &Env, expires_at: u64) -> Result<(), Error> {
     if expires_at == 0 {
-        return Ok(); // 0 means no expiration
+        return Ok(()); // 0 means no expiration
     }
     
     let current_time = env.ledger().timestamp();
