@@ -6,6 +6,7 @@ use crate::{
     types::{DisputeResult, Error, EscrowData, EscrowStatus, Milestone, MilestoneHistory},
     validation::{validate_init_contract, validate_init_contract_full, validate_add_milestone, validate_milestone_id, validate_address},
 };
+use crate::storage::{check_rate_limit, set_rate_limit_bypass_flag, reset_rate_limit as rl_reset};
 
 const TOKEN_TRANSFER: &str = "transfer";
 const TOKEN_BALANCE: &str = "balance";
@@ -311,6 +312,12 @@ pub fn add_milestone(env: &Env, client: Address, desc: String, amount: i128) -> 
     
     let mut escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
 
+    // Rate limit: max 10 milestones per hour per client for this escrow
+    let limit_type = String::from_str(env, "add_milestone");
+    if let Err(e) = check_rate_limit(env, &client, &limit_type, 10, 3600) {
+        handle_error(env, e);
+    }
+
     if escrow.client != client {
         handle_error(env, Error::Unauthorized);
     }
@@ -343,6 +350,22 @@ pub fn add_milestone(env: &Env, client: Address, desc: String, amount: i128) -> 
         (m_id, desc.clone(), amount, env.ledger().timestamp()),
     );
     m_id
+}
+
+// Admin helpers for rate limiting: admin is the escrow client
+pub fn set_rate_limit_bypass(env: &Env, caller: Address, user: Address, bypass: bool) {
+    caller.require_auth();
+    // Only escrow client can toggle bypass
+    let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+    if escrow.client != caller { handle_error(env, Error::Unauthorized); }
+    set_rate_limit_bypass_flag(env, &user, bypass);
+}
+
+pub fn reset_rate_limit(env: &Env, caller: Address, user: Address, limit_type: String) {
+    caller.require_auth();
+    let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+    if escrow.client != caller { handle_error(env, Error::Unauthorized); }
+    rl_reset(env, &user, &limit_type);
 }
 
 // CORREGIDO: usar índice correcto (milestone_id - 1)
