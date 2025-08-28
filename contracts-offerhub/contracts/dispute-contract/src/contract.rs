@@ -4,7 +4,7 @@ use crate::{
     access::{is_valid_arbitrator, is_valid_mediator},
     storage::{ARBITRATOR, DISPUTES, DISPUTE_TIMEOUT, ESCROW_CONTRACT, FEE_MANAGER, check_rate_limit},
     types::{DisputeData, DisputeLevel, DisputeOutcome, DisputeStatus, Error, Evidence},
-    validation::{validate_open_dispute, validate_add_evidence, validate_timeout_duration, validate_address, validate_different_addresses},
+    validation::{validate_open_dispute, validate_add_evidence, validate_timeout_duration, validate_address},
 };
 
 // Escrow integration constants

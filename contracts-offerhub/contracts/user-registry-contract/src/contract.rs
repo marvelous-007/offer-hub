@@ -2,7 +2,7 @@ use crate::access::AccessControl;
 use crate::events::*;
 use crate::storage::*;
 use crate::types::{require_auth, Error, PublicationStatus, UserProfile, UserStatus, VerificationLevel};
-use crate::validation::{validate_user_verification, validate_bulk_verification, validate_metadata_update, validate_address};
+use crate::validation::{validate_user_verification, validate_bulk_verification, validate_metadata_update};
 use soroban_sdk::{Address, Env, String, Vec};
 
 pub struct UserRegistryContract;

@@ -14,7 +14,7 @@ use crate::types::{
     Error, Rating, RatingStats, Feedback, UserRatingData, RatingThreshold,
     require_auth
 };
-use crate::validation::{validate_submit_rating, validate_report_feedback, validate_address};
+use crate::validation::{validate_submit_rating, validate_report_feedback};
 use soroban_sdk::{Address, Env, String, Vec, IntoVal};
 
 pub struct RatingContract;
