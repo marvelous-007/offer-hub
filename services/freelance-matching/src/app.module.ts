@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { PrismaModule } from './prisma/prisma.module';
 import * as Joi from 'joi';
 
 @Module({
@@ -19,6 +20,7 @@ import * as Joi from 'joi';
         JWT_EXPIRATION: Joi.string().default('1h'),
       }),
     }),
+    PrismaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
