@@ -2,7 +2,6 @@ use soroban_sdk::{Address, Env, String};
 use crate::types::Error;
 
 // Validation constants
-const MIN_AMOUNT: i128 = 1;
 const MAX_AMOUNT: i128 = 1_000_000_000_000; // 1 trillion stroops
 const MIN_TIMEOUT_SECONDS: u64 = 3600; // 1 hour
 const MAX_TIMEOUT_SECONDS: u64 = 31_536_000; // 1 year

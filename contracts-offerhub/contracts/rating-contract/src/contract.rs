@@ -7,13 +7,14 @@ use crate::restrictions::{check_and_apply_restrictions, get_user_privileges, che
 use crate::storage::{
     save_admin, get_admin, save_rating, save_feedback, get_user_rating_stats, 
     save_user_rating_stats, increment_platform_stat, save_rating_threshold, add_user_feedback_id, get_user_feedback_ids, get_feedback,
-    get_user_rating_history, save_reputation_contract, get_reputation_contract
+    get_user_rating_history, save_reputation_contract, get_reputation_contract,
+    check_rate_limit, set_rate_limit_bypass, reset_rate_limit,
 };
 use crate::types::{
     Error, Rating, RatingStats, Feedback, UserRatingData, RatingThreshold,
     require_auth
 };
-use crate::validation::{validate_submit_rating, validate_report_feedback, validate_address};
+use crate::validation::{validate_submit_rating, validate_report_feedback};
 use soroban_sdk::{Address, Env, String, Vec, IntoVal};
 
 pub struct RatingContract;
@@ -54,6 +55,10 @@ impl RatingContract {
         work_category: String,
     ) -> Result<(), Error> {
         require_auth(&caller)?;
+    // Rate limit: max 5 per hour per user
+    let limit_type = String::from_str(&env, "submit_rating");
+    // 3600 seconds
+    check_rate_limit(&env, &caller, &limit_type, 5, 3600)?;
         
         // Comprehensive input validation
         validate_submit_rating(&env, &caller, &rated_user, &contract_id, rating, &feedback, &work_category)?;
@@ -109,6 +114,19 @@ impl RatingContract {
         emit_rating_submitted(&env, &caller, &rated_user, &contract_id, rating, &rating_id);
         emit_feedback_submitted(&env, &caller, &rated_user, &feedback_id, &contract_id);
         
+        Ok(())
+    }
+
+    // Admin: toggle rate limit bypass for a user
+    pub fn set_rate_limit_bypass(env: Env, admin: Address, user: Address, bypass: bool) -> Result<(), Error> {
+        set_rate_limit_bypass(&env, &admin, &user, bypass)
+    }
+
+    // Admin: reset a user's rate limit window for a type
+    pub fn reset_rate_limit(env: Env, admin: Address, user: Address, limit_type: String) -> Result<(), Error> {
+        // simple admin auth
+        if get_admin(&env) != admin { return Err(Error::Unauthorized); }
+        reset_rate_limit(&env, &user, &limit_type);
         Ok(())
     }
 

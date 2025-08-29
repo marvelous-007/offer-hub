@@ -290,8 +290,8 @@ pub fn is_archived(env: Env, escrow_id: Option<u32>, escrow_address: Option<Addr
         if let Some(id) = storage::escrow_id_by_addr(&env, &addr) {
             return storage::is_archived(&env, id);
         }
-        handle_error(&Env::default(), Error::EscrowIdNotFoundError);
+        handle_error(&env, Error::EscrowIdNotFoundError);
     }
 
-    handle_error(&Env::default(), Error::EscrowInfoNotSet)
+    handle_error(&env, Error::EscrowInfoNotSet)
 }

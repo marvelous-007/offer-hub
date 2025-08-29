@@ -2,7 +2,6 @@ use soroban_sdk::{Address, Env, String, Vec};
 use crate::types::{Error, VerificationLevel};
 
 // Validation constants
-const MIN_METADATA_LENGTH: u32 = 0; // Allow empty metadata
 const MAX_METADATA_LENGTH: u32 = 500;
 const MIN_EXPIRATION_DURATION: u64 = 86400; // 1 day
 const MAX_EXPIRATION_DURATION: u64 = 31_536_000; // 1 year

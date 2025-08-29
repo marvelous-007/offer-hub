@@ -3,7 +3,7 @@ use soroban_sdk::{contract, contractimpl, Address, Env, String, Symbol};
 use crate::error::ContractError;
 use crate::event;
 use crate::storage::{DataKey, PublicationData};
-use crate::utils::{ValidationHelpers, StorageOptimizer};
+use crate::utils::StorageOptimizer;
 use crate::validation::validate_publication;
 
 #[contract]

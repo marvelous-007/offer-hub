@@ -2,9 +2,9 @@ use soroban_sdk::{panic_with_error, Address, Env, Map, String, Vec, Symbol, Into
 
 use crate::{
     access::{is_valid_arbitrator, is_valid_mediator},
-    storage::{ARBITRATOR, DISPUTES, DISPUTE_TIMEOUT, ESCROW_CONTRACT, FEE_MANAGER},
+    storage::{ARBITRATOR, DISPUTES, DISPUTE_TIMEOUT, ESCROW_CONTRACT, FEE_MANAGER, check_rate_limit},
     types::{DisputeData, DisputeLevel, DisputeOutcome, DisputeStatus, Error, Evidence},
-    validation::{validate_open_dispute, validate_add_evidence, validate_timeout_duration, validate_address, validate_different_addresses},
+    validation::{validate_open_dispute, validate_add_evidence, validate_timeout_duration, validate_address},
 };
 
 // Escrow integration constants
@@ -67,6 +67,11 @@ pub fn open_dispute(
     if !env.storage().instance().has(&ARBITRATOR) {
         panic_with_error!(env, Error::NotInitialized);
     }
+
+    // Rate limit: max 3 disputes per 24h per initiator
+    let limit_type = String::from_str(env, "open_dispute");
+    // 24h in seconds
+    let _ = check_rate_limit(env, &initiator, &limit_type, 3, 24 * 3600).map_err(|e| panic_with_error!(env, e));
 
     // Input validation
     if let Err(e) = validate_open_dispute(env, job_id, &initiator, &reason, dispute_amount) {
