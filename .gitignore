@@ -46,3 +46,6 @@ next-env.d.ts
 #IDE/Editors 
 ./vscode
 ./idea
+
+# Freelance matching service dependencies
+/services/freelance-matching/node_modules/
