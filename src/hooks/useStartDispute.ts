@@ -6,14 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { formSchema } from "../schemas/start-dispute-form.schema";
 import { toast } from "sonner";
-// import {
-//   StartDisputePayload,
-//   EscrowRequestResponse,
-// } from "@trustless-work/escrow/types"; // Temporarily commented - types not exported correctly
-// import {
-//   useSendTransaction,
-//   useStartDispute as useStartDisputeHook,
-// } from "@trustless-work/escrow/hooks"; // Temporarily commented
 
 export const useStartDisputeForm = () => {
   const [loading, setLoading] = useState(false);
