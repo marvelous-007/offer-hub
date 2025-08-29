@@ -7,9 +7,6 @@ import { signTransaction } from "../auth/helpers/stellar-wallet-kit.hellper"
 import { handleError } from "@/errors/utils/handle-errors"
 import type { AxiosError } from "axios"
 import type { WalletError } from "@/types/errors.entity"
-// import type { EscrowRequestResponse, ResolveDisputePayload } from "@trustless-work/escrow/types" // Temporarily commented - types not exported correctly
-// import { useResolveDispute as useResolveDisputeAPI, useSendTransaction } from "@trustless-work/escrow/hooks" // Temporarily commented
-
 export const useResolveDispute = () => {
   const [loading, setLoading] = useState(false)
   const [response, setResponse] = useState<any | null>(null) // Temporarily using any

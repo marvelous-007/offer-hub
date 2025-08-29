@@ -1,6 +1,4 @@
 import { useState } from 'react';
-// import { useUpdateEscrow as usePackageUpdateEscrow, useSendTransaction, UpdateEscrowPayload, UpdateEscrowResponse } from '@trustless-work/escrow'; // Temporarily commented - types not exported correctly
-
 /**
  * Hook to update escrow details using the @trustless-work/escrow package.
  * @Note:
