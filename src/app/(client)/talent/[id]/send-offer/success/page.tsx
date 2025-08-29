@@ -31,8 +31,7 @@ export default function OfferSuccessPage() {
   }, [])
 
   const handleMessage = () => {
-    // Navigate to messaging or back to talent profile
-    router.push(`/talent/${talentId}`)
+    router.push(`/talent/${talentId}/messages`)
   }
 
   return (

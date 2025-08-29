@@ -3,10 +3,11 @@ import { useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
-import { useTalentData } from "@/hooks/useTalentData"
+import { useTalentData } from "@/hooks/talent/useTalentData"
 import { MessageBubble } from "@/components/messaging/MessageBubble"
-import { MessageInput } from "@/components/messaging/MessageInput"
+import { MessageInputs } from "@/components/messaging/MessageInputs"
 import Image from "next/image"
+import TalentLayout from "@/components/talent/talents/TalentLayout"
 
 interface Message {
   id: string
@@ -20,7 +21,7 @@ export default function MessagesPage() {
   const router = useRouter()
   const talentId = params.id as string
   const { getTalentById } = useTalentData()
-  const talent = getTalentById(talentId)
+  const talent = getTalentById(Number(talentId))
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -55,11 +56,19 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <section className="min-h-screen bg-gray-100">
+         <div className='bg-white px-6 py-2'>
+        <div className='flex items-center justify-between'>
+          <div className='flex-1 text-center'>
+            <h1 className='text-base font-bold text-gray-900'>Message</h1>
+          </div>
+        </div>
+      </div>
+        <TalentLayout padding="p-0" borderRadius="">
+    <div className="flex flex-col">
       {/* Header */}
-      <div className="bg-teal-100 px-4 py-4 flex items-center gap-3">
+      <div className="bg-teal-100 flex  py-4">
         <Button variant="ghost" size="icon" onClick={handleBack} className="text-gray-700 hover:text-gray-900">
-          <ArrowLeft className="w-5 h-5" />
         </Button>
 
         <div className="flex items-center gap-3">
@@ -76,7 +85,7 @@ export default function MessagesPage() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6">
+      <div className="flex-1 overflow-y-auto px-10 py-6">
         {messages.map((message) => (
           <MessageBubble
             key={message.id}
@@ -88,7 +97,11 @@ export default function MessagesPage() {
       </div>
 
       {/* Message Input */}
-      <MessageInput onSendMessage={handleSendMessage} />
+      <div className="pt-28">
+        <MessageInputs onSendMessage={handleSendMessage} />
+      </div>
     </div>
+    </TalentLayout>
+    </section>
   )
 }
