@@ -32,19 +32,11 @@ export function signRefreshToken(payload: Omit<JWTPayload, "iat" | "exp">) {
 }
 
 export function verifyAccessToken(token: string): JWTPayload {
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
-    return decoded;
-  } catch (err) {
-    throw err;
-  }
+  const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
+  return decoded;
 }
 
 export function verifyRefreshToken(token: string): JWTPayload {
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
-    return decoded;
-  } catch (err) {
-    throw err;
-  }
+  const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
+  return decoded;
 }
