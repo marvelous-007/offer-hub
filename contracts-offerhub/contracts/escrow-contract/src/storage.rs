@@ -1,4 +1,4 @@
-use soroban_sdk::{contracttype, symbol_short, Address, Env, String, Symbol};
+use soroban_sdk::{contracttype, symbol_short, Address, Env, String, Symbol, Vec};
 use crate::types::Error;
 
 pub const ESCROW_DATA: Symbol = symbol_short!("ESCROW");
@@ -8,11 +8,27 @@ pub const INITIALIZED: Symbol = symbol_short!("INIT");
 pub const RATE_LIMITS: Symbol = symbol_short!("RLIM");
 pub const RATE_BYPASS: Symbol = symbol_short!("RLBYP");
 
+// Logging storage keys
+pub const CALL_LOGS: Symbol = symbol_short!("LOGS");
+pub const LOG_COUNT: Symbol = symbol_short!("LCOUNT");
+pub const MAX_LOGS: u32 = 100;
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[contracttype]
 pub struct RateLimitEntry {
 	pub current_calls: u32,
 	pub window_start: u64,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[contracttype]
+pub struct CallLog {
+    pub function_name: String,
+    pub caller: Address,
+    pub timestamp: u64,
+    pub success: bool,
+    pub gas_used: u64,
+    pub transaction_hash: String,
 }
 
 fn rl_key(user: &Address, kind: &String) -> (Symbol, Address, String) { (RATE_LIMITS, user.clone(), kind.clone()) }
@@ -48,4 +64,47 @@ pub fn check_rate_limit(env: &Env, user: &Address, kind: &String, max_calls: u32
 pub fn reset_rate_limit(env: &Env, user: &Address, kind: &String) {
 	let entry = RateLimitEntry { current_calls: 0, window_start: env.ledger().timestamp() };
 	env.storage().persistent().set(&rl_key(user, kind), &entry);
+}
+
+// Logging functions
+pub fn add_call_log(env: &Env, log: &CallLog) {
+    let mut count = env.storage().instance().get(&LOG_COUNT).unwrap_or(0);
+    
+    // Rotate logs if we exceed MAX_LOGS
+    if count >= MAX_LOGS {
+        // Remove oldest log (index 0) and shift all logs down
+        for i in 0..count-1 {
+            if let Some(next_log) = env.storage().instance().get::<(Symbol, u32), CallLog>(&(CALL_LOGS, i + 1)) {
+                env.storage().instance().set(&(CALL_LOGS, i), &next_log);
+            }
+        }
+        count = MAX_LOGS - 1;
+    }
+    
+    // Add new log
+    env.storage().instance().set(&(CALL_LOGS, count), log);
+    env.storage().instance().set(&LOG_COUNT, &(count + 1));
+}
+
+pub fn get_call_logs(env: &Env) -> Vec<CallLog> {
+    let count = env.storage().instance().get(&LOG_COUNT).unwrap_or(0);
+    let mut logs = Vec::new(env);
+    
+    for i in 0..count {
+        if let Some(log) = env.storage().instance().get::<(Symbol, u32), CallLog>(&(CALL_LOGS, i)) {
+            logs.push_back(log);
+        }
+    }
+    
+    logs
+}
+
+pub fn clear_call_logs(env: &Env) {
+    let count = env.storage().instance().get(&LOG_COUNT).unwrap_or(0);
+    
+    for i in 0..count {
+        env.storage().instance().remove(&(CALL_LOGS, i));
+    }
+    
+    env.storage().instance().set(&LOG_COUNT, &0);
 }
