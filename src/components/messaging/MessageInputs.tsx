@@ -29,7 +29,7 @@ export function MessageInputs({ onSendMessage, placeholder = "Message" }: Messag
   }
 
   return (
-    <div className="bg-white p-4">
+    <div className="bg-gray-100 rounded-full">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" className="text-gray-500 hover:text-gray-700">
           <Smile className="w-5 h-5" />
@@ -41,7 +41,7 @@ export function MessageInputs({ onSendMessage, placeholder = "Message" }: Messag
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
-            className="pr-20 rounded-full border-gray-300 focus:border-blue-500"
+            className="pr-20 rounded-full bg-transparent focus:ring-0 ring-0 border-none border-transparent focus:border-none"
           />
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
             <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-gray-700">
