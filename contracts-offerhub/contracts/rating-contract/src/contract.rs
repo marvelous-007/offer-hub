@@ -11,7 +11,7 @@ use crate::storage::{
     check_rate_limit, set_rate_limit_bypass, reset_rate_limit,
 };
 use crate::types::{
-    Error, Rating, RatingStats, Feedback, UserRatingData, RatingThreshold,
+    Error, Rating, RatingStats, Feedback, UserRatingData, RatingThreshold, HealthCheckResult,
     require_auth
 };
 use crate::validation::{validate_submit_rating, validate_report_feedback};
@@ -41,6 +41,9 @@ impl RatingContract {
             value: crate::types::DEFAULT_TOP_RATED_THRESHOLD,
         };
         save_rating_threshold(&env, &top_rated_threshold);
+        
+        // Initialize health check system
+        crate::health_check::initialize_health_check_system(&env)?;
         
         Ok(())
     }
@@ -399,5 +402,22 @@ impl RatingContract {
         emit_rating_stats_updated(env, user, stats.average_rating, stats.total_ratings);
 
         Ok(())
+    }
+
+    // Health check functions
+    pub fn health_check(env: Env) -> Result<HealthCheckResult, Error> {
+        crate::health_check::perform_health_check(&env)
+    }
+
+    pub fn admin_health_check(env: Env, caller: Address) -> Result<HealthCheckResult, Error> {
+        crate::health_check::admin_health_check(&env, &caller)
+    }
+
+    pub fn get_last_health_check(env: Env) -> u64 {
+        crate::storage::get_last_health_check(&env)
+    }
+
+    pub fn get_contract_version(env: Env) -> String {
+        crate::storage::get_contract_version(&env)
     }
 }

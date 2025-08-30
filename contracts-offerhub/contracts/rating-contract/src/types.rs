@@ -97,6 +97,27 @@ pub struct IncentiveRecord {
     pub timestamp: u64,
 }
 
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct HealthStatus {
+    pub is_healthy: bool,
+    pub issues: Vec<String>,
+    pub last_check: u64,
+    pub gas_used: u64,
+    pub contract_version: String,
+    pub admin_set: bool,
+    pub storage_accessible: bool,
+    pub critical_params_valid: bool,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct HealthCheckResult {
+    pub status: HealthStatus,
+    pub details: Vec<String>,
+    pub recommendations: Vec<String>,
+}
+
 // Storage keys
 pub const ADMIN: &[u8] = &[0];
 pub const MODERATOR: &[u8] = &[1];
