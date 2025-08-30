@@ -2,7 +2,7 @@ use soroban_sdk::{Address, Env, IntoVal, String, Symbol, Vec};
 
 use crate::{
     error::handle_error,
-    storage::{ESCROW_DATA, INITIALIZED},
+    storage::{ESCROW_DATA, INITIALIZED, add_call_log, CallLog},
     types::{DisputeResult, Error, EscrowData, EscrowStatus, Milestone, MilestoneHistory},
     validation::{validate_init_contract, validate_init_contract_full, validate_add_milestone, validate_milestone_id, validate_address},
 };
@@ -10,6 +10,25 @@ use crate::storage::{check_rate_limit, set_rate_limit_bypass_flag, reset_rate_li
 
 const TOKEN_TRANSFER: &str = "transfer";
 const TOKEN_BALANCE: &str = "balance";
+
+// Helper function to log function calls
+fn log_function_call(
+    env: &Env,
+    function_name: &str,
+    caller: &Address,
+    success: bool,
+) {
+    let log = CallLog {
+        function_name: String::from_str(env, function_name),
+        caller: caller.clone(),
+        timestamp: env.ledger().timestamp(),
+        success,
+        gas_used: 0, // Soroban doesn't provide gas_used method
+        transaction_hash: String::from_str(env, "unknown"), // Soroban doesn't provide transaction_hash method
+    };
+    
+    add_call_log(env, &log);
+}
 
 pub fn init_contract_full(
     env: &Env,
@@ -20,6 +39,11 @@ pub fn init_contract_full(
     amount: i128,
     timeout_secs: u64,
 ) {
+    let caller = client.clone();
+    
+    // Log function call start
+    log_function_call(env, "init_contract_full", &caller, true);
+    
     if env.storage().instance().has(&INITIALIZED) {
         handle_error(env, Error::AlreadyInitialized);
     }
@@ -60,6 +84,11 @@ pub fn init_contract(
     amount: i128,
     fee_manager: Address,
 ) {
+    let caller = client.clone();
+    
+    // Log function call start
+    log_function_call(env, "init_contract", &caller, true);
+    
     if env.storage().instance().has(&INITIALIZED) {
         handle_error(env, Error::AlreadyInitialized);
     }
@@ -96,6 +125,11 @@ pub fn init_contract(
 }
 
 pub fn deposit_funds(env: &Env, client: Address) {
+    let caller = client.clone();
+    
+    // Log function call start
+    log_function_call(env, "deposit_funds", &caller, true);
+    
     client.require_auth();
 
     if !env.storage().instance().has(&INITIALIZED) {
@@ -141,6 +175,11 @@ pub fn deposit_funds(env: &Env, client: Address) {
 }
 
 pub fn release_funds(env: &Env, freelancer: Address) {
+    let caller = freelancer.clone();
+    
+    // Log function call start
+    log_function_call(env, "release_funds", &caller, true);
+    
     freelancer.require_auth();
 
     if !env.storage().instance().has(&INITIALIZED) {
@@ -189,6 +228,11 @@ pub fn release_funds(env: &Env, freelancer: Address) {
 }
 
 pub fn dispute(env: &Env, caller: Address) {
+    let caller_addr = caller.clone();
+    
+    // Log function call start
+    log_function_call(env, "dispute", &caller_addr, true);
+    
     caller.require_auth();
 
     if !env.storage().instance().has(&INITIALIZED) {
@@ -217,6 +261,11 @@ pub fn dispute(env: &Env, caller: Address) {
 }
 
 pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
+    let caller_addr = caller.clone();
+    
+    // Log function call start
+    log_function_call(env, "resolve_dispute", &caller_addr, true);
+    
     caller.require_auth();
 
     if !env.storage().instance().has(&INITIALIZED) {
@@ -303,6 +352,11 @@ pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
 }
 
 pub fn add_milestone(env: &Env, client: Address, desc: String, amount: i128) -> u32 {
+    let caller = client.clone();
+    
+    // Log function call start
+    log_function_call(env, "add_milestone", &caller, true);
+    
     client.require_auth();
     
     // Input validation
@@ -370,6 +424,11 @@ pub fn reset_rate_limit(env: &Env, caller: Address, user: Address, limit_type: S
 
 // CORREGIDO: usar índice correcto (milestone_id - 1)
 pub fn approve_milestone(env: &Env, client: Address, milestone_id: u32) {
+    let caller = client.clone();
+    
+    // Log function call start
+    log_function_call(env, "approve_milestone", &caller, true);
+    
     client.require_auth();
     
     // Input validation
@@ -424,6 +483,11 @@ pub fn approve_milestone(env: &Env, client: Address, milestone_id: u32) {
 
 // CORREGIDO: usar índice correcto (milestone_id - 1)
 pub fn release_milestone(env: &Env, freelancer: Address, milestone_id: u32) {
+    let caller = freelancer.clone();
+    
+    // Log function call start
+    log_function_call(env, "release_milestone", &caller, true);
+    
     freelancer.require_auth();
     
     // Input validation
@@ -514,7 +578,13 @@ pub fn auto_release(env: &Env) {
     }
     escrow_data.status = EscrowStatus::Released;
     escrow_data.released_at = Some(now);
+
     env.storage().instance().set(&ESCROW_DATA, &escrow_data);
+
+    env.events().publish(
+        (Symbol::new(env, "auto_released"), escrow_data.freelancer.clone()),
+        (escrow_data.amount, now),
+    );
 }
 
 pub fn get_milestones(env: &Env) -> Vec<Milestone> {
@@ -529,4 +599,21 @@ pub fn get_milestone_history(env: &Env) -> Vec<MilestoneHistory> {
 
 pub fn set_escrow_data(env: &Env, data: &EscrowData) {
     env.storage().instance().set(&ESCROW_DATA, data);
+}
+
+// Logging functions
+pub fn get_call_logs(env: &Env) -> Vec<CallLog> {
+    crate::storage::get_call_logs(env)
+}
+
+pub fn clear_call_logs(env: &Env, caller: Address) {
+    caller.require_auth();
+    
+    // Only escrow client can clear logs
+    let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+    if escrow.client != caller { 
+        handle_error(env, Error::Unauthorized); 
+    }
+    
+    crate::storage::clear_call_logs(env);
 }
