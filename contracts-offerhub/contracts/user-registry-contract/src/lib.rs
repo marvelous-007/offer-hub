@@ -7,6 +7,7 @@ mod storage;
 mod types;
 mod test;
 mod basic_test;
+mod validation;
 
 use crate::contract::UserRegistryContract;
 use crate::types::{Error, UserProfile, UserStatus, VerificationLevel};
@@ -160,5 +161,14 @@ impl Contract {
     /// Get all moderators
     pub fn get_moderators(env: Env) -> Vec<Address> {
         UserRegistryContract::get_moderators(env)
+    }
+
+    // ===== Rate limiting admin helpers =====
+    pub fn set_rate_limit_bypass(env: Env, admin: Address, user: Address, bypass: bool) -> Result<(), Error> {
+        UserRegistryContract::set_rate_limit_bypass(env, admin, user, bypass)
+    }
+
+    pub fn reset_rate_limit(env: Env, admin: Address, user: Address, limit_type: String) -> Result<(), Error> {
+        UserRegistryContract::reset_rate_limit(env, admin, user, limit_type)
     }
 } 

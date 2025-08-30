@@ -9,6 +9,17 @@ impl ValidationHelpers {
         amount > 0
     }
 
+    /// Validates amount is within a specific range
+    pub fn validate_amount_range(amount: i128, min: i128, max: i128) -> bool {
+        amount >= min && amount <= max
+    }
+
+    /// Validates string length is within specified bounds
+    pub fn validate_string_length(text: &String, min: u32, max: u32) -> bool {
+        let len = text.len() as u32;
+        len >= min && len <= max
+    }
+
 
 
     /// Validates publication type is valid

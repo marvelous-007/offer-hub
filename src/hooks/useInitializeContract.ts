@@ -10,7 +10,6 @@
  */
 
 import {
-  // InitializeEscrowPayload, // Temporarily commented - not exported by @trustless-work/escrow
   useInitializeEscrow,
   useSendTransaction,
 } from "@trustless-work/escrow";

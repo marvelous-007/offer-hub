@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useReleaseFunds as usePackageReleaseFunds, useSendTransaction, /* ReleaseFundsPayload, */ EscrowRequestResponse } from '@trustless-work/escrow';
+import { useReleaseFunds as usePackageReleaseFunds, useSendTransaction, EscrowRequestResponse } from '@trustless-work/escrow';
 
 /**
  * Hook to release escrow funds using the @trustless-work/escrow package.

@@ -17,6 +17,7 @@ pub enum Error {
     ReputationContractNotSet = 12,
     AlreadyModerator = 13,
     NotModerator = 14,
+    RateLimitExceeded = 15,
 }
 
 #[contracttype]
@@ -109,6 +110,8 @@ pub const INCENTIVE_RECORDS: &[u8] = &[9];
 pub const REPUTATION_CONTRACT: &[u8] = &[10];
 pub const PLATFORM_STATS: &[u8] = &[11];
 pub const USER_RESTRICTIONS: &[u8] = &[12];
+pub const RATE_LIMITS: &[u8] = &[13];
+pub const RATE_LIMIT_BYPASS: &[u8] = &[14];
 
 // Rating validation constants
 pub const MIN_RATING: u32 = 1;
@@ -124,4 +127,11 @@ pub const DEFAULT_TOP_RATED_THRESHOLD: u32 = 480; // 4.80 average rating
 pub fn require_auth(address: &Address) -> Result<(), Error> {
     address.require_auth();
     Ok(())
+}
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct RateLimitEntry {
+    pub current_calls: u32,
+    pub window_start: u64,
 }

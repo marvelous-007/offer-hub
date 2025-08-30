@@ -2,6 +2,7 @@ use crate::access::AccessControl;
 use crate::events::*;
 use crate::storage::*;
 use crate::types::{require_auth, Error, PublicationStatus, UserProfile, UserStatus, VerificationLevel};
+use crate::validation::{validate_user_verification, validate_bulk_verification, validate_metadata_update};
 use soroban_sdk::{Address, Env, String, Vec};
 
 pub struct UserRegistryContract;
@@ -21,6 +22,9 @@ impl UserRegistryContract {
     /// Legacy function for registering a verified user (basic level)
     pub fn register_verified_user(env: Env, user: Address) -> Result<(), Error> {
         require_auth(&env, &user)?;
+    // Rate limit: max 3 registrations per 24h per caller
+    let limit_type = String::from_str(&env, "register_user");
+    check_rate_limit(&env, &user, &limit_type, 3, 24*3600)?;
         
         // Check if user is blacklisted
         if is_blacklisted(&env, &user) {
@@ -69,6 +73,9 @@ impl UserRegistryContract {
         metadata: String,
     ) -> Result<(), Error> {
         AccessControl::require_admin_or_moderator(&env, &admin)?;
+        
+        // Input validation
+        validate_user_verification(&env, &admin, &user, &level, expires_at, &metadata)?;
         
         // Check if user is blacklisted
         if is_blacklisted(&env, &user) {
@@ -221,6 +228,9 @@ impl UserRegistryContract {
     ) -> Result<(), Error> {
         AccessControl::require_admin(&env, &admin)?;
         
+        // Input validation
+        validate_bulk_verification(&env, &admin, &users, &level, expires_at, &metadata)?;
+        
         let mut verified_count = 0u32;
         
         for i in 0..users.len() {
@@ -265,6 +275,9 @@ impl UserRegistryContract {
         user: Address,
         metadata: String,
     ) -> Result<(), Error> {
+        // Input validation
+        validate_metadata_update(&env, &caller, &user, &metadata)?;
+        
         // User can update their own metadata, or admin/moderator can update any user's metadata
         if caller != user {
             AccessControl::require_admin_or_moderator(&env, &caller)?;
@@ -354,6 +367,18 @@ impl UserRegistryContract {
     /// Get all moderators
     pub fn get_moderators(env: Env) -> Vec<Address> {
         AccessControl::get_all_moderators(&env)
+    }
+
+    // ===== Rate limiting admin helpers =====
+    pub fn set_rate_limit_bypass(env: Env, admin: Address, user: Address, bypass: bool) -> Result<(), Error> {
+        set_rate_limit_bypass(&env, &admin, &user, bypass)
+    }
+
+    pub fn reset_rate_limit(env: Env, admin: Address, user: Address, limit_type: String) -> Result<(), Error> {
+        // Only admin
+        AccessControl::require_admin(&env, &admin)?;
+        reset_rate_limit(&env, &user, &limit_type);
+        Ok(())
     }
 
     // ==================== HELPER FUNCTIONS ====================

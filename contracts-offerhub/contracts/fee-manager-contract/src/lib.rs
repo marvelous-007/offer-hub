@@ -5,6 +5,7 @@ mod contract;
 mod error;
 mod storage;
 mod types;
+mod validation;
 
 #[cfg(test)]
 mod test;

@@ -4,7 +4,9 @@ use crate::{
     error::handle_error,
     storage::{ESCROW_DATA, INITIALIZED},
     types::{DisputeResult, Error, EscrowData, EscrowStatus, Milestone, MilestoneHistory},
+    validation::{validate_init_contract, validate_init_contract_full, validate_add_milestone, validate_milestone_id, validate_address},
 };
+use crate::storage::{check_rate_limit, set_rate_limit_bypass_flag, reset_rate_limit as rl_reset};
 
 const TOKEN_TRANSFER: &str = "transfer";
 const TOKEN_BALANCE: &str = "balance";
@@ -21,8 +23,10 @@ pub fn init_contract_full(
     if env.storage().instance().has(&INITIALIZED) {
         handle_error(env, Error::AlreadyInitialized);
     }
-    if amount <= 0 {
-        handle_error(env, Error::InvalidAmount);
+    
+    // Input validation
+    if let Err(e) = validate_init_contract_full(env, &client, &freelancer, &arbitrator, &token, amount, timeout_secs) {
+        handle_error(env, e);
     }
     let escrow_data = EscrowData {
         client: client.clone(),
@@ -60,8 +64,9 @@ pub fn init_contract(
         handle_error(env, Error::AlreadyInitialized);
     }
 
-    if amount <= 0 {
-        handle_error(env, Error::InvalidAmount);
+    // Input validation
+    if let Err(e) = validate_init_contract(env, &client, &freelancer, amount, &fee_manager) {
+        handle_error(env, e);
     }
 
     let escrow_data = EscrowData {
@@ -299,13 +304,22 @@ pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
 
 pub fn add_milestone(env: &Env, client: Address, desc: String, amount: i128) -> u32 {
     client.require_auth();
+    
+    // Input validation
+    if let Err(e) = validate_add_milestone(env, &client, &desc, amount) {
+        handle_error(env, e);
+    }
+    
     let mut escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+
+    // Rate limit: max 10 milestones per hour per client for this escrow
+    let limit_type = String::from_str(env, "add_milestone");
+    if let Err(e) = check_rate_limit(env, &client, &limit_type, 10, 3600) {
+        handle_error(env, e);
+    }
 
     if escrow.client != client {
         handle_error(env, Error::Unauthorized);
-    }
-    if amount <= 0 {
-        handle_error(env, Error::InvalidAmount);
     }
 
     let m_id = (escrow.milestones.len() as u32) + 1;
@@ -338,9 +352,34 @@ pub fn add_milestone(env: &Env, client: Address, desc: String, amount: i128) -> 
     m_id
 }
 
+// Admin helpers for rate limiting: admin is the escrow client
+pub fn set_rate_limit_bypass(env: &Env, caller: Address, user: Address, bypass: bool) {
+    caller.require_auth();
+    // Only escrow client can toggle bypass
+    let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+    if escrow.client != caller { handle_error(env, Error::Unauthorized); }
+    set_rate_limit_bypass_flag(env, &user, bypass);
+}
+
+pub fn reset_rate_limit(env: &Env, caller: Address, user: Address, limit_type: String) {
+    caller.require_auth();
+    let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+    if escrow.client != caller { handle_error(env, Error::Unauthorized); }
+    rl_reset(env, &user, &limit_type);
+}
+
 // CORREGIDO: usar índice correcto (milestone_id - 1)
 pub fn approve_milestone(env: &Env, client: Address, milestone_id: u32) {
     client.require_auth();
+    
+    // Input validation
+    if let Err(_) = validate_address(&client) {
+        handle_error(env, Error::Unauthorized);
+    }
+    if let Err(e) = validate_milestone_id(milestone_id) {
+        handle_error(env, e);
+    }
+    
     let mut escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
     let ts = env.ledger().timestamp();
 
@@ -349,11 +388,7 @@ pub fn approve_milestone(env: &Env, client: Address, milestone_id: u32) {
     }
 
     // CORREGIDO: convertir milestone_id (base-1) a índice (base-0)
-    let index = if milestone_id == 0 { 
-        handle_error(env, Error::MilestoneNotFound);
-    } else {
-        milestone_id - 1
-    };
+    let index = milestone_id - 1;
 
     if index >= escrow.milestones.len() {
         handle_error(env, Error::MilestoneNotFound);
@@ -390,6 +425,15 @@ pub fn approve_milestone(env: &Env, client: Address, milestone_id: u32) {
 // CORREGIDO: usar índice correcto (milestone_id - 1)
 pub fn release_milestone(env: &Env, freelancer: Address, milestone_id: u32) {
     freelancer.require_auth();
+    
+    // Input validation
+    if let Err(_) = validate_address(&freelancer) {
+        handle_error(env, Error::Unauthorized);
+    }
+    if let Err(e) = validate_milestone_id(milestone_id) {
+        handle_error(env, e);
+    }
+    
     let mut escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
     let ts = env.ledger().timestamp();
 
@@ -398,11 +442,7 @@ pub fn release_milestone(env: &Env, freelancer: Address, milestone_id: u32) {
     }
 
     // CORREGIDO: convertir milestone_id (base-1) a índice (base-0)
-    let index = if milestone_id == 0 { 
-        handle_error(env, Error::MilestoneNotFound);
-    } else {
-        milestone_id - 1
-    };
+    let index = milestone_id - 1;
 
     if index >= escrow.milestones.len() {
         handle_error(env, Error::MilestoneNotFound);
