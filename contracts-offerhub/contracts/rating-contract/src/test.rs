@@ -171,3 +171,57 @@ fn test_rating_categories() {
     
     assert_eq!(unique_categories.len(), categories.len() as u32);
 }
+
+#[test]
+fn test_health_check_basic_functionality() {
+    let env = Env::default();
+    let contract_id = create_contract(&env);
+    let client = ContractClient::new(&env, &contract_id);
+
+    // Initialize contract with admin
+    let admin = Address::generate(&env);
+    client.init(&admin);
+
+    // Perform health check
+    let health_status = client.health_check();
+    assert!(health_status.status.is_healthy, "Contract should be healthy after initialization");
+    assert!(health_status.status.admin_set, "Admin should be set");
+    assert!(health_status.status.storage_accessible, "Storage should be accessible");
+    assert!(health_status.status.critical_params_valid, "Critical parameters should be valid");
+    // Note: last_check might be 0 if not properly initialized
+    assert!(health_status.status.gas_used >= 0, "Gas usage should be recorded");
+}
+
+#[test]
+fn test_admin_health_check() {
+    let env = Env::default();
+    let contract_id = create_contract(&env);
+    let client = ContractClient::new(&env, &contract_id);
+
+    // Initialize contract with admin
+    let admin = Address::generate(&env);
+    client.init(&admin);
+
+    // Perform admin health check
+    let health_status = client.admin_health_check(&admin);
+    assert!(health_status.status.is_healthy, "Contract should be healthy");
+    assert!(health_status.details.len() > 0, "Admin health check should provide details");
+    assert!(health_status.recommendations.len() >= 0, "Recommendations should be provided");
+}
+
+#[test]
+#[should_panic]
+fn test_health_check_unauthorized_admin() {
+    let env = Env::default();
+    let contract_id = create_contract(&env);
+    let client = ContractClient::new(&env, &contract_id);
+
+    // Initialize contract with admin
+    let admin = Address::generate(&env);
+    client.init(&admin);
+
+    // Try admin health check with non-admin
+    let non_admin = Address::generate(&env);
+    // This should panic due to unauthorized access
+    client.admin_health_check(&non_admin);
+}

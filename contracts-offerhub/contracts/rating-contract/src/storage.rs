@@ -175,6 +175,10 @@ pub fn save_rating_threshold(env: &Env, threshold: &RatingThreshold) {
     env.storage().persistent().set(&key, threshold);
 }
 
+pub fn get_rating_threshold(env: &Env, threshold_type: &String) -> Result<RatingThreshold, Error> {
+    let key = (RATING_THRESHOLDS, threshold_type.clone());
+    env.storage().persistent().get(&key).ok_or(Error::ThresholdNotFound)
+}
 
 
 // Incentive records
@@ -277,4 +281,29 @@ pub fn check_rate_limit(env: &Env, user: &Address, limit_type: &String, max_call
     // emit a basic rate_limit event
     env.events().publish((Symbol::new(env, "rate_limit"), user.clone()), (limit_type.clone(), entry.current_calls, entry.window_start));
     Ok(())
+}
+
+// ================= Health Check Storage =================
+pub fn save_last_health_check(env: &Env, timestamp: u64) {
+    env.storage().instance().set(&Symbol::new(env, "last_health_check"), &timestamp);
+}
+
+pub fn get_last_health_check(env: &Env) -> u64 {
+    env.storage().instance().get(&Symbol::new(env, "last_health_check")).unwrap_or(0)
+}
+
+pub fn save_health_check_issues(env: &Env, issues: &Vec<String>) {
+    env.storage().instance().set(&Symbol::new(env, "health_issues"), issues);
+}
+
+pub fn get_health_check_issues(env: &Env) -> Vec<String> {
+    env.storage().instance().get(&Symbol::new(env, "health_issues")).unwrap_or_else(|| Vec::new(env))
+}
+
+pub fn save_contract_version(env: &Env, version: &String) {
+    env.storage().instance().set(&Symbol::new(env, "contract_version"), version);
+}
+
+pub fn get_contract_version(env: &Env) -> String {
+    env.storage().instance().get(&Symbol::new(env, "contract_version")).unwrap_or_else(|| String::from_str(env, "1.0.0"))
 }

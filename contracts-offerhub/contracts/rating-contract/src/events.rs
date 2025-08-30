@@ -110,4 +110,38 @@ pub fn emit_achievement_earned(
     );
 }
 
+pub fn emit_health_check_performed(
+    env: &Env,
+    is_healthy: bool,
+    issues_count: u32,
+    gas_used: u64,
+) {
+    env.events().publish(
+        (symbol_short!("health"), symbol_short!("check")),
+        (is_healthy, issues_count, gas_used),
+    );
+}
 
+pub fn emit_admin_health_check_performed(
+    env: &Env,
+    admin: &Address,
+    is_healthy: bool,
+    issues_count: u32,
+    recommendations_count: u32,
+) {
+    env.events().publish(
+        (symbol_short!("health"), symbol_short!("admin")),
+        (admin.clone(), is_healthy, issues_count, recommendations_count),
+    );
+}
+
+pub fn emit_health_issue_detected(
+    env: &Env,
+    issue: &String,
+    severity: &String,
+) {
+    env.events().publish(
+        (symbol_short!("health"), symbol_short!("issue")),
+        (issue.clone(), severity.clone()),
+    );
+}
