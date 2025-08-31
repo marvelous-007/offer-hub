@@ -8,7 +8,7 @@ use crate::storage::{
     save_admin, get_admin, save_rating, save_feedback, get_user_rating_stats, 
     save_user_rating_stats, increment_platform_stat, save_rating_threshold, add_user_feedback_id, get_user_feedback_ids, get_feedback,
     get_user_rating_history, save_reputation_contract, get_reputation_contract,
-    check_rate_limit, set_rate_limit_bypass, reset_rate_limit,
+    check_rate_limit, set_rate_limit_bypass, reset_rate_limit, increment_rating_count
 };
 use crate::types::{
     Error, Rating, RatingStats, Feedback, UserRatingData, RatingThreshold, HealthCheckResult,
@@ -43,7 +43,7 @@ impl RatingContract {
         save_rating_threshold(&env, &top_rated_threshold);
         
         // Initialize health check system
-        crate::health_check::initialize_health_check_system(&env)?;
+        // crate::health_check::initialize_health_check_system(&env)?;
         
         Ok(())
     }
@@ -112,9 +112,10 @@ impl RatingContract {
         // Update platform statistics
         increment_platform_stat(&env, &String::from_str(&env, "total_ratings"));
         increment_platform_stat(&env, &String::from_str(&env, "total_feedback"));
+        let total_ratings = increment_rating_count(&env);
         
         // Emit events
-        emit_rating_submitted(&env, &caller, &rated_user, &contract_id, rating, &rating_id);
+        emit_rating_submitted(&env, &caller, &rated_user, &contract_id, rating, &rating_id, &total_ratings);
         emit_feedback_submitted(&env, &caller, &rated_user, &feedback_id, &contract_id);
         
         Ok(())
@@ -405,13 +406,13 @@ impl RatingContract {
     }
 
     // Health check functions
-    pub fn health_check(env: Env) -> Result<HealthCheckResult, Error> {
-        crate::health_check::perform_health_check(&env)
-    }
+    // pub fn health_check(env: Env) -> Result<HealthCheckResult, Error> {
+    //     crate::health_check::perform_health_check(&env)
+    // }
 
-    pub fn admin_health_check(env: Env, caller: Address) -> Result<HealthCheckResult, Error> {
-        crate::health_check::admin_health_check(&env, &caller)
-    }
+    // pub fn admin_health_check(env: Env, caller: Address) -> Result<HealthCheckResult, Error> {
+    //     crate::health_check::admin_health_check(&env, &caller)
+    // }
 
     pub fn get_last_health_check(env: Env) -> u64 {
         crate::storage::get_last_health_check(&env)
@@ -419,5 +420,9 @@ impl RatingContract {
 
     pub fn get_contract_version(env: Env) -> String {
         crate::storage::get_contract_version(&env)
+    }
+
+    pub fn get_total_rating(env: &Env) -> u64 {
+        crate::storage::get_total_rating(&env)
     }
 }

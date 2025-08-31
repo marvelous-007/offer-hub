@@ -6,7 +6,7 @@ use crate::{
     types::{DisputeResult, Error, EscrowData, EscrowStatus, Milestone, MilestoneHistory},
     validation::{validate_init_contract, validate_init_contract_full, validate_add_milestone, validate_milestone_id, validate_address},
 };
-use crate::storage::{check_rate_limit, set_rate_limit_bypass_flag, reset_rate_limit as rl_reset};
+use crate::storage::{check_rate_limit, increment_escrow_transaction_count, set_rate_limit_bypass_flag, reset_rate_limit as rl_reset};
 
 const TOKEN_TRANSFER: &str = "transfer";
 const TOKEN_BALANCE: &str = "balance";
@@ -167,7 +167,9 @@ pub fn deposit_funds(env: &Env, client: Address) {
     escrow_data.funded_at = Some(env.ledger().timestamp());
 
     env.storage().instance().set(&ESCROW_DATA, &escrow_data);
+    let total_escrow_transaction = increment_escrow_transaction_count(env);
 
+    env.events().publish((Symbol::new(env, "escrow_tx_count"),),total_escrow_transaction);
     env.events().publish(
         (Symbol::new(env, "deposited_fund"), client.clone()),
         (escrow_data.amount, env.ledger().timestamp()),
@@ -215,6 +217,9 @@ pub fn release_funds(env: &Env, freelancer: Address) {
 
     env.storage().instance().set(&ESCROW_DATA, &escrow_data);
 
+    let total_escrow_transaction = increment_escrow_transaction_count(env);
+
+    env.events().publish((Symbol::new(env, "escrow_tx_count"),),total_escrow_transaction); 
     env.events().publish(
         (Symbol::new(env, "released_fund"), freelancer.clone()),
         (
@@ -254,6 +259,9 @@ pub fn dispute(env: &Env, caller: Address) {
 
     env.storage().instance().set(&ESCROW_DATA, &escrow_data);
 
+    let total_escrow_transaction = increment_escrow_transaction_count(env);
+
+    env.events().publish((Symbol::new(env, "escrow_tx_count"),),total_escrow_transaction);
     env.events().publish(
         (Symbol::new(env, "escrow_disputed"), caller.clone()),
         env.ledger().timestamp(),
@@ -345,6 +353,9 @@ pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
 
     env.storage().instance().set(&ESCROW_DATA, &escrow_data);
 
+    let total_escrow_transaction = increment_escrow_transaction_count(env);
+
+    env.events().publish((Symbol::new(env, "escrow_tx_count"),),total_escrow_transaction);
     env.events().publish(
         (Symbol::new(env, "escrow_resolved"), result.clone()),
         env.ledger().timestamp(),
@@ -399,6 +410,9 @@ pub fn add_milestone(env: &Env, client: Address, desc: String, amount: i128) -> 
 
     env.storage().instance().set(&ESCROW_DATA, &escrow);
 
+    let total_escrow_transaction = increment_escrow_transaction_count(env);
+
+    env.events().publish((Symbol::new(env, "escrow_tx_count"),),total_escrow_transaction);
     env.events().publish(
         (Symbol::new(env, "escrow_milestone_added"), client.clone()),
         (m_id, desc.clone(), amount, env.ledger().timestamp()),
@@ -472,6 +486,9 @@ pub fn approve_milestone(env: &Env, client: Address, milestone_id: u32) {
     });
     env.storage().instance().set(&ESCROW_DATA, &escrow);
 
+    let total_escrow_transaction = increment_escrow_transaction_count(env);
+
+    env.events().publish((Symbol::new(env, "escrow_tx_count"),),total_escrow_transaction);
     env.events().publish(
         (
             Symbol::new(env, "escrow_milestone_approved"),
@@ -532,6 +549,9 @@ pub fn release_milestone(env: &Env, freelancer: Address, milestone_id: u32) {
     });
     env.storage().instance().set(&ESCROW_DATA, &escrow);
 
+    let total_escrow_transaction = increment_escrow_transaction_count(env);
+
+    env.events().publish((Symbol::new(env, "escrow_tx_count"),),total_escrow_transaction);
     env.events().publish(
         (
             Symbol::new(env, "escrow_milestone_released"),
@@ -581,6 +601,9 @@ pub fn auto_release(env: &Env) {
 
     env.storage().instance().set(&ESCROW_DATA, &escrow_data);
 
+    let total_escrow_transaction = increment_escrow_transaction_count(env);
+
+    env.events().publish((Symbol::new(env, "escrow_tx_count"),),total_escrow_transaction);
     env.events().publish(
         (Symbol::new(env, "auto_released"), escrow_data.freelancer.clone()),
         (escrow_data.amount, now),
@@ -616,4 +639,9 @@ pub fn clear_call_logs(env: &Env, caller: Address) {
     }
     
     crate::storage::clear_call_logs(env);
+}
+
+
+pub fn get_escrow_transaction_count(env: &Env) -> u64 {
+    crate::storage::get_escrow_transaction_count(env)
 }

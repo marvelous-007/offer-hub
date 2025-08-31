@@ -94,6 +94,10 @@ impl EscrowContract {
         contract::set_escrow_data(&env, &data);
     }
 
+    pub fn get_escrow_transaction_count(env: &Env) -> u64 {
+        contract::get_escrow_transaction_count(env)
+    }
+
     // ===== Rate limiting admin helpers =====
     pub fn set_rate_limit_bypass(env: Env, caller: Address, user: Address, bypass: bool) {
         contract::set_rate_limit_bypass(&env, caller, user, bypass);

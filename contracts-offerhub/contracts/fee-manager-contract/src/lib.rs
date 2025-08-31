@@ -79,4 +79,8 @@ impl FeeManagerContract {
     pub fn get_premium_users(env: Env) -> Vec<types::PremiumUser> {
         contract::get_premium_users(&env)
     }
+
+    pub fn get_total_fees_collected(env: &Env) -> i128 {
+        contract::get_total_fees_collected(&env)
+    }
 } 

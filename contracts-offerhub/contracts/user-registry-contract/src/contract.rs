@@ -43,7 +43,10 @@ impl UserRegistryContract {
         // Add to new profile storage with basic verification
         let profile = create_default_profile(&env, VerificationLevel::Basic, 0); // No expiration
         set_user_profile(&env, &user, &profile);
-        
+
+        let count = increment_user_count(&env)?;
+
+        emit_total_users(&env, &user, &count);
         emit_user_registered(&env, &user);
         emit_user_verified(&env, &user, &VerificationLevel::Basic, 0);
         Ok(())
@@ -93,12 +96,14 @@ impl UserRegistryContract {
         };
 
         set_user_profile(&env, &user, &profile);
-        
+
+        let count = increment_user_count(&env)?;
         // Update legacy storage for backward compatibility
         let mut users = get_verified_users(&env);
         users.set(user.clone(), true);
         set_verified_users(&env, &users);
-
+        
+        emit_total_users(&env, &user, &count);
         emit_user_verified(&env, &user, &level, expires_at);
         Ok(())
     }
@@ -258,6 +263,9 @@ impl UserRegistryContract {
             legacy_users.set(user.clone(), true);
             set_verified_users(&env, &legacy_users);
 
+            let count = increment_user_count(&env)?;
+
+            emit_total_users(&env, &user, &count);
             emit_user_verified(&env, &user, &level, expires_at);
             verified_count += 1;
         }

@@ -377,3 +377,32 @@ fn test_set_dispute_timeout_unauthorized() {
     
     client.set_dispute_timeout(&unauthorized_user, &new_timeout);
 }
+
+#[test]
+fn test_get_total_disputes() {
+    let env = setup_env();
+    env.mock_all_auths();
+
+    let (client, admin, _, _) = create_contract(&env);
+    let initiator = Address::generate(&env);
+    let job_id_1 = 1;
+    let job_id_2 = 2;
+    let reason = String::from_str(&env, "Job not completed");
+    let dispute_amount = 1000000;
+    let escrow_contract_addr = Some(Address::generate(&env));
+
+    // Check initial dispute count
+    let initial_count = client.get_total_disputes();
+    assert_eq!(initial_count, 0);
+
+    // Open first dispute
+    client.open_dispute(&job_id_1, &initiator, &reason, &escrow_contract_addr, &dispute_amount);
+    let count_after_first = client.get_total_disputes();
+    assert_eq!(count_after_first, 1);
+
+    // Open second dispute
+    client.open_dispute(&job_id_2, &initiator, &reason, &escrow_contract_addr, &dispute_amount);
+    let count_after_second = client.get_total_disputes();
+    assert_eq!(count_after_second, 2);
+
+}

@@ -167,15 +167,15 @@ impl Contract {
         RatingContract::reset_rate_limit(env, admin, user, limit_type)
     }
 
-    /// Perform a health check on the contract
-    pub fn health_check(env: Env) -> Result<HealthCheckResult, Error> {
-        RatingContract::health_check(env)
-    }
+    // /// Perform a health check on the contract
+    // pub fn health_check(env: Env) -> Result<HealthCheckResult, Error> {
+    //     RatingContract::health_check(env)
+    // }
 
-    /// Perform an admin health check with additional details
-    pub fn admin_health_check(env: Env, caller: Address) -> Result<HealthCheckResult, Error> {
-        RatingContract::admin_health_check(env, caller)
-    }
+    // /// Perform an admin health check with additional details
+    // pub fn admin_health_check(env: Env, caller: Address) -> Result<HealthCheckResult, Error> {
+    //     RatingContract::admin_health_check(env, caller)
+    // }
 
     /// Get the last health check timestamp
     pub fn get_last_health_check(env: Env) -> u64 {
@@ -185,5 +185,10 @@ impl Contract {
     /// Get contract version
     pub fn get_contract_version(env: Env) -> String {
         RatingContract::get_contract_version(env)
+    }
+
+    /// Get contract total ratings count
+    pub fn get_total_rating(env: &Env) -> u64 {
+        crate::storage::get_total_rating(&env)
     }
 }

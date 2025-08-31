@@ -3,7 +3,7 @@
 use crate::types::EscrowStatus;
 use crate::{EscrowContract, EscrowContractClient};
 use soroban_sdk::testutils::{Address as _, Ledger};
-use soroban_sdk::{contract, contractimpl, Address, Env, Symbol, String};
+use soroban_sdk::{contract, contractimpl, log, Address, Env, String, Symbol};
 
 #[contract]
 pub struct MockTokenContract;
@@ -435,4 +435,52 @@ fn test_escrow_data_integrity() {
     contract.release_funds(&freelancer);
     let released_data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
     assert_eq!(released_data.status, EscrowStatus::Released);
+}
+
+#[test]
+fn test_increment_transaction_count() {
+    let env = setup_env();
+    env.mock_all_auths();
+
+    let contract_id = env.register(EscrowContract, ());
+    let contract = EscrowContractClient::new(&env, &contract_id);
+
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let arbitrator = Address::generate(&env);
+    let token = setup_token(&env);
+    let amount = 500;
+    let timeout = 3600;
+
+    // Check initial transaction count
+    let initial_count = contract.get_escrow_transaction_count();
+    assert_eq!(initial_count, 0);
+
+    // Initialize contract (no transaction count increment)
+    contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
+
+    // Deposit funds (should increment count)
+    contract.deposit_funds(&client);
+    let count_after_deposit = contract.get_escrow_transaction_count();
+    assert_eq!(count_after_deposit, 1);
+
+    // Add milestone (should increment count)
+    contract.add_milestone(&client, &String::from_str(&env, "Test milestone"), &200);
+    let count_after_milestone = contract.get_escrow_transaction_count();
+    assert_eq!(count_after_milestone, 2);
+
+    // Approve milestone (should increment count)
+    contract.approve_milestone(&client, &1);
+    let count_after_approve = contract.get_escrow_transaction_count();
+    assert_eq!(count_after_approve, 3);
+
+    // Release milestone (should increment count)
+    contract.release_milestone(&freelancer, &1);
+    let count_after_release_milestone = contract.get_escrow_transaction_count();
+    assert_eq!(count_after_release_milestone, 4);
+
+    // Release funds (should increment count)
+    contract.release_funds(&freelancer);
+    let final_count = contract.get_escrow_transaction_count();
+    assert_eq!(final_count, 5);
 }

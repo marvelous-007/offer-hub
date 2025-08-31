@@ -1,10 +1,11 @@
-use soroban_sdk::{Address, Env, String, Symbol, Vec};
+use soroban_sdk::{Address, Env, String, Symbol, Vec, log};
 
 use crate::{
     error::{handle_error, Error},
     storage::{
         DEFAULT_ARBITRATOR_FEE_PERCENTAGE, DEFAULT_DISPUTE_FEE_PERCENTAGE,
-        DEFAULT_ESCROW_FEE_PERCENTAGE, FEE_CONFIG, FEE_HISTORY, FEE_STATS, PLATFORM_BALANCE, PREMIUM_USERS,
+        DEFAULT_ESCROW_FEE_PERCENTAGE, FEE_CONFIG, FEE_HISTORY, FEE_STATS, PLATFORM_BALANCE, PREMIUM_USERS, 
+        TOTAL_FESS_COLLECTED,
     },
     types::{FeeCalculation, FeeConfig, FeeRecord, FeeStats, PremiumUser, FEE_TYPE_ESCROW, FEE_TYPE_DISPUTE},
     validation::{validate_initialization, validate_fee_rates, validate_fee_calculation, validate_withdrawal_amount, validate_fee_type, validate_address},
@@ -38,10 +39,11 @@ pub fn initialize(env: &Env, admin: Address, platform_wallet: Address) {
     };
 
     env.storage().instance().set(&FEE_CONFIG, &fee_config);
-    env.storage().instance().set(&PLATFORM_BALANCE, &0);
+    env.storage().instance().set(&PLATFORM_BALANCE, &(0 as i128));
     env.storage().instance().set(&FEE_STATS, &fee_stats);
     env.storage().instance().set(&FEE_HISTORY, &Vec::<FeeRecord>::new(env));
     env.storage().instance().set(&PREMIUM_USERS, &Vec::<PremiumUser>::new(env));
+    env.storage().instance().set(&TOTAL_FESS_COLLECTED, &(0 as i128));
 
     env.events().publish(
         (Symbol::new(env, "fee_manager_initialized"), admin.clone()),
@@ -190,9 +192,9 @@ pub fn collect_fee(env: &Env, amount: i128, fee_type: u32, user: Address) -> i12
         handle_error(env, e);
     }
 
+
     let fee_config: FeeConfig = env.storage().instance().get(&FEE_CONFIG).unwrap();
     let is_premium = is_premium_user(env, user.clone());
-
     let fee_percentage = match fee_type {
         FEE_TYPE_ESCROW => if is_premium { 0 } else { fee_config.escrow_fee_percentage },
         FEE_TYPE_DISPUTE => if is_premium { 0 } else { fee_config.dispute_fee_percentage },
@@ -200,12 +202,19 @@ pub fn collect_fee(env: &Env, amount: i128, fee_type: u32, user: Address) -> i12
     };
 
     let fee_amount = calculate_fee_amount(amount, fee_percentage);
+
     let net_amount = amount - fee_amount;
 
     // Update platform balance
     let mut platform_balance: i128 = env.storage().instance().get(&PLATFORM_BALANCE).unwrap();
+
     platform_balance += fee_amount;
     env.storage().instance().set(&PLATFORM_BALANCE, &platform_balance);
+
+    // Update total fees collected
+    let mut total_fees: i128 = env.storage().instance().get(&TOTAL_FESS_COLLECTED).unwrap_or(0);
+    total_fees += fee_amount;
+    env.storage().instance().set(&TOTAL_FESS_COLLECTED, &total_fees);
 
     // Update fee stats
     let mut fee_stats: FeeStats = env.storage().instance().get(&FEE_STATS).unwrap();
@@ -240,7 +249,7 @@ pub fn collect_fee(env: &Env, amount: i128, fee_type: u32, user: Address) -> i12
 
     env.events().publish(
         (Symbol::new(env, "fee_collected"), user),
-        (fee_amount, net_amount, env.ledger().timestamp()),
+        (fee_amount, net_amount, env.ledger().timestamp(), total_fees),
     );
 
     net_amount
@@ -322,6 +331,10 @@ pub fn get_premium_users(env: &Env) -> Vec<PremiumUser> {
     }
 }
 
+pub fn get_total_fees_collected(env: &Env) -> i128 {
+    env.storage().instance().get(&TOTAL_FESS_COLLECTED).unwrap()
+}
+
 // Helper function to calculate fee amount with precision
 fn calculate_fee_amount(amount: i128, fee_percentage: i128) -> i128 {
     if fee_percentage == 0 {
@@ -340,4 +353,3 @@ fn calculate_fee_amount(amount: i128, fee_percentage: i128) -> i128 {
     }
 }
 
- 

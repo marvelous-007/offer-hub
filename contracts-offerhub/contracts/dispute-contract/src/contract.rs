@@ -2,7 +2,7 @@ use soroban_sdk::{panic_with_error, Address, Env, Map, String, Vec, Symbol, Into
 
 use crate::{
     access::{is_valid_arbitrator, is_valid_mediator},
-    storage::{ARBITRATOR, DISPUTES, DISPUTE_TIMEOUT, ESCROW_CONTRACT, FEE_MANAGER, check_rate_limit},
+    storage::{ARBITRATOR, DISPUTES, DISPUTE_TIMEOUT, ESCROW_CONTRACT, FEE_MANAGER, check_rate_limit, set_total_disputes},
     types::{DisputeData, DisputeLevel, DisputeOutcome, DisputeStatus, Error, Evidence},
     validation::{validate_open_dispute, validate_add_evidence, validate_timeout_duration, validate_address},
 };
@@ -47,6 +47,8 @@ pub fn initialize(
     env.storage()
         .instance()
         .set(&DISPUTES, &Map::<u32, DisputeData>::new(env));
+
+    set_total_disputes(env, 0);
 
     env.events().publish(
         (String::from_str(env, "contract_initialized"), admin),
@@ -118,9 +120,11 @@ pub fn open_dispute(
     disputes.set(job_id, dispute_data);
     env.storage().instance().set(&DISPUTES, &disputes);
 
+    let total_dispute_count = increment_dispute_count(env);
+
     env.events().publish(
         (String::from_str(env, "dispute_opened"), job_id),
-        env.ledger().timestamp(),
+        (env.ledger().timestamp(), total_dispute_count)
     );
 }
 
@@ -477,4 +481,15 @@ pub fn set_dispute_timeout(env: &Env, admin: Address, timeout_seconds: u64) {
         (String::from_str(env, "timeout_updated"), timeout_seconds),
         env.ledger().timestamp(),
     );
+}
+
+pub fn get_total_disputes(env: &Env) -> u64 {
+    crate::storage::get_total_disputes(env)
+}
+
+fn increment_dispute_count(env: &Env) -> u64 {
+    let current = get_total_disputes(env);
+    let new_dispute_count = current + 1;
+    set_total_disputes(env, new_dispute_count);
+    new_dispute_count
 }

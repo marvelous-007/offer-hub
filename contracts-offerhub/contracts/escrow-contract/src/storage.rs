@@ -13,6 +13,9 @@ pub const CALL_LOGS: Symbol = symbol_short!("LOGS");
 pub const LOG_COUNT: Symbol = symbol_short!("LCOUNT");
 pub const MAX_LOGS: u32 = 100;
 
+pub const TOTAL_ESCROW_COUNT: Symbol = symbol_short!("ESCCOUNT");
+
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[contracttype]
 pub struct RateLimitEntry {
@@ -107,4 +110,19 @@ pub fn clear_call_logs(env: &Env) {
     }
     
     env.storage().instance().set(&LOG_COUNT, &0);
+}
+
+pub fn get_escrow_transaction_count(env: &Env) -> u64 {
+    env.storage().instance().get(&TOTAL_ESCROW_COUNT).unwrap_or(0)
+}
+
+pub fn set_escrow_transaction_count(env: &Env, count: u64) {
+    env.storage().instance().set(&TOTAL_ESCROW_COUNT, &count);
+}
+
+pub fn increment_escrow_transaction_count(env: &Env) -> u64 {
+    let current_count = get_escrow_transaction_count(env);
+    let new_escrow_count = current_count + 1;
+    set_escrow_transaction_count(env, new_escrow_count);
+    new_escrow_count
 }

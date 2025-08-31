@@ -66,4 +66,8 @@ pub fn emit_moderator_removed(env: &Env, moderator: &Address, admin: &Address) {
     env.events().publish((topic,), (moderator.clone(), admin.clone()));
 }
 
+pub fn emit_total_users(env: &Env, user: &Address, count: &u64) {
+    let topic = Symbol::new(env, "TOTAL_USERS");
+    env.events().publish((topic,), (user, count));
+}
  

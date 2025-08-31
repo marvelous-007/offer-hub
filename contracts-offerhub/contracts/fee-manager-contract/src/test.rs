@@ -3,7 +3,7 @@
 use super::*;
 use soroban_sdk::{
     testutils::Address as _,
-    Address, Env,
+    Address, Env, log
 };
 
 #[test]
@@ -329,3 +329,45 @@ fn test_fee_transparency() {
     assert_eq!(fee_calc.net_amount, 975000);
     assert!(!fee_calc.is_premium);
 } 
+
+#[test]
+fn test_get_total_fees_collected() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let contract_id = env.register_contract(None, FeeManagerContract);
+    let client = FeeManagerContractClient::new(&env, &contract_id);
+    let admin = Address::generate(&env);
+    let platform_wallet = Address::generate(&env);
+    let user1 = Address::generate(&env);
+    let user2 = Address::generate(&env);
+
+    // Initialize contract
+    client.initialize(&admin, &platform_wallet);
+
+    let fee_config = client.get_fee_config();
+    assert_eq!(fee_config.admin, admin);
+    assert_eq!(fee_config.platform_wallet, platform_wallet);
+    assert_eq!(fee_config.escrow_fee_percentage, 250); // 2.5%
+    assert_eq!(fee_config.dispute_fee_percentage, 500); // 5.0%
+    assert_eq!(fee_config.arbitrator_fee_percentage, 300); // 3.0%
+
+    // Check initial total fees collected
+    let initial_fees = client.get_total_fees_collected();
+    assert_eq!(initial_fees, 0);
+
+    // Add user1 as premium to test zero fees
+    client.add_premium_user(&user1);
+    client.collect_fee(&1000000i128, &1, &user1); // 0 fee (premium)
+    let fees_after_premium = client.get_total_fees_collected();
+    assert_eq!(fees_after_premium, 0);
+
+    // Collect dispute fee for user2 (non-premium)
+    client.collect_fee(&2000000i128, &2, &user2); // 100,000 fee (5%)
+    let fees_after_non_premium = client.get_total_fees_collected();
+    assert_eq!(fees_after_non_premium, 100_000);
+
+    // Collect dispute fee for user2 (non-premium)
+    client.collect_fee(&2000000i128, &1, &user2); // 100,000 fee (5%)
+    let fees_after_second_non_premium = client.get_total_fees_collected();
+    assert_eq!(fees_after_second_non_premium, 150_000);
+}
