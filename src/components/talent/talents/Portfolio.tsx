@@ -4,6 +4,7 @@ import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 interface PortfolioItem {
   id: string | number
@@ -54,11 +55,10 @@ export default function PortfolioCarousel({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {items.slice(index, index + itemsPerPage).map((item) => (
             <div
-              key={item.id}
+              key={`portfolio-${item.id}`}
               className="rounded-lg overflow-hidden hover:cursor-pointer"
               onClick={() => handleProjectClick(item.id)}
             >
-              {/* image wrapper with scale on hover */}
               <div className="overflow-hidden">
                 <Image
                   src={item.image || "/placeholder.svg"}
@@ -94,11 +94,10 @@ export default function PortfolioCarousel({
         <div className="flex gap-2">
           {Array.from({ length: Math.ceil(items.length / itemsPerPage) }, (_, i) => (
             <button
-              key={i}
+              key={`page-${i}`}
               onClick={() => setIndex(i * itemsPerPage)}
-              className={`w-2 h-2 rounded-full ${
-                Math.floor(index / itemsPerPage) === i ? "bg-gray-800" : "bg-gray-300"
-              }`}
+              className={`w-2 h-2 rounded-full ${Math.floor(index / itemsPerPage) === i ? "bg-gray-800" : "bg-gray-300"
+                }`}
             />
           ))}
         </div>

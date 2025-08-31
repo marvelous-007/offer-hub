@@ -3,6 +3,7 @@
 
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import Link from 'next/link';
 import React from 'react';
 import SaveTalent from '@/components/talent/SaveTalent';
 
@@ -42,16 +43,22 @@ const TalentCard: React.FC<TalentCardProps> = ({
   onActionClick,
   className = ''
 }) => {
-  const handleActionClick = () => {
-    if (onActionClick) {
-      onActionClick(id);
+
+  const getActionLink = () => {
+    switch (actionText.toLowerCase()) {
+      case "message":
+        return `/talent/${id}/messages`;
+      case "hire now":
+        return `/talent/${id}/send-offer`;
+      default:
+        return `/talent/${id}`;
     }
   };
 
   return (
-    <div className={`bg-gray-50 border-b border-b-gray-200  p-6 ${className}`}>
-      {/* Avatar and Header info in same row */}
-      <div className='flex items-start gap-4 mb-4 cursor-pointer profile-section'>
+    <div className={`bg-gray-50 border-b border-b-gray-200 p-6 ${className}`}>
+      {/* Avatar and Header info */}
+      <div className='flex items-start gap-4 mb-4 profile-section'>
         {/* Avatar */}
         <Image
           src={avatar}
@@ -65,13 +72,15 @@ const TalentCard: React.FC<TalentCardProps> = ({
         <div className='flex-1'>
           <div className='flex items-center gap-2 mb-1'>
             <h3 className='text-gray-400 text-sm font-normal'>{name}</h3>
-            {/* <span className='text-yellow-500 text-sm'>★ {rating}</span> */}
           </div>
-          <h2 className='text-lg font-semibold text-gray-900 leading-tight mb-1'>{title}</h2>
+          {/* Title linking to profile */}
+          <Link href={`/talent/${id}/profile`}>
+            <h2 className='text-lg font-semibold text-gray-900 leading-tight mb-1 hover:underline cursor-pointer'>
+              {title}
+            </h2>
+          </Link>
           <div className='flex items-center gap-4 text-sm'>
             <p className='text-teal-600'>{location}</p>
-            {/* <p className='text-gray-600'>${hourlyRate}/hr</p>
-            <span className='text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-full'>{category}</span> */}
           </div>
         </div>
       </div>
@@ -81,7 +90,7 @@ const TalentCard: React.FC<TalentCardProps> = ({
         {skills.map((skill, index) => (
           <span
             key={index}
-            className={`px-3 py-1 rounded-full text-sm font-medium text-white ${skill.color} ${index == 0 && "bg-slate-500"}`}
+            className={`px-3 py-1 rounded-full text-sm font-medium text-white ${skill.color} ${index === 0 && "bg-slate-500"}`}
           >
             {skill.name}
           </span>
@@ -93,15 +102,14 @@ const TalentCard: React.FC<TalentCardProps> = ({
         {description}
       </p>
 
-      {/* Action Buttons Row */}
+      {/* Action Buttons */}
       <div className='flex items-center gap-4'>
         <SaveTalent talentId={id} size='lg' />
-        <Button
-          onClick={handleActionClick}
-          className='bg-slate-800 hover:bg-slate-700 text-white rounded-full flex-1 py-3 font-medium'
-        >
-          {actionText}
-        </Button>
+        <Link href={getActionLink()} className='flex-1'>
+          <Button className='w-full bg-slate-800 hover:bg-slate-700 text-white rounded-full py-3 font-medium'>
+            {actionText}
+          </Button>
+        </Link>
       </div>
     </div>
   );

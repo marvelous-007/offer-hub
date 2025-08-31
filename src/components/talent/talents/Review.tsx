@@ -63,11 +63,6 @@ export default function ReviewsCarousel({
               </div>
               <p className="text-sm text-gray-500 mb-2">{review.date.slice(0,1).toUpperCase()+review.date.slice(1)}</p>
               <p className="text-gray-700 leading-relaxed text-sm">"{review.comment}"</p>
-              {/* {review.projectTitle && (
-                <p className="text-sm text-teal-600 mt-2">
-                  Project: {review.projectTitle}
-                </p>
-              )} */}
             </div>
           ))}
         </div>

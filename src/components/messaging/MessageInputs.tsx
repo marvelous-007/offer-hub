@@ -13,6 +13,7 @@ interface MessageInputProps {
 
 export function MessageInputs({ onSendMessage, placeholder = "Message" }: MessageInputProps) {
   const [message, setMessage] = useState("")
+  const [isFocused, setIsFocused] = useState(false)
 
   const handleSend = () => {
     if (message.trim()) {
@@ -29,10 +30,14 @@ export function MessageInputs({ onSendMessage, placeholder = "Message" }: Messag
   }
 
   return (
-    <div className="bg-gray-100 rounded-full">
-      <div className="flex items-center gap-3">
+    <div className="rounded-full flex items-center justify-between gap-5">
+      <div
+        className={`flex items-center gap-0 w-full bg-gray-100 rounded-full transition-all duration-200 ${
+          isFocused ? "ring-2 ring-gray-300 ring-offset-2" : ""
+        }`}
+      >
         <Button variant="ghost" size="icon" className="text-gray-500 hover:text-gray-700">
-          <Smile className="w-5 h-5" />
+          <Smile className="w-4 h-4 rounded-full" />
         </Button>
 
         <div className="flex-1 relative">
@@ -40,8 +45,10 @@ export function MessageInputs({ onSendMessage, placeholder = "Message" }: Messag
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             placeholder={placeholder}
-            className="pr-20 rounded-full bg-transparent focus:ring-0 ring-0 border-none border-transparent focus:border-none"
+            className="pr-20 focus-visible:ring-offset-0 rounded-full bg-transparent border-none focus:ring-0 focus:border-none focus-visible:outline-none focus-visible:ring-0 focus:outline-none"
           />
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
             <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-gray-700">
@@ -52,15 +59,14 @@ export function MessageInputs({ onSendMessage, placeholder = "Message" }: Messag
             </Button>
           </div>
         </div>
-
-        <Button
-          onClick={handleSend}
-          disabled={!message.trim()}
-          className="bg-slate-800 hover:bg-slate-700 text-white rounded-full w-10 h-10 p-0"
-        >
-          <Send className="w-4 h-4" />
-        </Button>
       </div>
+      <Button
+        onClick={handleSend}
+        disabled={!message.trim()}
+        className="bg-black hover:bg-gray-800 disabled:bg-gray-400 text-white rounded-full w-10 h-10 p-0"
+      >
+        <Send className="w-4 h-4 text-white" />
+      </Button>
     </div>
   )
 }

@@ -100,7 +100,7 @@ export default function MessagesPage() {
           </div>
 
           {/* Message Input */}
-          <div className="pt-28">
+          <div className="pt-28 pb-5 px-10">
             <MessageInputs onSendMessage={handleSendMessage} />
           </div>
         </div>

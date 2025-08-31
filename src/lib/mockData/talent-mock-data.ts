@@ -84,7 +84,7 @@ export const talentProfileData: TalentProfile[] = [
         category: "Mobile Design",
       },
       {
-        id: 1,
+        id: 2,
         title: "Mobile app design",
         description: "E-commerce mobile application with modern UI",
         image: "/mobile-app-design2.png",
@@ -92,7 +92,7 @@ export const talentProfileData: TalentProfile[] = [
         category: "Mobile Design",
       },
       {
-        id: 2,
+        id: 3,
         title: "Website design",
         description: "Corporate website redesign with improved UX",
         image: "/website-design.png",
@@ -100,7 +100,7 @@ export const talentProfileData: TalentProfile[] = [
         category: "Web Design",
       },
       {
-        id: 3,
+        id: 4,
         title: "Landing page design",
         description: "SaaS landing page with conversion optimization",
         image: "/landing-page.png",
@@ -108,7 +108,7 @@ export const talentProfileData: TalentProfile[] = [
         category: "Landing Page",
       },
       {
-        id: 4,
+        id: 5,
         title: "Dashboard design",
         description: "Analytics dashboard with data visualization",
         image: "/dashboard-design.png",
@@ -116,7 +116,7 @@ export const talentProfileData: TalentProfile[] = [
         category: "Dashboard",
       },
       {
-        id: 4,
+        id: 6,
         title: "Dashboard design",
         description: "Analytics dashboard with data visualization",
         image: "/dashboard-design1.png",

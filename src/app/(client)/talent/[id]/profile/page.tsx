@@ -31,19 +31,19 @@ const TalentProfilePage = () => {
   const loading = talentLoading || talentState.loading
 
   useEffect(() => {
-    if (!loading && params.id) {
-      const talentData = getTalentById(Number(params.id))
-      setTalent(talentData || null)
+  if (!loading && params.id) {
+    const talentData = getTalentById(Number(params.id))
+    setTalent(talentData || null)
 
-      if (talentData) {
-        addNotification({
-          type: "info",
-          title: "Profile Loaded",
-          message: `Viewing ${talentData.name}'s profile`,
-        })
-      }
+    if (talentData) {
+      addNotification({
+        type: "info",
+        title: "Profile Loaded",
+        message: `Viewing ${talentData.name}'s profile`,
+      })
     }
-  }, [params.id, getTalentById, loading, addNotification])
+  }
+}, [params.id, loading])
 
   const handleSendMessage = () => {
     if (talent) {
@@ -143,27 +143,7 @@ const TalentProfilePage = () => {
             className="border border-gray-200"
             onActionClick={() => handleSendOffer()}
           />
-
-          {/* <div className="flex gap-4 justify-center">
-            <Button
-              onClick={handleSendMessage}
-              variant="outline"
-              className="flex items-center gap-2 border-teal-600 text-teal-600 hover:bg-teal-50 bg-transparent"
-            >
-              <MessageCircle className="w-4 h-4" />
-              Message
-            </Button>
-            <Button
-              onClick={handleSendOffer}
-              className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white"
-            >
-              <Send className="w-4 h-4" />
-              Send Offer
-            </Button>
-          </div> */}
-
           <PortfolioCarousel talentId={String(talent.id)} title="Portfolio" items={talent.portfolio} />
-
           <ReviewsCarousel itemsPerPage={3} reviews={talent.reviews} renderStars={() => renderStars(5)} />
         </div>
       </TalentLayout>
