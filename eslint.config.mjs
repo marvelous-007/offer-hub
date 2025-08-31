@@ -15,7 +15,10 @@ const eslintConfig = [
     rules: {
       // Temporarily disable some rules to allow build while we fix issues
       "@typescript-eslint/no-unused-vars": "warn",
-      "@typescript-eslint/no-explicit-any": "warn", 
+      "@typescript-eslint/no-explicit-any": "error", // Changed from "warn" to "error"
+      "@typescript-eslint/no-unsafe-assignment": "error",
+      "@typescript-eslint/no-unsafe-member-access": "error",
+      "@typescript-eslint/no-unsafe-call": "error",
       "react/no-unescaped-entities": "warn",
       "@next/next/no-img-element": "warn",
       "jsx-a11y/alt-text": "warn",
