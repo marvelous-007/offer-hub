@@ -7,7 +7,17 @@ import { MessagesSidebar } from "@/components/messages/messages-sidebar"
 import { MessagesMainPlus } from "@/components/messaging/messages-main-plus"
 import { useMessagesMock as useMessages } from "@/hooks/useMessagesMock"
 
-export default function MessagingById({ params:{ conversationId } }:{ params:{ conversationId:string }}) {
+interface PageProps {
+  params: Promise<{ conversationId: string }>
+}
+
+export default async function MessagingById({ params }: PageProps) {
+  const { conversationId } = await params
+  
+  return <MessagingClient conversationId={conversationId} />
+}
+
+function MessagingClient({ conversationId }: { conversationId: string }) {
   const {
     conversations,
     activeConversationId,
@@ -40,8 +50,8 @@ export default function MessagingById({ params:{ conversationId } }:{ params:{ c
               onConversationSelect={setActiveConversationId}
             />
             <MessagesMainPlus
-              activeConversation={activeConversation as any}
-              messages={messages as any}
+              activeConversation={activeConversation}
+              messages={messages}
               onSendMessage={handleSendMessage}
             />
           </div>
