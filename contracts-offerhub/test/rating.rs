@@ -189,3 +189,37 @@ fn test_get_average_rating_no_ratings() {
     // Should return 0 when no ratings exist
     assert_eq!(avg_rating, 0_u8);
 }
+
+#[test]
+fn test_rating_out_of_range() {
+    let env = Env::default();
+    let contract_id = env.register(RatingContract, ());
+    let client = RatingContractClient::new(&env, &contract_id);
+    
+    // Create test addresses
+    let rater = Address::generate(&env);
+    let target = Address::generate(&env);
+    
+    // Set the invoker as the rater
+    env.set_invoker(rater.clone());
+    
+    // Test lower boundary
+    let job_id = 1;
+    let low_score = 1_u8; // Minimum valid score
+    let comment = String::from_str(&env, "Minimum score test");
+    client.rate_user(&target, &job_id, &low_score, &comment);
+    
+    let ratings = client.get_ratings(&target);
+    assert_eq!(ratings.len(), 1);
+    assert_eq!(ratings.get(0).unwrap().score, low_score);
+    
+    // Test upper boundary
+    let job_id2 = 2;
+    let high_score = 5_u8; // Maximum valid score
+    let comment2 = String::from_str(&env, "Maximum score test");
+    client.rate_user(&target, &job_id2, &high_score, &comment2);
+    
+    let ratings = client.get_ratings(&target);
+    assert_eq!(ratings.len(), 2);
+    assert_eq!(ratings.get(1).unwrap().score, high_score);
+}
