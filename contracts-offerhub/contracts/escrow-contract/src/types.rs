@@ -80,4 +80,5 @@ pub enum Error {
     InvalidDisputeResult = 8,
     MilestoneNotFound = 9,
     RateLimitExceeded = 10,
+    UnexpectedError = 11,
 }

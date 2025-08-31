@@ -22,6 +22,23 @@ export interface Project {
     status: string;
 }
 
+export interface ProjectAttachment {
+    id: string;
+    name: string;
+    url: string;
+    size: number;
+    type: string;
+}
+
+export interface ProjectMilestone {
+    id: string;
+    title: string;
+    description: string;
+    amount: number;
+    dueDate: string;
+    status: 'pending' | 'completed' | 'overdue';
+}
+
 export interface ProjectDraft{
     client_id: string;
     title: string;
@@ -35,6 +52,6 @@ export interface ProjectDraft{
     visibility: "public" | "private";
     budgetType: "fixed" | "hourly";
     duration: string;
-    attachments: any[];
-    milestones: any[];
+    attachments: ProjectAttachment[];
+    milestones: ProjectMilestone[];
 }

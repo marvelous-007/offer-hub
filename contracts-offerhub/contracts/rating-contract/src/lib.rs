@@ -5,6 +5,7 @@ mod access;
 mod analytics;
 mod contract;
 mod events;
+mod health_check;
 mod incentives;
 // mod integration_test;
 mod moderation;
@@ -15,7 +16,7 @@ mod types;
 mod validation;
 
 pub use crate::contract::RatingContract;
-pub use types::{Error, Rating, RatingStats, Feedback, UserRatingData};
+pub use types::{Error, Rating, RatingStats, Feedback, UserRatingData, HealthCheckResult, HealthStatus};
 
 #[contract]
 pub struct Contract;
@@ -164,5 +165,25 @@ impl Contract {
 
     pub fn reset_rate_limit(env: Env, admin: Address, user: Address, limit_type: String) -> Result<(), Error> {
         RatingContract::reset_rate_limit(env, admin, user, limit_type)
+    }
+
+    /// Perform a health check on the contract
+    pub fn health_check(env: Env) -> Result<HealthCheckResult, Error> {
+        RatingContract::health_check(env)
+    }
+
+    /// Perform an admin health check with additional details
+    pub fn admin_health_check(env: Env, caller: Address) -> Result<HealthCheckResult, Error> {
+        RatingContract::admin_health_check(env, caller)
+    }
+
+    /// Get the last health check timestamp
+    pub fn get_last_health_check(env: Env) -> u64 {
+        RatingContract::get_last_health_check(env)
+    }
+
+    /// Get contract version
+    pub fn get_contract_version(env: Env) -> String {
+        RatingContract::get_contract_version(env)
     }
 }
