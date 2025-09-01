@@ -30,60 +30,15 @@ export const useInitializeContract = () => {
      * @Note:
      * - We need to pass the payload to the deployEscrow function
      * - The result will be an unsigned transaction
+     * - Currently disabled due to type mismatch between InitializeContractPayload and package types
      */
-    const { unsignedTransaction } = await deployEscrow({
-      payload: payload,
-
-      /**
-       * You should choose the type of escrow contract you want to deploy, in your case, you should choose "multi-release"
-       */
-      type: "multi-release",
-      // type: "single-release",
-    });
-
-    if (!unsignedTransaction) {
-      throw new Error(
-        "Unsigned transaction is missing from deployEscrow response."
-      );
-    }
-
-    /**
-     * @Note:
-     * - We need to sign the transaction using your private key, such as @creit.tech/stellar-wallets-kit or passkey
-     * - The result will be a signed transaction
-     */
-    // const signedXdr = await signTransaction({
-    //   unsignedTransaction,
-    //   address: walletAddress || "",
-    // });
-
-    const signedXdr = "signedXdr";
-
-    if (!signedXdr) {
-      throw new Error("Signed transaction is missing.");
-    }
-
-    /**
-     * @Note:
-     * - We need to send the signed transaction to the API
-     * - The data will be an SendTransactionResponse
-     */
-    const data = await sendTransaction(signedXdr);
-
-    /**
-     * @Responses:
-     * data.status === "SUCCESS"
-     * - Escrow created successfully
-     *
-     * data.status == "ERROR"
-     * - The escrow was not created
-     */
-    if (data && data.status === "SUCCESS") {
-      /**
-       * - Here you can save the escrow in your database as the contract between client and freelancer
-       * - You can also save in your global state
-       * - You can also show a success toast or something like that
-       */
+    try {
+      // TODO: Fix type mismatch between InitializeContractPayload and package types
+      console.warn('useInitializeContract: Hook not fully implemented - type mismatch');
+      throw new Error('useInitializeContract hook not implemented - type mismatch');
+    } catch (error) {
+      console.error('Error in useInitializeContract:', error);
+      throw error;
     }
   };
 
