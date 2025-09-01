@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 env:
   NODE_VERSION: '18.x'
 
@@ -45,7 +50,7 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
             
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
         
       - name: Run linting
         run: npm run lint
@@ -96,10 +101,10 @@ jobs:
           cache-dependency-path: package-lock.json
           
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
         
       - name: Run security audit
-        run: npm audit --audit-level moderate
+        run: npm audit --audit-level moderate --legacy-peer-deps
         
   deploy-preview:
     runs-on: ubuntu-latest
@@ -118,7 +123,7 @@ jobs:
           cache-dependency-path: package-lock.json
           
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
         
       - name: Build for preview
         run: npm run build
@@ -127,11 +132,17 @@ jobs:
           
       - name: Comment PR with build status
         uses: actions/github-script@v7
+        continue-on-error: true
         with:
           script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '✅ **Frontend CI/CD Pipeline Completed Successfully!**\n\n- ✅ Linting passed\n- ✅ Tests passed\n- ✅ Build completed\n- ✅ Security audit passed\n\nReady for review and deployment! 🚀'
-            })
+            try {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: '✅ **Frontend CI/CD Pipeline Completed Successfully!**\n\n- ✅ Linting passed\n- ✅ Tests passed\n- ✅ Build completed\n- ✅ Security audit passed\n\nReady for review and deployment! 🚀'
+              });
+            } catch (error) {
+              console.log('Could not comment on PR:', error.message);
+              throw error;
+            }

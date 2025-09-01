@@ -20,6 +20,7 @@ export const useStartDisputeForm = () => {
     defaultValues: {
       contractId: "",
       signer: "",
+      reason: "",
     },
   });
 

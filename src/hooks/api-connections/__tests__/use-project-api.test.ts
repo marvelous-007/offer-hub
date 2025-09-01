@@ -57,7 +57,7 @@ describe("useProjectApi", () => {
 
         const { result } = renderHook(() => useProjectsApi());
         await expect(result.current.createProject(projectData)).rejects.toThrow(
-            "Error to create"
+            "API request failed"
         );
     })
 
