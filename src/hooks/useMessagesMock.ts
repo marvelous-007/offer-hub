@@ -29,12 +29,11 @@ export function useMessagesMock() {
   // Conversaciones adaptadas a la UI
   const conversations: UIConversation[] = useMemo(() => {
     return rawConvs.map((c) => {
-      const otherId = c.participants.find((p) => p !== currentUserId) || c.participants[0];
-      const other = getUser(otherId);
+      const other = c.participants.find((p) => p.id !== currentUserId) || c.participants[0];
       return {
         id: c.id,
-        name: other?.name ?? otherId,
-        avatarUrl: other?.avatarUrl,
+        name: other.name,
+        avatarUrl: other.avatarUrl,
         unreadCount: c.unreadCount ?? 0,
       };
     });
@@ -51,7 +50,7 @@ export function useMessagesMock() {
         type: m.fileUrl ? "file" : "text",
         fileData: m.fileUrl
           ? {
-              name: m.fileName ?? "file",
+              name: "file",
               size: "—",
               uploadDate: new Date(m.createdAt).toLocaleDateString(),
               status: m.status === "read" ? "Read" : m.status === "delivered" ? "Delivered" : "Sent",

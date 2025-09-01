@@ -75,7 +75,7 @@ export function useMessages(userId?: string): UseMessagesResult {
             const readRes = await markAsRead(activeConversationId, userId);
             if (!readRes.success && readRes.error) {
 
-              setErrorMessages((prev) => prev ?? readRes.error);
+              setErrorMessages((prev) => prev || readRes.error || null);
             } else {
              
               setConversations((prev) =>
