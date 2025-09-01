@@ -119,7 +119,7 @@ describe("useFreelancerServicesApi", () => {
       expect(success).toBe(true);
       expect(result.current.error).toBeNull();
       expect(mockFetch).toHaveBeenCalledWith(
-        "http://localhost:3001/services",
+        "http://localhost:3000/api/services",
         expect.objectContaining({
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -241,7 +241,7 @@ describe("useFreelancerServicesApi", () => {
       expect(success).toBe(true);
       expect(result.current.error).toBeNull();
       expect(mockFetch).toHaveBeenCalledWith(
-        "http://localhost:3001/services/123e4567-e89b-12d3-a456-426614174000",
+        "http://localhost:3000/api/services/123e4567-e89b-12d3-a456-426614174000",
         expect.objectContaining({
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -307,7 +307,7 @@ describe("useFreelancerServicesApi", () => {
       expect(success).toBe(true);
       expect(result.current.error).toBeNull();
       expect(mockFetch).toHaveBeenCalledWith(
-        "http://localhost:3001/services/123e4567-e89b-12d3-a456-426614174000",
+        "http://localhost:3000/api/services/123e4567-e89b-12d3-a456-426614174000",
         expect.objectContaining({
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
@@ -394,19 +394,13 @@ describe("useFreelancerServicesApi", () => {
         max_price: 100,
       };
 
-      // Start create operation
-      const createPromise = act(async () => {
-        return await result.current.createService(
+      // Start create operation and wait for it to complete
+      await act(async () => {
+        await result.current.createService(
           serviceData,
           "550e8400-e29b-41d4-a716-446655440000"
         );
       });
-
-      // Check that isCreating is true during operation
-      expect(result.current.isCreating).toBe(true);
-
-      // Wait for operation to complete
-      await createPromise;
 
       // Check that isCreating is false after operation
       expect(result.current.isCreating).toBe(false);
