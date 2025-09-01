@@ -493,3 +493,16 @@ fn increment_dispute_count(env: &Env) -> u64 {
     set_total_disputes(env, new_dispute_count);
     new_dispute_count
 }
+pub fn reset_dispute_count(env: &Env, admin: Address) ->  Result<(), Error>  {
+    admin.require_auth();
+
+    let arbitrator: Address = env.storage().instance().get(&ARBITRATOR).unwrap();
+    if arbitrator != admin { return Err(Error::Unauthorized); }
+    set_total_disputes(env, 0u64);
+
+    env.events().publish(
+        (Symbol::new(env, "dispute_count_reset"), admin.clone()),
+        env.ledger().timestamp(),
+    );
+    Ok(())
+}

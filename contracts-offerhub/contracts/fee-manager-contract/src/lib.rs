@@ -1,6 +1,6 @@
 #![no_std]
 use soroban_sdk::{contract, contractimpl, Address, Env, Vec};
-
+use crate::error::Error;
 mod contract;
 mod error;
 mod storage;
@@ -80,7 +80,11 @@ impl FeeManagerContract {
         contract::get_premium_users(&env)
     }
 
-    pub fn get_total_fees_collected(env: &Env) -> i128 {
-        contract::get_total_fees_collected(&env)
+    pub fn get_total_fees(env: &Env) -> i128 {
+        contract::get_total_fees(&env)
+    }
+
+     pub fn reset_total_fees_collected(env: &Env, admin: Address) -> Result<(), Error> {
+        contract::reset_total_fees_collected(&env, admin)
     }
 } 

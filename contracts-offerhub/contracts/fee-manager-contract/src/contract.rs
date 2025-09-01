@@ -39,11 +39,11 @@ pub fn initialize(env: &Env, admin: Address, platform_wallet: Address) {
     };
 
     env.storage().instance().set(&FEE_CONFIG, &fee_config);
-    env.storage().instance().set(&PLATFORM_BALANCE, &(0 as i128));
+    env.storage().instance().set(&PLATFORM_BALANCE, &0i128);
     env.storage().instance().set(&FEE_STATS, &fee_stats);
     env.storage().instance().set(&FEE_HISTORY, &Vec::<FeeRecord>::new(env));
     env.storage().instance().set(&PREMIUM_USERS, &Vec::<PremiumUser>::new(env));
-    env.storage().instance().set(&TOTAL_FESS_COLLECTED, &(0 as i128));
+    env.storage().instance().set(&TOTAL_FESS_COLLECTED, &0i128);
 
     env.events().publish(
         (Symbol::new(env, "fee_manager_initialized"), admin.clone()),
@@ -331,8 +331,23 @@ pub fn get_premium_users(env: &Env) -> Vec<PremiumUser> {
     }
 }
 
-pub fn get_total_fees_collected(env: &Env) -> i128 {
+pub fn get_total_fees(env: &Env) -> i128 {
     env.storage().instance().get(&TOTAL_FESS_COLLECTED).unwrap()
+}
+
+pub fn reset_total_fees_collected(env: &Env, admin: Address) -> Result<(), Error> {
+    admin.require_auth();
+
+    let fee_config: FeeConfig = env.storage().instance().get(&FEE_CONFIG).unwrap();
+    if fee_config.admin != admin { return Err(Error::Unauthorized); }
+
+    env.storage().instance().set(&TOTAL_FESS_COLLECTED, &0i128);
+
+    env.events().publish(
+        (Symbol::new(env, "total_fees_collected_reset"), fee_config.admin.clone()),
+        env.ledger().timestamp(),
+    );
+    Ok(())
 }
 
 // Helper function to calculate fee amount with precision

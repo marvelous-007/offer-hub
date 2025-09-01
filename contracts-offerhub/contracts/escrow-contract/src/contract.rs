@@ -1,3 +1,5 @@
+use core::ops::Add;
+
 use soroban_sdk::{Address, Env, IntoVal, String, Symbol, Vec};
 
 use crate::{
@@ -6,7 +8,7 @@ use crate::{
     types::{DisputeResult, Error, EscrowData, EscrowStatus, Milestone, MilestoneHistory},
     validation::{validate_init_contract, validate_init_contract_full, validate_add_milestone, validate_milestone_id, validate_address},
 };
-use crate::storage::{check_rate_limit, increment_escrow_transaction_count, set_rate_limit_bypass_flag, reset_rate_limit as rl_reset};
+use crate::storage::{check_rate_limit, increment_escrow_transaction_count, set_rate_limit_bypass_flag, reset_rate_limit as rl_reset, set_escrow_transaction_count};
 
 const TOKEN_TRANSFER: &str = "transfer";
 const TOKEN_BALANCE: &str = "balance";
@@ -641,7 +643,20 @@ pub fn clear_call_logs(env: &Env, caller: Address) {
     crate::storage::clear_call_logs(env);
 }
 
+pub fn get_total_transactions(env: &Env) -> u64 {
+    crate::storage::get_total_transactions(env)
+}
 
-pub fn get_escrow_transaction_count(env: &Env) -> u64 {
-    crate::storage::get_escrow_transaction_count(env)
+pub fn reset_transaction_count(env: &Env, admin: Address) -> Result<(), Error>  {
+    admin.require_auth();
+    let escrow_data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+
+    if escrow_data.client != admin { handle_error(env, Error::Unauthorized); }
+    set_escrow_transaction_count(&env, 0u64);
+
+    env.events().publish(
+        (Symbol::new(env, "transaction_count_reset"), escrow_data.client.clone()),
+        env.ledger().timestamp(),
+    );
+    Ok(())
 }

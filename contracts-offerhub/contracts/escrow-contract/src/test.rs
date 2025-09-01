@@ -453,7 +453,7 @@ fn test_increment_transaction_count() {
     let timeout = 3600;
 
     // Check initial transaction count
-    let initial_count = contract.get_escrow_transaction_count();
+    let initial_count = contract.get_total_transactions();
     assert_eq!(initial_count, 0);
 
     // Initialize contract (no transaction count increment)
@@ -461,26 +461,131 @@ fn test_increment_transaction_count() {
 
     // Deposit funds (should increment count)
     contract.deposit_funds(&client);
-    let count_after_deposit = contract.get_escrow_transaction_count();
+    let count_after_deposit = contract.get_total_transactions();
     assert_eq!(count_after_deposit, 1);
 
     // Add milestone (should increment count)
     contract.add_milestone(&client, &String::from_str(&env, "Test milestone"), &200);
-    let count_after_milestone = contract.get_escrow_transaction_count();
+    let count_after_milestone = contract.get_total_transactions();
     assert_eq!(count_after_milestone, 2);
 
     // Approve milestone (should increment count)
     contract.approve_milestone(&client, &1);
-    let count_after_approve = contract.get_escrow_transaction_count();
+    let count_after_approve = contract.get_total_transactions();
     assert_eq!(count_after_approve, 3);
 
     // Release milestone (should increment count)
     contract.release_milestone(&freelancer, &1);
-    let count_after_release_milestone = contract.get_escrow_transaction_count();
+    let count_after_release_milestone = contract.get_total_transactions();
     assert_eq!(count_after_release_milestone, 4);
 
     // Release funds (should increment count)
     contract.release_funds(&freelancer);
-    let final_count = contract.get_escrow_transaction_count();
+    let final_count = contract.get_total_transactions();
     assert_eq!(final_count, 5);
+}
+
+
+
+#[test]
+fn test_reset_transaction_count() {
+    let env = setup_env();
+    env.mock_all_auths();
+
+    let contract_id = env.register(EscrowContract, ());
+    let contract = EscrowContractClient::new(&env, &contract_id);
+
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let arbitrator = Address::generate(&env);
+    let token = setup_token(&env);
+    let amount = 500;
+    let timeout = 3600;
+
+    // Check initial transaction count
+    let initial_count = contract.get_total_transactions();
+    assert_eq!(initial_count, 0);
+
+    // Initialize contract (no transaction count increment)
+    contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
+
+    // Deposit funds (should increment count)
+    contract.deposit_funds(&client);
+    let count_after_deposit = contract.get_total_transactions();
+    assert_eq!(count_after_deposit, 1);
+
+    // Add milestone (should increment count)
+    contract.add_milestone(&client, &String::from_str(&env, "Test milestone"), &200);
+    let count_after_milestone = contract.get_total_transactions();
+    assert_eq!(count_after_milestone, 2);
+
+    // Approve milestone (should increment count)
+    contract.approve_milestone(&client, &1);
+    let count_after_approve = contract.get_total_transactions();
+    assert_eq!(count_after_approve, 3);
+
+    // Release milestone (should increment count)
+    contract.release_milestone(&freelancer, &1);
+    let count_after_release_milestone = contract.get_total_transactions();
+    assert_eq!(count_after_release_milestone, 4);
+
+    // Release funds (should increment count)
+    contract.release_funds(&freelancer);
+    let final_count = contract.get_total_transactions();
+    assert_eq!(final_count, 5);
+
+    contract.reset_transaction_count(&client);
+    let reset_transaction_count = contract.get_total_transactions();
+    assert_eq!(reset_transaction_count, 0);
+}
+
+#[test]
+#[should_panic]
+fn test_reset_transaction_count_failed() {
+    let env = setup_env();
+    env.mock_all_auths();
+
+    let contract_id = env.register(EscrowContract, ());
+    let contract = EscrowContractClient::new(&env, &contract_id);
+
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let arbitrator = Address::generate(&env);
+    let token = setup_token(&env);
+    let amount = 500;
+    let timeout = 3600;
+
+    // Check initial transaction count
+    let initial_count = contract.get_total_transactions();
+    assert_eq!(initial_count, 0);
+
+    // Initialize contract (no transaction count increment)
+    contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
+
+    // Deposit funds (should increment count)
+    contract.deposit_funds(&client);
+    let count_after_deposit = contract.get_total_transactions();
+    assert_eq!(count_after_deposit, 1);
+
+    // Add milestone (should increment count)
+    contract.add_milestone(&client, &String::from_str(&env, "Test milestone"), &200);
+    let count_after_milestone = contract.get_total_transactions();
+    assert_eq!(count_after_milestone, 2);
+
+    // Approve milestone (should increment count)
+    contract.approve_milestone(&client, &1);
+    let count_after_approve = contract.get_total_transactions();
+    assert_eq!(count_after_approve, 3);
+
+    // Release milestone (should increment count)
+    contract.release_milestone(&freelancer, &1);
+    let count_after_release_milestone = contract.get_total_transactions();
+    assert_eq!(count_after_release_milestone, 4);
+
+    // Release funds (should increment count)
+    contract.release_funds(&freelancer);
+    let final_count = contract.get_total_transactions();
+    assert_eq!(final_count, 5);
+
+    contract.reset_transaction_count(&freelancer);
 }

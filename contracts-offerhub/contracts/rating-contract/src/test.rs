@@ -265,3 +265,49 @@ fn test_rating_get_total_rating() {
     let total_count = client.get_total_rating();
     assert_eq!(total_count, 9)
 }
+
+
+#[test]
+fn test_reset_total_rating() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let contract_id = create_contract(&env);
+    let client = ContractClient::new(&env, &contract_id);
+
+    // Init admin
+    let admin = Address::generate(&env);
+    client.init(&admin);
+
+    let caller = Address::generate(&env);
+    let rated_user = Address::generate(&env);
+    let contract_str = String::from_str(&env, "c1");
+    let feedback = String::from_str(&env, "ok");
+    let category = String::from_str(&env, "web");
+
+    // Set a stable timestamp window start
+    env.ledger().with_mut(|l| l.timestamp = 10_000);
+
+    for i in 0..5 {
+        let cid = String::from_str(&env, match i {0=>"w1",1=>"w2",2=>"w3",3=>"w4",_=>"w5"});
+        client.submit_rating(&caller, &rated_user, &cid, &5u32, &feedback, &category);
+    }
+
+    // window advance resets
+    env.ledger().with_mut(|l| l.timestamp += 3601);
+    client.submit_rating(&caller, &rated_user, &contract_str, &5u32, &feedback, &category);
+
+    // Bypass
+    client.set_rate_limit_bypass(&admin, &caller, &true);
+    for i in 0..3 {
+        let cid = String::from_str(&env, match i {0=>"b1",1=>"b2",_=>"b3"});
+        client.submit_rating(&caller, &rated_user, &cid, &5u32, &feedback, &category);
+    }
+
+    let total_count = client.get_total_rating();
+    assert_eq!(total_count, 9);
+
+    client.reset_total_rating(&admin);
+
+    let total_count = client.get_total_rating();
+    assert_eq!(total_count, 0);
+}

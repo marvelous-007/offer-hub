@@ -8,14 +8,14 @@ use crate::storage::{
     save_admin, get_admin, save_rating, save_feedback, get_user_rating_stats, 
     save_user_rating_stats, increment_platform_stat, save_rating_threshold, add_user_feedback_id, get_user_feedback_ids, get_feedback,
     get_user_rating_history, save_reputation_contract, get_reputation_contract,
-    check_rate_limit, set_rate_limit_bypass, reset_rate_limit, increment_rating_count
+    check_rate_limit, set_rate_limit_bypass, reset_rate_limit, increment_rating_count, set_total_rating
 };
 use crate::types::{
     Error, Rating, RatingStats, Feedback, UserRatingData, RatingThreshold, HealthCheckResult,
     require_auth
 };
 use crate::validation::{validate_submit_rating, validate_report_feedback};
-use soroban_sdk::{Address, Env, String, Vec, IntoVal};
+use soroban_sdk::{Address, Env, String, Vec, IntoVal, Symbol};
 
 pub struct RatingContract;
 
@@ -424,5 +424,18 @@ impl RatingContract {
 
     pub fn get_total_rating(env: &Env) -> u64 {
         crate::storage::get_total_rating(&env)
+    }
+
+    pub fn reset_total_rating(env: &Env, admin: Address) ->  Result<(), Error> {
+        admin.require_auth();
+        if get_admin(&env) != admin { return Err(Error::Unauthorized); }
+
+        set_total_rating(env, 0u64);
+
+        env.events().publish(
+            (Symbol::new(env, "dispute_count_reset"), admin.clone()),
+            env.ledger().timestamp(),
+        );
+        Ok(())
     }
 }

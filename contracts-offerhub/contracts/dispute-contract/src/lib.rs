@@ -162,4 +162,8 @@ impl DisputeResolutionContract {
     pub fn get_total_disputes(env: Env) -> Result<u64, Error> {
         Ok(contract::get_total_disputes(&env))
     }
+
+    pub fn reset_dispute_count(env: &Env, admin: Address) ->  Result<(), Error>  {
+        contract::reset_dispute_count(&env, admin)
+    }
 }
