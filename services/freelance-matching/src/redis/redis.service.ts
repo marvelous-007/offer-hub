@@ -1,6 +1,11 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import Redis from 'ioredis';
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+  Logger,
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import Redis from "ioredis";
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
@@ -9,9 +14,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   constructor(private configService: ConfigService) {
     this.redisClient = new Redis({
-      host: this.configService.get<string>('REDIS_HOST'),
-      port: this.configService.get<number>('REDIS_PORT'),
-      password: this.configService.get<string>('REDIS_PASSWORD') || undefined,
+      host: this.configService.get<string>("REDIS_HOST"),
+      port: this.configService.get<number>("REDIS_PORT"),
+      password: this.configService.get<string>("REDIS_PASSWORD") || undefined,
       retryStrategy: (times) => {
         const delay = Math.min(times * 50, 2000);
         return delay;
@@ -25,22 +30,22 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       const pong = await this.redisClient.ping();
       this.logger.log(`Redis connection established: ${pong}`);
     } catch (error) {
-      this.logger.error('Failed to connect to Redis', error);
+      this.logger.error("Failed to connect to Redis", error);
     }
   }
 
   async onModuleDestroy() {
     await this.redisClient.quit();
-    this.logger.log('Redis connection closed');
+    this.logger.log("Redis connection closed");
   }
 
   getClient(): Redis {
     return this.redisClient;
   }
 
-  async set(key: string, value: string, ttl?: number): Promise<'OK'> {
+  async set(key: string, value: string, ttl?: number): Promise<"OK"> {
     if (ttl) {
-      return this.redisClient.set(key, value, 'EX', ttl);
+      return this.redisClient.set(key, value, "EX", ttl);
     }
     return this.redisClient.set(key, value);
   }

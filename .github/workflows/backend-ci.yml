@@ -69,11 +69,11 @@ jobs:
       run: npm run build
 
     - name: Upload coverage reports
-      uses: codecov/codecov-action@v4
+      uses: actions/upload-artifact@v4
       with:
-        file: ./backend/coverage/lcov.info
-        flags: backend
-        name: backend-coverage
+        name: backend-coverage-${{ matrix.node-version }}
+        path: backend/coverage/
+        retention-days: 30
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4

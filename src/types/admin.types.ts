@@ -44,7 +44,18 @@ export interface UpdateUserRequest {
   username?: string;
 }
 
-export const mapBackendUserToAdmin = (backendUser: any): AdminUser => ({
+export interface BackendUser {
+  id: string;
+  wallet_address: string;
+  username: string;
+  name?: string;
+  bio?: string;
+  email?: string;
+  is_freelancer?: boolean;
+  created_at?: string;
+}
+
+export const mapBackendUserToAdmin = (backendUser: BackendUser): AdminUser => ({
   id: backendUser.id,
   wallet_address: backendUser.wallet_address,
   username: backendUser.username,
@@ -77,6 +88,11 @@ export interface ApiError {
 
 export type ApiResult<T> = T | ApiError;
 
-export const isApiError = (result: any): result is ApiError => {
-  return result && result.success === false;
+export const isApiError = (result: unknown): result is ApiError => {
+  return (
+    typeof result === 'object' && 
+    result !== null && 
+    'success' in result && 
+    result.success === false
+  );
 };

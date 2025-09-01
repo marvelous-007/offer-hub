@@ -11,7 +11,7 @@ interface OfferFormState {
 }
 
 type OfferFormAction =
-  | { type: "UPDATE_FIELD"; field: keyof OfferFormData; value: any }
+  | { type: "UPDATE_FIELD"; field: keyof OfferFormData; value: OfferFormData[keyof OfferFormData] }
   | { type: "UPDATE_DELIVERABLES"; deliverables: string[] }
   | { type: "UPDATE_MILESTONES"; milestones: PaymentMilestone[] }
   | { type: "SET_STEP"; step: number }
@@ -24,7 +24,7 @@ type OfferFormAction =
 interface OfferFormContextType {
   state: OfferFormState;
   dispatch: React.Dispatch<OfferFormAction>;
-  updateField: (field: keyof OfferFormData, value: any) => void;
+  updateField: (field: keyof OfferFormData, value: OfferFormData[keyof OfferFormData]) => void;
   updateDeliverables: (deliverables: string[]) => void;
   updateMilestones: (milestones: PaymentMilestone[]) => void;
   setCurrentStep: (step: number) => void;
@@ -151,7 +151,7 @@ interface OfferFormProviderProps {
 export function OfferFormProvider({ children }: OfferFormProviderProps) {
   const [state, dispatch] = useReducer(offerFormReducer, initialState);
 
-  const updateField = useCallback((field: keyof OfferFormData, value: any) => {
+  const updateField = useCallback((field: keyof OfferFormData, value: OfferFormData[keyof OfferFormData]) => {
     dispatch({ type: "UPDATE_FIELD", field, value });
   }, []);
 
