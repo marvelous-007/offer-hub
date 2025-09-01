@@ -2,13 +2,59 @@
 use super::*;
 use crate::Contract;
 use soroban_sdk::{
-    testutils::{Address as _, Ledger},
-    Address, Env, String, Vec,
+    testutils::{Address as _, Ledger}, vec, Address, Env, String, Vec
 };
 extern crate std;
 
 fn create_contract(e: &Env) -> Address {
     e.register(Contract, ())
+}
+
+/// @notice Helper to submit a rating and check for expected outcome
+///
+/// @param client the contract client
+/// @param val the rating value to submit
+/// @param c the context for the submission
+/// @returns a non-changeable context in this architecture
+fn submit_rating(client: &ContractClient<'_>, val: i32, c: RatingContext) {
+    let result = client.try_submit_rating(
+        &c.caller,
+        &c.rated_user,
+        &c.contract_str,
+        &(val as u32),
+        &c.feedback,
+        &c.category,
+    );
+
+    if val < 1 || val > 5 {
+        assert_eq!(result, Err(Ok(Error::InvalidRating)));
+    } else {
+        assert_eq!(result, Ok(Ok(())));
+    }
+}
+
+fn default_rating_submission(client: &ContractClient<'_>, env: &Env, val: i32) {
+    let context = default_rating_context(&env);
+    submit_rating(client, val, context);
+}
+
+#[derive(Clone)]
+struct RatingContext {
+    caller: Address,
+    rated_user: Address,
+    contract_str: String,
+    feedback: String,
+    category: String,
+}
+
+fn default_rating_context(env: &Env) -> RatingContext {
+    RatingContext {
+        caller: Address::generate(&env),
+        rated_user: Address::generate(&env),
+        contract_str: String::from_str(&env, "c1"),
+        feedback: String::from_str(&env, "ok"),
+        category: String::from_str(&env, "web"),
+    }
 }
 
 #[test]
@@ -314,30 +360,6 @@ fn test_rating_reset_rate_limit_should_panic_on_non_admin() {
 }
 
 #[test]
-#[should_panic(expected = "Rating out of range")]
-fn test_rating_out_of_range_zero() {
-    let env = Env::default();
-    let contract_id = create_contract(&env);
-    let client = ContractClient::new(&env, &contract_id);
-
-    let caller = Address::generate(&env);
-    let rated_user = Address::generate(&env);
-    let contract_str = String::from_str(&env, "c1");
-    let feedback = String::from_str(&env, "ok");
-    let category = String::from_str(&env, "web");
-
-    // Submit a rating of 0, which should panic
-    client.submit_rating(
-        &caller,
-        &rated_user,
-        &contract_str,
-        &0u32,
-        &feedback,
-        &category,
-    );
-}
-
-#[test]
 fn test_rating_out_of_range() {
     let env = Env::default();
     let contract_id = create_contract(&env);
@@ -346,29 +368,50 @@ fn test_rating_out_of_range() {
 
     // Test ratings from -1 to 6 (invalid) and 1 to 5 (valid)
     for val in -1..7 {
-        submit_rating(&client, &env, val);
+        default_rating_submission(&client, &env, val);
     }
 }
 
-fn submit_rating(client: &ContractClient<'_>, env: &Env, val: i32) {
-    let caller = Address::generate(&env);
-    let rated_user = Address::generate(&env);
-    let contract_str = String::from_str(&env, "c1");
-    let feedback = String::from_str(&env, "ok");
-    let category = String::from_str(&env, "web");
+#[test]
+fn test_rating_rate_limiting_with_multiple_users() {
+    let env = Env::default();
+    let contract_id = create_contract(&env);
+    let client = ContractClient::new(&env, &contract_id);
+    env.mock_all_auths();
+    let str_ = vec![
+        &env,
+        String::from_str(&env, "c0"),
+        String::from_str(&env, "c1"),
+        String::from_str(&env, "c2"),
+        String::from_str(&env, "c3"),
+        String::from_str(&env, "c4"),
+    ];
 
+    let window = 3600;
+    let mut c = default_rating_context(&env);
+    for i in 0..5 {
+        c.contract_str = str_.get(i).unwrap();
+        submit_rating(&client, 5, c.clone());
+    }
+    // 6th should be rate-limited
+    c.contract_str = String::from_str(&env, "c6");
     let result = client.try_submit_rating(
-        &caller,
-        &rated_user,
-        &contract_str,
-        &(val as u32),
-        &feedback,
-        &category,
+        &c.caller,
+        &c.rated_user,
+        &c.contract_str,
+        &3u32,
+        &c.feedback,
+        &c.category,
     );
 
-    if val < 1 || val > 5 {
-        assert_eq!(result, Err(Ok(Error::InvalidRating)));
-    } else {
-        assert_eq!(result, Ok(Ok(())));
-    }
+    assert_eq!(result, Err(Ok(Error::RateLimitExceeded)));
+    let prev_caller = c.caller;
+    c.caller = Address::generate(&env);
+    // New caller should work
+    submit_rating(&client, 4, c.clone());
+    env.ledger().set_timestamp(window + 1);
+
+    // Previous caller should work after window
+    c.caller = prev_caller;
+    submit_rating(&client, 2, c.clone());
 }
