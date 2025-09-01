@@ -225,3 +225,21 @@ fn test_health_check_unauthorized_admin() {
     // This should panic due to unauthorized access
     client.admin_health_check(&non_admin);
 }
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #1)")]
+fn test_rating_reset_rate_limit_should_panic_on_non_admin() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let contract_id = create_contract(&env);
+    let client = ContractClient::new(&env, &contract_id);
+
+    // Initialize contract with admin
+    let admin = Address::generate(&env);
+    client.init(&admin);
+
+    // Try to reset rate limit as non-admin
+    let non_admin = Address::generate(&env);
+    // This should panic due to unauthorized access
+    client.reset_rate_limit(&non_admin, &non_admin, &String::from_str(&env, "total_ratings"));
+}
