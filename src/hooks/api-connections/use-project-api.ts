@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { CreateProjectDTO, ProjectDraft, ProjectResponse } from "@/types/project.types";
 import axios, { AxiosError } from "axios";
 import { isApiError } from "@/utils/type-guards";
@@ -16,7 +16,10 @@ const handleRequest = async <T>(request: Promise<{ data: T }>): Promise<T> => {
         return data;
     } catch (error: unknown) {
         if (isApiError(error)) {
-            throw new Error(error.response?.data?.message || 'API request failed');
+            const message = error.response?.data && typeof error.response.data === 'object' && 'message' in error.response.data 
+                ? String(error.response.data.message) 
+                : 'API request failed';
+            throw new Error(message);
         }
         throw new Error('API request failed');
     }
