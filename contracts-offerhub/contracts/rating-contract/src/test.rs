@@ -496,3 +496,24 @@ fn test_rating_moderation_scenarios() {
         "Unauthorized user should not be able to moderate feedback"
     );
 }
+
+#[test]
+fn test_rating_admin_transfer() {
+    let env = Env::default();
+    let contract_id = create_contract(&env);
+    let client = ContractClient::new(&env, &contract_id);
+    env.mock_all_auths();
+
+    // Initialize contract with admin
+    let admin = Address::generate(&env);
+    client.init(&admin);
+
+    // Transfer admin role to a new admin, and perform an admin function
+    let new_admin = Address::generate(&env);
+    client.transfer_admin(&admin, &new_admin);
+    client.set_rate_limit_bypass(&new_admin, &new_admin, &true);
+
+    // Old admin should no longer be valid
+    let result = client.try_set_rate_limit_bypass(&admin, &new_admin, &true);
+    assert_eq!(result, Err(Ok(Error::Unauthorized)));
+}
