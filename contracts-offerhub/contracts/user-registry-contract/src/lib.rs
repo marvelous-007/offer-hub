@@ -4,7 +4,7 @@ mod access;
 mod contract;
 mod events;
 mod storage;
-mod types;
+pub mod types;
 mod test;
 mod basic_test;
 mod validation;
@@ -170,5 +170,10 @@ impl Contract {
 
     pub fn reset_rate_limit(env: Env, admin: Address, user: Address, limit_type: String) -> Result<(), Error> {
         UserRegistryContract::reset_rate_limit(env, admin, user, limit_type)
+    }
+
+    pub fn get_total_users(env: &Env) -> Result<u64, Error> {
+        UserRegistryContract::get_total_users(env)
+
     }
 } 

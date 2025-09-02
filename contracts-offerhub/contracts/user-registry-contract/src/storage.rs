@@ -151,20 +151,5 @@ pub fn create_default_profile(env: &Env, level: VerificationLevel, expires_at: u
     }
 }
 
-// Statistcis and Metrics
-pub fn get_total_users(env: &Env) -> Result<u64, Error> {
-    env.storage().persistent().get(&TOTAL_USERS).unwrap_or(Ok(0))
-}
 
-pub fn set_total_users(env: &Env, count: u64) -> Result<(), Error> {
-    env.storage().persistent().set(&TOTAL_USERS, &count);
-    Ok(())
-}
-
-pub fn increment_user_count(env: &Env) -> Result<u64, Error> {
-    let current_count = get_total_users(env)?;
-    let new_count = current_count + 1;
-    set_total_users(env, new_count)?;
-    Ok(new_count)
-}
  

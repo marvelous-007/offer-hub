@@ -414,6 +414,10 @@ impl RatingContract {
     //     crate::health_check::admin_health_check(&env, &caller)
     // }
 
+    pub fn increment_rating_count(env: &Env) -> u64 {
+        crate::storage::increment_rating_count(&env)
+    }
+
     pub fn get_last_health_check(env: Env) -> u64 {
         crate::storage::get_last_health_check(&env)
     }

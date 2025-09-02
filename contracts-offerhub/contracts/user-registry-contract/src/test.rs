@@ -1,6 +1,6 @@
 #![cfg(test)]
 
-use crate::{Contract, storage::{get_verified_users, set_verified_users, get_total_users}, types::{Error, VerificationLevel}};
+use crate::{Contract, storage::{get_verified_users, set_verified_users}, types::{Error, VerificationLevel}};
 use soroban_sdk::{log, testutils::Address as _, Address, Env, String, Vec};
 
 // ==================== LEGACY TESTS ====================
@@ -632,7 +632,7 @@ fn test_user_get_total_users() {
         );
         assert!(result.is_ok());
 
-        let total_users_count = get_total_users(&env).unwrap();
+        let total_users_count = Contract::get_total_users(&env).unwrap();
         assert_eq!(total_users_count, 4);
     });
 }

@@ -188,18 +188,23 @@ impl Contract {
     }
 
     /// Get contract total ratings count
-    pub fn get_total_rating(env: &Env) -> u64 {
-        RatingContract::get_total_rating(&env)
+    pub fn get_total_rating(env: &Env) -> Result<u64, Error> {
+        Ok(RatingContract::get_total_rating(&env))
     }
 
     pub fn reset_total_rating(env: &Env, admin: Address) ->  Result<(), Error> {
         RatingContract::reset_total_rating(&env, admin)
     }
+
+    pub fn increment_rating_count(env: &Env) -> u64 {
+        RatingContract::increment_rating_count(&env)
+
+    }
 }
 
-use soroban_sdk::contractclient;
+// use soroban_sdk::contractclient;
 
-#[contractclient(name = "ContractAClient")]
-pub trait ContractAInterface {
-    fn get_total_rating(env: &Env) -> u64;
-}
+// #[contractclient(name = "ContractAClient")]
+// pub trait ContractAInterface {
+//     fn get_total_rating(env: &Env) -> u64;
+// }
