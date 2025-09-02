@@ -447,3 +447,52 @@ fn test_rating_admin_authorization_verification() {
     // Test authorized access to reset rate limit
     client.reset_rate_limit(&admin, &non_admin, &String::from_str(&env, "total_ratings"));
 }
+
+#[test]
+fn test_rating_moderation_scenarios() {
+    let env = Env::default();
+    let contract_id = create_contract(&env);
+    let client = ContractClient::new(&env, &contract_id);
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    client.init(&admin);
+
+    // Add a moderator
+    let moderator = Address::generate(&env);
+    client.add_moderator(&admin, &moderator);
+
+    // Submit a rating to be moderated
+    let c = default_rating_context(&env);
+
+    client.submit_rating(
+        &c.caller,
+        &c.rated_user,
+        &c.contract_str,
+        &1u32,
+        &c.feedback,
+        &c.category,
+    );
+
+    // Moderator approves the feedback
+    let feedback_id = String::from_str(&env, "feedback_id");
+    let action_approve = String::from_str(&env, "approve");
+    let reason = String::from_str(&env, "Valid feedback");
+
+    // use admin to approve
+    client.moderate_feedback(&admin, &feedback_id, &action_approve, &reason);
+
+    // Moderator removes the feedback
+    let action_remove = String::from_str(&env, "remove");
+    client.moderate_feedback(&moderator, &feedback_id, &action_remove, &reason);
+
+    // Unauthorized user tries to moderate
+    let unauthorized_user = Address::generate(&env);
+    let result =
+        client.try_moderate_feedback(&unauthorized_user, &feedback_id, &action_remove, &reason);
+    assert_eq!(
+        result,
+        Err(Ok(Error::Unauthorized)),
+        "Unauthorized user should not be able to moderate feedback"
+    );
+}
