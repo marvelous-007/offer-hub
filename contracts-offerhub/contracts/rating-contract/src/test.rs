@@ -2,7 +2,8 @@
 use super::*;
 use crate::Contract;
 use soroban_sdk::{
-    testutils::{Address as _, Ledger}, vec, Address, Env, String, Vec
+    testutils::{Address as _, Ledger},
+    vec, Address, Env, String, Vec,
 };
 extern crate std;
 
@@ -414,4 +415,35 @@ fn test_rating_rate_limiting_with_multiple_users() {
     // Previous caller should work after window
     c.caller = prev_caller;
     submit_rating(&client, 2, c.clone());
+}
+
+#[test]
+fn test_rating_admin_authorization_verification() {
+    let env = Env::default();
+    let contract_id = create_contract(&env);
+    let client = ContractClient::new(&env, &contract_id);
+
+    // Initialize contract with admin
+    let admin = Address::generate(&env);
+    client.init(&admin);
+
+    // Test authorized admin access
+    let result = client.try_set_rate_limit_bypass(&admin, &admin, &true);
+    assert!(
+        result.is_ok(),
+        "Admin should be authorized to perform this action"
+    );
+
+    // Test unauthorized access by non-admin
+    let non_admin = Address::generate(&env);
+    let result = client.try_set_rate_limit_bypass(&non_admin, &admin, &true);
+    assert_eq!(result, Err(Ok(Error::Unauthorized)));
+
+    // Test unauthorized access to reset rate limit
+    let result =
+        client.try_reset_rate_limit(&non_admin, &admin, &String::from_str(&env, "total_ratings"));
+    assert_eq!(result, Err(Ok(Error::Unauthorized)));
+
+    // Test authorized access to reset rate limit
+    client.reset_rate_limit(&admin, &non_admin, &String::from_str(&env, "total_ratings"));
 }
