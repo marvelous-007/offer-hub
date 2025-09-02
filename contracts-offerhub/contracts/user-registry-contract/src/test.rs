@@ -1,7 +1,7 @@
 #![cfg(test)]
 
 use crate::{Contract, storage::{get_verified_users, set_verified_users}, types::{Error, VerificationLevel}};
-use soroban_sdk::{testutils::Address as _, Address, Env, String, Vec};
+use soroban_sdk::{log, testutils::Address as _, Address, Env, String, Vec};
 
 // ==================== LEGACY TESTS ====================
 
@@ -577,3 +577,62 @@ fn test_additional_security_scenarios() {
         assert_eq!(result, Err(Error::Unauthorized));
     });
 } 
+
+
+#[test]
+fn test_user_get_total_users() {
+    let env = Env::default();
+    env.mock_all_auths();
+    
+    let contract_id = env.register(Contract, ());
+    let admin = Address::generate(&env);
+    
+    let user1 = Address::generate(&env);
+    let user2 = Address::generate(&env);
+    let user3 = Address::generate(&env);
+
+    // Initialize admin in first context
+    env.as_contract(&contract_id, || {
+        Contract::initialize_admin(env.clone(), admin.clone()).unwrap();
+    });
+
+    // Bulk verify in second context
+    env.as_contract(&contract_id, || {
+        let mut users = Vec::new(&env);
+        users.push_back(user1.clone());
+        users.push_back(user2.clone());
+        users.push_back(user3.clone());
+
+        let metadata = String::from_str(&env, "Bulk verified");
+        let expires_at = env.ledger().timestamp() + 365 * 24 * 60 * 60; // 1 year
+        
+        let result = Contract::bulk_verify_users(
+            env.clone(),
+            admin.clone(),
+            users,
+            VerificationLevel::Premium,
+            expires_at,
+            metadata,
+        );
+        assert!(result.is_ok());
+    });
+
+    env.as_contract(&contract_id, || {
+        let metadata = String::from_str(&env, "Bulk verified");
+        let expires_at = env.ledger().timestamp() + 365 * 24 * 60 * 60; // 1 year
+        
+        let user4 = Address::generate(&env);
+        let result = Contract::verify_user(
+            env.clone(),
+            admin.clone(),
+            user4,
+            VerificationLevel::Premium,
+            expires_at,
+            metadata
+        );
+        assert!(result.is_ok());
+
+        let total_users_count = Contract::get_total_users(&env).unwrap();
+        assert_eq!(total_users_count, 4);
+    });
+}

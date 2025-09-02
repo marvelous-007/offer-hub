@@ -1,4 +1,4 @@
-use soroban_sdk::{contracterror, contracttype, Address, String, Vec};
+use soroban_sdk::{contracterror, contracttype, symbol_short, Address, String, Vec, Symbol};
 
 #[contracterror]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -144,6 +144,9 @@ pub const MAX_FEEDBACK_LENGTH: u32 = 1000;
 pub const DEFAULT_RESTRICTION_THRESHOLD: u32 = 250; // 2.50 average rating
 pub const DEFAULT_WARNING_THRESHOLD: u32 = 300; // 3.00 average rating
 pub const DEFAULT_TOP_RATED_THRESHOLD: u32 = 480; // 4.80 average rating
+
+pub const TOTAL_RATING_COUNT: Symbol = symbol_short!("TOTALRATE");
+
 
 pub fn require_auth(address: &Address) -> Result<(), Error> {
     address.require_auth();

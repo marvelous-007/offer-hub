@@ -2,7 +2,7 @@ use crate::types::{
     Error, Feedback, IncentiveRecord, Rating, RatingStats, RatingThreshold,
     FeedbackReport, ADMIN, MODERATOR, RATING, FEEDBACK, USER_RATING_STATS, FEEDBACK_REPORTS, RATING_THRESHOLDS,
     INCENTIVE_RECORDS, REPUTATION_CONTRACT, PLATFORM_STATS, USER_RESTRICTIONS,
-    RATE_LIMITS, RATE_LIMIT_BYPASS, RateLimitEntry,
+    RATE_LIMITS, RATE_LIMIT_BYPASS, RateLimitEntry, TOTAL_RATING_COUNT
 };
 use soroban_sdk::{Address, Env, String, Symbol, Vec};
 
@@ -306,4 +306,20 @@ pub fn save_contract_version(env: &Env, version: &String) {
 
 pub fn get_contract_version(env: &Env) -> String {
     env.storage().instance().get(&Symbol::new(env, "contract_version")).unwrap_or_else(|| String::from_str(env, "1.0.0"))
+}
+
+// Statistcis and Metrics
+pub fn get_total_rating(env: &Env) -> u64 {
+    env.storage().instance().get(&TOTAL_RATING_COUNT).unwrap_or(0)
+}
+
+pub fn set_total_rating(env: &Env, count: u64) {
+    env.storage().instance().set(&TOTAL_RATING_COUNT, &count);
+}
+
+pub fn increment_rating_count(env: &Env) -> u64 {
+    let current_count = get_total_rating(env);
+    let new_total_rating = current_count + 1;
+    set_total_rating(env, new_total_rating);
+    new_total_rating
 }

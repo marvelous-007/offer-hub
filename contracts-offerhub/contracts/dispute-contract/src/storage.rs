@@ -10,6 +10,7 @@ pub const ESCROW_CONTRACT: Symbol = symbol_short!("ESCROW");
 pub const FEE_MANAGER: Symbol = symbol_short!("FEEMGR");
 pub const RATE_LIMITS: Symbol = symbol_short!("RLIM");
 pub const RATE_BYPASS: Symbol = symbol_short!("RLBYP");
+pub const TOTAL_DISPUTES: Symbol = symbol_short!("DISPCOUNT");
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[contracttype]
@@ -38,4 +39,12 @@ pub fn check_rate_limit(env: &Env, user: &Address, kind: &String, max_calls: u32
 pub fn reset_rate_limit(env: &Env, user: &Address, kind: &String) {
 	let entry = RateLimitEntry { current_calls: 0, window_start: env.ledger().timestamp() };
 	env.storage().persistent().set(&rl_key(user, kind), &entry);
+}
+
+pub fn get_total_disputes(env: &Env) -> u64 {
+    env.storage().persistent().get(&TOTAL_DISPUTES).unwrap_or(0)
+}
+
+pub fn set_total_disputes(env: &Env, count: u64) {
+    env.storage().persistent().set(&TOTAL_DISPUTES, &count);
 }

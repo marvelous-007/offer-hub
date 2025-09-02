@@ -7,10 +7,11 @@ pub fn emit_rating_submitted(
     contract_id: &String,
     rating: u32,
     rating_id: &String,
+    total_ratings: &u64
 ) {
     env.events().publish(
         (symbol_short!("rating"), symbol_short!("submit")),
-        (rater.clone(), rated_user.clone(), contract_id.clone(), rating, rating_id.clone()),
+        (rater.clone(), rated_user.clone(), contract_id.clone(), rating, rating_id.clone(), total_ratings.clone()),
     );
 }
 

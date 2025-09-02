@@ -167,15 +167,15 @@ impl Contract {
         RatingContract::reset_rate_limit(env, admin, user, limit_type)
     }
 
-    /// Perform a health check on the contract
-    pub fn health_check(env: Env) -> Result<HealthCheckResult, Error> {
-        RatingContract::health_check(env)
-    }
+    // /// Perform a health check on the contract
+    // pub fn health_check(env: Env) -> Result<HealthCheckResult, Error> {
+    //     RatingContract::health_check(env)
+    // }
 
-    /// Perform an admin health check with additional details
-    pub fn admin_health_check(env: Env, caller: Address) -> Result<HealthCheckResult, Error> {
-        RatingContract::admin_health_check(env, caller)
-    }
+    // /// Perform an admin health check with additional details
+    // pub fn admin_health_check(env: Env, caller: Address) -> Result<HealthCheckResult, Error> {
+    //     RatingContract::admin_health_check(env, caller)
+    // }
 
     /// Get the last health check timestamp
     pub fn get_last_health_check(env: Env) -> u64 {
@@ -186,4 +186,25 @@ impl Contract {
     pub fn get_contract_version(env: Env) -> String {
         RatingContract::get_contract_version(env)
     }
+
+    /// Get contract total ratings count
+    pub fn get_total_rating(env: &Env) -> Result<u64, Error> {
+        Ok(RatingContract::get_total_rating(&env))
+    }
+
+    pub fn reset_total_rating(env: &Env, admin: Address) ->  Result<(), Error> {
+        RatingContract::reset_total_rating(&env, admin)
+    }
+
+    pub fn increment_rating_count(env: &Env) -> u64 {
+        RatingContract::increment_rating_count(&env)
+
+    }
 }
+
+// use soroban_sdk::contractclient;
+
+// #[contractclient(name = "ContractAClient")]
+// pub trait ContractAInterface {
+//     fn get_total_rating(env: &Env) -> u64;
+// }

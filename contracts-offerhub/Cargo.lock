@@ -1363,6 +1363,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "stat-contract"
+version = "0.0.0"
+dependencies = [
+ "dispute-contract",
+ "escrow-contract",
+ "fee-manager-contract",
+ "rating-contract",
+ "soroban-sdk",
+ "user-registry-contract",
+]
+
+[[package]]
 name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
