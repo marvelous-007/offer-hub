@@ -1,8 +1,12 @@
 #![cfg(test)]
 use super::*;
-use soroban_sdk::{log, testutils::{Address as _, Ledger}, Address, Env, String, Vec, vec};
 use crate::Contract;
 use rand::{distributions::Alphanumeric, Rng};
+use soroban_sdk::{
+    log,
+    testutils::{Address as _, Ledger},
+    vec, Address, Env, String, Vec,
+};
 extern crate std;
 
 #[derive(Clone)]
@@ -19,7 +23,11 @@ fn create_contract(e: &Env) -> Address {
 }
 
 fn _random_string() -> std::string::String {
-    rand::thread_rng().sample_iter(&Alphanumeric).take(6).map(char::from).collect()
+    rand::thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(6)
+        .map(char::from)
+        .collect()
 }
 
 fn random_string(env: &Env) -> String {
@@ -55,7 +63,13 @@ fn default_rating_submission(client: &ContractClient<'_>, env: &Env, val: i32) {
     submit_rating(client, val, context);
 }
 
-fn feign_rating(env: &Env, client: &ContractClient<'_>, len: usize, rating: i32, c: &mut RatingContext) {
+fn feign_rating(
+    env: &Env,
+    client: &ContractClient<'_>,
+    len: usize,
+    rating: i32,
+    c: &mut RatingContext,
+) {
     let mut window = 0;
     for i in 0..len {
         if i % 5 == 0 {
@@ -358,25 +372,47 @@ fn test_rating_get_total_rating() {
     env.ledger().with_mut(|l| l.timestamp = 10_000);
 
     for i in 0..5 {
-        let cid = String::from_str(&env, match i {0=>"w1",1=>"w2",2=>"w3",3=>"w4",_=>"w5"});
+        let cid = String::from_str(
+            &env,
+            match i {
+                0 => "w1",
+                1 => "w2",
+                2 => "w3",
+                3 => "w4",
+                _ => "w5",
+            },
+        );
         client.submit_rating(&caller, &rated_user, &cid, &5u32, &feedback, &category);
     }
 
     // window advance resets
     env.ledger().with_mut(|l| l.timestamp += 3601);
-    client.submit_rating(&caller, &rated_user, &contract_str, &5u32, &feedback, &category);
+    client.submit_rating(
+        &caller,
+        &rated_user,
+        &contract_str,
+        &5u32,
+        &feedback,
+        &category,
+    );
 
     // Bypass
     client.set_rate_limit_bypass(&admin, &caller, &true);
     for i in 0..3 {
-        let cid = String::from_str(&env, match i {0=>"b1",1=>"b2",_=>"b3"});
+        let cid = String::from_str(
+            &env,
+            match i {
+                0 => "b1",
+                1 => "b2",
+                _ => "b3",
+            },
+        );
         client.submit_rating(&caller, &rated_user, &cid, &5u32, &feedback, &category);
     }
 
     let total_count = client.get_total_rating();
     assert_eq!(total_count, 9)
 }
-
 
 #[test]
 fn test_reset_total_rating() {
@@ -399,18 +435,41 @@ fn test_reset_total_rating() {
     env.ledger().with_mut(|l| l.timestamp = 10_000);
 
     for i in 0..5 {
-        let cid = String::from_str(&env, match i {0=>"w1",1=>"w2",2=>"w3",3=>"w4",_=>"w5"});
+        let cid = String::from_str(
+            &env,
+            match i {
+                0 => "w1",
+                1 => "w2",
+                2 => "w3",
+                3 => "w4",
+                _ => "w5",
+            },
+        );
         client.submit_rating(&caller, &rated_user, &cid, &5u32, &feedback, &category);
     }
 
     // window advance resets
     env.ledger().with_mut(|l| l.timestamp += 3601);
-    client.submit_rating(&caller, &rated_user, &contract_str, &5u32, &feedback, &category);
+    client.submit_rating(
+        &caller,
+        &rated_user,
+        &contract_str,
+        &5u32,
+        &feedback,
+        &category,
+    );
 
     // Bypass
     client.set_rate_limit_bypass(&admin, &caller, &true);
     for i in 0..3 {
-        let cid = String::from_str(&env, match i {0=>"b1",1=>"b2",_=>"b3"});
+        let cid = String::from_str(
+            &env,
+            match i {
+                0 => "b1",
+                1 => "b2",
+                _ => "b3",
+            },
+        );
         client.submit_rating(&caller, &rated_user, &cid, &5u32, &feedback, &category);
     }
 
@@ -629,22 +688,52 @@ fn test_rating_incentives() {
 
     let incentives = client.check_rating_incentives(&c.rated_user);
     assert_eq!(incentives.len(), 5, "Incentive len should be 3");
-    assert_eq!(incentives.get(1).unwrap(), String::from_str(&env, "ten_reviews"));
-    assert_eq!(incentives.get(2).unwrap(), String::from_str(&env, "fifty_reviews"));
-    assert_eq!(incentives.get(3).unwrap(), String::from_str(&env, "top_rated"));
-    assert_eq!(incentives.get(4).unwrap(), String::from_str(&env, "consistency_award"));
+    assert_eq!(
+        incentives.get(1).unwrap(),
+        String::from_str(&env, "ten_reviews")
+    );
+    assert_eq!(
+        incentives.get(2).unwrap(),
+        String::from_str(&env, "fifty_reviews")
+    );
+    assert_eq!(
+        incentives.get(3).unwrap(),
+        String::from_str(&env, "top_rated")
+    );
+    assert_eq!(
+        incentives.get(4).unwrap(),
+        String::from_str(&env, "consistency_award")
+    );
 
-    // Top rated achievement
-    //     if stats.average_rating >= 480 && stats.total_ratings >= 20 && !is_incentive_claimed(env, user, &String::from_str(env, "top_rated")) {
-    //         available_incentives.push_back(String::from_str(env, "top_rated"));
-    //     }
+    // let total_points = // average_rating * total_ratings / 100
+    // 480 * 20 / 100 = 96
 
-    // Crosscheck for check_perfect_month
+    // 96 / 4 = 24 ratings of 4 stars
 
+    // To simulate the top_rated achievement..
+    // simulate a 4.75 rating using 15 five stars and 4 four stars
+
+    c.rated_user = Address::generate(&env);
+    feign_rating(&env, &client, 15, 5, &mut c);
+    feign_rating(&env, &client, 4, 4, &mut c);
+    let incentives = client.check_rating_incentives(&c.rated_user);
+    log!(&env, "", incentives);
+    assert_eq!(incentives.len(), 2, "Incentive len should be 2");
+    assert_eq!(
+        incentives.get(0).unwrap(),
+        String::from_str(&env, "first_five_star")
+    );
+    assert_eq!(
+        incentives.get(1).unwrap(),
+        String::from_str(&env, "ten_reviews")
+    );
+
+    // Simulate top rated by adding an extra 5-star rating
+    feign_rating(&env, &client, 1, 5, &mut c);
+    let incentives = client.check_rating_incentives(&c.rated_user);
+    assert_eq!(incentives.len(), 3, "Incentive len should be 3");
+    assert_eq!(
+        incentives.get(2).unwrap(),
+        String::from_str(&env, "top_rated")
+    );
 }
-
-//     // Improvement award (significant rating improvement)
-//     if check_improvement_award(env, user) && !is_incentive_claimed(env, user, &String::from_str(env, "improvement_award")) {
-//         available_incentives.push_back(String::from_str(env, "improvement_award"));
-//     }
-// }
