@@ -196,10 +196,18 @@
                       },
                       {
                         "key": {
+                          "symbol": "FEE_TOTAL"
+                        },
+                        "val": {
+                          "i128": "0"
+                        }
+                      },
+                      {
+                        "key": {
                           "symbol": "PLAT_BAL"
                         },
                         "val": {
-                          "i32": 0
+                          "i128": "0"
                         }
                       },
                       {

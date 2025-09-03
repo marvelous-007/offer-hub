@@ -5,11 +5,10 @@ pub const FEE_CONFIG: Symbol = symbol_short!("FEE_CFG");
 pub const PLATFORM_BALANCE: Symbol = symbol_short!("PLAT_BAL");
 pub const FEE_HISTORY: Symbol = symbol_short!("FEE_HIST");
 pub const FEE_STATS: Symbol = symbol_short!("FEE_STAT");
+pub const TOTAL_FESS_COLLECTED: Symbol = symbol_short!("FEE_TOTAL");
 
 // Storage keys for premium users
 pub const PREMIUM_USERS: Symbol = symbol_short!("PREM_USR");
-
-
 
 // Default fee percentages (in basis points: 100 = 1%)
 pub const DEFAULT_ESCROW_FEE_PERCENTAGE: i128 = 250;    // 2.5%

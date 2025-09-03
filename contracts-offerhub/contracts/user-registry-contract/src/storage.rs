@@ -8,6 +8,7 @@ pub const ADMIN: Symbol = symbol_short!("ADMIN");
 pub const MODERATORS: Symbol = symbol_short!("MODS");
 pub const RATE_LIMITS: Symbol = symbol_short!("RLIM");
 pub const RATE_BYPASS: Symbol = symbol_short!("RLBYP");
+pub const TOTAL_USERS: Symbol = symbol_short!("TOTALUSER");
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[contracttype]
@@ -149,5 +150,6 @@ pub fn create_default_profile(env: &Env, level: VerificationLevel, expires_at: u
         validations: Vec::new(env),
     }
 }
+
 
  

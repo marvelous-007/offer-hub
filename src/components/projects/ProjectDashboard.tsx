@@ -28,9 +28,13 @@ export function ProjectDashboard() {
     return []
   }, [tab, projects])
 
+  const handleTabChange = (newTab: string) => {
+    setTab(newTab as TabKey);
+  };
+
   return (
     <div className="p-3 sm:p-6">
-      <ProjectTabs tabs={TABS} activeTab={tab} onTabChange={setTab} />
+      <ProjectTabs tabs={TABS} activeTab={tab} onTabChange={handleTabChange} />
       
       <div className="mx-auto w-full max-w-[680px] mt-3 sm:mt-4 space-y-4">
         {tab === "analytics" ? (
