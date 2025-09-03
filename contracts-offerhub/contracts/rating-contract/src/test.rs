@@ -8,6 +8,15 @@ use soroban_sdk::{
 use rand::{distributions::Alphanumeric, Rng};
 extern crate std;
 
+#[derive(Clone)]
+struct RatingContext {
+    caller: Address,
+    rated_user: Address,
+    contract_str: String,
+    feedback: String,
+    category: String,
+}
+
 fn create_contract(e: &Env) -> Address {
     e.register(Contract, ())
 }
@@ -49,13 +58,17 @@ fn default_rating_submission(client: &ContractClient<'_>, env: &Env, val: i32) {
     submit_rating(client, val, context);
 }
 
-#[derive(Clone)]
-struct RatingContext {
-    caller: Address,
-    rated_user: Address,
-    contract_str: String,
-    feedback: String,
-    category: String,
+fn feign_rating(env: &Env, client: &ContractClient<'_>, len: usize, rating: i32, c: &mut RatingContext) {
+    let mut window = 0;
+    for i in 0..len {
+        if i % 5 == 0 {
+            window += 3600;
+            env.ledger().set_timestamp(window);
+            c.caller = Address::generate(&env);
+        }
+        c.contract_str = random_string(&env);
+        submit_rating(&client, rating, c.clone());
+    }
 }
 
 fn default_rating_context(env: &Env) -> RatingContext {
@@ -559,53 +572,14 @@ fn test_rating_incentives() {
     assert_eq!(incentives.get(3).unwrap(), String::from_str(&env, "top_rated"));
     assert_eq!(incentives.get(4).unwrap(), String::from_str(&env, "consistency_award"));
 
+    // Top rated achievement
+    //     if stats.average_rating >= 480 && stats.total_ratings >= 20 && !is_incentive_claimed(env, user, &String::from_str(env, "top_rated")) {
+    //         available_incentives.push_back(String::from_str(env, "top_rated"));
+    //     }
+
+    // Crosscheck for check_perfect_month
+
 }
-
-fn feign_rating(env: &Env, client: &ContractClient<'_>, len: usize, rating: i32, c: &mut RatingContext) {
-    let mut window = 0;
-    for i in 0..len {
-        if i % 5 == 0 {
-            window += 3600;
-            env.ledger().set_timestamp(window);
-            c.caller = Address::generate(&env);
-        }
-        c.contract_str = random_string(&env);
-        submit_rating(&client, rating, c.clone());
-    }
-}
-
-
-
-// if let Ok(stats) = get_user_rating_stats(env, user) {
-//     // First five-star rating incentive
-//     if stats.five_star_count >= 1 && !is_incentive_claimed(env, user, &String::from_str(env, "first_five_star")) {
-//         available_incentives.push_back(String::from_str(env, "first_five_star"));
-//     }
-
-//     // Ten ratings milestone
-//     if stats.total_ratings >= 10 && !is_incentive_claimed(env, user, &String::from_str(env, "ten_reviews")) {
-//         available_incentives.push_back(String::from_str(env, "ten_reviews"));
-//     }
-
-//     // Fifty ratings milestone
-//     if stats.total_ratings >= 50 && !is_incentive_claimed(env, user, &String::from_str(env, "fifty_reviews")) {
-//         available_incentives.push_back(String::from_str(env, "fifty_reviews"));
-//     }
-
-//     // Perfect month (all 5-star ratings in last 30 days)
-//     if check_perfect_month(env, user) && !is_incentive_claimed(env, user, &String::from_str(env, "perfect_month")) {
-//         available_incentives.push_back(String::from_str(env, "perfect_month"));
-//     }
-
-//     // Top rated achievement
-//     if stats.average_rating >= 480 && stats.total_ratings >= 20 && !is_incentive_claimed(env, user, &String::from_str(env, "top_rated")) {
-//         available_incentives.push_back(String::from_str(env, "top_rated"));
-//     }
-
-//     // Consistency award (maintaining high rating over time)
-//     if check_consistency_award(env, user) && !is_incentive_claimed(env, user, &String::from_str(env, "consistency_award")) {
-//         available_incentives.push_back(String::from_str(env, "consistency_award"));
-//     }
 
 //     // Improvement award (significant rating improvement)
 //     if check_improvement_award(env, user) && !is_incentive_claimed(env, user, &String::from_str(env, "improvement_award")) {
