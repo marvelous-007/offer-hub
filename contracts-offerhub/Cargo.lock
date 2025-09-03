@@ -980,6 +980,7 @@ name = "rating-contract"
 version = "1.0.0"
 dependencies = [
  "rand",
+ "reputation-nft-contract",
  "soroban-sdk",
 ]
 

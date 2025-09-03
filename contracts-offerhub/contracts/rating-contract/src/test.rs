@@ -7,6 +7,7 @@ use soroban_sdk::{
     testutils::{Address as _, Ledger},
     vec, Address, Env, String, Vec,
 };
+use reputation_nft_contract::Contract as ReputationContract;
 extern crate std;
 
 #[derive(Clone)]
@@ -705,13 +706,8 @@ fn test_rating_incentives() {
         String::from_str(&env, "consistency_award")
     );
 
-    // let total_points = // average_rating * total_ratings / 100
-    // 480 * 20 / 100 = 96
-
-    // 96 / 4 = 24 ratings of 4 stars
-
     // To simulate the top_rated achievement..
-    // simulate a 4.75 rating using 15 five stars and 4 four stars
+    // simulate a 4.75 rating using fifteen 5-stars and four 4-stars
 
     c.rated_user = Address::generate(&env);
     feign_rating(&env, &client, 15, 5, &mut c);
@@ -737,3 +733,26 @@ fn test_rating_incentives() {
         String::from_str(&env, "top_rated")
     );
 }
+
+#[test]
+fn test_rating_reputation_contract_integration() {
+    let env = Env::default();
+    let contract_id = create_contract(&env);
+    // e.register(Contract, ())
+    let reputation_cid = env.register(ReputationContract, ());
+    let client = ContractClient::new(&env, &contract_id);
+    env.mock_all_auths();
+
+    // Initialize contract with admin
+    let admin = Address::generate(&env);
+    let non_admin = Address::generate(&env);
+    client.init(&admin);
+
+    let res = client.try_set_reputation_contract(&non_admin, &reputation_cid);
+    assert_eq!(res, Err(Ok(Error::Unauthorized)));
+    client.set_reputation_contract(&admin, &reputation_cid);
+}
+
+// Create test for edge cases in get_user_rating_history pagination
+
+// Add test for parameter validation in set_rating_threshold
