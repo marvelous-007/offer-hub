@@ -5,10 +5,20 @@ use soroban_sdk::{
     testutils::{Address as _, Ledger},
     vec, Address, Env, String, Vec,
 };
+use rand::{distributions::Alphanumeric, Rng};
 extern crate std;
 
 fn create_contract(e: &Env) -> Address {
     e.register(Contract, ())
+}
+
+fn _random_string() -> std::string::String {
+    rand::thread_rng().sample_iter(&Alphanumeric).take(6).map(char::from).collect()
+}
+
+fn random_string(env: &Env) -> String {
+    let str = _random_string();
+    String::from_str(&env, &str)
 }
 
 /// @notice Helper to submit a rating and check for expected outcome
@@ -517,3 +527,88 @@ fn test_rating_admin_transfer() {
     let result = client.try_set_rate_limit_bypass(&admin, &new_admin, &true);
     assert_eq!(result, Err(Ok(Error::Unauthorized)));
 }
+
+#[test]
+fn test_rating_incentives() {
+    let env = Env::default();
+    let contract_id = create_contract(&env);
+    let client = ContractClient::new(&env, &contract_id);
+    env.mock_all_auths();
+
+    // Initialize contract with admin
+    let admin = Address::generate(&env);
+    client.init(&admin);
+
+    let mut c = default_rating_context(&env);
+
+    // simulate various ratings
+    submit_rating(&client, 5, c.clone());
+    let incentives = client.check_rating_incentives(&c.rated_user);
+    assert_eq!(incentives.len(), 1, "Incentive len should be 1"); // First five-star rating incentive
+    assert_eq!(
+        incentives.get(0).unwrap(),
+        String::from_str(&env, "first_five_star")
+    );
+
+    feign_rating(&env, &client, 50, 5, &mut c);
+
+    let incentives = client.check_rating_incentives(&c.rated_user);
+    assert_eq!(incentives.len(), 5, "Incentive len should be 3");
+    assert_eq!(incentives.get(1).unwrap(), String::from_str(&env, "ten_reviews"));
+    assert_eq!(incentives.get(2).unwrap(), String::from_str(&env, "fifty_reviews"));
+    assert_eq!(incentives.get(3).unwrap(), String::from_str(&env, "top_rated"));
+    assert_eq!(incentives.get(4).unwrap(), String::from_str(&env, "consistency_award"));
+
+}
+
+fn feign_rating(env: &Env, client: &ContractClient<'_>, len: usize, rating: i32, c: &mut RatingContext) {
+    let mut window = 0;
+    for i in 0..len {
+        if i % 5 == 0 {
+            window += 3600;
+            env.ledger().set_timestamp(window);
+            c.caller = Address::generate(&env);
+        }
+        c.contract_str = random_string(&env);
+        submit_rating(&client, rating, c.clone());
+    }
+}
+
+
+
+// if let Ok(stats) = get_user_rating_stats(env, user) {
+//     // First five-star rating incentive
+//     if stats.five_star_count >= 1 && !is_incentive_claimed(env, user, &String::from_str(env, "first_five_star")) {
+//         available_incentives.push_back(String::from_str(env, "first_five_star"));
+//     }
+
+//     // Ten ratings milestone
+//     if stats.total_ratings >= 10 && !is_incentive_claimed(env, user, &String::from_str(env, "ten_reviews")) {
+//         available_incentives.push_back(String::from_str(env, "ten_reviews"));
+//     }
+
+//     // Fifty ratings milestone
+//     if stats.total_ratings >= 50 && !is_incentive_claimed(env, user, &String::from_str(env, "fifty_reviews")) {
+//         available_incentives.push_back(String::from_str(env, "fifty_reviews"));
+//     }
+
+//     // Perfect month (all 5-star ratings in last 30 days)
+//     if check_perfect_month(env, user) && !is_incentive_claimed(env, user, &String::from_str(env, "perfect_month")) {
+//         available_incentives.push_back(String::from_str(env, "perfect_month"));
+//     }
+
+//     // Top rated achievement
+//     if stats.average_rating >= 480 && stats.total_ratings >= 20 && !is_incentive_claimed(env, user, &String::from_str(env, "top_rated")) {
+//         available_incentives.push_back(String::from_str(env, "top_rated"));
+//     }
+
+//     // Consistency award (maintaining high rating over time)
+//     if check_consistency_award(env, user) && !is_incentive_claimed(env, user, &String::from_str(env, "consistency_award")) {
+//         available_incentives.push_back(String::from_str(env, "consistency_award"));
+//     }
+
+//     // Improvement award (significant rating improvement)
+//     if check_improvement_award(env, user) && !is_incentive_claimed(env, user, &String::from_str(env, "improvement_award")) {
+//         available_incentives.push_back(String::from_str(env, "improvement_award"));
+//     }
+// }
