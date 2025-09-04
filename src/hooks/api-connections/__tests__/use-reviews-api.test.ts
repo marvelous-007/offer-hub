@@ -60,7 +60,7 @@ describe("useReviewsApi", () => {
             });
 
             expect(mockFetch).toHaveBeenCalledWith(
-                "/api/user/550e8400-e29b-41d4-a716-446655440001/reviews",
+                "http://localhost:3000/api/user/550e8400-e29b-41d4-a716-446655440001/reviews",
                 {
                     method: "GET",
                     headers: { "Content-Type": "application/json" },
@@ -143,7 +143,7 @@ describe("useReviewsApi", () => {
                 createdReview = await result.current.createReview(createReviewData);
             });
 
-            expect(mockFetch).toHaveBeenCalledWith("/api/reviews", {
+            expect(mockFetch).toHaveBeenCalledWith("http://localhost:3000/api/reviews", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(createReviewData)
