@@ -181,9 +181,11 @@ describe('useServicesApi', () => {
 
     const { result } = renderHook(() => useServicesApi())
 
-    // Wait for initial load to complete
+    // Wait for initial load to complete with defensive checks
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
+      expect(result.current).toBeDefined()
+      expect(result.current).not.toBeNull()
+      expect(result.current?.isLoading).toBe(false)
     })
 
     // Reset fetch mock and trigger an error
@@ -191,18 +193,23 @@ describe('useServicesApi', () => {
     ;(fetch as jest.Mock).mockRejectedValueOnce(new Error('Test error'))
 
     await act(async () => {
-      await result.current.searchServices({ page: 1, limit: 10 })
+      if (result.current) {
+        await result.current.searchServices({ page: 1, limit: 10 })
+      }
     })
 
     await waitFor(() => {
-      expect(result.current.error).toBe('Test error')
+      expect(result.current).toBeDefined()
+      expect(result.current?.error).toBe('Test error')
     })
 
     act(() => {
-      result.current.clearError()
+      if (result.current) {
+        result.current.clearError()
+      }
     })
 
-    expect(result.current.error).toBeNull()
+    expect(result.current?.error).toBeNull()
   }, 15000)
 
   it('should debounce search requests', async () => {
