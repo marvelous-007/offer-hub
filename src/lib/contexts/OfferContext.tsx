@@ -166,7 +166,7 @@ export function OfferProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: "SET_ERROR", payload: null })
 
       return newOffer.id
-    } catch {
+    } catch (error) {
       dispatch({ type: "SET_ERROR", payload: "Failed to send offer" })
       throw error
     } finally {
