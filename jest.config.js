@@ -37,10 +37,11 @@ const customJestConfig = {
   transformIgnorePatterns: [
     'node_modules/(?!(lucide-react|@radix-ui|@testing-library)/)',
   ],
-  transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest',
-    '^.+\\.(js|jsx)$': 'babel-jest',
-  },
+  // Use Next.js built-in SWC transformer
+  // transform: {
+  //   '^.+\\.(ts|tsx)$': 'ts-jest',
+  //   '^.+\\.(js|jsx)$': 'babel-jest',
+  // },
   // Remove custom transform - let Next.js Jest handle it
   // extensionsToTreatAsEsm: ['.ts', '.tsx'],
 }
