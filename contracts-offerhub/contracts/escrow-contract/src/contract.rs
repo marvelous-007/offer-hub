@@ -2,24 +2,28 @@ use core::ops::Add;
 
 use soroban_sdk::{Address, Env, IntoVal, String, Symbol, Vec};
 
+use crate::storage::{
+    check_rate_limit, increment_escrow_transaction_count, reset_rate_limit as rl_reset,
+    set_escrow_transaction_count, set_rate_limit_bypass_flag,
+};
 use crate::{
     error::handle_error,
-    storage::{ESCROW_DATA, INITIALIZED, add_call_log, CallLog},
-    types::{DisputeResult, Error, EscrowData, EscrowStatus, Milestone, MilestoneHistory},
-    validation::{validate_init_contract, validate_init_contract_full, validate_add_milestone, validate_milestone_id, validate_address},
+    storage::{add_call_log, CallLog, ESCROW_DATA, INITIALIZED},
+    types::{
+        DisputeResult, Error, EscrowData, EscrowDataExport, EscrowStatus, Milestone,
+        MilestoneHistory,
+    },
+    validation::{
+        validate_add_milestone, validate_address, validate_init_contract,
+        validate_init_contract_full, validate_milestone_id,
+    },
 };
-use crate::storage::{check_rate_limit, increment_escrow_transaction_count, set_rate_limit_bypass_flag, reset_rate_limit as rl_reset, set_escrow_transaction_count};
 
 const TOKEN_TRANSFER: &str = "transfer";
 const TOKEN_BALANCE: &str = "balance";
 
 // Helper function to log function calls
-fn log_function_call(
-    env: &Env,
-    function_name: &str,
-    caller: &Address,
-    success: bool,
-) {
+fn log_function_call(env: &Env, function_name: &str, caller: &Address, success: bool) {
     let log = CallLog {
         function_name: String::from_str(env, function_name),
         caller: caller.clone(),
@@ -28,7 +32,7 @@ fn log_function_call(
         gas_used: 0, // Soroban doesn't provide gas_used method
         transaction_hash: String::from_str(env, "unknown"), // Soroban doesn't provide transaction_hash method
     };
-    
+
     add_call_log(env, &log);
 }
 
@@ -42,16 +46,24 @@ pub fn init_contract_full(
     timeout_secs: u64,
 ) {
     let caller = client.clone();
-    
+
     // Log function call start
     log_function_call(env, "init_contract_full", &caller, true);
-    
+
     if env.storage().instance().has(&INITIALIZED) {
         handle_error(env, Error::AlreadyInitialized);
     }
-    
+
     // Input validation
-    if let Err(e) = validate_init_contract_full(env, &client, &freelancer, &arbitrator, &token, amount, timeout_secs) {
+    if let Err(e) = validate_init_contract_full(
+        env,
+        &client,
+        &freelancer,
+        &arbitrator,
+        &token,
+        amount,
+        timeout_secs,
+    ) {
         handle_error(env, e);
     }
     let escrow_data = EscrowData {
@@ -87,10 +99,10 @@ pub fn init_contract(
     fee_manager: Address,
 ) {
     let caller = client.clone();
-    
+
     // Log function call start
     log_function_call(env, "init_contract", &caller, true);
-    
+
     if env.storage().instance().has(&INITIALIZED) {
         handle_error(env, Error::AlreadyInitialized);
     }
@@ -129,10 +141,10 @@ pub fn init_contract(
 
 pub fn deposit_funds(env: &Env, client: Address) {
     let caller = client.clone();
-    
+
     // Log function call start
     log_function_call(env, "deposit_funds", &caller, true);
-    
+
     client.require_auth();
 
     if !env.storage().instance().has(&INITIALIZED) {
@@ -172,7 +184,10 @@ pub fn deposit_funds(env: &Env, client: Address) {
     env.storage().instance().set(&ESCROW_DATA, &escrow_data);
     let total_escrow_transaction = increment_escrow_transaction_count(env);
 
-    env.events().publish((Symbol::new(env, "escrow_tx_count"),),total_escrow_transaction);
+    env.events().publish(
+        (Symbol::new(env, "escrow_tx_count"),),
+        total_escrow_transaction,
+    );
     env.events().publish(
         (Symbol::new(env, "deposited_fund"), client.clone()),
         (escrow_data.amount, env.ledger().timestamp()),
@@ -181,10 +196,10 @@ pub fn deposit_funds(env: &Env, client: Address) {
 
 pub fn release_funds(env: &Env, freelancer: Address) {
     let caller = freelancer.clone();
-    
+
     // Log function call start
     log_function_call(env, "release_funds", &caller, true);
-    
+
     freelancer.require_auth();
 
     if !env.storage().instance().has(&INITIALIZED) {
@@ -222,7 +237,10 @@ pub fn release_funds(env: &Env, freelancer: Address) {
 
     let total_escrow_transaction = increment_escrow_transaction_count(env);
 
-    env.events().publish((Symbol::new(env, "escrow_tx_count"),),total_escrow_transaction); 
+    env.events().publish(
+        (Symbol::new(env, "escrow_tx_count"),),
+        total_escrow_transaction,
+    );
     env.events().publish(
         (Symbol::new(env, "released_fund"), freelancer.clone()),
         (
@@ -237,10 +255,10 @@ pub fn release_funds(env: &Env, freelancer: Address) {
 
 pub fn dispute(env: &Env, caller: Address) {
     let caller_addr = caller.clone();
-    
+
     // Log function call start
     log_function_call(env, "dispute", &caller_addr, true);
-    
+
     caller.require_auth();
 
     if !env.storage().instance().has(&INITIALIZED) {
@@ -264,7 +282,10 @@ pub fn dispute(env: &Env, caller: Address) {
 
     let total_escrow_transaction = increment_escrow_transaction_count(env);
 
-    env.events().publish((Symbol::new(env, "escrow_tx_count"),),total_escrow_transaction);
+    env.events().publish(
+        (Symbol::new(env, "escrow_tx_count"),),
+        total_escrow_transaction,
+    );
     env.events().publish(
         (Symbol::new(env, "escrow_disputed"), caller.clone()),
         env.ledger().timestamp(),
@@ -273,10 +294,10 @@ pub fn dispute(env: &Env, caller: Address) {
 
 pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
     let caller_addr = caller.clone();
-    
+
     // Log function call start
     log_function_call(env, "resolve_dispute", &caller_addr, true);
-    
+
     caller.require_auth();
 
     if !env.storage().instance().has(&INITIALIZED) {
@@ -294,15 +315,18 @@ pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
     }
 
     // CORREGIDO: Aceptar más variaciones de símbolos
-    let dispute_result = if result == Symbol::new(env, "client_wins") || result == Symbol::new(env, "client") {
-        DisputeResult::ClientWins
-    } else if result == Symbol::new(env, "freelancer_wins") || result == Symbol::new(env, "freelancer") {
-        DisputeResult::FreelancerWins
-    } else if result == Symbol::new(env, "split") {
-        DisputeResult::Split
-    } else {
-        handle_error(env, Error::InvalidDisputeResult);
-    };
+    let dispute_result =
+        if result == Symbol::new(env, "client_wins") || result == Symbol::new(env, "client") {
+            DisputeResult::ClientWins
+        } else if result == Symbol::new(env, "freelancer_wins")
+            || result == Symbol::new(env, "freelancer")
+        {
+            DisputeResult::FreelancerWins
+        } else if result == Symbol::new(env, "split") {
+            DisputeResult::Split
+        } else {
+            handle_error(env, Error::InvalidDisputeResult);
+        };
 
     if let (Some(token), amount) = (escrow_data.token.clone(), escrow_data.amount) {
         let contract_addr = env.current_contract_address();
@@ -358,7 +382,10 @@ pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
 
     let total_escrow_transaction = increment_escrow_transaction_count(env);
 
-    env.events().publish((Symbol::new(env, "escrow_tx_count"),),total_escrow_transaction);
+    env.events().publish(
+        (Symbol::new(env, "escrow_tx_count"),),
+        total_escrow_transaction,
+    );
     env.events().publish(
         (Symbol::new(env, "escrow_resolved"), result.clone()),
         env.ledger().timestamp(),
@@ -367,17 +394,17 @@ pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
 
 pub fn add_milestone(env: &Env, client: Address, desc: String, amount: i128) -> u32 {
     let caller = client.clone();
-    
+
     // Log function call start
     log_function_call(env, "add_milestone", &caller, true);
-    
+
     client.require_auth();
-    
+
     // Input validation
     if let Err(e) = validate_add_milestone(env, &client, &desc, amount) {
         handle_error(env, e);
     }
-    
+
     let mut escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
 
     // Rate limit: max 10 milestones per hour per client for this escrow
@@ -415,7 +442,10 @@ pub fn add_milestone(env: &Env, client: Address, desc: String, amount: i128) -> 
 
     let total_escrow_transaction = increment_escrow_transaction_count(env);
 
-    env.events().publish((Symbol::new(env, "escrow_tx_count"),),total_escrow_transaction);
+    env.events().publish(
+        (Symbol::new(env, "escrow_tx_count"),),
+        total_escrow_transaction,
+    );
     env.events().publish(
         (Symbol::new(env, "escrow_milestone_added"), client.clone()),
         (m_id, desc.clone(), amount, env.ledger().timestamp()),
@@ -428,7 +458,9 @@ pub fn set_rate_limit_bypass(env: &Env, caller: Address, user: Address, bypass: 
     caller.require_auth();
     // Only escrow client can toggle bypass
     let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
-    if escrow.client != caller { handle_error(env, Error::Unauthorized); }
+    if escrow.client != caller {
+        handle_error(env, Error::Unauthorized);
+    }
     set_rate_limit_bypass_flag(env, &user, bypass);
 
     env.events().publish((Symbol::new(env , "set_rate_limit_bypass") , caller), (user , bypass , env.ledger().timestamp()));
@@ -437,7 +469,9 @@ pub fn set_rate_limit_bypass(env: &Env, caller: Address, user: Address, bypass: 
 pub fn reset_rate_limit(env: &Env, caller: Address, user: Address, limit_type: String) {
     caller.require_auth();
     let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
-    if escrow.client != caller { handle_error(env, Error::Unauthorized); }
+    if escrow.client != caller {
+        handle_error(env, Error::Unauthorized);
+    }
     rl_reset(env, &user, &limit_type);
      env.events().publish((Symbol::new(env , "reset_rate_limit") , caller), (user , limit_type, env.ledger().timestamp()));
 }
@@ -445,12 +479,12 @@ pub fn reset_rate_limit(env: &Env, caller: Address, user: Address, limit_type: S
 // CORREGIDO: usar índice correcto (milestone_id - 1)
 pub fn approve_milestone(env: &Env, client: Address, milestone_id: u32) {
     let caller = client.clone();
-    
+
     // Log function call start
     log_function_call(env, "approve_milestone", &caller, true);
-    
+
     client.require_auth();
-    
+
     // Input validation
     if let Err(_) = validate_address(&client) {
         handle_error(env, Error::Unauthorized);
@@ -458,7 +492,7 @@ pub fn approve_milestone(env: &Env, client: Address, milestone_id: u32) {
     if let Err(e) = validate_milestone_id(milestone_id) {
         handle_error(env, e);
     }
-    
+
     let mut escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
     let ts = env.ledger().timestamp();
 
@@ -481,10 +515,10 @@ pub fn approve_milestone(env: &Env, client: Address, milestone_id: u32) {
 
     milestone.approved = true;
     milestone.approved_at = Some(ts);
-    
+
     // CORREGIDO: actualizar el milestone en el vector
     escrow.milestones.set(index, milestone.clone());
-    
+
     escrow.milestone_history.push_back(MilestoneHistory {
         milestone: milestone.clone(),
         action: String::from_str(env, "approved"),
@@ -494,7 +528,10 @@ pub fn approve_milestone(env: &Env, client: Address, milestone_id: u32) {
 
     let total_escrow_transaction = increment_escrow_transaction_count(env);
 
-    env.events().publish((Symbol::new(env, "escrow_tx_count"),),total_escrow_transaction);
+    env.events().publish(
+        (Symbol::new(env, "escrow_tx_count"),),
+        total_escrow_transaction,
+    );
     env.events().publish(
         (
             Symbol::new(env, "escrow_milestone_approved"),
@@ -507,12 +544,12 @@ pub fn approve_milestone(env: &Env, client: Address, milestone_id: u32) {
 // CORREGIDO: usar índice correcto (milestone_id - 1)
 pub fn release_milestone(env: &Env, freelancer: Address, milestone_id: u32) {
     let caller = freelancer.clone();
-    
+
     // Log function call start
     log_function_call(env, "release_milestone", &caller, true);
-    
+
     freelancer.require_auth();
-    
+
     // Input validation
     if let Err(_) = validate_address(&freelancer) {
         handle_error(env, Error::Unauthorized);
@@ -520,7 +557,7 @@ pub fn release_milestone(env: &Env, freelancer: Address, milestone_id: u32) {
     if let Err(e) = validate_milestone_id(milestone_id) {
         handle_error(env, e);
     }
-    
+
     let mut escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
     let ts = env.ledger().timestamp();
 
@@ -544,10 +581,10 @@ pub fn release_milestone(env: &Env, freelancer: Address, milestone_id: u32) {
     milestone.released = true;
     milestone.released_at = Some(ts);
     escrow.released_amount += milestone.amount;
-    
+
     // CORREGIDO: actualizar el milestone en el vector
     escrow.milestones.set(index, milestone.clone());
-    
+
     escrow.milestone_history.push_back(MilestoneHistory {
         milestone: milestone.clone(),
         action: String::from_str(env, "released"),
@@ -557,7 +594,10 @@ pub fn release_milestone(env: &Env, freelancer: Address, milestone_id: u32) {
 
     let total_escrow_transaction = increment_escrow_transaction_count(env);
 
-    env.events().publish((Symbol::new(env, "escrow_tx_count"),),total_escrow_transaction);
+    env.events().publish(
+        (Symbol::new(env, "escrow_tx_count"),),
+        total_escrow_transaction,
+    );
     env.events().publish(
         (
             Symbol::new(env, "escrow_milestone_released"),
@@ -589,7 +629,7 @@ pub fn auto_release(env: &Env) {
     if now < funded_at + timeout {
         handle_error(env, Error::InvalidStatus);
     }
-    
+
     if let (Some(token), amount) = (escrow_data.token.clone(), escrow_data.amount) {
         env.invoke_contract::<()>(
             &token,
@@ -609,9 +649,15 @@ pub fn auto_release(env: &Env) {
 
     let total_escrow_transaction = increment_escrow_transaction_count(env);
 
-    env.events().publish((Symbol::new(env, "escrow_tx_count"),),total_escrow_transaction);
     env.events().publish(
-        (Symbol::new(env, "auto_released"), escrow_data.freelancer.clone()),
+        (Symbol::new(env, "escrow_tx_count"),),
+        total_escrow_transaction,
+    );
+    env.events().publish(
+        (
+            Symbol::new(env, "auto_released"),
+            escrow_data.freelancer.clone(),
+        ),
         (escrow_data.amount, now),
     );
 }
@@ -637,13 +683,13 @@ pub fn get_call_logs(env: &Env) -> Vec<CallLog> {
 
 pub fn clear_call_logs(env: &Env, caller: Address) {
     caller.require_auth();
-    
+
     // Only escrow client can clear logs
     let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
-    if escrow.client != caller { 
-        handle_error(env, Error::Unauthorized); 
+    if escrow.client != caller {
+        handle_error(env, Error::Unauthorized);
     }
-    
+
     crate::storage::clear_call_logs(env);
 }
 
@@ -651,16 +697,68 @@ pub fn get_total_transactions(env: &Env) -> u64 {
     crate::storage::get_total_transactions(env)
 }
 
-pub fn reset_transaction_count(env: &Env, admin: Address) -> Result<(), Error>  {
+pub fn reset_transaction_count(env: &Env, admin: Address) -> Result<(), Error> {
     admin.require_auth();
     let escrow_data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
 
-    if escrow_data.client != admin { handle_error(env, Error::Unauthorized); }
+    if escrow_data.client != admin {
+        handle_error(env, Error::Unauthorized);
+    }
     set_escrow_transaction_count(&env, 0u64);
 
     env.events().publish(
-        (Symbol::new(env, "transaction_count_reset"), escrow_data.client.clone()),
+        (
+            Symbol::new(env, "transaction_count_reset"),
+            escrow_data.client.clone(),
+        ),
         env.ledger().timestamp(),
     );
     Ok(())
+}
+
+// ==================== DATA EXPORT FUNCTIONS ====================
+
+/// Export escrow data (client, freelancer, or arbitrator can access)
+pub fn export_escrow_data(env: &Env, caller: Address, contract_id: String) -> EscrowDataExport {
+    let caller_addr = caller.clone();
+
+    // Log function call start
+    log_function_call(env, "export_escrow_data", &caller_addr, true);
+
+    caller.require_auth();
+
+    if !env.storage().instance().has(&INITIALIZED) {
+        handle_error(env, Error::NotInitialized);
+    }
+
+    let escrow_data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+
+    // Permission check: client, freelancer, or arbitrator can export data
+    let is_authorized = escrow_data.client == caller
+        || escrow_data.freelancer == caller
+        || escrow_data.arbitrator == Some(caller.clone());
+
+    if !is_authorized {
+        handle_error(env, Error::Unauthorized);
+    }
+
+    let milestones = get_milestones(env);
+    let milestone_history = get_milestone_history(env);
+
+    let export_data = EscrowDataExport {
+        contract_id,
+        escrow_data: escrow_data.clone(),
+        milestones,
+        milestone_history,
+        export_timestamp: env.ledger().timestamp(),
+        export_version: String::from_str(env, "1.0"),
+    };
+
+    // Emit export event
+    env.events().publish(
+        (Symbol::new(env, "escrow_data_exported"), caller),
+        env.ledger().timestamp(),
+    );
+
+    export_data
 }

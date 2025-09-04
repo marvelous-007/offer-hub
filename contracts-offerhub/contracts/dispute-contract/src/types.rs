@@ -90,3 +90,34 @@ pub enum Error {
     ArbitrationRequired = 14,
     RateLimitExceeded = 15,
 }
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct DisputeDataExport {
+    pub dispute_id: u32,
+    pub dispute_data: DisputeData,
+    pub evidence: Vec<Evidence>,
+    pub export_timestamp: u64,
+    pub export_version: String,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct DisputeSummary {
+    pub dispute_id: u32,
+    pub initiator: Address,
+    pub status: DisputeStatus,
+    pub outcome: DisputeOutcome,
+    pub dispute_amount: i128,
+    pub timestamp: u64,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct AllDisputeDataExport {
+    pub total_disputes: u64,
+    pub dispute_summaries: Vec<DisputeSummary>,
+    pub export_timestamp: u64,
+    pub export_version: String,
+    pub data_size_limit_reached: bool,
+}

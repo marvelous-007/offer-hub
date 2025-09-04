@@ -1,21 +1,27 @@
-use soroban_sdk::{Address, Env, String, Symbol, Vec, log};
+use soroban_sdk::{log, Address, Env, String, Symbol, Vec};
 
 use crate::{
     error::{handle_error, Error},
     storage::{
         DEFAULT_ARBITRATOR_FEE_PERCENTAGE, DEFAULT_DISPUTE_FEE_PERCENTAGE,
-        DEFAULT_ESCROW_FEE_PERCENTAGE, FEE_CONFIG, FEE_HISTORY, FEE_STATS, PLATFORM_BALANCE, PREMIUM_USERS, 
-        TOTAL_FESS_COLLECTED,
+        DEFAULT_ESCROW_FEE_PERCENTAGE, FEE_CONFIG, FEE_HISTORY, FEE_STATS, PLATFORM_BALANCE,
+        PREMIUM_USERS, TOTAL_FESS_COLLECTED,
     },
-    types::{FeeCalculation, FeeConfig, FeeRecord, FeeStats, PremiumUser, FEE_TYPE_ESCROW, FEE_TYPE_DISPUTE},
-    validation::{validate_initialization, validate_fee_rates, validate_fee_calculation, validate_withdrawal_amount, validate_fee_type, validate_address},
+    types::{
+        FeeCalculation, FeeConfig, FeeRecord, FeeStats, PremiumUser, FEE_TYPE_DISPUTE,
+        FEE_TYPE_ESCROW,
+    },
+    validation::{
+        validate_address, validate_fee_calculation, validate_fee_rates, validate_fee_type,
+        validate_initialization, validate_withdrawal_amount,
+    },
 };
 
 pub fn initialize(env: &Env, admin: Address, platform_wallet: Address) {
     if env.storage().instance().has(&FEE_CONFIG) {
         handle_error(env, Error::AlreadyInitialized);
     }
-    
+
     // Input validation
     if let Err(e) = validate_initialization(env, &admin, &platform_wallet) {
         handle_error(env, e);
@@ -41,8 +47,12 @@ pub fn initialize(env: &Env, admin: Address, platform_wallet: Address) {
     env.storage().instance().set(&FEE_CONFIG, &fee_config);
     env.storage().instance().set(&PLATFORM_BALANCE, &0i128);
     env.storage().instance().set(&FEE_STATS, &fee_stats);
-    env.storage().instance().set(&FEE_HISTORY, &Vec::<FeeRecord>::new(env));
-    env.storage().instance().set(&PREMIUM_USERS, &Vec::<PremiumUser>::new(env));
+    env.storage()
+        .instance()
+        .set(&FEE_HISTORY, &Vec::<FeeRecord>::new(env));
+    env.storage()
+        .instance()
+        .set(&PREMIUM_USERS, &Vec::<PremiumUser>::new(env));
     env.storage().instance().set(&TOTAL_FESS_COLLECTED, &0i128);
 
     env.events().publish(
@@ -58,12 +68,16 @@ pub fn set_fee_rates(
     arbitrator_fee_percentage: i128,
 ) {
     let mut fee_config: FeeConfig = env.storage().instance().get(&FEE_CONFIG).unwrap();
-    
+
     // Only admin can set fee rates
     fee_config.admin.require_auth();
 
     // Input validation
-    if let Err(e) = validate_fee_rates(escrow_fee_percentage, dispute_fee_percentage, arbitrator_fee_percentage) {
+    if let Err(e) = validate_fee_rates(
+        escrow_fee_percentage,
+        dispute_fee_percentage,
+        arbitrator_fee_percentage,
+    ) {
         handle_error(env, e);
     }
 
@@ -74,15 +88,22 @@ pub fn set_fee_rates(
     env.storage().instance().set(&FEE_CONFIG, &fee_config);
 
     env.events().publish(
-        (Symbol::new(env, "fee_rates_updated"), fee_config.admin.clone()),
-        (escrow_fee_percentage, dispute_fee_percentage, arbitrator_fee_percentage),
+        (
+            Symbol::new(env, "fee_rates_updated"),
+            fee_config.admin.clone(),
+        ),
+        (
+            escrow_fee_percentage,
+            dispute_fee_percentage,
+            arbitrator_fee_percentage,
+        ),
     );
 }
 
 pub fn add_premium_user(env: &Env, user: Address) {
     let fee_config: FeeConfig = env.storage().instance().get(&FEE_CONFIG).unwrap();
     fee_config.admin.require_auth();
-    
+
     // Input validation
     if let Err(_) = validate_address(&user) {
         handle_error(env, Error::Unauthorized);
@@ -107,7 +128,10 @@ pub fn add_premium_user(env: &Env, user: Address) {
     env.storage().instance().set(&PREMIUM_USERS, &premium_users);
 
     env.events().publish(
-        (Symbol::new(env, "premium_user_added"), fee_config.admin.clone()),
+        (
+            Symbol::new(env, "premium_user_added"),
+            fee_config.admin.clone(),
+        ),
         (user, env.ledger().timestamp()),
     );
 }
@@ -134,7 +158,10 @@ pub fn remove_premium_user(env: &Env, user: Address) {
     env.storage().instance().set(&PREMIUM_USERS, &premium_users);
 
     env.events().publish(
-        (Symbol::new(env, "premium_user_removed"), fee_config.admin.clone()),
+        (
+            Symbol::new(env, "premium_user_removed"),
+            fee_config.admin.clone(),
+        ),
         (user, env.ledger().timestamp()),
     );
 }
@@ -148,7 +175,11 @@ pub fn calculate_escrow_fee(env: &Env, amount: i128, user: Address) -> FeeCalcul
     let fee_config: FeeConfig = env.storage().instance().get(&FEE_CONFIG).unwrap();
     let is_premium = is_premium_user(env, user);
 
-    let fee_percentage = if is_premium { 0 } else { fee_config.escrow_fee_percentage };
+    let fee_percentage = if is_premium {
+        0
+    } else {
+        fee_config.escrow_fee_percentage
+    };
     let fee_amount = calculate_fee_amount(amount, fee_percentage);
     let net_amount = amount - fee_amount;
 
@@ -170,7 +201,11 @@ pub fn calculate_dispute_fee(env: &Env, amount: i128, user: Address) -> FeeCalcu
     let fee_config: FeeConfig = env.storage().instance().get(&FEE_CONFIG).unwrap();
     let is_premium = is_premium_user(env, user);
 
-    let fee_percentage = if is_premium { 0 } else { fee_config.dispute_fee_percentage };
+    let fee_percentage = if is_premium {
+        0
+    } else {
+        fee_config.dispute_fee_percentage
+    };
     let fee_amount = calculate_fee_amount(amount, fee_percentage);
     let net_amount = amount - fee_amount;
 
@@ -192,12 +227,23 @@ pub fn collect_fee(env: &Env, amount: i128, fee_type: u32, user: Address) -> i12
         handle_error(env, e);
     }
 
-
     let fee_config: FeeConfig = env.storage().instance().get(&FEE_CONFIG).unwrap();
     let is_premium = is_premium_user(env, user.clone());
     let fee_percentage = match fee_type {
-        FEE_TYPE_ESCROW => if is_premium { 0 } else { fee_config.escrow_fee_percentage },
-        FEE_TYPE_DISPUTE => if is_premium { 0 } else { fee_config.dispute_fee_percentage },
+        FEE_TYPE_ESCROW => {
+            if is_premium {
+                0
+            } else {
+                fee_config.escrow_fee_percentage
+            }
+        }
+        FEE_TYPE_DISPUTE => {
+            if is_premium {
+                0
+            } else {
+                fee_config.dispute_fee_percentage
+            }
+        }
         _ => 0,
     };
 
@@ -209,12 +255,20 @@ pub fn collect_fee(env: &Env, amount: i128, fee_type: u32, user: Address) -> i12
     let mut platform_balance: i128 = env.storage().instance().get(&PLATFORM_BALANCE).unwrap();
 
     platform_balance += fee_amount;
-    env.storage().instance().set(&PLATFORM_BALANCE, &platform_balance);
+    env.storage()
+        .instance()
+        .set(&PLATFORM_BALANCE, &platform_balance);
 
     // Update total fees collected
-    let mut total_fees: i128 = env.storage().instance().get(&TOTAL_FESS_COLLECTED).unwrap_or(0);
+    let mut total_fees: i128 = env
+        .storage()
+        .instance()
+        .get(&TOTAL_FESS_COLLECTED)
+        .unwrap_or(0);
     total_fees += fee_amount;
-    env.storage().instance().set(&TOTAL_FESS_COLLECTED, &total_fees);
+    env.storage()
+        .instance()
+        .set(&TOTAL_FESS_COLLECTED, &total_fees);
 
     // Update fee stats
     let mut fee_stats: FeeStats = env.storage().instance().get(&FEE_STATS).unwrap();
@@ -236,7 +290,7 @@ pub fn collect_fee(env: &Env, amount: i128, fee_type: u32, user: Address) -> i12
     // Record fee transaction
     let mut fee_history: Vec<FeeRecord> = env.storage().instance().get(&FEE_HISTORY).unwrap();
     let user_clone = user.clone();
-    
+
     let fee_record = FeeRecord {
         timestamp: env.ledger().timestamp(),
         fee_type: fee_type,
@@ -267,10 +321,15 @@ pub fn withdraw_platform_fees(env: &Env, amount: i128) {
     }
 
     platform_balance -= amount;
-    env.storage().instance().set(&PLATFORM_BALANCE, &platform_balance);
+    env.storage()
+        .instance()
+        .set(&PLATFORM_BALANCE, &platform_balance);
 
     env.events().publish(
-        (Symbol::new(env, "platform_fees_withdrawn"), fee_config.admin.clone()),
+        (
+            Symbol::new(env, "platform_fees_withdrawn"),
+            fee_config.admin.clone(),
+        ),
         (amount, platform_balance, env.ledger().timestamp()),
     );
 }
@@ -339,12 +398,17 @@ pub fn reset_total_fees_collected(env: &Env, admin: Address) -> Result<(), Error
     admin.require_auth();
 
     let fee_config: FeeConfig = env.storage().instance().get(&FEE_CONFIG).unwrap();
-    if fee_config.admin != admin { return Err(Error::Unauthorized); }
+    if fee_config.admin != admin {
+        return Err(Error::Unauthorized);
+    }
 
     env.storage().instance().set(&TOTAL_FESS_COLLECTED, &0i128);
 
     env.events().publish(
-        (Symbol::new(env, "total_fees_collected_reset"), fee_config.admin.clone()),
+        (
+            Symbol::new(env, "total_fees_collected_reset"),
+            fee_config.admin.clone(),
+        ),
         env.ledger().timestamp(),
     );
     Ok(())
@@ -355,11 +419,11 @@ fn calculate_fee_amount(amount: i128, fee_percentage: i128) -> i128 {
     if fee_percentage == 0 {
         return 0;
     }
-    
+
     // Calculate fee: (amount * fee_percentage) / 10000
     // This ensures precision and handles basis points correctly (100 = 1%)
     let fee_amount = (amount * fee_percentage) / 10000;
-    
+
     // Ensure fee doesn't exceed the original amount
     if fee_amount > amount {
         amount
@@ -367,4 +431,3 @@ fn calculate_fee_amount(amount: i128, fee_percentage: i128) -> i128 {
         fee_amount
     }
 }
-

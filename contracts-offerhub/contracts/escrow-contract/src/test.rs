@@ -234,7 +234,7 @@ fn test_milestone_lifecycle() {
     let milestone_desc = String::from_str(&env, "Frontend");
     let milestone_amount = 500;
     let milestone_id = contract.add_milestone(&client, &milestone_desc, &milestone_amount);
-    
+
     let milestones = contract.get_milestones();
     assert_eq!(milestones.len(), 1);
 
@@ -272,7 +272,7 @@ fn test_dispute_resolution() {
     // Usar símbolo más simple
     let resolution = Symbol::new(&env, "freelancer");
     contract.resolve_dispute(&arbitrator, &resolution);
-    
+
     let resolved_data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
     assert_eq!(resolved_data.status, EscrowStatus::Released);
 }
@@ -295,10 +295,10 @@ fn test_basic_authorization() {
 
     let milestone_desc = String::from_str(&env, "Task Description");
     let milestone_id = contract.add_milestone(&client, &milestone_desc, &500);
-    
+
     let milestones = contract.get_milestones();
     assert_eq!(milestones.len(), 1);
-    
+
     contract.approve_milestone(&client, &milestone_id);
     let updated_milestones = contract.get_milestones();
     let milestone = updated_milestones.get(0).unwrap();
@@ -399,7 +399,7 @@ fn test_successful_escrow_flow() {
 
     contract.approve_milestone(&client, &milestone_id);
     contract.release_milestone(&freelancer, &milestone_id);
-    
+
     let final_milestones = contract.get_milestones();
     let milestone = final_milestones.get(0).unwrap();
     assert!(milestone.approved);
@@ -421,7 +421,7 @@ fn test_escrow_data_integrity() {
 
     contract.init_contract(&client, &freelancer, &amount, &fee_manager);
     let initial_data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    
+
     assert_eq!(initial_data.client, client);
     assert_eq!(initial_data.freelancer, freelancer);
     assert_eq!(initial_data.amount, amount);
@@ -484,8 +484,6 @@ fn test_increment_transaction_count() {
     let final_count = contract.get_total_transactions();
     assert_eq!(final_count, 5);
 }
-
-
 
 #[test]
 fn test_reset_transaction_count() {

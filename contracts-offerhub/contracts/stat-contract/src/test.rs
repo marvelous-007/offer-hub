@@ -1,8 +1,10 @@
 #[cfg(test)]
-
 use super::*;
-use soroban_sdk::{testutils::{Address as _, Ledger}, Address, Env, String, Vec};
 use soroban_sdk::{contract, contractimpl, log};
+use soroban_sdk::{
+    testutils::{Address as _, Ledger},
+    Address, Env, String, Vec,
+};
 
 #[contract]
 pub struct MockTokenContract;
@@ -14,7 +16,6 @@ impl MockTokenContract {
     }
     pub fn transfer(_env: Env, _from: Address, _to: Address, _amount: i128) {}
 }
-
 
 #[test]
 fn test_get_contract_stats() {
@@ -29,7 +30,7 @@ fn test_get_contract_stats() {
     let escrow_id = env.register(escrow_contract::EscrowContract, ());
     let escrow_client = escrow_contract::EscrowContractClient::new(&env, &escrow_id);
 
-     // Deploy the Rating contract
+    // Deploy the Rating contract
     let rating_contract_id = env.register(rating_contract::Contract, ());
     let rating_client = rating_contract::ContractClient::new(&env, &rating_contract_id);
 
@@ -39,16 +40,23 @@ fn test_get_contract_stats() {
 
     // Deploy the Fee Manager contract
     let fee_manager_id = env.register(fee_manager_contract::FeeManagerContract, ());
-    let fee_manager_client = fee_manager_contract::FeeManagerContractClient::new(&env, &fee_manager_id);
+    let fee_manager_client =
+        fee_manager_contract::FeeManagerContractClient::new(&env, &fee_manager_id);
 
     // // Deploy the statistics contract
     let stats_contract_id = env.register(StatisticsContract, ());
     let stats_client = StatisticsContractClient::new(&env, &stats_contract_id);
 
     /////////////////////////////////////////////////////////////    User Registry Contract
-    
+
     // Initialize the statistics contract with the rating contract address
-    stats_client.initialize(&user_registry_id, &rating_contract_id, &escrow_id, &dispute_id, &fee_manager_id);
+    stats_client.initialize(
+        &user_registry_id,
+        &rating_contract_id,
+        &escrow_id,
+        &dispute_id,
+        &fee_manager_id,
+    );
 
     let user1 = Address::generate(&env);
     let user2 = Address::generate(&env);
@@ -65,7 +73,6 @@ fn test_get_contract_stats() {
     let metadata = String::from_str(&env, "Bulk verified");
     let expires_at = env.ledger().timestamp() + 365 * 24 * 60 * 60; // 1 year
 
-    
     let _ = user_registry_client.bulk_verify_users(
         &admin.clone(),
         &users,
@@ -78,7 +85,7 @@ fn test_get_contract_stats() {
     assert_eq!(total_users_count, 3);
 
     /////////////////////////////////////////////////////////////    Escrow Contract
-    
+
     let client = Address::generate(&env);
     let freelancer = Address::generate(&env);
     let arbitrator = Address::generate(&env);
@@ -116,13 +123,16 @@ fn test_get_contract_stats() {
 
     // Submit ratings
     for i in 0..5 {
-        let cid = String::from_str(&env, match i {
-            0 => "w1",
-            1 => "w2", 
-            2 => "w3",
-            3 => "w4",
-            _ => "w5"
-        });
+        let cid = String::from_str(
+            &env,
+            match i {
+                0 => "w1",
+                1 => "w2",
+                2 => "w3",
+                3 => "w4",
+                _ => "w5",
+            },
+        );
         rating_client.submit_rating(&caller, &rated_user, &cid, &5u32, &feedback, &category);
     }
 
@@ -135,9 +145,9 @@ fn test_get_contract_stats() {
     let admin = Address::generate(&env);
     let escrow_contract = Address::generate(&env);
     let fee_manager = Address::generate(&env);
-    
+
     dispute_client.initialize(&admin, &86400_u64, &escrow_contract, &fee_manager);
-    
+
     let initiator = Address::generate(&env);
     let job_id_1 = 1;
     let job_id_2 = 2;
@@ -150,10 +160,22 @@ fn test_get_contract_stats() {
     assert_eq!(initial_count, 0);
 
     // Open first dispute
-    dispute_client.open_dispute(&job_id_1, &initiator, &reason, &escrow_contract_addr, &dispute_amount);
+    dispute_client.open_dispute(
+        &job_id_1,
+        &initiator,
+        &reason,
+        &escrow_contract_addr,
+        &dispute_amount,
+    );
 
     // Open second dispute
-    dispute_client.open_dispute(&job_id_2, &initiator, &reason, &escrow_contract_addr, &dispute_amount);
+    dispute_client.open_dispute(
+        &job_id_2,
+        &initiator,
+        &reason,
+        &escrow_contract_addr,
+        &dispute_amount,
+    );
 
     let count_after_first = dispute_client.get_total_disputes();
     assert_eq!(count_after_first, 2);
@@ -198,4 +220,3 @@ fn test_get_contract_stats() {
     assert_eq!(stats.total_disputes, 2);
     assert_eq!(stats.total_fees_collected, 150_000);
 }
-

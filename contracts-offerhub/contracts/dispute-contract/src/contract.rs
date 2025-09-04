@@ -6,7 +6,12 @@ use crate::{
         check_rate_limit, set_total_disputes, ARBITRATOR, DISPUTES, DISPUTE_TIMEOUT,
         ESCROW_CONTRACT, FEE_MANAGER,
     },
-    types::{DisputeData, DisputeLevel, DisputeOutcome, DisputeStatus, Error, Evidence},
+
+    types::{
+        AllDisputeDataExport, DisputeData, DisputeDataExport, DisputeLevel, DisputeOutcome,
+        DisputeStatus, DisputeSummary, Error, Evidence,
+    },
+
     validation::{
         validate_add_evidence, validate_address, validate_open_dispute, validate_timeout_duration,
     },
@@ -529,4 +534,120 @@ pub fn reset_dispute_count(env: &Env, admin: Address) -> Result<(), Error> {
         env.ledger().timestamp(),
     );
     Ok(())
+}
+
+// ==================== DATA EXPORT FUNCTIONS ====================
+
+/// Export dispute data (initiator, mediator, arbitrator, or admin can access)
+pub fn export_dispute_data(env: &Env, caller: Address, dispute_id: u32) -> DisputeDataExport {
+    caller.require_auth();
+
+    if !env.storage().instance().has(&ARBITRATOR) {
+        panic_with_error!(env, Error::NotInitialized);
+    }
+
+    let disputes: Map<u32, DisputeData> = env.storage().instance().get(&DISPUTES).unwrap();
+    let dispute = disputes
+        .get(dispute_id)
+        .unwrap_or_else(|| panic_with_error!(env, Error::DisputeNotFound));
+
+    // Permission check: initiator, mediator, arbitrator, or admin can export data
+    let admin: Address = env.storage().instance().get(&ARBITRATOR).unwrap();
+    let is_authorized = dispute.initiator == caller
+        || dispute.mediator == Some(caller.clone())
+        || dispute.arbitrator == Some(caller.clone())
+        || admin == caller;
+
+    if !is_authorized {
+        panic_with_error!(env, Error::Unauthorized);
+    }
+
+    let evidence = get_dispute_evidence(env, dispute_id);
+
+    let export_data = DisputeDataExport {
+        dispute_id,
+        dispute_data: dispute,
+        evidence,
+        export_timestamp: env.ledger().timestamp(),
+        export_version: String::from_str(env, "1.0"),
+    };
+
+    // Emit export event
+    env.events().publish(
+        (
+            String::from_str(env, "dispute_data_exported"),
+            caller.clone(),
+        ),
+        (dispute_id, env.ledger().timestamp()),
+    );
+
+    export_data
+}
+
+/// Export all dispute data (admin only)
+pub fn export_all_dispute_data(env: &Env, admin: Address, limit: u32) -> AllDisputeDataExport {
+    admin.require_auth();
+
+    if !env.storage().instance().has(&ARBITRATOR) {
+        panic_with_error!(env, Error::NotInitialized);
+    }
+
+    let stored_admin: Address = env.storage().instance().get(&ARBITRATOR).unwrap();
+    if stored_admin != admin {
+        panic_with_error!(env, Error::Unauthorized);
+    }
+
+    // Apply data size limit to prevent gas issues (max 50 disputes per export)
+    let max_limit = 50u32;
+    let actual_limit = if limit == 0 || limit > max_limit {
+        max_limit
+    } else {
+        limit
+    };
+
+    let disputes: Map<u32, DisputeData> = env.storage().instance().get(&DISPUTES).unwrap();
+    let mut dispute_summaries = Vec::new(env);
+    let mut data_size_limit_reached = false;
+    let mut count = 0u32;
+
+    // Iterate through disputes and create summaries (limited)
+    for (dispute_id, dispute_data) in disputes.iter() {
+        if count >= actual_limit {
+            data_size_limit_reached = true;
+            break;
+        }
+
+        let summary = DisputeSummary {
+            dispute_id,
+            initiator: dispute_data.initiator,
+            status: dispute_data.status,
+            outcome: dispute_data.outcome,
+            dispute_amount: dispute_data.dispute_amount,
+            timestamp: dispute_data.timestamp,
+        };
+
+        dispute_summaries.push_back(summary);
+        count += 1;
+    }
+
+    let total_disputes = get_total_disputes(env);
+
+    let export_data = AllDisputeDataExport {
+        total_disputes,
+        dispute_summaries,
+        export_timestamp: env.ledger().timestamp(),
+        export_version: String::from_str(env, "1.0"),
+        data_size_limit_reached,
+    };
+
+    // Emit export event
+    env.events().publish(
+        (
+            String::from_str(env, "all_dispute_data_exported"),
+            admin.clone(),
+        ),
+        env.ledger().timestamp(),
+    );
+
+    export_data
 }
