@@ -34,7 +34,8 @@ const customJestConfig = {
   transformIgnorePatterns: [
     'node_modules/(?!(lucide-react|@radix-ui|@testing-library)/)',
   ],
-  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  // Remove custom transform - let Next.js Jest handle it
+  // extensionsToTreatAsEsm: ['.ts', '.tsx'],
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
