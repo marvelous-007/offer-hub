@@ -1,4 +1,4 @@
-use crate::storage::{get_incentive_record, save_incentive_record, get_user_rating_stats, get_reputation_contract};
+use crate::storage::{get_admin, get_incentive_record, get_reputation_contract, get_user_rating_stats, save_incentive_record};
 use crate::types::{Error, IncentiveRecord};
 use crate::events::{emit_incentive_claimed, emit_achievement_earned};
 use soroban_sdk::{Address, Env, String, Vec, symbol_short, IntoVal};
@@ -94,6 +94,7 @@ fn award_incentive(env: &Env, user: &Address, incentive_type: &String) -> Result
 
 fn award_reputation_nft(env: &Env, user: &Address, nft_type: &soroban_sdk::Symbol) -> Result<(), Error> {
     let reputation_contract = get_reputation_contract(env)?;
+    let caller = get_admin(&env);
     
     // Make cross-contract call to mint achievement NFT
     let result: Result<(), soroban_sdk::InvokeError> = env.invoke_contract(
@@ -101,6 +102,7 @@ fn award_reputation_nft(env: &Env, user: &Address, nft_type: &soroban_sdk::Symbo
         &soroban_sdk::symbol_short!("mint_achv"),
         soroban_sdk::vec![
             env,
+            caller.into_val(env),       // caller (admin)
             user.into_val(env),         // to
             nft_type.into_val(env),     // nft_type
         ]

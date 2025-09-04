@@ -2,12 +2,12 @@
 use super::*;
 use crate::Contract;
 use rand::{distributions::Alphanumeric, Rng};
+use reputation_nft_contract::{Contract as ReputationContract, Error as E};
 use soroban_sdk::{
     log,
     testutils::{Address as _, Ledger},
-    vec, Address, Env, String, Vec,
+    vec, Address, Env, IntoVal, String, Vec,
 };
-use reputation_nft_contract::Contract as ReputationContract;
 extern crate std;
 
 #[derive(Clone)]
@@ -738,19 +738,45 @@ fn test_rating_incentives() {
 fn test_rating_reputation_contract_integration() {
     let env = Env::default();
     let contract_id = create_contract(&env);
-    // e.register(Contract, ())
+
     let reputation_cid = env.register(ReputationContract, ());
     let client = ContractClient::new(&env, &contract_id);
-    env.mock_all_auths();
+    let r_client = reputation_nft_contract::ContractClient::new(&env, &reputation_cid);
+    env.mock_all_auths_allowing_non_root_auth();
 
     // Initialize contract with admin
     let admin = Address::generate(&env);
     let non_admin = Address::generate(&env);
     client.init(&admin);
+    r_client.init(&admin);
+    r_client.add_minter(&admin, &admin);
+
+    let mut c = default_rating_context(&env);
 
     let res = client.try_set_reputation_contract(&non_admin, &reputation_cid);
     assert_eq!(res, Err(Ok(Error::Unauthorized)));
     client.set_reputation_contract(&admin, &reputation_cid);
+
+    feign_rating(&env, &client, 10, 5, &mut c);
+
+    // Before claiming, check the user's ownership of Token ID 1
+    // should panic because token does not exist.
+    let res = r_client.try_get_owner(&1);
+    assert_eq!(res, Err(Ok(E::TokenDoesNotExist)));
+    client.claim_incentive_reward(&c.rated_user, &String::from_str(&env, "first_five_star"));
+
+    // Token should exist, and owner as c.rated_user
+    let owner = r_client.get_owner(&1);
+    assert_eq!(owner, c.rated_user);
+
+    let new_recipient = Address::generate(&env);
+    r_client.transfer(&c.rated_user, &new_recipient, &1);
+    let new_owner = r_client.get_owner(&1);
+    assert_eq!(new_owner, new_recipient);
+
+    // no other token ID should've been created
+    let res = r_client.try_get_owner(&2);
+    assert_eq!(res, Err(Ok(E::TokenDoesNotExist)));
 }
 
 // Create test for edge cases in get_user_rating_history pagination
