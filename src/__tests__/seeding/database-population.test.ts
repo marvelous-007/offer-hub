@@ -12,6 +12,7 @@
  */
 
 import { generateUserData, generateContractData, generateReviewData, SEEDING_CONFIG, delay } from '@/lib/seeding/data-generators';
+import { DatabaseSeeder, populateTestDatabase } from '@/utils/database-seeder';
 
 // Mock fetch para simular llamadas a la API
 const mockFetch = jest.fn();
@@ -279,63 +280,3 @@ describe('Database Population Tests', () => {
   });
 });
 
-// Utilidades de testing adicionales
-export class DatabaseSeeder {
-  private apiUrl: string;
-
-  constructor(apiUrl: string = 'http://localhost:3000') {
-    this.apiUrl = apiUrl;
-  }
-
-  async seedSmallDataset(): Promise<any> {
-    return this.seed({ users: 10, dryRun: true });
-  }
-
-  async seedMediumDataset(): Promise<any> {
-    return this.seed({ users: 30, dryRun: true });
-  }
-
-  async seedLargeDataset(): Promise<any> {
-    return this.seed({ users: 100, dryRun: true });
-  }
-
-  async seedForTesting(): Promise<any> {
-    return this.seed({ 
-      users: 20, 
-      clearExisting: true, 
-      dryRun: false 
-    });
-  }
-
-  private async seed(options: { users: number; clearExisting?: boolean; dryRun?: boolean }): Promise<any> {
-    const response = await fetch(`${this.apiUrl}/api/seed`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(options)
-    });
-
-    return response.json();
-  }
-}
-
-// Función helper para tests manuales
-export async function populateTestDatabase(options?: {
-  users?: number;
-  clearExisting?: boolean;
-  dryRun?: boolean;
-  apiUrl?: string;
-}) {
-  const seeder = new DatabaseSeeder(options?.apiUrl);
-  
-  const result = await seeder.seed({
-    users: options?.users || 50,
-    clearExisting: options?.clearExisting || false,
-    dryRun: options?.dryRun || true
-  });
-
-  console.log('Database population result:', result);
-  return result;
-}
-
-// Exportar para uso en otros tests
-export { generateUserData, generateContractData, generateReviewData, SEEDING_CONFIG };
