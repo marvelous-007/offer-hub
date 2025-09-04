@@ -27,10 +27,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { action, data } = body;
 
-    let results = [];
+    const results = [];
 
     switch (action) {
-      case 'insert_users':
+      case 'insert_users': {
         for (const user of data) {
           const result = await executeQuery(`
             INSERT INTO users (wallet_address, username, name, email, is_freelancer, bio)
@@ -47,8 +47,9 @@ export async function POST(request: NextRequest) {
           results.push(result.rows[0]);
         }
         break;
+      }
 
-      case 'insert_contracts':
+      case 'insert_contracts': {
         for (const contract of data) {
           const result = await executeQuery(`
             INSERT INTO contracts (contract_type, freelancer_id, client_id, contract_on_chain_id, escrow_status, amount_locked)
@@ -65,8 +66,9 @@ export async function POST(request: NextRequest) {
           results.push(result.rows[0]);
         }
         break;
+      }
 
-      case 'insert_reviews':
+      case 'insert_reviews': {
         for (const review of data) {
           const result = await executeQuery(`
             INSERT INTO reviews (from_user_id, to_user_id, contract_id, rating, comment)
@@ -82,6 +84,7 @@ export async function POST(request: NextRequest) {
           results.push(result.rows[0]);
         }
         break;
+      }
 
       default:
         return NextResponse.json({
@@ -116,7 +119,7 @@ export async function GET(request: NextRequest) {
     let result;
 
     switch (action) {
-      case 'get_users':
+      case 'get_users': {
         result = await executeQuery(`
           SELECT id, name, username, is_freelancer, created_at
           FROM users 
@@ -124,8 +127,9 @@ export async function GET(request: NextRequest) {
           LIMIT 50
         `);
         break;
+      }
 
-      case 'get_contracts':
+      case 'get_contracts': {
         result = await executeQuery(`
           SELECT id, contract_type, freelancer_id, client_id, escrow_status, amount_locked, created_at
           FROM contracts 
@@ -133,8 +137,9 @@ export async function GET(request: NextRequest) {
           LIMIT 50
         `);
         break;
+      }
 
-      case 'get_reviews':
+      case 'get_reviews': {
         if (userId) {
           result = await executeQuery(`
             SELECT r.id, r.from_user_id, r.to_user_id, r.contract_id, r.rating, r.comment, r.created_at,
@@ -157,8 +162,9 @@ export async function GET(request: NextRequest) {
           `);
         }
         break;
+      }
 
-      case 'get_stats':
+      case 'get_stats': {
         const usersResult = await executeQuery('SELECT COUNT(*) as count FROM users');
         const contractsResult = await executeQuery('SELECT COUNT(*) as count FROM contracts');
         const reviewsResult = await executeQuery('SELECT COUNT(*) as count FROM reviews');
@@ -173,8 +179,9 @@ export async function GET(request: NextRequest) {
           }]
         };
         break;
+      }
 
-      default:
+      default: {
         // Get all summary
         const users = await executeQuery('SELECT COUNT(*) as count FROM users');
         const contracts = await executeQuery('SELECT COUNT(*) as count FROM contracts');
@@ -190,6 +197,7 @@ export async function GET(request: NextRequest) {
           }]
         };
         break;
+      }
     }
 
     return NextResponse.json({
