@@ -106,7 +106,7 @@ describe("useReviewsApi", () => {
             const { result } = renderHook(() => useReviewsApi());
             
             await expect(
-                result.current.fetchUserReviews("invalid-user-id")
+                result.current.fetchUserReviews("550e8400-e29b-41d4-a716-446655440001")
             ).rejects.toThrow("User not found");
         });
 
@@ -186,6 +186,7 @@ describe("useReviewsApi", () => {
         });
 
         it("should handle server validation errors", async () => {
+            mockFetch.mockClear();
             mockFetch.mockResolvedValueOnce({
                 ok: false,
                 status: 400,
@@ -197,12 +198,15 @@ describe("useReviewsApi", () => {
 
             const { result } = renderHook(() => useReviewsApi());
             
-            await expect(
-                result.current.createReview(createReviewData)
-            ).rejects.toThrow("All required fields must be filled out");
+            await act(async () => {
+                await expect(
+                    result.current.createReview(createReviewData)
+                ).rejects.toThrow("All required fields must be filled out");
+            });
         });
 
         it("should handle authorization errors", async () => {
+            mockFetch.mockClear();
             mockFetch.mockResolvedValueOnce({
                 ok: false,
                 status: 403,
@@ -214,12 +218,15 @@ describe("useReviewsApi", () => {
 
             const { result } = renderHook(() => useReviewsApi());
             
-            await expect(
-                result.current.createReview(createReviewData)
-            ).rejects.toThrow("You are not authorized to review this contract");
+            await act(async () => {
+                await expect(
+                    result.current.createReview(createReviewData)
+                ).rejects.toThrow("You are not authorized to review this contract");
+            });
         });
 
         it("should handle duplicate review errors", async () => {
+            mockFetch.mockClear();
             mockFetch.mockResolvedValueOnce({
                 ok: false,
                 status: 409,
@@ -231,9 +238,11 @@ describe("useReviewsApi", () => {
 
             const { result } = renderHook(() => useReviewsApi());
             
-            await expect(
-                result.current.createReview(createReviewData)
-            ).rejects.toThrow("You have already reviewed this contract");
+            await act(async () => {
+                await expect(
+                    result.current.createReview(createReviewData)
+                ).rejects.toThrow("You have already reviewed this contract");
+            });
         });
     });
 
@@ -345,7 +354,7 @@ describe("useReviewsApi", () => {
             await act(async () => {
                 try {
                     await createReviewHook.mutate(createReviewData);
-                } catch (error) {
+                } catch {
                     // Expected to throw
                 }
             });
