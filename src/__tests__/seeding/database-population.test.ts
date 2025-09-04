@@ -222,7 +222,7 @@ describe('Database Population Tests', () => {
         if (!healthCheck.ok) {
           throw new Error('Backend not available');
         }
-      } catch (error) {
+      } catch {
         console.warn('Real database tests skipped - backend not available');
         return;
       }
