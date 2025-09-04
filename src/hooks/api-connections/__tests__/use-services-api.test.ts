@@ -92,6 +92,8 @@ describe('useServicesApi', () => {
       }
     }
 
+    // Clear any previous mocks and set up new one
+    ;(fetch as jest.Mock).mockClear()
     ;(fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse
@@ -117,6 +119,8 @@ describe('useServicesApi', () => {
       message: 'Failed to fetch services'
     }
 
+    // Clear any previous mocks
+    ;(fetch as jest.Mock).mockClear()
     ;(fetch as jest.Mock).mockResolvedValueOnce({
       ok: false,
       status: 500,
@@ -137,6 +141,8 @@ describe('useServicesApi', () => {
   })
 
   it('should handle network errors', async () => {
+    // Clear any previous mocks
+    ;(fetch as jest.Mock).mockClear()
     ;(fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'))
 
     const { result } = renderHook(() => useServicesApi())
