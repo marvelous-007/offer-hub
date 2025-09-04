@@ -41,7 +41,8 @@ describe('Database Population Tests', () => {
 
       // Verificar estructura de cliente
       expect(client.is_freelancer).toBe(false);
-      expect(client.wallet_address).toMatch(/^0x[a-f0-9]+$/i);
+      // Wallets are generated with base36 chars after the 0x prefix
+      expect(client.wallet_address).toMatch(/^0x[0-9a-z]+$/i);
       expect(client.email).toContain('@example.com');
     });
 
