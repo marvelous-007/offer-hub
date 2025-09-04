@@ -81,7 +81,9 @@ export function generateRealisticComment(rating: number): string {
 
 // Generar rating con distribución realista (más 4s y 5s)
 export function generateRealisticRating(): number {
-  const weights = [2, 3, 8, 35, 52]; // 2% rating 1, 3% rating 2, 8% rating 3, 35% rating 4, 52% rating 5
+  // More conservative weights to ensure >85% are ratings 4-5
+  // 1% rating 1, 2% rating 2, 10% rating 3, 30% rating 4, 57% rating 5
+  const weights = [1, 2, 10, 30, 57]; 
   const random = Math.random() * 100;
   
   let cumulative = 0;
@@ -136,7 +138,7 @@ export function generateContractData(clientId: string, freelancerId: string) {
 // Generar review realista
 export function generateReviewData(fromUserId: string, toUserId: string, contractId: string): CreateReviewDTO {
   const rating = generateRealisticRating();
-  const comment = Math.random() > 0.1 ? generateRealisticComment(rating) : undefined; // 90% tienen comentario
+  const comment = Math.random() > 0.05 ? generateRealisticComment(rating) : undefined; // 95% tienen comentario
   
   return {
     from_id: fromUserId, // Nota: El hook usa from_id pero la BD usa from_user_id
