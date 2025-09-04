@@ -20,14 +20,11 @@ impl ValidationHelpers {
         len >= min && len <= max
     }
 
-
-
     /// Validates publication type is valid
     pub fn validate_publication_type(env: &Env, publication_type: &Symbol) -> bool {
-        publication_type == &Symbol::new(env, "service") || publication_type == &Symbol::new(env, "project")
+        publication_type == &Symbol::new(env, "service")
+            || publication_type == &Symbol::new(env, "project")
     }
-
-
 
     /// Validates category is not empty and within reasonable length
     pub fn validate_category(category: &String) -> bool {

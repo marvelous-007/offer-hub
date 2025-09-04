@@ -19,6 +19,7 @@ pub enum Error {
     ValidationFailed = 14,
     InvalidValidationData = 15,
     RateLimitExceeded = 16,
+    UnexpectedError = 17,
 }
 
 #[contracttype]
@@ -70,7 +71,54 @@ pub struct UserStatus {
     pub validation_count: u32,
 }
 
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct UserDataExport {
+    pub user_address: Address,
+    pub has_profile: bool,
+    pub profile: UserProfile, // We'll use a default profile if none exists
+    pub status: UserStatus,
+    pub export_timestamp: u64,
+    pub export_version: String,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct AllUsersExport {
+    pub total_users: u64,
+    pub verified_users: Vec<Address>,
+    pub blacklisted_users: Vec<Address>,
+    pub export_timestamp: u64,
+    pub export_version: String,
+    pub data_size_limit_reached: bool,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ContractExportResult {
+    pub contract_address: Address,
+    pub contract_type: String,
+    pub export_successful: bool,
+    pub data_size: u32,
+    pub error_message: Option<String>,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct PlatformDataExport {
+    pub user_registry_summary: AllUsersExport,
+    pub rating_contract_results: Vec<ContractExportResult>,
+    pub escrow_contract_results: Vec<ContractExportResult>,
+    pub dispute_contract_results: Vec<ContractExportResult>,
+    pub total_contracts_processed: u32,
+    pub successful_exports: u32,
+    pub failed_exports: u32,
+    pub export_timestamp: u64,
+    pub export_version: String,
+    pub platform_statistics: Vec<(String, String)>,
+}
+
 pub fn require_auth(_env: &Env, address: &Address) -> Result<(), Error> {
     address.require_auth();
     Ok(())
-} 
+}

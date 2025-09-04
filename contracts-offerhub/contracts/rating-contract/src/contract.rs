@@ -1,50 +1,59 @@
-use crate::access::{add_moderator as add_moderator_impl, remove_moderator as remove_moderator_impl, transfer_admin as transfer_admin_impl};
+use crate::access::{
+    add_moderator as add_moderator_impl, remove_moderator as remove_moderator_impl,
+    transfer_admin as transfer_admin_impl,
+};
 use crate::analytics::{generate_user_rating_data, get_platform_analytics};
-use crate::events::{emit_rating_submitted, emit_feedback_submitted, emit_rating_stats_updated};
+use crate::events::{emit_feedback_submitted, emit_rating_stats_updated, emit_rating_submitted};
 use crate::incentives::{check_rating_incentives, claim_incentive_reward as claim_incentive_impl};
-use crate::moderation::{report_feedback as report_feedback_impl, moderate_feedback as moderate_feedback_impl, auto_moderate_feedback};
-use crate::restrictions::{check_and_apply_restrictions, get_user_privileges, check_restriction_status};
+use crate::moderation::{
+    auto_moderate_feedback, moderate_feedback as moderate_feedback_impl,
+    report_feedback as report_feedback_impl,
+};
+use crate::restrictions::{
+    check_and_apply_restrictions, check_restriction_status, get_user_privileges,
+};
 use crate::storage::{
-    save_admin, get_admin, save_rating, save_feedback, get_user_rating_stats, 
-    save_user_rating_stats, increment_platform_stat, save_rating_threshold, add_user_feedback_id, get_user_feedback_ids, get_feedback,
-    get_user_rating_history, save_reputation_contract, get_reputation_contract,
-    check_rate_limit, set_rate_limit_bypass, reset_rate_limit, increment_rating_count, set_total_rating
+    add_user_feedback_id, check_rate_limit, get_admin, get_feedback, get_reputation_contract,
+    get_user_feedback_ids, get_user_rating_history, get_user_rating_stats, increment_platform_stat,
+    increment_rating_count, reset_rate_limit, save_admin, save_feedback, save_rating,
+    save_rating_threshold, save_reputation_contract, save_user_rating_stats, set_rate_limit_bypass,
+    set_total_rating,
 };
 use crate::types::{
-    Error, Rating, RatingStats, Feedback, UserRatingData, RatingThreshold, HealthCheckResult,
-    require_auth
+    require_auth, AllRatingDataExport, Error, Feedback, HealthCheckResult, Rating,
+    RatingDataExport, RatingStats, RatingThreshold, UserRatingData,
 };
-use crate::validation::{validate_submit_rating, validate_report_feedback};
-use soroban_sdk::{Address, Env, String, Vec, IntoVal, Symbol};
+use crate::validation::{validate_report_feedback, validate_submit_rating};
+use soroban_sdk::{Address, Env, IntoVal, String, Symbol, Vec};
 
 pub struct RatingContract;
 
 impl RatingContract {
     pub fn init(env: Env, admin: Address) -> Result<(), Error> {
         save_admin(&env, &admin);
-        
+
         // Initialize default thresholds
         let restriction_threshold = RatingThreshold {
             threshold_type: String::from_str(&env, "restriction"),
             value: crate::types::DEFAULT_RESTRICTION_THRESHOLD,
         };
         save_rating_threshold(&env, &restriction_threshold);
-        
+
         let warning_threshold = RatingThreshold {
             threshold_type: String::from_str(&env, "warning"),
             value: crate::types::DEFAULT_WARNING_THRESHOLD,
         };
         save_rating_threshold(&env, &warning_threshold);
-        
+
         let top_rated_threshold = RatingThreshold {
             threshold_type: String::from_str(&env, "top_rated"),
             value: crate::types::DEFAULT_TOP_RATED_THRESHOLD,
         };
         save_rating_threshold(&env, &top_rated_threshold);
-        
+
         // Initialize health check system
         // crate::health_check::initialize_health_check_system(&env)?;
-        
+
         Ok(())
     }
 
@@ -58,18 +67,26 @@ impl RatingContract {
         work_category: String,
     ) -> Result<(), Error> {
         require_auth(&caller)?;
-    // Rate limit: max 5 per hour per user
-    let limit_type = String::from_str(&env, "submit_rating");
-    // 3600 seconds
-    check_rate_limit(&env, &caller, &limit_type, 5, 3600)?;
-        
+        // Rate limit: max 5 per hour per user
+        let limit_type = String::from_str(&env, "submit_rating");
+        // 3600 seconds
+        check_rate_limit(&env, &caller, &limit_type, 5, 3600)?;
+
         // Comprehensive input validation
-        validate_submit_rating(&env, &caller, &rated_user, &contract_id, rating, &feedback, &work_category)?;
-        
+        validate_submit_rating(
+            &env,
+            &caller,
+            &rated_user,
+            &contract_id,
+            rating,
+            &feedback,
+            &work_category,
+        )?;
+
         // Generate unique IDs
         let rating_id = Self::generate_rating_id(&env, &caller, &rated_user, &contract_id);
         let feedback_id = Self::generate_feedback_id(&env, &rating_id);
-        
+
         // Create rating record
         let rating_record = Rating {
             id: rating_id.clone(),
@@ -80,7 +97,7 @@ impl RatingContract {
             timestamp: env.ledger().timestamp(),
             work_category: work_category.clone(),
         };
-        
+
         // Create feedback record
         let moderation_status = auto_moderate_feedback(&env, &feedback);
         let feedback_record = Feedback {
@@ -94,42 +111,62 @@ impl RatingContract {
             is_flagged: moderation_status != String::from_str(&env, "approved"),
             moderation_status,
         };
-        
+
         // Save records
         save_rating(&env, &rating_record);
         save_feedback(&env, &feedback_record);
-        
+
         // Add feedback to user's feedback list for easy retrieval
         // Store feedback ID for user indexing
         add_user_feedback_id(&env, &rated_user, &feedback_id);
-        
+
         // Update statistics
         Self::update_user_statistics(&env, &rated_user, rating)?;
-        
+
         // Check and apply restrictions based on new rating
         check_and_apply_restrictions(&env, &rated_user)?;
-        
+
         // Update platform statistics
         increment_platform_stat(&env, &String::from_str(&env, "total_ratings"));
         increment_platform_stat(&env, &String::from_str(&env, "total_feedback"));
         let total_ratings = increment_rating_count(&env);
-        
+
         // Emit events
-        emit_rating_submitted(&env, &caller, &rated_user, &contract_id, rating, &rating_id, &total_ratings);
+        emit_rating_submitted(
+            &env,
+            &caller,
+            &rated_user,
+            &contract_id,
+            rating,
+            &rating_id,
+            &total_ratings,
+        );
         emit_feedback_submitted(&env, &caller, &rated_user, &feedback_id, &contract_id);
-        
+
         Ok(())
     }
 
     // Admin: toggle rate limit bypass for a user
-    pub fn set_rate_limit_bypass(env: Env, admin: Address, user: Address, bypass: bool) -> Result<(), Error> {
+    pub fn set_rate_limit_bypass(
+        env: Env,
+        admin: Address,
+        user: Address,
+        bypass: bool,
+    ) -> Result<(), Error> {
         set_rate_limit_bypass(&env, &admin, &user, bypass)
     }
 
     // Admin: reset a user's rate limit window for a type
-    pub fn reset_rate_limit(env: Env, admin: Address, user: Address, limit_type: String) -> Result<(), Error> {
+    pub fn reset_rate_limit(
+        env: Env,
+        admin: Address,
+        user: Address,
+        limit_type: String,
+    ) -> Result<(), Error> {
         // simple admin auth
-        if get_admin(&env) != admin { return Err(Error::Unauthorized); }
+        if get_admin(&env) != admin {
+            return Err(Error::Unauthorized);
+        }
         reset_rate_limit(&env, &user, &limit_type);
         Ok(())
     }
@@ -142,11 +179,15 @@ impl RatingContract {
         // Get all feedback IDs for the user from storage
         let feedback_ids = get_user_feedback_ids(&env, &user);
         let mut feedbacks = Vec::new(&env);
-        
+
         // Fetch actual feedback objects and limit results
         let total_count = feedback_ids.len();
-        let limit = if limit == 0 { total_count } else { u32::min(limit, total_count) };
-        
+        let limit = if limit == 0 {
+            total_count
+        } else {
+            u32::min(limit, total_count)
+        };
+
         for i in 0..limit {
             if let Some(feedback_id) = feedback_ids.get(i) {
                 if let Ok(feedback) = get_feedback(&env, &feedback_id) {
@@ -154,7 +195,7 @@ impl RatingContract {
                 }
             }
         }
-        
+
         Ok(feedbacks)
     }
 
@@ -216,73 +257,89 @@ impl RatingContract {
         claim_incentive_impl(&env, &caller, &incentive_type)
     }
 
-    pub fn update_reputation(
-        env: Env,
-        caller: Address,
-        user: Address,
-    ) -> Result<(), Error> {
+    pub fn update_reputation(env: Env, caller: Address, user: Address) -> Result<(), Error> {
         require_auth(&caller)?;
-        
+
         // Get user's rating statistics
         let stats = get_user_rating_stats(&env, &user)?;
-        
+
         // Try to get reputation contract address
         if let Ok(reputation_contract) = get_reputation_contract(&env) {
             // Check if user qualifies for reputation NFTs and try to mint them
             if stats.average_rating >= 480 && stats.total_ratings >= 20 {
                 // Award top-rated NFT
-                let _ = Self::try_mint_achievement_nft(&env, &reputation_contract, &user, &soroban_sdk::symbol_short!("toprated"));
-                
+                let _ = Self::try_mint_achievement_nft(
+                    &env,
+                    &reputation_contract,
+                    &user,
+                    &soroban_sdk::symbol_short!("toprated"),
+                );
+
                 crate::events::emit_achievement_earned(
-                    &env, 
-                    &user, 
-                    &String::from_str(&env, "top_rated"), 
-                    stats.average_rating
+                    &env,
+                    &user,
+                    &String::from_str(&env, "top_rated"),
+                    stats.average_rating,
                 );
             }
-            
+
             if stats.total_ratings >= 50 && stats.average_rating >= 400 {
                 // Award veteran NFT
-                let _ = Self::try_mint_achievement_nft(&env, &reputation_contract, &user, &soroban_sdk::symbol_short!("veteran"));
-                
+                let _ = Self::try_mint_achievement_nft(
+                    &env,
+                    &reputation_contract,
+                    &user,
+                    &soroban_sdk::symbol_short!("veteran"),
+                );
+
                 crate::events::emit_achievement_earned(
-                    &env, 
-                    &user, 
-                    &String::from_str(&env, "veteran"), 
-                    stats.total_ratings
+                    &env,
+                    &user,
+                    &String::from_str(&env, "veteran"),
+                    stats.total_ratings,
                 );
             }
-            
+
             if stats.total_ratings >= 10 {
                 // Award milestone NFT for 10 completed ratings
-                let _ = Self::try_mint_achievement_nft(&env, &reputation_contract, &user, &soroban_sdk::symbol_short!("tencontr"));
+                let _ = Self::try_mint_achievement_nft(
+                    &env,
+                    &reputation_contract,
+                    &user,
+                    &soroban_sdk::symbol_short!("tencontr"),
+                );
             }
-            
+
             if stats.five_star_count >= 5 {
                 // Award 5 stars 5 times NFT
-                let _ = Self::try_mint_achievement_nft(&env, &reputation_contract, &user, &soroban_sdk::symbol_short!("5stars5x"));
+                let _ = Self::try_mint_achievement_nft(
+                    &env,
+                    &reputation_contract,
+                    &user,
+                    &soroban_sdk::symbol_short!("5stars5x"),
+                );
             }
         } else {
             // If no reputation contract is set, just emit events
             if stats.average_rating >= 480 && stats.total_ratings >= 20 {
                 crate::events::emit_achievement_earned(
-                    &env, 
-                    &user, 
-                    &String::from_str(&env, "top_rated"), 
-                    stats.average_rating
+                    &env,
+                    &user,
+                    &String::from_str(&env, "top_rated"),
+                    stats.average_rating,
                 );
             }
-            
+
             if stats.total_ratings >= 50 && stats.average_rating >= 400 {
                 crate::events::emit_achievement_earned(
-                    &env, 
-                    &user, 
-                    &String::from_str(&env, "veteran"), 
-                    stats.total_ratings
+                    &env,
+                    &user,
+                    &String::from_str(&env, "veteran"),
+                    stats.total_ratings,
                 );
             }
         }
-        
+
         Ok(())
     }
 
@@ -298,11 +355,11 @@ impl RatingContract {
             &soroban_sdk::symbol_short!("mint_achv"),
             soroban_sdk::vec![
                 env,
-                user.into_val(env),         // to
-                nft_type.into_val(env),     // nft_type
-            ]
+                user.into_val(env),     // to
+                nft_type.into_val(env), // nft_type
+            ],
         );
-        
+
         match result {
             Ok(_) => Ok(()),
             Err(_) => {
@@ -327,13 +384,13 @@ impl RatingContract {
         value: u32,
     ) -> Result<(), Error> {
         crate::access::check_admin(&env, &caller)?;
-        
+
         let threshold = RatingThreshold {
             threshold_type: threshold_type.clone(),
             value,
         };
         save_rating_threshold(&env, &threshold);
-        
+
         Ok(())
     }
 
@@ -356,7 +413,12 @@ impl RatingContract {
     }
 
     // Helper functions
-    fn generate_rating_id(env: &Env, _rater: &Address, _rated_user: &Address, _contract_id: &String) -> String {
+    fn generate_rating_id(
+        env: &Env,
+        _rater: &Address,
+        _rated_user: &Address,
+        _contract_id: &String,
+    ) -> String {
         let _timestamp = env.ledger().timestamp();
         let _sequence = env.ledger().sequence();
         // Create a simple ID without format! macro
@@ -393,9 +455,11 @@ impl RatingContract {
         }
 
         // Calculate new average (multiply by 100 for precision)
-        let total_points = (stats.five_star_count * 5) + (stats.four_star_count * 4) + 
-                          (stats.three_star_count * 3) + (stats.two_star_count * 2) + 
-                          stats.one_star_count;
+        let total_points = (stats.five_star_count * 5)
+            + (stats.four_star_count * 4)
+            + (stats.three_star_count * 3)
+            + (stats.two_star_count * 2)
+            + stats.one_star_count;
         stats.average_rating = (total_points * 100) / stats.total_ratings;
         stats.last_updated = env.ledger().timestamp();
 
@@ -430,9 +494,11 @@ impl RatingContract {
         crate::storage::get_total_rating(&env)
     }
 
-    pub fn reset_total_rating(env: &Env, admin: Address) ->  Result<(), Error> {
+    pub fn reset_total_rating(env: &Env, admin: Address) -> Result<(), Error> {
         admin.require_auth();
-        if get_admin(&env) != admin { return Err(Error::Unauthorized); }
+        if get_admin(&env) != admin {
+            return Err(Error::Unauthorized);
+        }
 
         set_total_rating(env, 0u64);
 
@@ -441,5 +507,110 @@ impl RatingContract {
             env.ledger().timestamp(),
         );
         Ok(())
+    }
+
+    // ==================== DATA EXPORT FUNCTIONS ====================
+
+    /// Export rating data for a specific user (user themselves or admin)
+    pub fn export_rating_data(
+        env: Env,
+        caller: Address,
+        user: Address,
+        limit: u32,
+    ) -> Result<RatingDataExport, Error> {
+        // Permission check: user can export their own data, or admin can export any user's data
+        if caller != user {
+            crate::access::check_admin(&env, &caller)?;
+        } else {
+            require_auth(&caller)?;
+        }
+
+        // Apply data size limit to prevent gas issues (max 50 items per export)
+        let max_limit = 50u32;
+        let actual_limit = if limit == 0 || limit > max_limit {
+            max_limit
+        } else {
+            limit
+        };
+
+        let stats = get_user_rating_stats(&env, &user).unwrap_or(RatingStats {
+            user: user.clone(),
+            total_ratings: 0,
+            average_rating: 0,
+            five_star_count: 0,
+            four_star_count: 0,
+            three_star_count: 0,
+            two_star_count: 0,
+            one_star_count: 0,
+            last_updated: env.ledger().timestamp(),
+        });
+
+        // Get user's rating history (limited)
+        let ratings = get_user_rating_history(&env, &user, actual_limit, 0);
+
+        // Get user's feedback (limited)
+        let feedback_result = Self::get_user_feedback(env.clone(), user.clone(), actual_limit);
+        let feedback = feedback_result.unwrap_or(Vec::new(&env));
+
+        let data_size_limit_reached =
+            ratings.len() >= actual_limit || feedback.len() >= actual_limit;
+
+        let export_data = RatingDataExport {
+            user_address: user.clone(),
+            stats,
+            ratings,
+            feedback,
+            export_timestamp: env.ledger().timestamp(),
+            export_version: String::from_str(&env, "1.0"),
+            data_size_limit_reached,
+        };
+
+        // Emit export event
+        env.events().publish(
+            (Symbol::new(&env, "rating_data_exported"), caller.clone()),
+            (user, env.ledger().timestamp()),
+        );
+
+        Ok(export_data)
+    }
+
+    /// Export all platform rating data (admin only)
+    pub fn export_all_rating_data(env: Env, admin: Address) -> Result<AllRatingDataExport, Error> {
+        crate::access::check_admin(&env, &admin)?;
+
+        let total_ratings = Self::get_total_rating(&env);
+        let platform_stats = get_platform_analytics(&env);
+
+        // Apply data size limit for platform stats (max 100 entries)
+        let max_stats = 100usize;
+        let data_size_limit_reached = platform_stats.len() as usize > max_stats;
+
+        let limited_stats = if platform_stats.len() as usize > max_stats {
+            let mut limited = Vec::new(&env);
+            for i in 0..max_stats {
+                if let Some(stat) = platform_stats.get(i as u32) {
+                    limited.push_back(stat);
+                }
+            }
+            limited
+        } else {
+            platform_stats
+        };
+
+        let export_data = AllRatingDataExport {
+            total_ratings,
+            platform_stats: limited_stats,
+            export_timestamp: env.ledger().timestamp(),
+            export_version: String::from_str(&env, "1.0"),
+            data_size_limit_reached,
+        };
+
+        // Emit export event
+        env.events().publish(
+            (Symbol::new(&env, "all_rating_data_exported"), admin.clone()),
+            env.ledger().timestamp(),
+        );
+
+        Ok(export_data)
     }
 }

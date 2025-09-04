@@ -1,6 +1,6 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, Address, Env, Vec};
 use crate::error::Error;
+use soroban_sdk::{contract, contractimpl, Address, Env, Vec};
 mod contract;
 mod error;
 mod storage;
@@ -25,7 +25,12 @@ impl FeeManagerContract {
         dispute_fee_percentage: i128,
         arbitrator_fee_percentage: i128,
     ) {
-        contract::set_fee_rates(&env, escrow_fee_percentage, dispute_fee_percentage, arbitrator_fee_percentage);
+        contract::set_fee_rates(
+            &env,
+            escrow_fee_percentage,
+            dispute_fee_percentage,
+            arbitrator_fee_percentage,
+        );
     }
 
     pub fn add_premium_user(env: Env, user: Address) {
@@ -84,7 +89,7 @@ impl FeeManagerContract {
         contract::get_total_fees(&env)
     }
 
-     pub fn reset_total_fees_collected(env: &Env, admin: Address) -> Result<(), Error> {
+    pub fn reset_total_fees_collected(env: &Env, admin: Address) -> Result<(), Error> {
         contract::reset_total_fees_collected(&env, admin)
     }
-} 
+}

@@ -19,4 +19,4 @@ pub enum Error {
 
 pub fn handle_error(env: &Env, error: Error) -> ! {
     env.panic_with_error(error);
-} 
+}
