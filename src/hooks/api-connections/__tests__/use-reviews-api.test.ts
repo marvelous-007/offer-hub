@@ -292,25 +292,33 @@ describe("useReviewsApi", () => {
 
     describe("useUserReviews hook", () => {
         it("should return loading state initially", () => {
-            const { result } = renderHook(() => useReviewsApi());
+            const TestComponent = () => {
+                const { useUserReviews } = useReviewsApi();
+                const hook = useUserReviews("550e8400-e29b-41d4-a716-446655440001");
+                return hook;
+            };
             
-            const hook = result.current.useUserReviews("550e8400-e29b-41d4-a716-446655440001");
+            const { result } = renderHook(() => TestComponent());
             
-            expect(hook.data).toBeUndefined();
-            expect(hook.isLoading).toBe(false); // Will be false initially, then true when fetch triggers
-            expect(hook.error).toBeUndefined();
+            expect(result.current.data).toBeUndefined();
+            expect(result.current.isLoading).toBe(false); // Will be false initially, then true when fetch triggers
+            expect(result.current.error).toBeUndefined();
         });
     });
 
     describe("useCreateReview hook", () => {
         it("should return mutate function and loading states", () => {
-            const { result } = renderHook(() => useReviewsApi());
+            const TestComponent = () => {
+                const { useCreateReview } = useReviewsApi();
+                const hook = useCreateReview();
+                return hook;
+            };
             
-            const hook = result.current.useCreateReview();
+            const { result } = renderHook(() => TestComponent());
             
-            expect(typeof hook.mutate).toBe('function');
-            expect(hook.isLoading).toBe(false);
-            expect(hook.error).toBeUndefined();
+            expect(typeof result.current.mutate).toBe('function');
+            expect(result.current.isLoading).toBe(false);
+            expect(result.current.error).toBeUndefined();
         });
 
         it("should handle successful mutation", async () => {
@@ -325,17 +333,21 @@ describe("useReviewsApi", () => {
                 json: async () => mockResponse
             });
 
-            const { result } = renderHook(() => useReviewsApi());
-            const createReviewHook = result.current.useCreateReview();
+            const TestComponent = () => {
+                const { useCreateReview } = useReviewsApi();
+                return useCreateReview();
+            };
+            
+            const { result } = renderHook(() => TestComponent());
             
             let createdReview: Review;
             
             await act(async () => {
-                createdReview = await createReviewHook.mutate(createReviewData);
+                createdReview = await result.current.mutate(createReviewData);
             });
 
             expect(createdReview).toEqual(mockReview);
-            expect(createReviewHook.error).toBeUndefined();
+            expect(result.current.error).toBeUndefined();
         });
 
         it("should handle mutation errors", async () => {
@@ -348,18 +360,22 @@ describe("useReviewsApi", () => {
                 })
             });
 
-            const { result } = renderHook(() => useReviewsApi());
-            const createReviewHook = result.current.useCreateReview();
+            const TestComponent = () => {
+                const { useCreateReview } = useReviewsApi();
+                return useCreateReview();
+            };
+            
+            const { result } = renderHook(() => TestComponent());
             
             await act(async () => {
                 try {
-                    await createReviewHook.mutate(createReviewData);
+                    await result.current.mutate(createReviewData);
                 } catch {
                     // Expected to throw
                 }
             });
 
-            expect(createReviewHook.error).toBe("All required fields must be filled out");
+            expect(result.current.error).toBe("All required fields must be filled out");
         });
     });
 });

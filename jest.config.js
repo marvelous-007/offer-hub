@@ -32,8 +32,9 @@ const customJestConfig = {
     '<rootDir>/contracts-offerhub/',
   ],
   transformIgnorePatterns: [
-    'node_modules/(?!(lucide-react)/)',
+    'node_modules/(?!(lucide-react|@radix-ui|@testing-library)/)',
   ],
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

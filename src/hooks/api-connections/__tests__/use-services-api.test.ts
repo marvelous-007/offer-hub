@@ -22,6 +22,12 @@ describe('useServicesApi', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockSearchParams = new URLSearchParams()
+    jest.useFakeTimers()
+  })
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers()
+    jest.useRealTimers()
   })
 
   it('should initialize with empty state', async () => {
@@ -114,24 +120,16 @@ describe('useServicesApi', () => {
   })
 
   it('should handle API errors', async () => {
-    const mockError = {
-      success: false,
-      message: 'Failed to fetch services'
-    }
-
-    // Clear any previous mocks
+    // Clear any previous mocks and set up error response
     ;(fetch as jest.Mock).mockClear()
-    ;(fetch as jest.Mock).mockResolvedValueOnce({
-      ok: false,
-      status: 500,
-      statusText: 'Internal Server Error',
-      json: async () => mockError
-    })
+    ;(fetch as jest.Mock).mockRejectedValueOnce(new Error('Failed to fetch services'))
 
     const { result } = renderHook(() => useServicesApi())
 
-    await act(async () => {
-      await result.current.searchServices({ page: 1, limit: 10 })
+    act(() => {
+      result.current.searchServices({ page: 1, limit: 10 })
+      // Fast-forward the debounce timer
+      jest.advanceTimersByTime(300)
     })
 
     await waitFor(() => {
@@ -147,8 +145,10 @@ describe('useServicesApi', () => {
 
     const { result } = renderHook(() => useServicesApi())
 
-    await act(async () => {
-      await result.current.searchServices({ page: 1, limit: 10 })
+    act(() => {
+      result.current.searchServices({ page: 1, limit: 10 })
+      // Fast-forward the debounce timer
+      jest.advanceTimersByTime(300)
     })
 
     await waitFor(() => {
