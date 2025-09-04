@@ -99,7 +99,9 @@ describe('useServicesApi', () => {
 
     const { result } = renderHook(() => useServicesApi())
 
-    await result.current.searchServices({ page: 1, limit: 10 })
+    await act(async () => {
+      await result.current.searchServices({ page: 1, limit: 10 })
+    })
 
     await waitFor(() => {
       expect(result.current.services).toHaveLength(1)
@@ -124,7 +126,9 @@ describe('useServicesApi', () => {
 
     const { result } = renderHook(() => useServicesApi())
 
-    await result.current.searchServices({ page: 1, limit: 10 })
+    await act(async () => {
+      await result.current.searchServices({ page: 1, limit: 10 })
+    })
 
     await waitFor(() => {
       expect(result.current.error).toBe('Failed to fetch services')
@@ -137,7 +141,9 @@ describe('useServicesApi', () => {
 
     const { result } = renderHook(() => useServicesApi())
 
-    await result.current.searchServices({ page: 1, limit: 10 })
+    await act(async () => {
+      await result.current.searchServices({ page: 1, limit: 10 })
+    })
 
     await waitFor(() => {
       expect(result.current.error).toBe('Network error')
@@ -221,9 +227,11 @@ describe('useServicesApi', () => {
     ;(fetch as jest.Mock).mockClear()
 
     // Call search multiple times quickly
-    result.current.searchServices({ keyword: 'test' })
-    result.current.searchServices({ keyword: 'test2' })
-    result.current.searchServices({ keyword: 'test3' })
+    act(() => {
+      result.current.searchServices({ keyword: 'test' })
+      result.current.searchServices({ keyword: 'test2' })
+      result.current.searchServices({ keyword: 'test3' })
+    })
 
     // Fast-forward time to trigger debounced search
     jest.advanceTimersByTime(300)
@@ -255,12 +263,14 @@ describe('useServicesApi', () => {
 
     const { result } = renderHook(() => useServicesApi())
 
-    await result.current.searchServices({ 
-      keyword: 'react', 
-      category: 'development',
-      min_price: 50,
-      max_price: 100,
-      page: 2
+    await act(async () => {
+      await result.current.searchServices({ 
+        keyword: 'react', 
+        category: 'development',
+        min_price: 50,
+        max_price: 100,
+        page: 2
+      })
     })
 
     await waitFor(() => {
@@ -326,7 +336,9 @@ describe('useServicesApi', () => {
 
     const { result } = renderHook(() => useServicesApi())
 
-    await result.current.searchServices({ page: 2, limit: 10 })
+    await act(async () => {
+      await result.current.searchServices({ page: 2, limit: 10 })
+    })
 
     await waitFor(() => {
       expect(result.current.pagination).toEqual(mockResponse.pagination)
@@ -375,7 +387,9 @@ describe('useServicesApi', () => {
 
     const { result } = renderHook(() => useServicesApi())
 
-    await result.current.searchServices({ page: 1, limit: 10 })
+    await act(async () => {
+      await result.current.searchServices({ page: 1, limit: 10 })
+    })
 
     await waitFor(() => {
       expect(result.current.services).toHaveLength(1)
