@@ -166,7 +166,7 @@ export function OfferProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: "SET_ERROR", payload: null })
 
       return newOffer.id
-    } catch (error) {
+    } catch {
       dispatch({ type: "SET_ERROR", payload: "Failed to send offer" })
       throw error
     } finally {
@@ -182,7 +182,7 @@ export function OfferProvider({ children }: { children: React.ReactNode }) {
       const mockOffers: Offer[] = []
       dispatch({ type: "SET_OFFERS", payload: mockOffers })
       dispatch({ type: "SET_ERROR", payload: null })
-    } catch (error) {
+    } catch {
       dispatch({ type: "SET_ERROR", payload: "Failed to fetch offers" })
     } finally {
       dispatch({ type: "SET_LOADING", payload: false })
@@ -200,7 +200,7 @@ export function OfferProvider({ children }: { children: React.ReactNode }) {
       } else {
         dispatch({ type: "SET_ERROR", payload: "Offer not found" })
       }
-    } catch (error) {
+    } catch {
       dispatch({ type: "SET_ERROR", payload: "Failed to fetch offer details" })
     } finally {
       dispatch({ type: "SET_LOADING", payload: false })
@@ -215,7 +215,7 @@ export function OfferProvider({ children }: { children: React.ReactNode }) {
         const updated = { ...updatedOffer, status, updatedAt: new Date().toISOString() }
         dispatch({ type: "UPDATE_OFFER", payload: updated })
       }
-    } catch (error) {
+    } catch {
       dispatch({ type: "SET_ERROR", payload: "Failed to update offer status" })
     }
   }
@@ -232,7 +232,7 @@ export function OfferProvider({ children }: { children: React.ReactNode }) {
         type: "message",
       }
       dispatch({ type: "ADD_MESSAGE", payload: { offerId, message: newMessage } })
-    } catch (error) {
+    } catch {
       dispatch({ type: "SET_ERROR", payload: "Failed to send message" })
     }
   }

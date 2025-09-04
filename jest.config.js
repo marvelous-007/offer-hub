@@ -35,6 +35,10 @@ const customJestConfig = {
     'node_modules/(?!(lucide-react|@radix-ui|@testing-library)/)',
   ],
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  transform: {
+    '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.(js|jsx)$': 'babel-jest'
+  },
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

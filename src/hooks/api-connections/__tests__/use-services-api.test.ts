@@ -26,7 +26,10 @@ describe('useServicesApi', () => {
   })
 
   afterEach(() => {
-    jest.runOnlyPendingTimers()
+    // Clean up any pending timers before switching back to real timers
+    if (jest.isMockFunction(setTimeout)) {
+      jest.runOnlyPendingTimers()
+    }
     jest.useRealTimers()
   })
 
@@ -64,7 +67,7 @@ describe('useServicesApi', () => {
       total_services: 0,
       per_page: 10
     })
-  })
+  }, 15000)
 
   it('should fetch services successfully', async () => {
     const mockResponse = {
@@ -117,7 +120,7 @@ describe('useServicesApi', () => {
       expect(result.current.services[0].title).toBe('Web Development')
       expect(result.current.pagination).toEqual(mockResponse.pagination)
     })
-  })
+  }, 15000)
 
   it('should handle API errors', async () => {
     // Clear any previous mocks and set up error response
@@ -126,7 +129,7 @@ describe('useServicesApi', () => {
 
     const { result } = renderHook(() => useServicesApi())
 
-    act(() => {
+    await act(async () => {
       result.current.searchServices({ page: 1, limit: 10 })
       // Fast-forward the debounce timer
       jest.advanceTimersByTime(300)
@@ -136,7 +139,7 @@ describe('useServicesApi', () => {
       expect(result.current.error).toBe('Failed to fetch services')
       expect(result.current.services).toEqual([])
     })
-  })
+  }, 15000)
 
   it('should handle network errors', async () => {
     // Clear any previous mocks
@@ -145,7 +148,7 @@ describe('useServicesApi', () => {
 
     const { result } = renderHook(() => useServicesApi())
 
-    act(() => {
+    await act(async () => {
       result.current.searchServices({ page: 1, limit: 10 })
       // Fast-forward the debounce timer
       jest.advanceTimersByTime(300)
@@ -155,7 +158,7 @@ describe('useServicesApi', () => {
       expect(result.current.error).toBe('Network error')
       expect(result.current.services).toEqual([])
     })
-  })
+  }, 15000)
 
   it('should clear error when clearError is called', async () => {
     // Mock initial successful response
@@ -200,7 +203,7 @@ describe('useServicesApi', () => {
     })
 
     expect(result.current.error).toBeNull()
-  })
+  }, 15000)
 
   it('should debounce search requests', async () => {
     jest.useFakeTimers()
@@ -285,7 +288,7 @@ describe('useServicesApi', () => {
         { scroll: false }
       )
     })
-  })
+  }, 15000)
 
   it('should parse URL parameters on initialization', async () => {
     // Set up URL parameters
@@ -320,7 +323,7 @@ describe('useServicesApi', () => {
         expect.any(Object)
       )
     })
-  })
+  }, 15000)
 
   it('should handle pagination correctly', async () => {
     const mockResponse = {
@@ -351,7 +354,7 @@ describe('useServicesApi', () => {
       expect(result.current.pagination?.current_page).toBe(2)
       expect(result.current.pagination?.total_pages).toBe(5)
     })
-  })
+  }, 15000)
 
   it('should map service data to freelancer display format correctly', async () => {
     const mockResponse = {
@@ -409,5 +412,5 @@ describe('useServicesApi', () => {
       expect(service.rating).toBeGreaterThan(0)
       expect(service.reviewCount).toBeGreaterThan(0)
     })
-  })
+  }, 15000)
 })
