@@ -11,6 +11,9 @@ const customJestConfig = {
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+    '\\.(gif|ttf|eot|svg|png|jpg|jpeg|webp|bmp)$': '<rootDir>/__mocks__/fileMock.js',
+    '^lucide-react$': '<rootDir>/__mocks__/lucide-react.js',
   },
   testMatch: [
     '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
@@ -34,6 +37,10 @@ const customJestConfig = {
   transformIgnorePatterns: [
     'node_modules/(?!(lucide-react|@radix-ui|@testing-library)/)',
   ],
+  transform: {
+    '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.(js|jsx)$': 'babel-jest',
+  },
   // Remove custom transform - let Next.js Jest handle it
   // extensionsToTreatAsEsm: ['.ts', '.tsx'],
 }
