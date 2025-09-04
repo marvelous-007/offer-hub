@@ -8,9 +8,7 @@ import {
 } from '@/lib/seeding/data-generators';
 
 // ⚠️ SOLO PARA DESARROLLO - NO USAR EN PRODUCCIÓN
-if (process.env.NODE_ENV === 'production') {
-  throw new Error('Seeding endpoints are not available in production');
-}
+// Moved production check to inside the handler functions
 
 interface DatabaseClient {
   query: (sql: string, params?: any[]) => Promise<{ rows: any[] }>;
@@ -36,6 +34,13 @@ const getDatabaseClient = async (): Promise<DatabaseClient> => {
 };
 
 export async function POST(request: NextRequest) {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { success: false, message: 'Seeding endpoints are not available in production' },
+      { status: 403 }
+    );
+  }
+  
   try {
     const body = await request.json();
     const { 
@@ -229,6 +234,13 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { success: false, message: 'Seeding endpoints are not available in production' },
+      { status: 403 }
+    );
+  }
+  
   return NextResponse.json({
     message: 'Seeding API is available',
     usage: 'POST /api/seed with body: { users: number, clearExisting: boolean, dryRun: boolean }',
