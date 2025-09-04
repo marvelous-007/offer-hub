@@ -34,7 +34,7 @@ export class DatabaseSeeder {
     });
   }
 
-  private async seed(options: { users: number; clearExisting?: boolean; dryRun?: boolean }): Promise<any> {
+  public async seed(options: { users: number; clearExisting?: boolean; dryRun?: boolean }): Promise<any> {
     const response = await fetch(`${this.apiUrl}/api/seed`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
