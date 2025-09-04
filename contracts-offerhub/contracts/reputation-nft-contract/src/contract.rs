@@ -2,7 +2,7 @@ use crate::access::{
     add_minter as add_minter_impl, check_minter, check_owner, remove_minter as remove_minter_impl,
     transfer_admin as transfer_admin_impl,
 };
-use crate::events::{emit_minted, emit_transferred, emit_achievement_minted};
+use crate::events::{emit_minted, emit_transferred, emit_achievement_minted , emit_reputaion_contract_initiated};
 use crate::metadata::{get_metadata as get_token_metadata, store_metadata};
 use crate::storage::{
     get_admin, get_token_owner, is_minter, save_admin, save_token_owner, token_exists, next_token_id,
@@ -15,6 +15,7 @@ pub struct ReputationNFTContract;
 impl ReputationNFTContract {
     pub fn init(env: Env, admin: Address) -> Result<(), Error> {
         save_admin(&env, &admin);
+       emit_reputaion_contract_initiated(&env, &admin);
         Ok(())
     }
 

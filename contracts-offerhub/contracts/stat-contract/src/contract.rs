@@ -1,4 +1,4 @@
-use soroban_sdk::{Address, Env};
+use soroban_sdk::{Address, Env, Symbol};
 use crate::storage::{ContractStats};
 use rating_contract;
 use user_registry_contract;
@@ -15,6 +15,7 @@ impl StatContract {
         env.storage().instance().set(&DataKey::EscrowContract, &escrow_id);
         env.storage().instance().set(&DataKey::DisputeContract, &dispute_id);
         env.storage().instance().set(&DataKey::FeeManagerContract, &fee_manager_id);
+        env.events().publish((Symbol::new(&env , "stat_contract_initialized"), ), (user_registry_id, rating_contract_id , escrow_id, dispute_id , fee_manager_id , env.ledger().timestamp()));
     }
 
     pub fn get_contract_stats(env: Env) -> Result<ContractStats, Error> {

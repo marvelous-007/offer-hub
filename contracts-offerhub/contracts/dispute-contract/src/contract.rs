@@ -1,10 +1,15 @@
-use soroban_sdk::{panic_with_error, Address, Env, Map, String, Vec, Symbol, IntoVal};
+use soroban_sdk::{panic_with_error, Address, Env, IntoVal, Map, String, Symbol, Vec};
 
 use crate::{
     access::{is_valid_arbitrator, is_valid_mediator},
-    storage::{ARBITRATOR, DISPUTES, DISPUTE_TIMEOUT, ESCROW_CONTRACT, FEE_MANAGER, check_rate_limit, set_total_disputes},
+    storage::{
+        check_rate_limit, set_total_disputes, ARBITRATOR, DISPUTES, DISPUTE_TIMEOUT,
+        ESCROW_CONTRACT, FEE_MANAGER,
+    },
     types::{DisputeData, DisputeLevel, DisputeOutcome, DisputeStatus, Error, Evidence},
-    validation::{validate_open_dispute, validate_add_evidence, validate_timeout_duration, validate_address},
+    validation::{
+        validate_add_evidence, validate_address, validate_open_dispute, validate_timeout_duration,
+    },
 };
 
 // Escrow integration constants
@@ -23,9 +28,9 @@ pub fn initialize(
     if env.storage().instance().has(&ARBITRATOR) {
         panic_with_error!(env, Error::AlreadyInitialized)
     }
-    
+
     admin.require_auth();
-    
+
     // Input validation
     if let Err(_) = validate_address(&admin) {
         panic_with_error!(env, Error::Unauthorized);
@@ -39,10 +44,14 @@ pub fn initialize(
     if let Err(_) = validate_timeout_duration(default_timeout) {
         panic_with_error!(env, Error::InvalidTimeout);
     }
-    
+
     env.storage().instance().set(&ARBITRATOR, &admin);
-    env.storage().instance().set(&DISPUTE_TIMEOUT, &default_timeout);
-    env.storage().instance().set(&ESCROW_CONTRACT, &escrow_contract);
+    env.storage()
+        .instance()
+        .set(&DISPUTE_TIMEOUT, &default_timeout);
+    env.storage()
+        .instance()
+        .set(&ESCROW_CONTRACT, &escrow_contract);
     env.storage().instance().set(&FEE_MANAGER, &fee_manager);
     env.storage()
         .instance()
@@ -73,13 +82,14 @@ pub fn open_dispute(
     // Rate limit: max 3 disputes per 24h per initiator
     let limit_type = String::from_str(env, "open_dispute");
     // 24h in seconds
-    let _ = check_rate_limit(env, &initiator, &limit_type, 3, 24 * 3600).map_err(|e| panic_with_error!(env, e));
+    let _ = check_rate_limit(env, &initiator, &limit_type, 3, 24 * 3600)
+        .map_err(|e| panic_with_error!(env, e));
 
     // Input validation
     if let Err(e) = validate_open_dispute(env, job_id, &initiator, &reason, dispute_amount) {
         panic_with_error!(env, e);
     }
-    
+
     // Validate escrow contract address if provided
     if let Some(ref escrow_addr) = escrow_contract {
         if let Err(_) = validate_address(escrow_addr) {
@@ -124,7 +134,7 @@ pub fn open_dispute(
 
     env.events().publish(
         (String::from_str(env, "dispute_opened"), job_id),
-        (env.ledger().timestamp(), total_dispute_count)
+        (env.ledger().timestamp(), total_dispute_count),
     );
 }
 
@@ -146,7 +156,7 @@ pub fn add_evidence(
     attachment_hash: Option<String>,
 ) {
     submitter.require_auth();
-    
+
     // Input validation
     if let Err(e) = validate_add_evidence(env, job_id, &submitter, &description) {
         panic_with_error!(env, e);
@@ -232,7 +242,10 @@ pub fn escalate_to_arbitration(env: &Env, job_id: u32, mediator: Address, arbitr
     env.storage().instance().set(&DISPUTES, &disputes);
 
     env.events().publish(
-        (String::from_str(env, "escalated_to_arbitration"), arbitrator),
+        (
+            String::from_str(env, "escalated_to_arbitration"),
+            arbitrator,
+        ),
         env.ledger().timestamp(),
     );
 }
@@ -260,7 +273,7 @@ pub fn resolve_dispute(env: &Env, job_id: u32, decision: DisputeOutcome) {
             dispute.resolution_timestamp = Some(env.ledger().timestamp());
             disputes.set(job_id, dispute);
             env.storage().instance().set(&DISPUTES, &disputes);
-            
+
             env.events().publish(
                 (String::from_str(env, "dispute_timeout"), job_id),
                 env.ledger().timestamp(),
@@ -347,7 +360,7 @@ pub fn resolve_dispute_with_auth(
     caller: Address,
 ) {
     caller.require_auth();
-    
+
     if !env.storage().instance().has(&ARBITRATOR) {
         panic_with_error!(env, Error::NotInitialized);
     }
@@ -370,7 +383,7 @@ pub fn resolve_dispute_with_auth(
             dispute.resolution_timestamp = Some(env.ledger().timestamp());
             disputes.set(job_id, dispute);
             env.storage().instance().set(&DISPUTES, &disputes);
-            
+
             env.events().publish(
                 (String::from_str(env, "dispute_timeout"), job_id),
                 env.ledger().timestamp(),
@@ -466,7 +479,7 @@ pub fn get_dispute_evidence(env: &Env, job_id: u32) -> Vec<Evidence> {
 
 pub fn set_dispute_timeout(env: &Env, admin: Address, timeout_seconds: u64) {
     admin.require_auth();
-    
+
     // Input validation
     if let Err(_) = validate_address(&admin) {
         panic_with_error!(env, Error::Unauthorized);
@@ -475,7 +488,9 @@ pub fn set_dispute_timeout(env: &Env, admin: Address, timeout_seconds: u64) {
         panic_with_error!(env, Error::InvalidTimeout);
     }
 
-    env.storage().instance().set(&DISPUTE_TIMEOUT, &timeout_seconds);
+    env.storage()
+        .instance()
+        .set(&DISPUTE_TIMEOUT, &timeout_seconds);
 
     env.events().publish(
         (String::from_str(env, "timeout_updated"), timeout_seconds),
@@ -491,13 +506,22 @@ fn increment_dispute_count(env: &Env) -> u64 {
     let current = get_total_disputes(env);
     let new_dispute_count = current + 1;
     set_total_disputes(env, new_dispute_count);
+    env.events().publish(
+        (
+            Symbol::new(env, "Increment_dispute_count"),
+            new_dispute_count.clone(),
+        ),
+        env.ledger().timestamp(),
+    );
     new_dispute_count
 }
-pub fn reset_dispute_count(env: &Env, admin: Address) ->  Result<(), Error>  {
+pub fn reset_dispute_count(env: &Env, admin: Address) -> Result<(), Error> {
     admin.require_auth();
 
     let arbitrator: Address = env.storage().instance().get(&ARBITRATOR).unwrap();
-    if arbitrator != admin { return Err(Error::Unauthorized); }
+    if arbitrator != admin {
+        return Err(Error::Unauthorized);
+    }
     set_total_disputes(env, 0u64);
 
     env.events().publish(
