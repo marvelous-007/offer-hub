@@ -1,4 +1,4 @@
-use soroban_sdk::{contracterror, contracttype, symbol_short, Address, String, Vec, Symbol};
+use soroban_sdk::{contracterror, contracttype, symbol_short, Address, String, Symbol, Vec};
 
 #[contracterror]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -139,14 +139,12 @@ pub const MIN_RATING: u32 = 1;
 pub const MAX_RATING: u32 = 5;
 pub const MAX_FEEDBACK_LENGTH: u32 = 1000;
 
-
 // Default thresholds
 pub const DEFAULT_RESTRICTION_THRESHOLD: u32 = 250; // 2.50 average rating
 pub const DEFAULT_WARNING_THRESHOLD: u32 = 300; // 3.00 average rating
 pub const DEFAULT_TOP_RATED_THRESHOLD: u32 = 480; // 4.80 average rating
 
 pub const TOTAL_RATING_COUNT: Symbol = symbol_short!("TOTALRATE");
-
 
 pub fn require_auth(address: &Address) -> Result<(), Error> {
     address.require_auth();
@@ -158,4 +156,26 @@ pub fn require_auth(address: &Address) -> Result<(), Error> {
 pub struct RateLimitEntry {
     pub current_calls: u32,
     pub window_start: u64,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct RatingDataExport {
+    pub user_address: Address,
+    pub stats: RatingStats,
+    pub ratings: Vec<Rating>,
+    pub feedback: Vec<Feedback>,
+    pub export_timestamp: u64,
+    pub export_version: String,
+    pub data_size_limit_reached: bool,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct AllRatingDataExport {
+    pub total_ratings: u64,
+    pub platform_stats: Vec<(String, String)>,
+    pub export_timestamp: u64,
+    pub export_version: String,
+    pub data_size_limit_reached: bool,
 }

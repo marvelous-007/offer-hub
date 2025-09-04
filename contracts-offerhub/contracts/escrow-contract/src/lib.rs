@@ -1,6 +1,6 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, Address, Env, String, Symbol, Vec};
 use crate::types::Error;
+use soroban_sdk::{contract, contractimpl, Address, Env, String, Symbol, Vec};
 
 mod contract;
 mod error;
@@ -102,7 +102,6 @@ impl EscrowContract {
     pub fn reset_transaction_count(env: &Env, admin: Address) -> Result<(), Error> {
         contract::reset_transaction_count(env, admin)
     }
-
 
     // ===== Rate limiting admin helpers =====
     pub fn set_rate_limit_bypass(env: Env, caller: Address, user: Address, bypass: bool) {

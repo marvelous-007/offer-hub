@@ -118,7 +118,7 @@ pub fn remove_mediator(env: &Env, admin: Address, mediator: Address) -> Result<(
 
     let mut found = false;
     let mut new_mediators = Vec::new(env);
-    
+
     for i in 0..mediators.len() {
         let current_mediator = mediators.get(i).unwrap();
         if current_mediator == mediator {

@@ -1,10 +1,7 @@
 #![cfg(test)]
 
 use super::*;
-use soroban_sdk::{
-    testutils::Address as _,
-    Address, Env, log
-};
+use soroban_sdk::{log, testutils::Address as _, Address, Env};
 
 #[test]
 fn test_initialize() {
@@ -328,7 +325,7 @@ fn test_fee_transparency() {
     assert_eq!(fee_calc.fee_amount, 25000);
     assert_eq!(fee_calc.net_amount, 975000);
     assert!(!fee_calc.is_premium);
-} 
+}
 
 #[test]
 fn test_get_total_fees() {
@@ -408,12 +405,11 @@ fn test_get_total_fees_reset() {
     let fees_after_non_premium = client.get_total_fees();
     assert_eq!(fees_after_non_premium, 100_000);
 
-    let res = client.reset_total_fees_collected(&admin); 
+    let res = client.reset_total_fees_collected(&admin);
 
     let fees_after_reset = client.get_total_fees();
     assert_eq!(fees_after_reset, 0);
 }
-
 
 #[test]
 #[should_panic]
@@ -452,5 +448,5 @@ fn test_get_total_fees_reset_failed() {
     let fees_after_non_premium = client.get_total_fees();
     assert_eq!(fees_after_non_premium, 100_000);
 
-    let _ = client.reset_total_fees_collected(&user1); 
+    let _ = client.reset_total_fees_collected(&user1);
 }
