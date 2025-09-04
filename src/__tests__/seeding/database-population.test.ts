@@ -63,7 +63,8 @@ describe('Database Population Tests', () => {
 
     it('should generate review data with realistic distribution', () => {
       const reviews = [];
-      for (let i = 0; i < 100; i++) {
+      // Increase sample size for more reliable statistics
+      for (let i = 0; i < 1000; i++) {
         const review = generateReviewData('from-id', 'to-id', 'contract-id');
         reviews.push(review);
       }
@@ -71,11 +72,25 @@ describe('Database Population Tests', () => {
       // Verificar que la mayoría de ratings son 4 y 5
       const ratings = reviews.map(r => r.rating);
       const highRatings = ratings.filter(r => r >= 4).length;
-      expect(highRatings).toBeGreaterThan(80); // Más del 80% deberían ser 4 o 5
+      const highRatingPercentage = (highRatings / reviews.length) * 100;
+      
+      // With weights [1,2,10,30,57], we expect ~87% to be 4 or 5
+      // Allow some variance but ensure it's consistently above 80%
+      expect(highRatingPercentage).toBeGreaterThan(80);
+      expect(highRatingPercentage).toBeLessThan(95); // Sanity check
 
       // Verificar que la mayoría tienen comentarios
       const withComments = reviews.filter(r => r.comment).length;
-      expect(withComments).toBeGreaterThan(85); // Más del 85% deberían tener comentario
+      const commentPercentage = (withComments / reviews.length) * 100;
+      
+      // With 95% probability, we expect ~95% to have comments
+      // Allow some variance but ensure it's consistently above 85%
+      expect(commentPercentage).toBeGreaterThan(85);
+      expect(commentPercentage).toBeLessThan(98); // Sanity check
+      
+      // Log the actual percentages for debugging
+      console.log(`High ratings (4-5): ${highRatingPercentage.toFixed(1)}%`);
+      console.log(`Reviews with comments: ${commentPercentage.toFixed(1)}%`);
     });
   });
 
