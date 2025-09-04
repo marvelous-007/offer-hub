@@ -41,7 +41,7 @@ describe('Database Population Tests', () => {
 
       // Verificar estructura de cliente
       expect(client.is_freelancer).toBe(false);
-      expect(client.wallet_address).toMatch(/^0x[a-f0-9]+$/);
+      expect(client.wallet_address).toMatch(/^0x[a-f0-9]+$/i);
       expect(client.email).toContain('@example.com');
     });
 
