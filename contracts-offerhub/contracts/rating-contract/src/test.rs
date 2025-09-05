@@ -484,7 +484,6 @@ fn test_reset_total_rating() {
 }
 
 #[test]
-#[should_panic(expected = "HostError: Error(Contract, #1)")]
 fn test_rating_reset_rate_limit_should_panic_on_non_admin() {
     let env = Env::default();
     let contract_id = create_contract(&env);
@@ -498,11 +497,12 @@ fn test_rating_reset_rate_limit_should_panic_on_non_admin() {
     let non_admin = Address::generate(&env);
     // This should panic due to unauthorized access
     // should panic with #1 from the Error enum
-    client.reset_rate_limit(
+    let res = client.try_reset_rate_limit(
         &non_admin,
         &non_admin,
         &String::from_str(&env, "total_ratings"),
     );
+    assert_eq!(res, Err(Ok(Error::Unauthorized)));
 }
 
 #[test]
@@ -749,7 +749,7 @@ fn test_rating_reputation_contract_integration() {
     let non_admin = Address::generate(&env);
     client.init(&admin);
     r_client.init(&admin);
-    r_client.add_minter(&admin, &admin);
+    r_client.add_minter(&admin, &contract_id);
 
     let mut c = default_rating_context(&env);
 

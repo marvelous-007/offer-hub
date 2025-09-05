@@ -116,7 +116,7 @@ fn award_reputation_nft(
 ) -> Result<(), Error> {
     let reputation_contract = get_reputation_contract(env)?;
     // Here, the admin of the nft is the admin of this contract
-    let caller = get_admin(&env);
+    let caller = env.current_contract_address();
     
     // Make cross-contract call to mint achievement NFT
     let result: Result<(), soroban_sdk::InvokeError> = env.invoke_contract(
