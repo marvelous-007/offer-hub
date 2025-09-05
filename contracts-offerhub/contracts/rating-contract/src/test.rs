@@ -547,7 +547,8 @@ fn test_rating_get_user_rating_summary() {
     assert_eq!(user_rating_summary.five_star_count, 6);
     assert_eq!(user_rating_summary.four_star_count, 3);
     assert_eq!(user_rating_summary.total_ratings, 9);
-=======
+}
+
 #[test]
 fn test_rating_reset_rate_limit_should_panic_on_non_admin() {
     let env = Env::default();
