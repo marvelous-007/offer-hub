@@ -261,7 +261,8 @@ fn test_mock_minter_role() {
         storage::remove_minter(&env, &minter);
 
         // Verify that the minter was removed
-        let is_still_minter = ReputationNFTContract::is_minter(env.clone(), minter.clone()).unwrap();
+        let is_still_minter =
+            ReputationNFTContract::is_minter(env.clone(), minter.clone()).unwrap();
         assert!(!is_still_minter);
     });
 }
@@ -298,19 +299,19 @@ fn test_achievement_types() {
     let (env, admin, contract_id) = setup();
     let user = Address::generate(&env);
     let client = ContractClient::new(env.clone(), contract_id.clone());
-    
+
     client.init(admin.clone()).unwrap();
     env.mock_all_auths();
     client.add_minter(admin.clone(), admin.clone()).unwrap();
 
     // Test different achievement types
     let achievement_types = [
-        symbol_short!("tencontr"),  // 10 completed contracts
-        symbol_short!("5stars5x"),  // 5 stars 5 times
-        symbol_short!("newbie"),    // First contract
-        symbol_short!("reliable"),  // Reliable contractor
-        symbol_short!("expert"),    // Expert level
-        symbol_short!("vip"),       // VIP status
+        symbol_short!("tencontr"), // 10 completed contracts
+        symbol_short!("5stars5x"), // 5 stars 5 times
+        symbol_short!("newbie"),   // First contract
+        symbol_short!("reliable"), // Reliable contractor
+        symbol_short!("expert"),   // Expert level
+        symbol_short!("vip"),      // VIP status
     ];
 
     for (i, achievement_type) in achievement_types.iter().enumerate() {
@@ -345,7 +346,7 @@ fn test_transfer_scenarios() {
     let user1 = Address::generate(&env);
     let user2 = Address::generate(&env);
     let client = ContractClient::new(env.clone(), contract_id.clone());
-    
+
     client.init(admin.clone()).unwrap();
     env.mock_all_auths();
     client.add_minter(admin.clone(), admin.clone()).unwrap();
@@ -379,7 +380,7 @@ fn test_error_conditions() {
     let (env, admin, contract_id) = setup();
     let user = Address::generate(&env);
     let client = ContractClient::new(env.clone(), contract_id.clone());
-    
+
     client.init(admin.clone()).unwrap();
     env.mock_all_auths();
     client.add_minter(admin.clone(), admin.clone()).unwrap();
@@ -413,7 +414,7 @@ fn test_error_conditions() {
         // Test: Verify token exists check works
         assert!(crate::storage::token_exists(&env, &1));
         assert!(!crate::storage::token_exists(&env, &999));
-        
+
         // Test: Token already exists logic
         let duplicate_check = if crate::storage::token_exists(&env, &1) {
             Err(Error::TokenAlreadyExists)
@@ -430,7 +431,7 @@ fn test_minter_management() {
     let minter1 = Address::generate(&env);
     let user = Address::generate(&env);
     let client = ContractClient::new(env.clone(), contract_id.clone());
-    
+
     client.init(admin.clone()).unwrap();
     env.mock_all_auths();
 
@@ -472,11 +473,11 @@ fn test_unauthorized_minting() {
     let (env, admin, contract_id) = setup();
     let non_admin = Address::generate(&env);
     let user = Address::generate(&env);
-    
+
     env.as_contract(&contract_id, || {
         // Initialize contract
         ReputationNFTContract::init(env.clone(), admin.clone()).unwrap();
-        
+
         // Try to mint without being admin or minter - should fail
         let result = ReputationNFTContract::mint(
             env.clone(),
@@ -487,7 +488,7 @@ fn test_unauthorized_minting() {
             String::from_str(&env, "Test Description"),
             String::from_str(&env, "ipfs://test"),
         );
-        
+
         // This should return Unauthorized error
         assert_eq!(result, Err(Error::Unauthorized));
     });
@@ -499,14 +500,14 @@ fn test_admin_minting_privilege() {
     let (env, admin, contract_id) = setup();
     let user = Address::generate(&env);
     let client = ContractClient::new(env.clone(), contract_id.clone());
-    
+
     client.init(admin.clone()).unwrap();
     env.mock_all_auths(); // Esto es necesario para evitar errores de autorización
-    
+
     // Verificar que admin no es minter por defecto
     let is_admin_minter = client.is_minter(admin.clone()).unwrap();
     assert!(!is_admin_minter);
-    
+
     // Admin should be able to mint without being explicitly added as minter
     let result = client.mint(
         admin.clone(),
@@ -516,9 +517,9 @@ fn test_admin_minting_privilege() {
         String::from_str(&env, "Minted by admin"),
         String::from_str(&env, "ipfs://admin"),
     );
-    
+
     assert!(result.is_ok());
-    
+
     // Verify token was created
     let owner = client.get_owner(1).unwrap();
     assert_eq!(owner, user);
@@ -533,20 +534,22 @@ fn test_admin_authorization_logic() {
     env.as_contract(&contract_id, || {
         // Initialize contract
         ReputationNFTContract::init(env.clone(), admin.clone()).unwrap();
-        
+
         // Verificar que admin es admin
         assert!(crate::storage::is_admin(&env, &admin));
         assert!(!crate::storage::is_admin(&env, &non_admin));
-        
+
         // Verificar que admin no es minter por defecto pero puede mint
         assert!(!crate::storage::is_minter(&env, &admin));
-        
+
         // La función check_minter debería permitir que admin haga mint
         // (sin llamar require_auth que causaría problemas)
-        let admin_is_authorized = crate::storage::is_admin(&env, &admin) || crate::storage::is_minter(&env, &admin);
+        let admin_is_authorized =
+            crate::storage::is_admin(&env, &admin) || crate::storage::is_minter(&env, &admin);
         assert!(admin_is_authorized);
-        
-        let non_admin_is_authorized = crate::storage::is_admin(&env, &non_admin) || crate::storage::is_minter(&env, &non_admin);
+
+        let non_admin_is_authorized = crate::storage::is_admin(&env, &non_admin)
+            || crate::storage::is_minter(&env, &non_admin);
         assert!(!non_admin_is_authorized);
     });
 }
@@ -560,30 +563,31 @@ fn test_storage_error_handling() {
     env.as_contract(&contract_id, || {
         // Initialize contract
         ReputationNFTContract::init(env.clone(), admin.clone()).unwrap();
-        
+
         // Test: Non-existent token errors
         let owner_result = crate::storage::get_token_owner(&env, &999);
         assert_eq!(owner_result, Err(Error::TokenDoesNotExist));
-        
+
         let metadata_result = crate::storage::get_token_metadata(&env, &999);
         assert_eq!(metadata_result, Err(Error::TokenDoesNotExist));
-        
+
         // Test: Token existence checks
         assert!(!crate::storage::token_exists(&env, &999));
-        
+
         // Create a token and verify it works
         crate::storage::save_token_owner(&env, &1, &user);
         let name = String::from_str(&env, "Test NFT");
-        let description = String::from_str(&env, "Test Description");  
+        let description = String::from_str(&env, "Test Description");
         let uri = String::from_str(&env, "ipfs://test");
-        crate::metadata::store_metadata(&env, &1, name.clone(), description.clone(), uri.clone()).unwrap();
-        
+        crate::metadata::store_metadata(&env, &1, name.clone(), description.clone(), uri.clone())
+            .unwrap();
+
         // Now the token should exist
         assert!(crate::storage::token_exists(&env, &1));
-        
+
         let owner = crate::storage::get_token_owner(&env, &1).unwrap();
         assert_eq!(owner, user);
-        
+
         let metadata = crate::storage::get_token_metadata(&env, &1).unwrap();
         assert_eq!(metadata.name, name);
         assert_eq!(metadata.description, description);
@@ -600,23 +604,30 @@ fn test_complete_mint_validation() {
     env.as_contract(&contract_id, || {
         // Initialize contract
         ReputationNFTContract::init(env.clone(), admin.clone()).unwrap();
-        
+
         // Simulate the complete mint logic step by step
         let token_id = 1u64;
-        
+
         // Step 1: Check if token exists (should be false)
         assert!(!crate::storage::token_exists(&env, &token_id));
-        
+
         // Step 2: Simulate successful mint
         crate::storage::save_token_owner(&env, &token_id, &user);
         let name = String::from_str(&env, "Test NFT");
         let description = String::from_str(&env, "Test Description");
         let uri = String::from_str(&env, "ipfs://test");
-        crate::metadata::store_metadata(&env, &token_id, name.clone(), description.clone(), uri.clone()).unwrap();
-        
+        crate::metadata::store_metadata(
+            &env,
+            &token_id,
+            name.clone(),
+            description.clone(),
+            uri.clone(),
+        )
+        .unwrap();
+
         // Step 3: Verify token now exists
         assert!(crate::storage::token_exists(&env, &token_id));
-        
+
         // Step 4: Try to "mint" the same token again (should detect duplicate)
         let duplicate_attempt = if crate::storage::token_exists(&env, &token_id) {
             Err(Error::TokenAlreadyExists)
@@ -624,11 +635,11 @@ fn test_complete_mint_validation() {
             Ok(())
         };
         assert_eq!(duplicate_attempt, Err(Error::TokenAlreadyExists));
-        
+
         // Step 5: Verify original token data is intact
         let owner = crate::storage::get_token_owner(&env, &token_id).unwrap();
         assert_eq!(owner, user);
-        
+
         let metadata = crate::storage::get_token_metadata(&env, &token_id).unwrap();
         assert_eq!(metadata.name, name);
     });
@@ -639,7 +650,7 @@ fn test_rating_system_integration() {
     let (env, admin, contract_id) = setup();
     let user = Address::generate(&env);
     let client = ContractClient::new(env.clone(), contract_id.clone());
-    
+
     client.init(admin.clone()).unwrap();
     env.mock_all_auths();
     client.add_minter(admin.clone(), admin.clone()).unwrap();
@@ -672,15 +683,15 @@ fn test_reputation_nft_features() {
     let (env, admin, contract_id) = setup();
     let user = Address::generate(&env);
     let client = ContractClient::new(env.clone(), contract_id.clone());
-    
+
     client.init(admin.clone()).unwrap();
     env.mock_all_auths();
     client.add_minter(admin.clone(), admin.clone()).unwrap();
 
     // Test different achievement types que SÍ existen
     let achievement_types = [
-        symbol_short!("tencontr"),  // 10 completed contracts
-        symbol_short!("toprated"),  // Top rated freelancer
+        symbol_short!("tencontr"), // 10 completed contracts
+        symbol_short!("toprated"), // Top rated freelancer
     ];
 
     for (i, achievement_type) in achievement_types.iter().enumerate() {
@@ -715,7 +726,7 @@ fn test_comprehensive_nft_lifecycle() {
     let original_owner = Address::generate(&env);
     let new_owner = Address::generate(&env);
     let client = ContractClient::new(env.clone(), contract_id.clone());
-    
+
     client.init(admin.clone()).unwrap();
     env.mock_all_auths();
     client.add_minter(admin.clone(), admin.clone()).unwrap();
@@ -724,7 +735,7 @@ fn test_comprehensive_nft_lifecycle() {
     let name = String::from_str(&env, "Achievement NFT");
     let description = String::from_str(&env, "Special achievement token");
     let uri = String::from_str(&env, "ipfs://special-achievement");
-    
+
     let mint_result = client.mint(
         admin.clone(),
         original_owner.clone(),
@@ -1140,11 +1151,23 @@ fn test_mint_for_achievement() {
     client.add_minter(admin.clone(), admin.clone()).unwrap();
     // Mint achievement NFT
     let nft_type = symbol_short!("tencontr");
-    let result: Result<(), Error> = env.invoke_contract(&contract_id.clone(), &symbol_short!("mint_achv"), vec![&env, admin.clone().into_val(&env), user.clone().into_val(&env), nft_type.into_val(&env)]);
+    let result: Result<(), Error> = env.invoke_contract(
+        &contract_id.clone(),
+        &symbol_short!("mint_achv"),
+        vec![
+            &env,
+            admin.clone().into_val(&env),
+            user.clone().into_val(&env),
+            nft_type.into_val(&env),
+        ],
+    );
     assert!(result.is_ok());
     // Check that token_id 1 exists and is owned by user
     let owner = client.get_owner(1).unwrap();
     assert_eq!(owner, user);
     let metadata = client.get_metadata(1).unwrap();
-    assert_eq!(metadata.name, String::from_str(&env, "10 Completed Contracts"));
+    assert_eq!(
+        metadata.name,
+        String::from_str(&env, "10 Completed Contracts")
+    );
 }

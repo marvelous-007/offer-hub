@@ -8,7 +8,6 @@ pub enum Error {
     NotInitialized = 5,
 }
 
-
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[contracttype]
 pub enum DataKey {

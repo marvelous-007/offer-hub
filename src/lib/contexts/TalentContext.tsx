@@ -206,7 +206,7 @@ export function TalentProvider({ children }: { children: React.ReactNode }) {
       await new Promise((resolve) => setTimeout(resolve, 1000))
       dispatch({ type: "SET_TALENTS", payload: talentMockData })
       dispatch({ type: "SET_ERROR", payload: null })
-    } catch (error) {
+    } catch {
       dispatch({ type: "SET_ERROR", payload: "Failed to fetch talents" })
     } finally {
       dispatch({ type: "SET_LOADING", payload: false })
@@ -224,7 +224,7 @@ export function TalentProvider({ children }: { children: React.ReactNode }) {
       } else {
         dispatch({ type: "SET_ERROR", payload: "Talent not found" })
       }
-    } catch (error) {
+    } catch {
       dispatch({ type: "SET_ERROR", payload: "Failed to fetch talent details" })
     } finally {
       dispatch({ type: "SET_LOADING", payload: false })

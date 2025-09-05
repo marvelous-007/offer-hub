@@ -1,5 +1,7 @@
-use crate::storage::{get_admin, is_moderator, save_moderator, remove_moderator as remove_moderator_storage};
-use crate::types::{Error, require_auth};
+use crate::storage::{
+    get_admin, is_moderator, remove_moderator as remove_moderator_storage, save_moderator,
+};
+use crate::types::{require_auth, Error};
 use soroban_sdk::{Address, Env};
 
 pub fn check_admin(env: &Env, caller: &Address) -> Result<(), Error> {
@@ -26,22 +28,22 @@ pub fn is_admin_or_moderator(env: &Env, address: &Address) -> bool {
 
 pub fn add_moderator(env: &Env, caller: &Address, moderator: &Address) -> Result<(), Error> {
     check_admin(env, caller)?;
-    
+
     if is_moderator(env, moderator) {
         return Err(Error::AlreadyModerator);
     }
-    
+
     save_moderator(env, moderator);
     Ok(())
 }
 
 pub fn remove_moderator(env: &Env, caller: &Address, moderator: &Address) -> Result<(), Error> {
     check_admin(env, caller)?;
-    
+
     if !is_moderator(env, moderator) {
         return Err(Error::NotModerator);
     }
-    
+
     remove_moderator_storage(env, moderator);
     Ok(())
 }

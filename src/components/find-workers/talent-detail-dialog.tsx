@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Star, Heart, MessageSquare, Check, MapPin, Clock, Briefcase, Globe, Award, X } from "lucide-react"
+import { useReviewsApi } from "@/hooks/api-connections/use-reviews-api"
 
 interface TalentDetailDialogProps {
   freelancer: any
@@ -37,34 +38,11 @@ export default function TalentDetailDialog({
       ))
   }
 
-  // Sample reviews data
-  const reviews = [
-    {
-      id: 1,
-      client: "John D.",
-      rating: 5,
-      date: "2 months ago",
-      comment:
-        "Alex was fantastic to work with. Delivered high-quality code ahead of schedule and was very communicative throughout the project.",
-      project: "E-commerce Website Development",
-    },
-    {
-      id: 2,
-      client: "Sarah M.",
-      rating: 4,
-      date: "4 months ago",
-      comment: "Great developer with strong technical skills. Would definitely hire again for future projects.",
-      project: "API Integration",
-    },
-    {
-      id: 3,
-      client: "Michael T.",
-      rating: 5,
-      date: "6 months ago",
-      comment: "Excellent work! Understood requirements quickly and delivered exactly what we needed.",
-      project: "Mobile App Development",
-    },
-  ]
+  // Fetch real reviews data
+  const { useUserReviews, computeAverage } = useReviewsApi();
+  const { data: reviews = [], isLoading: reviewsLoading, error: reviewsError } = useUserReviews(freelancer.id || "");
+  
+  const averageRating = computeAverage(reviews);
 
   // Sample portfolio data
   const portfolio = [
@@ -135,8 +113,8 @@ export default function TalentDetailDialog({
 
                 <div className="flex items-center mt-2">
                   <div className="flex mr-2">{renderStars(freelancer.rating)}</div>
-                  <span className="text-[#002333] font-medium">{freelancer.rating}</span>
-                  <span className="text-[#002333]/70 ml-1">({freelancer.reviewCount} reviews)</span>
+                  <span className="text-[#002333] font-medium">{averageRating > 0 ? averageRating : freelancer.rating}</span>
+                  <span className="text-[#002333]/70 ml-1">({reviews.length > 0 ? reviews.length : freelancer.reviewCount} reviews)</span>
                 </div>
 
                 <div className="flex flex-wrap gap-4 mt-2 text-sm text-[#002333]/70">
@@ -342,27 +320,71 @@ export default function TalentDetailDialog({
                     <h3 className="font-medium text-lg text-[#002333]">Client Reviews</h3>
                     <div className="flex items-center">
                       <div className="flex mr-2">{renderStars(freelancer.rating)}</div>
-                      <span className="text-[#002333] font-medium">{freelancer.rating}</span>
-                      <span className="text-[#002333]/70 ml-1">({freelancer.reviewCount} reviews)</span>
+                      <span className="text-[#002333] font-medium">{averageRating > 0 ? averageRating : freelancer.rating}</span>
+                      <span className="text-[#002333]/70 ml-1">({reviews.length > 0 ? reviews.length : freelancer.reviewCount} reviews)</span>
                     </div>
                   </div>
 
                   <div className="space-y-4">
-                    {reviews.map((review) => (
-                      <div key={review.id} className="border rounded-lg p-4">
-                        <div className="flex justify-between">
-                          <div>
-                            <p className="font-medium text-[#002333]">{review.client}</p>
-                            <p className="text-sm text-[#002333]/70">{review.project}</p>
+                    {reviewsLoading ? (
+                      <div className="space-y-4">
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="border rounded-lg p-4 animate-pulse">
+                            <div className="flex justify-between">
+                              <div>
+                                <div className="h-4 bg-gray-300 rounded w-24 mb-2"></div>
+                                <div className="h-3 bg-gray-300 rounded w-32"></div>
+                              </div>
+                              <div className="flex items-center">
+                                <div className="h-4 bg-gray-300 rounded w-16 mr-2"></div>
+                                <div className="h-3 bg-gray-300 rounded w-20"></div>
+                              </div>
+                            </div>
+                            <div className="h-12 bg-gray-300 rounded w-full mt-2"></div>
                           </div>
-                          <div className="flex items-center">
-                            <div className="flex mr-1">{renderStars(review.rating)}</div>
-                            <span className="text-[#002333]/70 text-sm">{review.date}</span>
-                          </div>
-                        </div>
-                        <p className="mt-2 text-[#002333]/80">{review.comment}</p>
+                        ))}
                       </div>
-                    ))}
+                    ) : reviewsError ? (
+                      <div className="text-center py-8">
+                        <p className="text-red-600 mb-2">Failed to load reviews</p>
+                        <p className="text-gray-500 text-sm">{reviewsError}</p>
+                      </div>
+                    ) : reviews.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500">No reviews yet</p>
+                        <p className="text-gray-400 text-sm">Be the first to leave a review!</p>
+                      </div>
+                    ) : (
+                      reviews.map((review) => {
+                        const reviewDate = new Date(review.created_at);
+                        const now = new Date();
+                        const diffInMs = now.getTime() - reviewDate.getTime();
+                        const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+                        const timeAgo = diffInDays === 0 ? 'Today' : 
+                          diffInDays === 1 ? '1 day ago' :
+                          diffInDays < 30 ? `${diffInDays} days ago` :
+                          diffInDays < 365 ? `${Math.floor(diffInDays / 30)} months ago` :
+                          `${Math.floor(diffInDays / 365)} years ago`;
+                        
+                        return (
+                          <div key={review.id} className="border rounded-lg p-4">
+                            <div className="flex justify-between">
+                              <div>
+                                <p className="font-medium text-[#002333]">Client Review</p>
+                                <p className="text-sm text-[#002333]/70">Contract: {review.contract_id.slice(-8)}</p>
+                              </div>
+                              <div className="flex items-center">
+                                <div className="flex mr-1">{renderStars(review.rating)}</div>
+                                <span className="text-[#002333]/70 text-sm">{timeAgo}</span>
+                              </div>
+                            </div>
+                            {review.comment && (
+                              <p className="mt-2 text-[#002333]/80">{review.comment}</p>
+                            )}
+                          </div>
+                        );
+                      })
+                    )}
                   </div>
                 </TabsContent>
 
