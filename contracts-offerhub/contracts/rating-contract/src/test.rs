@@ -779,6 +779,59 @@ fn test_rating_reputation_contract_integration() {
     assert_eq!(res, Err(Ok(E::TokenDoesNotExist)));
 }
 
-// Create test for edge cases in get_user_rating_history pagination
+#[test]
+fn test_get_user_rating_history_pagination_edge_cases() {
+    let env = Env::default();
+    let contract_id = create_contract(&env);
+    let client = ContractClient::new(&env, &contract_id);
+    env.mock_all_auths();
 
-// Add test for parameter validation in set_rating_threshold
+    // Initialize contract with admin
+    let admin = Address::generate(&env);
+    client.init(&admin);
+
+    let mut c = default_rating_context(&env);
+
+    // Submit 3 ratings
+    for _ in 0..3 {
+        c.contract_str = random_string(&env);
+        submit_rating(&client, 5, c.clone());
+    }
+
+    // Test pagination with limit greater than total ratings
+    let history = client.get_user_rating_history(&c.rated_user, &0, &10);
+    assert_eq!(history.len(), 3, "Should return all 3 ratings");
+
+    // Test pagination with offset beyond total ratings
+    let history = client.get_user_rating_history(&c.rated_user, &5, &2);
+    assert_eq!(history.len(), 0, "Should return 0 ratings");
+
+    // Test pagination with exact limit
+    let history = client.get_user_rating_history(&c.rated_user, &0, &3);
+    assert_eq!(history.len(), 3, "Should return all 3 ratings");
+
+    // Test pagination with offset and limit within range
+    let history = client.get_user_rating_history(&c.rated_user, &1, &2);
+    assert_eq!(history.len(), 2, "Should return 2 ratings");
+}
+
+#[test]
+fn test_rating_set_rating_threshold_parameter_validation() {
+    let env = Env::default();
+    let contract_id = create_contract(&env);
+    let client = ContractClient::new(&env, &contract_id);
+    env.mock_all_auths();
+
+    // Initialize contract with admin
+    let admin = Address::generate(&env);
+    client.init(&admin);
+
+    // Test valid threshold values
+    let valid_thresholds = [0u32, 50, 100, 200, 300, 400, 500];
+    for threshold in valid_thresholds.iter() {
+        let threshold_type = random_string(&env);
+        client.set_rating_threshold(&admin, &threshold_type, threshold);
+    }
+
+    // in the contract, get_threshold() is never used
+}

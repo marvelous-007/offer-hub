@@ -1,6 +1,6 @@
 use crate::events::{emit_achievement_earned, emit_incentive_claimed};
 use crate::storage::{
-    get_incentive_record, get_reputation_contract, get_user_rating_stats, save_incentive_record,
+    get_incentive_record, get_reputation_contract, get_user_rating_stats, save_incentive_record, get_admin
 };
 use crate::types::{Error, IncentiveRecord};
 use soroban_sdk::{symbol_short, Address, Env, IntoVal, String, Vec};
@@ -115,6 +115,7 @@ fn award_reputation_nft(
     nft_type: &soroban_sdk::Symbol,
 ) -> Result<(), Error> {
     let reputation_contract = get_reputation_contract(env)?;
+    // Here, the admin of the nft is the admin of this contract
     let caller = get_admin(&env);
     
     // Make cross-contract call to mint achievement NFT
