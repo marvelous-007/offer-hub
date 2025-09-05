@@ -115,7 +115,7 @@ fn award_reputation_nft(
     nft_type: &soroban_sdk::Symbol,
 ) -> Result<(), Error> {
     let reputation_contract = get_reputation_contract(env)?;
-    // Here, the admin of the nft is the admin of this contract
+    // Here, the minter of the nft is the contract itself
     let caller = env.current_contract_address();
     
     // Make cross-contract call to mint achievement NFT
@@ -124,7 +124,7 @@ fn award_reputation_nft(
         &soroban_sdk::symbol_short!("mint_achv"),
         soroban_sdk::vec![
             env,
-            caller.into_val(env),       // caller (admin)
+            caller.into_val(env),       // caller (contract)
             user.into_val(env),         // to
             nft_type.into_val(env),     // nft_type
         ]
