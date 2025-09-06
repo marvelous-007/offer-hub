@@ -1,5 +1,5 @@
+use soroban_sdk::{contracttype, symbol_short, Address, Env, String, Symbol, Vec, log};
 use crate::types::Error;
-use soroban_sdk::{contracttype, symbol_short, Address, Env, String, Symbol, Vec};
 
 pub const ESCROW_DATA: Symbol = symbol_short!("ESCROW");
 pub const INITIALIZED: Symbol = symbol_short!("INIT");
@@ -162,4 +162,32 @@ pub fn increment_escrow_transaction_count(env: &Env) -> u64 {
     let new_escrow_count = current_count + 1;
     set_escrow_transaction_count(env, new_escrow_count);
     new_escrow_count
+}
+
+// --- Escrow state handling ---
+use crate::types::{EscrowData, EscrowState};
+use crate::error::handle_error;
+
+pub fn set_escrow_state(env: &Env, new_state: EscrowState) {
+    let mut data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+
+
+    if !data.state.can_transition_to(&new_state) {
+        handle_error(env, Error::InvalidStatus)
+    }
+
+    data.state = new_state.clone();
+    env.storage().instance().set(&ESCROW_DATA, &data);
+
+    log!(env, "Escrow state changed to {:?}", new_state);
+}
+
+pub fn get_escrow_state(env: &Env) -> EscrowState {
+    let data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+
+    data.state
+}
+
+pub fn is_escrow_funded(env: &Env) -> bool {
+    get_escrow_state(env) == EscrowState::Funded
 }
