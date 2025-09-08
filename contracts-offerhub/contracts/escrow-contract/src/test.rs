@@ -3,7 +3,7 @@
 use crate::types::EscrowState;
 use crate::{EscrowContract, EscrowContractClient};
 use soroban_sdk::testutils::{Address as _, Ledger, LedgerInfo};
-use soroban_sdk::{contract, contractimpl, log, Address, Env, String, Symbol};
+use soroban_sdk::{contract, contractimpl, Address, Env, String, Symbol};
 
 #[contract]
 pub struct MockTokenContract;
