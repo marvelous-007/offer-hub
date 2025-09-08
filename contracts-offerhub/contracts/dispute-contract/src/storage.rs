@@ -1,3 +1,4 @@
+use soroban_sdk::{contracttype, symbol_short, Symbol, Address, Env, String, log};
 use crate::types::Error;
 use soroban_sdk::{contracttype, symbol_short, Address, Env, String, Symbol};
 
@@ -86,4 +87,31 @@ pub fn get_total_disputes(env: &Env) -> u64 {
 
 pub fn set_total_disputes(env: &Env, count: u64) {
     env.storage().persistent().set(&TOTAL_DISPUTES, &count);
+}
+
+// --- Dispute state handling ---
+use crate::types::{DisputeData, DisputeState};
+use crate::error::handle_error;
+
+pub fn set_dispute_state(env: &Env, new_state: DisputeState) {
+	let mut data: DisputeData = env.storage().instance().get(&DISPUTES).unwrap();
+
+	if !data.state.can_transition_to(&new_state) {
+		handle_error(env, Error::InvalidDisputeLevel)
+	}
+
+	data.state = new_state;
+	env.storage().instance().set(&DISPUTES, &data);
+
+	log!(env, "Dispute state changed to {:?}", new_state);
+}
+
+pub fn get_dispute_state(env: &Env) -> DisputeState {
+	let data: DisputeData = env.storage().instance().get(&DISPUTES).unwrap();
+
+	data.state
+}
+
+pub fn is_dispute_initiated(env: &Env) -> bool {
+	get_dispute_state(env) == DisputeState::Open
 }
