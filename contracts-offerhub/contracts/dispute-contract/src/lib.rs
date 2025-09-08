@@ -6,6 +6,7 @@ mod storage;
 mod test;
 mod types;
 mod validation;
+mod error;
 
 // #[cfg(test)]
 // mod validation_test;
