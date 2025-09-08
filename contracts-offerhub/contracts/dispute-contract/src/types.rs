@@ -13,12 +13,24 @@ pub enum DisputeOutcome {
 #[contracttype]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(u32)]
-pub enum DisputeStatus {
-    Open,
-    UnderMediation,
-    UnderArbitration,
-    Resolved,
-    Timeout,
+pub enum DisputeState {
+    Open, 
+    UnderReview (DisputeLevel), 
+    Resolved, 
+    Closed
+}
+
+impl DisputeState {
+    pub fn can_transition_to(&self, next: &DisputeState) -> bool {
+        use DisputeState::*;
+        match (self, next) {
+            (Open, UnderReview(_)) => true,
+            (UnderReview(DisputeLevel::Arbitration), Resolved) => true,
+            (Resolved, Closed) => true,
+            (UnderReview(DisputeLevel::Arbitration), Closed) => true,
+            _ => false 
+        }
+    }
 }
 
 #[contracttype]
@@ -46,7 +58,7 @@ pub struct DisputeData {
     pub timestamp: u64,
     pub resolved: bool,
     pub outcome: DisputeOutcome,
-    pub status: DisputeStatus,
+    pub state: DisputeState,
     pub level: DisputeLevel,
     pub fee_manager: Address,
     pub dispute_amount: i128,
