@@ -22,7 +22,6 @@ import Link from "next/link"
 import { useServicesApi } from "@/hooks/api-connections/use-services-api"
 import { ServiceFilters, FreelancerDisplay } from "@/types/service.types"
 import { useSearchParams } from "next/navigation"
-import type { Freelancer } from "@/app/freelancer-search/page"
 
 // Simple Header component defined inline
 function SimpleHeader() {

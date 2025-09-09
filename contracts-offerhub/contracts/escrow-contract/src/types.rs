@@ -79,4 +79,28 @@ pub enum Error {
     DisputeNotOpen = 7,
     InvalidDisputeResult = 8,
     MilestoneNotFound = 9,
+    RateLimitExceeded = 10,
+    UnexpectedError = 11,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct EscrowDataExport {
+    pub contract_id: String,
+    pub escrow_data: EscrowData,
+    pub milestones: Vec<Milestone>,
+    pub milestone_history: Vec<MilestoneHistory>,
+    pub export_timestamp: u64,
+    pub export_version: String,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct EscrowSummary {
+    pub client: Address,
+    pub freelancer: Address,
+    pub amount: i128,
+    pub status: String,
+    pub created_at: u64,
+    pub milestone_count: u32,
 }

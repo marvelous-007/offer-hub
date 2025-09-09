@@ -1,4 +1,4 @@
-use soroban_sdk::{contracterror, Env, Symbol};
+use soroban_sdk::{contracterror, Env};
 
 #[contracterror]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
@@ -19,4 +19,4 @@ pub enum Error {
 
 pub fn handle_error(env: &Env, error: Error) -> ! {
     env.panic_with_error(error);
-} 
+}
