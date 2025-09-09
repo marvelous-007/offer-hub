@@ -16,7 +16,7 @@ export interface PlatformUser {
   email: string;
   firstName: string;
   lastName: string;
-  userType: "client" | "freelancer";
+  userType: 'client' | 'freelancer';
   isVerified: boolean;
   isActive: boolean;
   profileCompleteness: number;
@@ -29,7 +29,7 @@ export interface PlatformUser {
   profilePicture?: string;
   location?: string;
   phoneNumber?: string;
-  verificationStatus: "pending" | "verified" | "rejected";
+  verificationStatus: 'pending' | 'verified' | 'rejected';
 }
 
 export interface PlatformStatistics {
@@ -52,7 +52,7 @@ export interface SystemHealthMetrics {
   responseTime: number;
   errorRate: number;
   activeConnections: number;
-  databaseStatus: "healthy" | "warning" | "error";
+  databaseStatus: 'healthy' | 'warning' | 'error';
   serverLoad: number;
   memoryUsage: number;
   diskUsage: number;
@@ -62,18 +62,18 @@ export interface SystemHealthMetrics {
 export interface SecurityEvent {
   id: string;
   type:
-    | "login_attempt"
-    | "failed_login"
-    | "suspicious_activity"
-    | "data_breach"
-    | "unauthorized_access";
-  severity: "low" | "medium" | "high" | "critical";
+    | 'login_attempt'
+    | 'failed_login'
+    | 'suspicious_activity'
+    | 'data_breach'
+    | 'unauthorized_access';
+  severity: 'low' | 'medium' | 'high' | 'critical';
   description: string;
   userId?: string;
   ipAddress: string;
   userAgent: string;
   timestamp: Date;
-  status: "pending" | "investigating" | "resolved" | "false_positive";
+  status: 'pending' | 'investigating' | 'resolved' | 'false_positive';
   assignedTo?: string;
 }
 
@@ -93,18 +93,18 @@ export interface FinancialMetrics {
 
 export interface ContentModerationItem {
   id: string;
-  type: "project" | "profile" | "review" | "message";
+  type: 'project' | 'profile' | 'review' | 'message';
   title: string;
   content: string;
   authorId: string;
   authorName: string;
-  status: "pending" | "approved" | "rejected" | "flagged";
+  status: 'pending' | 'approved' | 'rejected' | 'flagged';
   reportedBy?: string;
   reportReason?: string;
   moderatedBy?: string;
   moderatedAt?: Date;
   createdAt: Date;
-  priority: "low" | "medium" | "high";
+  priority: 'low' | 'medium' | 'high';
 }
 
 export interface AuditLog {
@@ -137,17 +137,17 @@ export interface AdminPermission {
   id: string;
   name: string;
   resource: string;
-  action: "create" | "read" | "update" | "delete" | "manage";
+  action: 'create' | 'read' | 'update' | 'delete' | 'manage';
   description: string;
 }
 
 export interface PlatformConfiguration {
   id: string;
-  category: "general" | "security" | "payments" | "features" | "notifications";
+  category: 'general' | 'security' | 'payments' | 'features' | 'notifications';
   key: string;
   value: string | number | boolean | Record<string, unknown>;
   description: string;
-  dataType: "string" | "number" | "boolean" | "json";
+  dataType: 'string' | 'number' | 'boolean' | 'json';
   isEditable: boolean;
   updatedBy: string;
   updatedAt: Date;
@@ -155,7 +155,7 @@ export interface PlatformConfiguration {
 
 export interface AdminNotification {
   id: string;
-  type: "info" | "warning" | "error" | "success";
+  type: 'info' | 'warning' | 'error' | 'success';
   title: string;
   message: string;
   isRead: boolean;
@@ -168,8 +168,8 @@ export interface AdminNotification {
 
 export interface UserManagementFilters {
   search?: string;
-  userType?: "client" | "freelancer" | "all";
-  verificationStatus?: "pending" | "verified" | "rejected" | "all";
+  userType?: 'client' | 'freelancer' | 'all';
+  verificationStatus?: 'pending' | 'verified' | 'rejected' | 'all';
   isActive?: boolean;
   joinedDateFrom?: Date;
   joinedDateTo?: Date;
@@ -182,12 +182,12 @@ export interface UserManagementFilters {
 
 export interface BulkUserAction {
   action:
-    | "activate"
-    | "deactivate"
-    | "verify"
-    | "suspend"
-    | "delete"
-    | "send_message";
+    | 'activate'
+    | 'deactivate'
+    | 'verify'
+    | 'suspend'
+    | 'delete'
+    | 'send_message';
   userIds: string[];
   reason?: string;
   message?: string;
@@ -198,10 +198,10 @@ export interface AnalyticsReport {
   id: string;
   name: string;
   type:
-    | "user_analytics"
-    | "project_analytics"
-    | "financial_analytics"
-    | "performance_analytics";
+    | 'user_analytics'
+    | 'project_analytics'
+    | 'financial_analytics'
+    | 'performance_analytics';
   dateRange: {
     from: Date;
     to: Date;
@@ -210,12 +210,12 @@ export interface AnalyticsReport {
   data: Record<string, unknown>;
   generatedBy: string;
   generatedAt: Date;
-  format: "json" | "csv" | "pdf";
+  format: 'json' | 'csv' | 'pdf';
 }
 
 export interface DashboardWidget {
   id: string;
-  type: "metric" | "chart" | "table" | "notification";
+  type: 'metric' | 'chart' | 'table' | 'notification';
   title: string;
   position: { x: number; y: number; width: number; height: number };
   config: Record<string, string | number | boolean>;
