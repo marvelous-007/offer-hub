@@ -1,0 +1,133 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  NODE_VERSION: "18.x"
+  RUST_VERSION: "1.75.0"
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          override: true
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd backend && npm ci
+          cd ../services/freelance-matching && npm ci
+          cd ../../contracts-offerhub && cargo build --release
+
+      - name: Build applications
+        run: |
+          npm run build
+          cd backend && npm run build
+          cd ../services/freelance-matching && npm run build
+
+      - name: Deploy to staging
+        run: |
+          echo "🚀 Deploying to staging environment..."
+          # Add your staging deployment logic here
+          # Example: rsync, docker push, etc.
+
+      - name: Run smoke tests
+        run: |
+          echo "🧪 Running smoke tests on staging..."
+          # Add smoke tests here
+
+      - name: Notify deployment success
+        run: |
+          echo "✅ Successfully deployed to staging!"
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          override: true
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd backend && npm ci
+          cd ../services/freelance-matching && npm ci
+          cd ../../contracts-offerhub && cargo build --release
+
+      - name: Build applications
+        run: |
+          npm run build
+          cd backend && npm run build
+          cd ../services/freelance-matching && npm run build
+
+      - name: Deploy to production
+        run: |
+          echo "🚀 Deploying to production environment..."
+          # Add your production deployment logic here
+          # Example: rsync, docker push, etc.
+
+      - name: Run smoke tests
+        run: |
+          echo "🧪 Running smoke tests on production..."
+          # Add smoke tests here
+
+      - name: Notify deployment success
+        run: |
+          echo "✅ Successfully deployed to production!"
+
+  rollback:
+    runs-on: ubuntu-latest
+    if: failure()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Rollback deployment
+        run: |
+          echo "🔄 Rolling back deployment..."
+          # Add rollback logic here
+
+      - name: Notify rollback
+        run: |
+          echo "⚠️ Deployment rolled back due to failure!"
