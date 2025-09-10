@@ -1,7 +1,8 @@
 #![cfg(test)]
 
 use crate::{
-    types::{Error, VerificationLevel},
+    types::{VerificationLevel},
+    error::Error,
     Contract,
 };
 use soroban_sdk::{testutils::Address as _, Address, Env, String};

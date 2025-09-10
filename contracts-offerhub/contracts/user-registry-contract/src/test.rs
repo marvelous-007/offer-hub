@@ -2,7 +2,8 @@
 
 use crate::{
     storage::{get_verified_users, set_verified_users},
-    types::{Error, VerificationLevel},
+    error::Error,
+    types::{VerificationLevel},
     Contract,
 };
 use soroban_sdk::{log, testutils::Address as _, Address, Env, String, Vec};

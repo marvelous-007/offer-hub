@@ -8,9 +8,11 @@ mod storage;
 mod test;
 pub mod types;
 mod validation;
+mod error;
 
 use crate::contract::UserRegistryContract;
-use crate::types::{Error, UserProfile,UserProfileSummary,  UserStatus, VerificationLevel};
+use crate::error::Error;
+use crate::types::{UserProfile,UserProfileSummary,  UserStatus, VerificationLevel};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
 
 #[contract]
