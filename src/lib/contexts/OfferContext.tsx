@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { createContext, useContext, useReducer } from "react"
+import { TIMEOUTS } from "@/constants/magic-numbers"
 
 // Types
 interface Offer {
@@ -150,7 +151,7 @@ export function OfferProvider({ children }: { children: React.ReactNode }) {
 
     dispatch({ type: "SET_LOADING", payload: true })
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, TIMEOUTS.API_DELAY_VERY_LONG))
 
       const newOffer: Offer = {
         id: `offer-${Date.now()}`,
@@ -177,7 +178,7 @@ export function OfferProvider({ children }: { children: React.ReactNode }) {
   const fetchOffers = async () => {
     dispatch({ type: "SET_LOADING", payload: true })
     try {
-      await new Promise((resolve) => setTimeout(resolve, 800))
+      await new Promise((resolve) => setTimeout(resolve, TIMEOUTS.API_DELAY_LONG))
       // Mock offers data
       const mockOffers: Offer[] = []
       dispatch({ type: "SET_OFFERS", payload: mockOffers })
@@ -192,7 +193,7 @@ export function OfferProvider({ children }: { children: React.ReactNode }) {
   const fetchOfferById = async (id: string) => {
     dispatch({ type: "SET_LOADING", payload: true })
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, TIMEOUTS.API_DELAY_MEDIUM))
       const offer = state.offers.find((o) => o.id === id)
       if (offer) {
         dispatch({ type: "SET_SELECTED_OFFER", payload: offer })
@@ -209,7 +210,7 @@ export function OfferProvider({ children }: { children: React.ReactNode }) {
 
   const updateOfferStatus = async (id: string, status: Offer["status"]) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, TIMEOUTS.API_DELAY_MEDIUM))
       const updatedOffer = state.offers.find((o) => o.id === id)
       if (updatedOffer) {
         const updated = { ...updatedOffer, status, updatedAt: new Date().toISOString() }
@@ -222,7 +223,7 @@ export function OfferProvider({ children }: { children: React.ReactNode }) {
 
   const sendMessage = async (offerId: string, message: string) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 300))
+      await new Promise((resolve) => setTimeout(resolve, TIMEOUTS.API_DELAY_SHORT))
       const newMessage: OfferMessage = {
         id: `msg-${Date.now()}`,
         senderId: "current-user",

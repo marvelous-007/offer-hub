@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
+import { VALIDATION_LIMITS } from "@/constants/magic-numbers"
 import type { ProfileStepProps } from "@/app/types/freelancer-profile"
 
 export function useFreelancerSkills({ userData, updateUserData }: ProfileStepProps) {
@@ -14,7 +15,7 @@ export function useFreelancerSkills({ userData, updateUserData }: ProfileStepPro
   }, [skills, updateUserData])
 
   const handleAddSkill = (skill: string) => {
-    if (skills.length >= 15) return
+    if (skills.length >= VALIDATION_LIMITS.MAX_SKILLS_PER_USER) return
     if (!skills.includes(skill)) {
       setSkills([...skills, skill])
     }
