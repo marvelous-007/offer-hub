@@ -43,7 +43,7 @@ export function DisputeCreationForm({ onSubmit }: DisputeCreationFormProps) {
     if (!formData.description.trim()) {
       newErrors.description = 'Please provide a description of the dispute';
     } else if (formData.description.trim().length < VALIDATION_LIMITS.MIN_MESSAGE_LENGTH) {
-      newErrors.description = 'Description must be at least 10 characters long';
+      newErrors.description = `Description must be at least ${VALIDATION_LIMITS.MIN_MESSAGE_LENGTH} characters long`;
     }
 
     setErrors(newErrors);

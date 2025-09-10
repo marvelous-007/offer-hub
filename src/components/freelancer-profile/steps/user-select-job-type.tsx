@@ -93,7 +93,7 @@ export default function UserSelectJobType({ userData, updateUserData, prevStep, 
         </div>
 
         <div className="space-y-3 md:col-span-2">
-          <h3 className="text-lg font-medium">Select up to 4 options</h3>
+          <h3 className="text-lg font-medium">Select up to {VALIDATION_LIMITS.MAX_JOB_TYPES_SELECTION} options</h3>
           <div className="flex flex-col space-y-3">
             {jobOptions.map((job) => (
               <label key={job} className="flex items-center space-x-3 cursor-pointer">

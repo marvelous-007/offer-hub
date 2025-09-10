@@ -41,7 +41,7 @@ export function SkillsSelector({ addedSkills, onSkillsChange }: SkillsSelectorPr
           <Input
             id="skillSearch"
             type="text"
-            placeholder="Search and add up to 10 skills"
+            placeholder={`Search and add up to ${VALIDATION_LIMITS.MAX_SKILLS_PER_PROJECT} skills`}
             value={skillSearch}
             onChange={(e) => setSkillSearch(e.target.value)}
             onKeyPress={handleKeyPress}
