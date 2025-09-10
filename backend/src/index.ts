@@ -12,6 +12,8 @@ import projectRoutes from "@/routes/project.routes";
 import userRoutes from "@/routes/user.routes";
 import authRoutes from "@/routes/auth.routes";
 import { errorHandlerMiddleware, setupGlobalErrorHandlers } from "./middlewares/errorHandler.middleware";
+import { generalLimiter, authLimiter } from "./middlewares/ratelimit.middleware";
+import { authenticateToken } from "./middlewares/auth.middleware";
 
 import conversationRoutes from "@/routes/conversation.routes";
 import messageRoutes from "@/routes/message.routes";
@@ -25,19 +27,23 @@ const port = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
-// Routes
-app.use("/api/service-requests", serviceRequestRoutes);
-app.use("/api/reviews", reviewRoutes);
-app.use("/api/services", serviceRoutes);
-app.use("/api/applications", applicationRoutes);
-app.use("/api/nfts-awarded", nftRoutes);
-app.use("/api/contracts", contractRoutes);
-app.use("/api/projects", projectRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/auth", authRoutes);
+// Apply general rate limiting to all routes
+app.use(generalLimiter);
 
-app.use("/api/conversations", conversationRoutes);
-app.use("/api/messages", messageRoutes);
+// Public routes (no authentication required)
+app.use("/api/auth", authLimiter, authRoutes);
+
+// Protected routes (authentication required)
+app.use("/api/service-requests", authenticateToken(), serviceRequestRoutes);
+app.use("/api/reviews", authenticateToken(), reviewRoutes);
+app.use("/api/services", authenticateToken(), serviceRoutes);
+app.use("/api/applications", authenticateToken(), applicationRoutes);
+app.use("/api/nfts-awarded", authenticateToken(), nftRoutes);
+app.use("/api/contracts", authenticateToken(), contractRoutes);
+app.use("/api/projects", authenticateToken(), projectRoutes);
+app.use("/api/users", authenticateToken(), userRoutes);
+app.use("/api/conversations", authenticateToken(), conversationRoutes);
+app.use("/api/messages", authenticateToken(), messageRoutes);
 
 app.get("/", (_req, res) => {
   res.send("💼 OFFER-HUB backend is up and running!");

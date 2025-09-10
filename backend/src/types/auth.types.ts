@@ -1,6 +1,6 @@
 import { User } from "./user.types";
 
-export type UserRole = "freelancer" | "client" | "admin";
+export type UserRole = "freelancer" | "client" | "admin" | "moderator";
 
 export interface JWTPayload {
   user_id: string;
@@ -9,7 +9,17 @@ export interface JWTPayload {
   exp?: number;
 }
 
-export interface AuthUser extends User {
+export interface AuthUser {
+  id: string;
+  wallet_address: string;
+  username: string;
+  name?: string;
+  bio?: string;
+  email?: string;
+  is_freelancer?: boolean;
+  nonce?: string;
+  created_at: string;
+  updated_at: string;
   role: UserRole;
 }
 
