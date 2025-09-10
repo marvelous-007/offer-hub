@@ -3,12 +3,27 @@ use soroban_sdk::{contracterror, contracttype, Address, String, Vec};
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[repr(u32)]
-pub enum EscrowStatus {
-    Initialized,
+pub enum EscrowState {
+    Created,
     Funded,
     Released,
+    Refunded,
     Disputed,
-    Resolved,
+}
+
+impl EscrowState {
+    pub fn can_transition_to(&self, next: &EscrowState) -> bool {
+        use EscrowState::*;
+        match (self, next) {
+            (Created, Funded) => true,
+            (Funded, Released) => true,
+            (Funded, Refunded) => true,
+            (Funded, Disputed) => true,
+            (Disputed, Released) => true,
+            (Disputed, Refunded) => true,
+            _ => false,
+        }
+    }
 }
 
 #[contracttype]
@@ -50,7 +65,7 @@ pub struct EscrowData {
     pub arbitrator: Option<Address>,
     pub token: Option<Address>,
     pub amount: i128,
-    pub status: EscrowStatus,
+    pub state: EscrowState,
     pub dispute_result: u32,
     pub created_at: u64,
     pub funded_at: Option<u64>,
