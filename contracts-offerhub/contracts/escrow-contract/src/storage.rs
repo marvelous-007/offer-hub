@@ -220,15 +220,15 @@ pub fn set_escrow_state(env: &Env, new_state: EscrowState) {
     }
 
 pub fn get_escrow_state(env: &Env) -> EscrowState {
-    let data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
-
-    data.state
+    get_escrow_data(env).state
 }
 
 pub fn get_escrow_data(env: &Env) -> EscrowData {
-    let data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
-
-    data
+    if !env.storage().instance().has(&INITIALIZED) {
+        handle_error(env, Error::NotInitialized);
+    }
+    
+    env.storage().instance().get(&ESCROW_DATA).unwrap()
 }
 
 pub fn is_escrow_funded(env: &Env) -> bool {
