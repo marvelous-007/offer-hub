@@ -2,8 +2,11 @@ use soroban_sdk::{panic_with_error, Address, Env, Map, String, Vec, Symbol, Into
 
 use crate::{
     access::{is_valid_arbitrator, is_valid_mediator},
-    storage::{ARBITRATOR, DISPUTES, DISPUTE_TIMEOUT, ESCROW_CONTRACT, FEE_MANAGER, check_rate_limit},
-    types::{DisputeData, DisputeLevel, DisputeOutcome, DisputeStatus, Error, Evidence},
+    storage::{ARBITRATOR, DISPUTES, DISPUTE_TIMEOUT, ESCROW_CONTRACT, FEE_MANAGER, check_rate_limit,
+              CONTRACT_CONFIG, DEFAULT_TIMEOUT_HOURS, DEFAULT_MAX_EVIDENCE, DEFAULT_MEDIATION_TIMEOUT,
+              DEFAULT_ARBITRATION_TIMEOUT, DEFAULT_FEE_PERCENTAGE, DEFAULT_RATE_LIMIT_CALLS,
+              DEFAULT_RATE_LIMIT_WINDOW_HOURS},
+    types::{DisputeData, DisputeLevel, DisputeOutcome, DisputeStatus, Error, Evidence, ContractConfig},
     validation::{validate_open_dispute, validate_add_evidence, validate_timeout_duration, validate_address},
 };
 
@@ -40,10 +43,21 @@ pub fn initialize(
         panic_with_error!(env, Error::InvalidTimeout);
     }
     
+    let contract_config = ContractConfig {
+        default_timeout_hours: DEFAULT_TIMEOUT_HOURS,
+        max_evidence_per_dispute: DEFAULT_MAX_EVIDENCE,
+        mediation_timeout_hours: DEFAULT_MEDIATION_TIMEOUT,
+        arbitration_timeout_hours: DEFAULT_ARBITRATION_TIMEOUT,
+        fee_percentage: DEFAULT_FEE_PERCENTAGE,
+        rate_limit_calls: DEFAULT_RATE_LIMIT_CALLS,
+        rate_limit_window_hours: DEFAULT_RATE_LIMIT_WINDOW_HOURS,
+    };
+
     env.storage().instance().set(&ARBITRATOR, &admin);
     env.storage().instance().set(&DISPUTE_TIMEOUT, &default_timeout);
     env.storage().instance().set(&ESCROW_CONTRACT, &escrow_contract);
     env.storage().instance().set(&FEE_MANAGER, &fee_manager);
+    env.storage().instance().set(&CONTRACT_CONFIG, &contract_config);
     env.storage()
         .instance()
         .set(&DISPUTES, &Map::<u32, DisputeData>::new(env));
@@ -477,4 +491,72 @@ pub fn set_dispute_timeout(env: &Env, admin: Address, timeout_seconds: u64) {
         (String::from_str(env, "timeout_updated"), timeout_seconds),
         env.ledger().timestamp(),
     );
+}
+
+pub fn set_config(env: &Env, admin: Address, config: ContractConfig) {
+    admin.require_auth();
+    
+    // Only admin can set config
+    let stored_admin: Address = env.storage().instance().get(&ARBITRATOR).unwrap();
+    if stored_admin != admin {
+        panic_with_error!(env, Error::Unauthorized);
+    }
+    
+    // Validate config parameters
+    if let Err(e) = validate_config(&config) {
+        panic_with_error!(env, e);
+    }
+    
+    env.storage().instance().set(&CONTRACT_CONFIG, &config);
+    
+    env.events().publish(
+        (String::from_str(env, "config_updated"), admin),
+        (config.default_timeout_hours, config.max_evidence_per_dispute, config.mediation_timeout_hours),
+    );
+}
+
+pub fn get_config(env: &Env) -> ContractConfig {
+    if !env.storage().instance().has(&CONTRACT_CONFIG) {
+        panic_with_error!(env, Error::NotInitialized);
+    }
+    env.storage().instance().get(&CONTRACT_CONFIG).unwrap()
+}
+
+// Helper function to validate config parameters
+fn validate_config(config: &ContractConfig) -> Result<(), Error> {
+    // Validate timeout hours (1-720 hours = 30 days)
+    if config.default_timeout_hours < 1 || config.default_timeout_hours > 720 {
+        return Err(Error::InvalidTimeout);
+    }
+    
+    // Validate max evidence (1-50)
+    if config.max_evidence_per_dispute < 1 || config.max_evidence_per_dispute > 50 {
+        return Err(Error::InvalidTimeout);
+    }
+    
+    // Validate mediation timeout (1-168 hours = 7 days)
+    if config.mediation_timeout_hours < 1 || config.mediation_timeout_hours > 168 {
+        return Err(Error::InvalidTimeout);
+    }
+    
+    // Validate arbitration timeout (1-720 hours = 30 days)
+    if config.arbitration_timeout_hours < 1 || config.arbitration_timeout_hours > 720 {
+        return Err(Error::InvalidTimeout);
+    }
+    
+    // Validate fee percentage (0-20%)
+    if config.fee_percentage > 2000 {
+        return Err(Error::InvalidTimeout);
+    }
+    
+    // Validate rate limit parameters
+    if config.rate_limit_window_hours < 1 || config.rate_limit_window_hours > 168 {
+        return Err(Error::InvalidTimeout);
+    }
+    
+    if config.rate_limit_calls < 1 || config.rate_limit_calls > 100 {
+        return Err(Error::InvalidTimeout);
+    }
+    
+    Ok(())
 }

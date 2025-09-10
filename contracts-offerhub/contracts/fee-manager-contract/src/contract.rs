@@ -5,8 +5,11 @@ use crate::{
     storage::{
         DEFAULT_ARBITRATOR_FEE_PERCENTAGE, DEFAULT_DISPUTE_FEE_PERCENTAGE,
         DEFAULT_ESCROW_FEE_PERCENTAGE, FEE_CONFIG, FEE_HISTORY, FEE_STATS, PLATFORM_BALANCE, PREMIUM_USERS,
+        CONTRACT_CONFIG, DEFAULT_PLATFORM_FEE_PERCENTAGE, DEFAULT_ESCROW_TIMEOUT_DAYS, DEFAULT_MAX_RATING_PER_DAY,
+        DEFAULT_MIN_ESCROW_AMOUNT, DEFAULT_MAX_ESCROW_AMOUNT, DEFAULT_DISPUTE_TIMEOUT_HOURS,
+        DEFAULT_RATE_LIMIT_WINDOW_HOURS, DEFAULT_MAX_RATE_LIMIT_CALLS,
     },
-    types::{FeeCalculation, FeeConfig, FeeRecord, FeeStats, PremiumUser, FEE_TYPE_ESCROW, FEE_TYPE_DISPUTE},
+    types::{FeeCalculation, FeeConfig, FeeRecord, FeeStats, PremiumUser, FEE_TYPE_ESCROW, FEE_TYPE_DISPUTE, ContractConfig},
     validation::{validate_initialization, validate_fee_rates, validate_fee_calculation, validate_withdrawal_amount, validate_fee_type, validate_address},
 };
 
@@ -37,11 +40,23 @@ pub fn initialize(env: &Env, admin: Address, platform_wallet: Address) {
         total_transactions: 0,
     };
 
+    let contract_config = ContractConfig {
+        platform_fee_percentage: DEFAULT_PLATFORM_FEE_PERCENTAGE,
+        escrow_timeout_days: DEFAULT_ESCROW_TIMEOUT_DAYS,
+        max_rating_per_day: DEFAULT_MAX_RATING_PER_DAY,
+        min_escrow_amount: DEFAULT_MIN_ESCROW_AMOUNT,
+        max_escrow_amount: DEFAULT_MAX_ESCROW_AMOUNT,
+        dispute_timeout_hours: DEFAULT_DISPUTE_TIMEOUT_HOURS,
+        rate_limit_window_hours: DEFAULT_RATE_LIMIT_WINDOW_HOURS,
+        max_rate_limit_calls: DEFAULT_MAX_RATE_LIMIT_CALLS,
+    };
+
     env.storage().instance().set(&FEE_CONFIG, &fee_config);
     env.storage().instance().set(&PLATFORM_BALANCE, &0);
     env.storage().instance().set(&FEE_STATS, &fee_stats);
     env.storage().instance().set(&FEE_HISTORY, &Vec::<FeeRecord>::new(env));
     env.storage().instance().set(&PREMIUM_USERS, &Vec::<PremiumUser>::new(env));
+    env.storage().instance().set(&CONTRACT_CONFIG, &contract_config);
 
     env.events().publish(
         (Symbol::new(env, "fee_manager_initialized"), admin.clone()),
@@ -338,6 +353,79 @@ fn calculate_fee_amount(amount: i128, fee_percentage: i128) -> i128 {
     } else {
         fee_amount
     }
+}
+
+pub fn set_config(env: &Env, caller: Address, config: ContractConfig) {
+    let fee_config: FeeConfig = env.storage().instance().get(&FEE_CONFIG).unwrap();
+    
+    // Only admin can set config
+    fee_config.admin.require_auth();
+    
+    if fee_config.admin != caller {
+        handle_error(env, Error::Unauthorized);
+    }
+    
+    // Validate config parameters
+    if let Err(e) = validate_config(&config) {
+        handle_error(env, e);
+    }
+    
+    env.storage().instance().set(&CONTRACT_CONFIG, &config);
+    
+    env.events().publish(
+        (Symbol::new(env, "config_updated"), caller),
+        (config.platform_fee_percentage, config.escrow_timeout_days, config.max_rating_per_day),
+    );
+}
+
+pub fn get_config(env: &Env) -> ContractConfig {
+    if !env.storage().instance().has(&CONTRACT_CONFIG) {
+        handle_error(env, Error::NotInitialized);
+    }
+    env.storage().instance().get(&CONTRACT_CONFIG).unwrap()
+}
+
+// Helper function to validate config parameters
+fn validate_config(config: &ContractConfig) -> Result<(), Error> {
+    // Validate platform fee percentage (0-10%)
+    if config.platform_fee_percentage > 10 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    // Validate escrow timeout (1-365 days)
+    if config.escrow_timeout_days < 1 || config.escrow_timeout_days > 365 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    // Validate max rating per day (1-100)
+    if config.max_rating_per_day < 1 || config.max_rating_per_day > 100 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    // Validate escrow amounts
+    if config.min_escrow_amount >= config.max_escrow_amount {
+        return Err(Error::InvalidAmount);
+    }
+    
+    if config.min_escrow_amount < 1 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    // Validate dispute timeout (1-720 hours = 30 days)
+    if config.dispute_timeout_hours < 1 || config.dispute_timeout_hours > 720 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    // Validate rate limit parameters
+    if config.rate_limit_window_hours < 1 || config.rate_limit_window_hours > 168 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    if config.max_rate_limit_calls < 1 || config.max_rate_limit_calls > 1000 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    Ok(())
 }
 
  

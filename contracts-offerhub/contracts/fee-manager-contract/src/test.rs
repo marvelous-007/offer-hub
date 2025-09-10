@@ -48,6 +48,125 @@ fn test_set_fee_rates() {
 }
 
 #[test]
+fn test_set_config() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, FeeManagerContract);
+    let client = FeeManagerContractClient::new(&env, &contract_id);
+    let admin = Address::generate(&env);
+    let platform_wallet = Address::generate(&env);
+
+    client.initialize(&admin, &platform_wallet);
+
+    // Mock admin authentication
+    env.mock_all_auths();
+
+    // Create new config
+    let new_config = ContractConfig {
+        platform_fee_percentage: 3,
+        escrow_timeout_days: 45,
+        max_rating_per_day: 15,
+        min_escrow_amount: 2000,
+        max_escrow_amount: 2000000000,
+        dispute_timeout_hours: 240,
+        rate_limit_window_hours: 12,
+        max_rate_limit_calls: 150,
+    };
+
+    client.set_config(&admin, &new_config);
+
+    let config = client.get_config();
+    assert_eq!(config.platform_fee_percentage, 3);
+    assert_eq!(config.escrow_timeout_days, 45);
+    assert_eq!(config.max_rating_per_day, 15);
+    assert_eq!(config.min_escrow_amount, 2000);
+    assert_eq!(config.max_escrow_amount, 2000000000);
+    assert_eq!(config.dispute_timeout_hours, 240);
+    assert_eq!(config.rate_limit_window_hours, 12);
+    assert_eq!(config.max_rate_limit_calls, 150);
+}
+
+#[test]
+fn test_get_config_defaults() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, FeeManagerContract);
+    let client = FeeManagerContractClient::new(&env, &contract_id);
+    let admin = Address::generate(&env);
+    let platform_wallet = Address::generate(&env);
+
+    client.initialize(&admin, &platform_wallet);
+
+    let config = client.get_config();
+    assert_eq!(config.platform_fee_percentage, 2); // DEFAULT_PLATFORM_FEE_PERCENTAGE
+    assert_eq!(config.escrow_timeout_days, 30); // DEFAULT_ESCROW_TIMEOUT_DAYS
+    assert_eq!(config.max_rating_per_day, 10); // DEFAULT_MAX_RATING_PER_DAY
+    assert_eq!(config.min_escrow_amount, 1000); // DEFAULT_MIN_ESCROW_AMOUNT
+    assert_eq!(config.max_escrow_amount, 1000000000); // DEFAULT_MAX_ESCROW_AMOUNT
+    assert_eq!(config.dispute_timeout_hours, 168); // DEFAULT_DISPUTE_TIMEOUT_HOURS
+    assert_eq!(config.rate_limit_window_hours, 24); // DEFAULT_RATE_LIMIT_WINDOW_HOURS
+    assert_eq!(config.max_rate_limit_calls, 100); // DEFAULT_MAX_RATE_LIMIT_CALLS
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #3)")]
+fn test_set_config_unauthorized() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, FeeManagerContract);
+    let client = FeeManagerContractClient::new(&env, &contract_id);
+    let admin = Address::generate(&env);
+    let platform_wallet = Address::generate(&env);
+    let non_admin = Address::generate(&env);
+
+    client.initialize(&admin, &platform_wallet);
+
+    // Mock non-admin authentication
+    env.mock_all_auths();
+
+    let new_config = ContractConfig {
+        platform_fee_percentage: 3,
+        escrow_timeout_days: 45,
+        max_rating_per_day: 15,
+        min_escrow_amount: 2000,
+        max_escrow_amount: 2000000000,
+        dispute_timeout_hours: 240,
+        rate_limit_window_hours: 12,
+        max_rate_limit_calls: 150,
+    };
+
+    // This should fail because non_admin is not the admin
+    client.set_config(&non_admin, &new_config);
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #4)")]
+fn test_set_config_invalid_parameters() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, FeeManagerContract);
+    let client = FeeManagerContractClient::new(&env, &contract_id);
+    let admin = Address::generate(&env);
+    let platform_wallet = Address::generate(&env);
+
+    client.initialize(&admin, &platform_wallet);
+
+    // Mock admin authentication
+    env.mock_all_auths();
+
+    // Create invalid config (platform fee > 10%)
+    let invalid_config = ContractConfig {
+        platform_fee_percentage: 15, // Invalid: > 10%
+        escrow_timeout_days: 45,
+        max_rating_per_day: 15,
+        min_escrow_amount: 2000,
+        max_escrow_amount: 2000000000,
+        dispute_timeout_hours: 240,
+        rate_limit_window_hours: 12,
+        max_rate_limit_calls: 150,
+    };
+
+    // This should fail due to invalid parameters
+    client.set_config(&admin, &invalid_config);
+}
+
+#[test]
 #[should_panic(expected = "Error(Auth, InvalidAction)")]
 fn test_set_fee_rates_unauthorized() {
     let env = Env::default();

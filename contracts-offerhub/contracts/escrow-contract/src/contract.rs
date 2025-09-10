@@ -2,14 +2,42 @@ use soroban_sdk::{Address, Env, IntoVal, String, Symbol, Vec};
 
 use crate::{
     error::handle_error,
-    storage::{ESCROW_DATA, INITIALIZED, add_call_log, CallLog},
-    types::{DisputeResult, Error, EscrowData, EscrowStatus, Milestone, MilestoneHistory},
+    storage::{ESCROW_DATA, INITIALIZED, add_call_log, CallLog, CONTRACT_CONFIG, 
+              DEFAULT_MIN_ESCROW_AMOUNT, DEFAULT_MAX_ESCROW_AMOUNT, DEFAULT_TIMEOUT_DAYS,
+              DEFAULT_MAX_MILESTONES, DEFAULT_FEE_PERCENTAGE, DEFAULT_RATE_LIMIT_CALLS,
+              DEFAULT_RATE_LIMIT_WINDOW_HOURS},
+    types::{DisputeResult, Error, EscrowData, EscrowStatus, Milestone, MilestoneHistory, ContractConfig},
     validation::{validate_init_contract, validate_init_contract_full, validate_add_milestone, validate_milestone_id, validate_address},
 };
 use crate::storage::{check_rate_limit, set_rate_limit_bypass_flag, reset_rate_limit as rl_reset};
 
 const TOKEN_TRANSFER: &str = "transfer";
 const TOKEN_BALANCE: &str = "balance";
+
+pub fn initialize_contract(env: &Env, admin: Address) {
+    if env.storage().instance().has(&CONTRACT_CONFIG) {
+        handle_error(env, Error::AlreadyInitialized);
+    }
+    
+    admin.require_auth();
+    
+    let contract_config = ContractConfig {
+        min_escrow_amount: DEFAULT_MIN_ESCROW_AMOUNT,
+        max_escrow_amount: DEFAULT_MAX_ESCROW_AMOUNT,
+        default_timeout_days: DEFAULT_TIMEOUT_DAYS,
+        max_milestones: DEFAULT_MAX_MILESTONES,
+        fee_percentage: DEFAULT_FEE_PERCENTAGE,
+        rate_limit_calls: DEFAULT_RATE_LIMIT_CALLS,
+        rate_limit_window_hours: DEFAULT_RATE_LIMIT_WINDOW_HOURS,
+    };
+    
+    env.storage().instance().set(&CONTRACT_CONFIG, &contract_config);
+    
+    env.events().publish(
+        (Symbol::new(env, "contract_initialized"), admin),
+        env.ledger().timestamp(),
+    );
+}
 
 // Helper function to log function calls
 fn log_function_call(
@@ -616,4 +644,71 @@ pub fn clear_call_logs(env: &Env, caller: Address) {
     }
     
     crate::storage::clear_call_logs(env);
+}
+
+pub fn set_config(env: &Env, caller: Address, config: ContractConfig) {
+    caller.require_auth();
+    
+    // Only escrow client can set config (admin functionality)
+    let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+    if escrow.client != caller { 
+        handle_error(env, Error::Unauthorized); 
+    }
+    
+    // Validate config parameters
+    if let Err(e) = validate_config(&config) {
+        handle_error(env, e);
+    }
+    
+    env.storage().instance().set(&CONTRACT_CONFIG, &config);
+    
+    env.events().publish(
+        (Symbol::new(env, "config_updated"), caller),
+        (config.min_escrow_amount, config.max_escrow_amount, config.default_timeout_days),
+    );
+}
+
+pub fn get_config(env: &Env) -> ContractConfig {
+    if !env.storage().instance().has(&CONTRACT_CONFIG) {
+        handle_error(env, Error::NotInitialized);
+    }
+    env.storage().instance().get(&CONTRACT_CONFIG).unwrap()
+}
+
+// Helper function to validate config parameters
+fn validate_config(config: &ContractConfig) -> Result<(), Error> {
+    // Validate escrow amounts
+    if config.min_escrow_amount >= config.max_escrow_amount {
+        return Err(Error::InvalidAmount);
+    }
+    
+    if config.min_escrow_amount < 1 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    // Validate timeout (1-365 days)
+    if config.default_timeout_days < 1 || config.default_timeout_days > 365 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    // Validate max milestones (1-100)
+    if config.max_milestones < 1 || config.max_milestones > 100 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    // Validate fee percentage (0-10%)
+    if config.fee_percentage > 1000 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    // Validate rate limit parameters
+    if config.rate_limit_window_hours < 1 || config.rate_limit_window_hours > 168 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    if config.rate_limit_calls < 1 || config.rate_limit_calls > 1000 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    Ok(())
 }
