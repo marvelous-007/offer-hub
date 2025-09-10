@@ -198,6 +198,53 @@ export interface AdminDashboardState {
   error: string | null;
 }
 
+export interface AuditLog {
+  id: string;
+  adminId: string;
+  adminName: string;
+  action: string;
+  resource: string;
+  resourceId?: string;
+  previousValue?: Record<string, unknown>;
+  newValue?: Record<string, unknown>;
+  timestamp: Date;
+  ipAddress: string;
+  userAgent: string;
+  success: boolean;
+  errorMessage?: string;
+}
+
+export interface AnalyticsReport {
+  id: string;
+  name: string;
+  type:
+    | 'user_analytics'
+    | 'project_analytics'
+    | 'financial_analytics'
+    | 'performance_analytics';
+  dateRange: {
+    from: Date;
+    to: Date;
+  };
+  filters: Record<string, string | number | boolean>;
+  data: Record<string, unknown>;
+  generatedBy: string;
+  generatedAt: Date;
+  format: 'json' | 'csv' | 'pdf';
+}
+
+export interface PlatformConfiguration {
+  id: string;
+  category: 'general' | 'security' | 'payments' | 'features' | 'notifications';
+  key: string;
+  value: string | number | boolean | Record<string, unknown>;
+  description: string;
+  dataType: 'string' | 'number' | 'boolean' | 'json';
+  isEditable: boolean;
+  updatedBy: string;
+  updatedAt: Date;
+}
+
 export const mapBackendUserToAdmin = (backendUser: BackendUser): AdminUser => ({
   id: backendUser.id,
   wallet_address: backendUser.wallet_address,
