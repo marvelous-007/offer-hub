@@ -30,6 +30,73 @@ export interface AdminUsersResponse {
   pagination: PaginationInfo;
 }
 
+export interface FinancialMetrics {
+  totalRevenue: number;
+  monthlyRevenue: number;
+  platformFees: number;
+  paymentProcessingFees: number;
+  netRevenue: number;
+  averageTransactionValue: number;
+  transactionVolume: number;
+  refundsTotal: number;
+  disputesTotal: number;
+  pendingPayouts: number;
+  completedPayouts: number;
+}
+
+export interface SecurityEvent {
+  id: string;
+  type:
+    | 'login_attempt'
+    | 'failed_login'
+    | 'suspicious_activity'
+    | 'data_breach'
+    | 'unauthorized_access';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  description: string;
+  userId?: string;
+  ipAddress: string;
+  userAgent: string;
+  timestamp: Date;
+  status: 'pending' | 'investigating' | 'resolved' | 'false_positive';
+  assignedTo?: string;
+}
+
+export interface BulkUserAction {
+  action:
+    | 'activate'
+    | 'deactivate'
+    | 'verify'
+    | 'suspend'
+    | 'delete'
+    | 'send_message';
+  userIds: string[];
+  reason?: string;
+  message?: string;
+  expiresAt?: Date;
+}
+
+export interface PlatformUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  userType: 'client' | 'freelancer';
+  isVerified: boolean;
+  isActive: boolean;
+  profileCompleteness: number;
+  totalEarnings?: number;
+  totalSpent?: number;
+  projectsCompleted: number;
+  rating: number;
+  joinedAt: Date;
+  lastActiveAt: Date;
+  profilePicture?: string;
+  location?: string;
+  phoneNumber?: string;
+  verificationStatus: 'pending' | 'verified' | 'rejected';
+}
+
 export interface AdminUserResponse {
   success: boolean;
   message: string;
@@ -81,6 +148,56 @@ export interface SystemHealthMetrics {
   lastUpdated: Date;
 }
 
+export interface AdminNotification {
+  id: string;
+  type: 'info' | 'warning' | 'error' | 'success';
+  title: string;
+  message: string;
+  isRead: boolean;
+  isImportant: boolean;
+  actionRequired: boolean;
+  actionUrl?: string;
+  createdAt: Date;
+  expiresAt?: Date;
+}
+
+export interface ContentModerationItem {
+  id: string;
+  type: 'project' | 'profile' | 'review' | 'message';
+  title: string;
+  content: string;
+  authorId: string;
+  authorName: string;
+  status: 'pending' | 'approved' | 'rejected' | 'flagged';
+  reportedBy?: string;
+  reportReason?: string;
+  moderatedBy?: string;
+  moderatedAt?: Date;
+  createdAt: Date;
+  priority: 'low' | 'medium' | 'high';
+}
+
+export interface DashboardWidget {
+  id: string;
+  type: 'metric' | 'chart' | 'table' | 'notification';
+  title: string;
+  position: { x: number; y: number; width: number; height: number };
+  config: Record<string, string | number | boolean>;
+  isVisible: boolean;
+  refreshInterval?: number;
+}
+
+export interface AdminDashboardState {
+  user: AdminUser | null;
+  platformStats: PlatformStatistics | null;
+  systemHealth: SystemHealthMetrics | null;
+  notifications: AdminNotification[];
+  unreadNotificationsCount: number;
+  widgets: DashboardWidget[];
+  isLoading: boolean;
+  error: string | null;
+}
+
 export const mapBackendUserToAdmin = (backendUser: BackendUser): AdminUser => ({
   id: backendUser.id,
   wallet_address: backendUser.wallet_address,
@@ -106,7 +223,19 @@ export const formatUserForDisplay = (user: AdminUser) => ({
     ? new Date(user.created_at).toLocaleDateString()
     : 'Unknown',
 });
-
+export interface UserManagementFilters {
+  search?: string;
+  userType?: 'client' | 'freelancer' | 'all';
+  verificationStatus?: 'pending' | 'verified' | 'rejected' | 'all';
+  isActive?: boolean;
+  joinedDateFrom?: Date;
+  joinedDateTo?: Date;
+  lastActiveDateFrom?: Date;
+  lastActiveDateTo?: Date;
+  minRating?: number;
+  maxRating?: number;
+  location?: string;
+}
 // Error handling types
 export interface ApiError {
   success: false;

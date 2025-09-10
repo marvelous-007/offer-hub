@@ -1,18 +1,16 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   AdminDashboardState,
-  PlatformStatistics,
   SystemHealthMetrics,
-  AdminNotification,
   PlatformUser,
   UserManagementFilters,
   SecurityEvent,
   ContentModerationItem,
   FinancialMetrics,
-} from "@/types/admin.types";
-import { adminService } from "@/services/admin.service";
+} from '@/types/admin.types';
+import { adminService } from '@/services/admin.service';
 
 export function useAdminDashboard() {
   const [state, setState] = useState<AdminDashboardState>({
@@ -50,7 +48,7 @@ export function useAdminDashboard() {
         error:
           error instanceof Error
             ? error.message
-            : "Failed to load dashboard data",
+            : 'Failed to load dashboard data',
         isLoading: false,
       }));
     }
@@ -62,7 +60,7 @@ export function useAdminDashboard() {
       const stats = await adminService.getPlatformStatistics();
       setState((prev) => ({ ...prev, platformStats: stats }));
     } catch (error) {
-      console.error("Failed to refresh statistics:", error);
+      console.error('Failed to refresh statistics:', error);
     }
   }, []);
 
@@ -72,7 +70,7 @@ export function useAdminDashboard() {
       const health = await adminService.getSystemHealth();
       setState((prev) => ({ ...prev, systemHealth: health }));
     } catch (error) {
-      console.error("Failed to refresh system health:", error);
+      console.error('Failed to refresh system health:', error);
     }
   }, []);
 
@@ -87,7 +85,7 @@ export function useAdminDashboard() {
         unreadNotificationsCount: unreadCount,
       }));
     } catch (error) {
-      console.error("Failed to load notifications:", error);
+      console.error('Failed to load notifications:', error);
     }
   }, []);
 
@@ -106,7 +104,7 @@ export function useAdminDashboard() {
         ),
       }));
     } catch (error) {
-      console.error("Failed to mark notification as read:", error);
+      console.error('Failed to mark notification as read:', error);
     }
   }, []);
 
@@ -123,7 +121,7 @@ export function useAdminDashboard() {
         unreadNotificationsCount: 0,
       }));
     } catch (error) {
-      console.error("Failed to mark all notifications as read:", error);
+      console.error('Failed to mark all notifications as read:', error);
     }
   }, []);
 
@@ -168,15 +166,15 @@ export function useAdminDashboard() {
 
   // Computed values
   const systemHealthStatus = useMemo(() => {
-    if (!state.systemHealth) return "unknown";
+    if (!state.systemHealth) return 'unknown';
 
     const { uptime, errorRate, databaseStatus } = state.systemHealth;
 
-    if (errorRate > 5 || databaseStatus === "error" || uptime < 95)
-      return "critical";
-    if (errorRate > 1 || databaseStatus === "warning" || uptime < 99)
-      return "warning";
-    return "healthy";
+    if (errorRate > 5 || databaseStatus === 'error' || uptime < 95)
+      return 'critical';
+    if (errorRate > 1 || databaseStatus === 'warning' || uptime < 99)
+      return 'warning';
+    return 'healthy';
   }, [state.systemHealth]);
 
   const platformGrowthTrend = useMemo(() => {
@@ -186,19 +184,19 @@ export function useAdminDashboard() {
       state.platformStats;
 
     return {
-      users: userGrowthRate > 0 ? "up" : userGrowthRate < 0 ? "down" : "stable",
+      users: userGrowthRate > 0 ? 'up' : userGrowthRate < 0 ? 'down' : 'stable',
       projects:
         projectGrowthRate > 0
-          ? "up"
+          ? 'up'
           : projectGrowthRate < 0
-          ? "down"
-          : "stable",
+          ? 'down'
+          : 'stable',
       revenue:
         revenueGrowthRate > 0
-          ? "up"
+          ? 'up'
           : revenueGrowthRate < 0
-          ? "down"
-          : "stable",
+          ? 'down'
+          : 'stable',
     };
   }, [state.platformStats]);
 
@@ -244,7 +242,7 @@ export function useUserManagement() {
         setTotalPages(response.totalPages);
       } catch (error) {
         setError(
-          error instanceof Error ? error.message : "Failed to load users",
+          error instanceof Error ? error.message : 'Failed to load users',
         );
       } finally {
         setIsLoading(false);
@@ -290,7 +288,7 @@ export function useUserManagement() {
         setCurrentPage(1);
         setTotalPages(1);
       } catch (error) {
-        setError(error instanceof Error ? error.message : "Search failed");
+        setError(error instanceof Error ? error.message : 'Search failed');
       } finally {
         setIsLoading(false);
       }
@@ -337,7 +335,7 @@ export function useSystemMonitoring() {
       setSystemHealth(health);
     } catch (error) {
       setError(
-        error instanceof Error ? error.message : "Failed to load system health",
+        error instanceof Error ? error.message : 'Failed to load system health',
       );
     }
   }, []);
@@ -350,7 +348,7 @@ export function useSystemMonitoring() {
       setError(
         error instanceof Error
           ? error.message
-          : "Failed to load security events",
+          : 'Failed to load security events',
       );
     }
   }, []);
@@ -411,7 +409,7 @@ export function useContentModeration() {
       setError(
         error instanceof Error
           ? error.message
-          : "Failed to load moderation queue",
+          : 'Failed to load moderation queue',
       );
     } finally {
       setIsLoading(false);
@@ -419,7 +417,7 @@ export function useContentModeration() {
   }, []);
 
   const moderateContent = useCallback(
-    async (id: string, action: "approve" | "reject", reason?: string) => {
+    async (id: string, action: 'approve' | 'reject', reason?: string) => {
       try {
         await adminService.moderateContent(id, action, reason);
         // Remove moderated item from queue
@@ -427,7 +425,7 @@ export function useContentModeration() {
         setTotalItems((prev) => prev - 1);
       } catch (error) {
         setError(
-          error instanceof Error ? error.message : "Failed to moderate content",
+          error instanceof Error ? error.message : 'Failed to moderate content',
         );
       }
     },
@@ -470,7 +468,7 @@ export function useFinancialMetrics() {
         setError(
           error instanceof Error
             ? error.message
-            : "Failed to load financial metrics",
+            : 'Failed to load financial metrics',
         );
       } finally {
         setIsLoading(false);
