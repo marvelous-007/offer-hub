@@ -3,6 +3,7 @@ import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import RoleSelector from '@/components/auth/RoleSelector';
 import SignInForm from '@/components/auth/SignInForm';
+import { TIMEOUTS } from '@/constants/magic-numbers';
 
 // Component that uses useSearchParams - needs to be wrapped in Suspense
 const SignInNotFoundContent: React.FC = () => {
@@ -35,7 +36,7 @@ const SignInNotFoundContent: React.FC = () => {
         break;
     }
 
-    setTimeout(() => setIsLoading(false), 1000);
+    setTimeout(() => setIsLoading(false), TIMEOUTS.API_DELAY_VERY_LONG);
   };
 
   const handleEmailChange = (newEmail: string) => {

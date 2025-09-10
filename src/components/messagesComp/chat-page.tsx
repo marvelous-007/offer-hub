@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ConversationList } from "./conversation-list";
 import { Button } from "@/components/ui/button";
+import { TIMEOUTS } from "@/constants/magic-numbers";
 import {
   Sheet,
   SheetContent,
@@ -165,7 +166,7 @@ export default function ChatPageClient({
   // Handler: typing preview simulation
   const handleTextDraftChange = (_next: string) => {
     setIsPeerTyping(true);
-    const timeoutId = window.setTimeout(() => setIsPeerTyping(false), 1200);
+    const timeoutId = window.setTimeout(() => setIsPeerTyping(false), TIMEOUTS.PEER_TYPING_TIMEOUT);
     return () => window.clearTimeout(timeoutId);
   };
 

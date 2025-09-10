@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { DisputeReasonSelector } from './DisputeReasonSelector';
 import { ProjectSelector } from './ProjectSelector';
 import { Upload, Paperclip } from 'lucide-react';
+import { TIMEOUTS, VALIDATION_LIMITS } from '@/constants/magic-numbers';
 
 interface DisputeFormData {
   reason: string;
@@ -41,8 +42,8 @@ export function DisputeCreationForm({ onSubmit }: DisputeCreationFormProps) {
 
     if (!formData.description.trim()) {
       newErrors.description = 'Please provide a description of the dispute';
-    } else if (formData.description.trim().length < 10) {
-      newErrors.description = 'Description must be at least 10 characters long';
+    } else if (formData.description.trim().length < VALIDATION_LIMITS.MIN_MESSAGE_LENGTH) {
+      newErrors.description = `Description must be at least ${VALIDATION_LIMITS.MIN_MESSAGE_LENGTH} characters long`;
     }
 
     setErrors(newErrors);
@@ -60,7 +61,7 @@ export function DisputeCreationForm({ onSubmit }: DisputeCreationFormProps) {
     
     try {
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, TIMEOUTS.API_DELAY_VERY_LONG));
       onSubmit(formData);
     } catch (error) {
       console.error('Error submitting dispute:', error);

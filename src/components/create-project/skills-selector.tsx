@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState } from "react"
+import { VALIDATION_LIMITS } from "@/constants/magic-numbers";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
@@ -11,7 +12,7 @@ export function SkillsSelector({ addedSkills, onSkillsChange }: SkillsSelectorPr
   const [skillSearch, setSkillSearch] = useState("");
 
   const handleAddSkill = (skill: string) => {
-    if (skill.trim() && !addedSkills.includes(skill.trim()) && addedSkills.length < 10) {
+    if (skill.trim() && !addedSkills.includes(skill.trim()) && addedSkills.length < VALIDATION_LIMITS.MAX_SKILLS_PER_PROJECT) {
       onSkillsChange([...addedSkills, skill.trim()]);
       setSkillSearch("");
     }
@@ -40,7 +41,7 @@ export function SkillsSelector({ addedSkills, onSkillsChange }: SkillsSelectorPr
           <Input
             id="skillSearch"
             type="text"
-            placeholder="Search and add up to 10 skills"
+            placeholder={`Search and add up to ${VALIDATION_LIMITS.MAX_SKILLS_PER_PROJECT} skills`}
             value={skillSearch}
             onChange={(e) => setSkillSearch(e.target.value)}
             onKeyPress={handleKeyPress}

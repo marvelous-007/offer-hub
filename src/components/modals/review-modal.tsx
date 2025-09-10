@@ -6,6 +6,7 @@ import StarRating from '@/components/ui/star-rating';
 import { useReviewsApi } from '@/hooks/api-connections/use-reviews-api';
 import { Review } from '@/types/review.types';
 import { useNotification } from '@/lib/contexts/NotificatonContext';
+import { VALIDATION_LIMITS } from '@/constants/magic-numbers';
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -142,11 +143,11 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
               placeholder="Share your experience working on this contract..."
               rows={4}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
-              maxLength={500}
+              maxLength={VALIDATION_LIMITS.MAX_REVIEW_COMMENT_LENGTH}
             />
             <div className="flex justify-between mt-1">
               <div className="text-xs text-gray-500">
-                {comment.length}/500 characters
+                {comment.length}/{VALIDATION_LIMITS.MAX_REVIEW_COMMENT_LENGTH} characters
               </div>
             </div>
           </div>

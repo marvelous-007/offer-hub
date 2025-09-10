@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { VALIDATION_LIMITS } from "@/constants/magic-numbers"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -179,7 +180,7 @@ export default function TalentDetailDialog({
                     <h3 className="font-medium text-lg text-[#002333] mb-3">About</h3>
                     <p className="text-[#002333]/80">
                       {freelancer.description ||
-                        `${freelancer.name} is a highly skilled ${freelancer.title} with ${freelancer.experience} of experience. Specializing in ${freelancer.skills.slice(0, 3).join(", ")}, and more, they have successfully completed numerous projects and maintained an excellent rating of ${freelancer.rating}.`}
+                        `${freelancer.name} is a highly skilled ${freelancer.title} with ${freelancer.experience} of experience. Specializing in ${freelancer.skills.slice(0, VALIDATION_LIMITS.MAX_TECHNOLOGIES_DISPLAY).join(", ")}, and more, they have successfully completed numerous projects and maintained an excellent rating of ${freelancer.rating}.`}
                     </p>
                   </div>
 
@@ -262,7 +263,7 @@ export default function TalentDetailDialog({
                   <div>
                     <h3 className="font-medium text-lg text-[#002333] mb-3">Portfolio Highlights</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {portfolio.slice(0, 2).map((item) => (
+                      {portfolio.slice(0, VALIDATION_LIMITS.MAX_PORTFOLIO_ITEMS_DISPLAY).map((item) => (
                         <div key={item.id} className="border rounded-lg overflow-hidden">
                           <div className="h-40 bg-gray-100 flex items-center justify-center">
                             <img
