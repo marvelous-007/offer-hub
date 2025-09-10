@@ -86,7 +86,7 @@ export default function ProjectBudget({ projectData, updateProjectData }: Projec
               <Label>Budget Type</Label>
               <RadioGroup
                 value={projectData.budgetType}
-                onValueChange={(value) => updateProjectData("budgetType", value )}
+                onValueChange={(value: string) => updateProjectData("budgetType", value )}
                 className="grid grid-cols-1 md:grid-cols-2 gap-4"
               >
                 <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-gray-50">
@@ -118,7 +118,7 @@ export default function ProjectBudget({ projectData, updateProjectData }: Projec
                       placeholder="Enter your budget"
                       className="pl-10"
                       value={projectData.budgetAmount || ""}
-                      onChange={(e) => updateProjectData("budgetAmount", Number.parseFloat(e.target.value) || 0 )}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateProjectData("budgetAmount", Number.parseFloat(e.target.value) || 0 )}
                     />
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -162,7 +162,7 @@ export default function ProjectBudget({ projectData, updateProjectData }: Projec
                         <Input
                           placeholder="Milestone title"
                           value={newMilestone.title}
-                          onChange={(e) => setNewMilestone({ ...newMilestone, title: e.target.value })}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewMilestone({ ...newMilestone, title: e.target.value })}
                         />
                       </div>
                       <div className="flex gap-2">
@@ -173,7 +173,7 @@ export default function ProjectBudget({ projectData, updateProjectData }: Projec
                             placeholder="Amount"
                             className="pl-10"
                             value={newMilestone.amount}
-                            onChange={(e) => setNewMilestone({ ...newMilestone, amount: e.target.value })}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewMilestone({ ...newMilestone, amount: e.target.value })}
                           />
                         </div>
                         <Button
@@ -199,7 +199,7 @@ export default function ProjectBudget({ projectData, updateProjectData }: Projec
                     placeholder="Enter hourly rate"
                     className="pl-10"
                     value={projectData.budgetAmount || ""}
-                    onChange={(e) => updateProjectData("budgetAmount", Number.parseFloat(e.target.value) || 0 )}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateProjectData("budgetAmount", Number.parseFloat(e.target.value) || 0 )}
                   />
                 </div>
                 <p className="text-sm text-muted-foreground">The hourly rate you're willing to pay for this project</p>
@@ -210,7 +210,7 @@ export default function ProjectBudget({ projectData, updateProjectData }: Projec
 
             <div className="space-y-2">
               <Label htmlFor="duration">Project Duration</Label>
-              <Select value={projectData.duration} onValueChange={(value) => updateProjectData("duration", value )}>
+              <Select value={projectData.duration} onValueChange={(value: string) => updateProjectData("duration", value )}>
                 <SelectTrigger id="duration">
                   <SelectValue placeholder="Select estimated duration" />
                 </SelectTrigger>

@@ -195,7 +195,7 @@ export default function ChatPageClient({
                 <ConversationList
                   conversations={conversations}
                   activeId={activeConversation?.id}
-                  onSelect={(id) => setActiveConversationId(id)}
+                  onSelect={(id: string) => setActiveConversationId(id)}
                 />
               </div>
             </SheetContent>
@@ -216,7 +216,7 @@ export default function ChatPageClient({
                 <ConversationList
                   conversations={conversations}
                   activeId={activeConversation?.id}
-                  onSelect={(id) => setActiveConversationId(id)}
+                  onSelect={(id: string) => setActiveConversationId(id)}
                   dense={false}
                 />
               </div>
