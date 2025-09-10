@@ -1,7 +1,8 @@
 use crate::storage::{
     get_admin, is_moderator, remove_moderator as remove_moderator_storage, save_moderator,
 };
-use crate::types::{require_auth, Error};
+use crate::error::Error;
+use crate::types::{require_auth};
 use soroban_sdk::{Address, Env};
 
 pub fn check_admin(env: &Env, caller: &Address) -> Result<(), Error> {

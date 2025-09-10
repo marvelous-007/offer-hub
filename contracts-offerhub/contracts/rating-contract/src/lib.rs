@@ -14,12 +14,14 @@ mod storage;
 mod test;
 mod types;
 mod validation;
+mod error;
 
 pub use crate::contract::RatingContract;
 use crate::types::UserRatingSummary;
 pub use types::{
-    Error, Feedback, HealthCheckResult, HealthStatus, Rating, RatingStats, UserRatingData,
+    Feedback, HealthCheckResult, HealthStatus, Rating, RatingStats, UserRatingData,
 };
+pub use error::Error;
 
 #[contract]
 pub struct Contract;

@@ -52,7 +52,48 @@ fn test_deposit_and_release_token() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "HostError: Error(Contract, #5)")]
+fn test_insufficient_fund() {
+    let env = setup_env();
+    env.mock_all_auths();
+
+    let contract_id = env.register(EscrowContract, ());
+    let contract = EscrowContractClient::new(&env, &contract_id);
+
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let arbitrator = Address::generate(&env);
+    let token = setup_token(&env);
+    let amount = 10000;
+    let timeout = 3600; // 1 hour (minimum allowed)
+
+    contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
+    contract.deposit_funds(&client);
+}
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #1)")]
+fn test_already_initilaized() {
+    let env = setup_env();
+    env.mock_all_auths();
+
+    let contract_id = env.register(EscrowContract, ());
+    let contract = EscrowContractClient::new(&env, &contract_id);
+
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let arbitrator = Address::generate(&env);
+    let token = setup_token(&env);
+    let amount = 500_000_000;
+    let timeout = 3600; // 1 hour (minimum allowed)
+
+    contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
+    contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
+
+}
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #5)")]
 fn test_deposit_insufficient_balance() {
     let env = setup_env();
     env.mock_all_auths();
@@ -71,9 +112,22 @@ fn test_deposit_insufficient_balance() {
     contract.deposit_funds(&client);
 }
 
+
 #[test]
-#[should_panic]
-fn test_resolve_dispute_arbitrator_only_panics_for_non_arbitrator() {
+#[should_panic(expected = "HostError: Error(Contract, #2)")]
+fn test_not_initialized() {
+    let env = setup_env();
+    env.mock_all_auths();
+
+    let contract_id = env.register(EscrowContract, ());
+    let contract = EscrowContractClient::new(&env, &contract_id);
+
+    let client = Address::generate(&env);
+    contract.deposit_funds(&client);
+}
+
+#[test]
+fn test_resolve_dispute_arbitrator() {
     let env = setup_env();
     env.mock_all_auths();
 
@@ -91,14 +145,14 @@ fn test_resolve_dispute_arbitrator_only_panics_for_non_arbitrator() {
     contract.deposit_funds(&client);
 
     contract.dispute(&client);
-    let data = crate::contract::get_escrow_data(&env);
+    let data = contract.get_escrow_data();
     assert_eq!(data.status, EscrowStatus::Disputed);
 
-    contract.resolve_dispute(&client, &Symbol::new(&env, "client_wins"));
+    contract.resolve_dispute(&arbitrator, &Symbol::new(&env, "client_wins"));
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "HostError: Error(Contract, #3)")]
 fn test_resolve_dispute_panics_for_non_arbitrator() {
     let env = setup_env();
     env.mock_all_auths();
@@ -120,8 +174,58 @@ fn test_resolve_dispute_panics_for_non_arbitrator() {
     contract.resolve_dispute(&client, &Symbol::new(&env, "client_wins"));
 }
 
+
 #[test]
-#[should_panic]
+#[should_panic(expected = "HostError: Error(Contract, #7)")]
+fn test_dispute_not_opened() {
+    let env = setup_env();
+    env.mock_all_auths();
+
+    let contract_id = env.register(EscrowContract, ());
+    let contract = EscrowContractClient::new(&env, &contract_id);
+
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let arbitrator = Address::generate(&env);
+    let token = setup_token(&env);
+    let amount = 500;
+    let timeout = 3600; // 1 hour (minimum allowed)
+
+    contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
+    contract.deposit_funds(&client);
+
+    contract.resolve_dispute(&client, &Symbol::new(&env, "client_wins"));
+}
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #8)")]
+fn test_invalid_dsipute_result() {
+    let env = setup_env();
+    env.mock_all_auths();
+
+    let contract_id = env.register(EscrowContract, ());
+    let contract = EscrowContractClient::new(&env, &contract_id);
+
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let arbitrator = Address::generate(&env);
+    let token = setup_token(&env);
+    let amount = 500;
+    let timeout = 3600; // 1 hour (minimum allowed)
+
+    contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
+    contract.deposit_funds(&client);
+
+    contract.dispute(&client);
+    let data = contract.get_escrow_data();
+    assert_eq!(data.status, EscrowStatus::Disputed);
+
+    contract.resolve_dispute(&arbitrator, &Symbol::new(&env, "none"));
+}
+
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #3)")]
 fn test_resolve_dispute_unauthorized() {
     let env = setup_env();
     env.mock_all_auths();
@@ -140,10 +244,8 @@ fn test_resolve_dispute_unauthorized() {
     contract.deposit_funds(&client);
 
     contract.dispute(&client);
-    let data = crate::contract::get_escrow_data(&env);
-    assert_eq!(data.status, EscrowStatus::Disputed);
 
-    contract.resolve_dispute(&client, &Symbol::new(&env, "client_wins"));
+    contract.resolve_dispute(&freelancer, &Symbol::new(&env, "client_wins"));
 }
 
 #[test]
@@ -172,7 +274,7 @@ fn test_auto_release_after_timeout() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "HostError: Error(Contract, #6)")]
 fn test_auto_release_panics_if_not_timed_out() {
     let env = setup_env();
     env.mock_all_auths();
@@ -538,7 +640,7 @@ fn test_reset_transaction_count() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "HostError: Error(Contract, #3)")]
 fn test_reset_transaction_count_failed() {
     let env = setup_env();
     env.mock_all_auths();

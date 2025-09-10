@@ -1,24 +1,5 @@
 use soroban_sdk::{contracterror, contracttype, symbol_short, Address, String, Symbol, Vec};
-
-#[contracterror]
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum Error {
-    Unauthorized = 1,
-    InvalidRating = 2,
-    AlreadyRated = 3,
-    ContractNotFound = 4,
-    InsufficientRatings = 5,
-    RatingRestricted = 6,
-    FeedbackNotFound = 7,
-    InvalidModerationAction = 8,
-    ThresholdNotFound = 9,
-    IncentiveNotFound = 10,
-    IncentiveAlreadyClaimed = 11,
-    ReputationContractNotSet = 12,
-    AlreadyModerator = 13,
-    NotModerator = 14,
-    RateLimitExceeded = 15,
-}
+use crate::error::Error;
 
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]

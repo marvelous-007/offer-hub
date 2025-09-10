@@ -1,5 +1,6 @@
 use crate::storage::{get_platform_stat, get_user_rating_stats};
-use crate::types::{Error, UserRatingData};
+use crate::error::Error;
+use crate::types::{UserRatingData};
 use soroban_sdk::{Address, Env, String, Vec};
 
 pub fn calculate_rating_trend(env: &Env, user: &Address) -> i32 {

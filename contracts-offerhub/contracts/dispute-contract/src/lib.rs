@@ -4,6 +4,7 @@ mod access;
 mod contract;
 mod storage;
 mod test;
+mod validation_test;
 mod types;
 mod validation;
 mod error;

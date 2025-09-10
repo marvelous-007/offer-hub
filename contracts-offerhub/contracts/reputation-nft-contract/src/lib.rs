@@ -8,9 +8,10 @@ mod metadata;
 mod storage;
 mod test;
 mod types;
+mod error;
 
 pub use crate::contract::ReputationNFTContract;
-pub use types::Error;
+pub use error::Error;
 pub use types::Metadata;
 pub use types::TokenId;
 

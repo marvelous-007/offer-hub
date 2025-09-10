@@ -66,23 +66,6 @@ pub struct EscrowData {
     pub net_amount: i128,     // Amount after fees
 }
 
-#[contracterror]
-#[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
-#[repr(u32)]
-pub enum Error {
-    AlreadyInitialized = 1,
-    NotInitialized = 2,
-    Unauthorized = 3,
-    InvalidAmount = 4,
-    InsufficientFunds = 5,
-    InvalidStatus = 6,
-    DisputeNotOpen = 7,
-    InvalidDisputeResult = 8,
-    MilestoneNotFound = 9,
-    RateLimitExceeded = 10,
-    UnexpectedError = 11,
-}
-
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct EscrowDataExport {

@@ -1,7 +1,8 @@
 use crate::events::{emit_privilege_granted, emit_restriction_applied};
 use crate::storage::{get_user_rating_stats, get_user_restriction, save_user_restriction};
+use crate::error::Error;
 use crate::types::{
-    Error, DEFAULT_RESTRICTION_THRESHOLD, DEFAULT_TOP_RATED_THRESHOLD, DEFAULT_WARNING_THRESHOLD,
+    DEFAULT_RESTRICTION_THRESHOLD, DEFAULT_TOP_RATED_THRESHOLD, DEFAULT_WARNING_THRESHOLD,
 };
 use soroban_sdk::{Address, Env, String, Vec};
 

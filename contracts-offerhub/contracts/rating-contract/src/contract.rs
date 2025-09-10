@@ -19,8 +19,9 @@ use crate::storage::{
     save_rating_threshold, save_reputation_contract, save_user_rating_stats, set_rate_limit_bypass,
     set_total_rating,
 };
+use crate::error::Error;
 use crate::types::{
-    require_auth, AllRatingDataExport, Error, Feedback, HealthCheckResult, Rating,
+    require_auth, AllRatingDataExport, Feedback, HealthCheckResult, Rating,
     RatingDataExport, RatingStats, RatingThreshold, UserRatingData, UserRatingSummary
 };
 use crate::validation::{validate_report_feedback, validate_submit_rating};

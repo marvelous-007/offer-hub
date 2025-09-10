@@ -1,4 +1,4 @@
-use crate::types::Error;
+use crate::error::Error;
 use soroban_sdk::{contracttype, symbol_short, Address, Env, String, Symbol, Vec};
 
 pub const ESCROW_DATA: Symbol = symbol_short!("ESCROW");

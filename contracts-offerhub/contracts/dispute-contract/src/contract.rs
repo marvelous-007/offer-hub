@@ -1,4 +1,4 @@
-use soroban_sdk::{panic_with_error, Address, Env, IntoVal, Map, String, Symbol, Vec};
+use soroban_sdk::{panic_with_error, Address, Env, IntoVal, Map, String, Symbol, Vec, log};
 
 use crate::{
     access::{is_valid_arbitrator, is_valid_mediator},
@@ -84,6 +84,7 @@ pub fn open_dispute(
     if !env.storage().instance().has(&ARBITRATOR) {
         handle_error(env, Error::NotInitialized);
     }
+
 
     // Rate limit: max 3 disputes per 24h per initiator
     let limit_type = String::from_str(env, "open_dispute");
@@ -257,18 +258,22 @@ pub fn escalate_to_arbitration(env: &Env, job_id: u32, mediator: Address, arbitr
 }
 
 pub fn resolve_dispute(env: &Env, job_id: u32, decision: DisputeOutcome) {
+    log!(&env, "0");
+
     if !env.storage().instance().has(&ARBITRATOR) {
         handle_error(env, Error::NotInitialized);
     }
-
+    log!(&env, "1");
     let mut disputes: Map<u32, DisputeData> = env.storage().instance().get(&DISPUTES).unwrap();
     let mut dispute = disputes
         .get(job_id)
         .unwrap_or_else(|| handle_error(env, Error::DisputeNotFound));
+    log!(&env, "2");
 
     if dispute.resolved {
         handle_error(env, Error::DisputeAlreadyResolved);
     }
+    log!(&env, "3");
 
     // Check timeout
     if let Some(timeout) = dispute.timeout_timestamp {

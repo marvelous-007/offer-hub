@@ -1,5 +1,5 @@
 use soroban_sdk::{contracterror, contracttype, Address, Env, String};
-
+use crate::error::Error;
 pub type TokenId = u64;
 
 #[contracttype]
@@ -8,16 +8,6 @@ pub struct Metadata {
     pub name: String,
     pub description: String,
     pub uri: String,
-}
-
-#[contracterror]
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum Error {
-    Unauthorized = 1,
-    TokenDoesNotExist = 2,
-    TokenAlreadyExists = 3,
-    AlreadyMinter = 4,
-    NotMinter = 5,
 }
 
 pub const TOKEN_OWNER: &[u8] = &[0];

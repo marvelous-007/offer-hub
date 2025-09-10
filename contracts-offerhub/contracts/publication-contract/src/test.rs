@@ -199,3 +199,111 @@ fn test_publish_fails_on_negative_amount() {
 
     assert_eq!(result, Err(Ok(ContractError::InvalidAmount)));
 }
+
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #2)")]
+fn test_title_too_short() {
+    let test = PublicationTest::setup();
+
+    let pub_type = Symbol::new(&test.env, "service");
+    let title = String::from_str(&test.env, "Bu");
+    let category = String::from_str(&test.env, "Web Development");
+    let amount = 1000;
+    let timestamp = test.env.ledger().timestamp();
+
+    let _ = test.contract.publish(
+        &test.user1,
+        &pub_type,
+        &title,
+        &category,
+        &amount,
+        &timestamp,
+    );
+}
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #4)")]
+fn test_max_len() {
+    let test = PublicationTest::setup();
+
+    let pub_type = Symbol::new(&test.env, "service");
+    let title = String::from_str(&test.env, "Build a WebsiteBuild a WebsiteBuild a WebsiteBuild a WebsiteBuild a WebsiteBuild a WebsiteBuild a WebsiteBuild a WebsiteBuild a Website");
+    let category = String::from_str(&test.env, "Web Development");
+    let amount = 1000;
+    let timestamp = test.env.ledger().timestamp();
+
+    let _ = test.contract.publish(
+        &test.user1,
+        &pub_type,
+        &title,
+        &category,
+        &amount,
+        &timestamp,
+    );
+}
+
+
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #4)")]
+fn test_min_category() {
+    let test = PublicationTest::setup();
+
+    let pub_type = Symbol::new(&test.env, "service");
+    let title = String::from_str(&test.env, "Build a Website");
+    let category = String::from_str(&test.env, "");
+    let amount = 1000;
+    let timestamp = test.env.ledger().timestamp();
+
+    let _ = test.contract.publish(
+        &test.user1,
+        &pub_type,
+        &title,
+        &category,
+        &amount,
+        &timestamp,
+    );
+}
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #3)")]
+fn test_max_amount_invalid_amount() {
+    let test = PublicationTest::setup();
+
+    let pub_type = Symbol::new(&test.env, "service");
+    let title = String::from_str(&test.env, "Build a website");
+    let category = String::from_str(&test.env, "Web Development");
+    let amount = 1_000_000_000_001;
+    let timestamp = test.env.ledger().timestamp();
+
+    let _ = test.contract.publish(
+        &test.user1,
+        &pub_type,
+        &title,
+        &category,
+        &amount,
+        &timestamp,
+    );
+}
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #1)")]
+fn test_invalid_publication_type() {
+    let test = PublicationTest::setup();
+
+    let pub_type = Symbol::new(&test.env, "none");
+    let title = String::from_str(&test.env, "Build a website");
+    let category = String::from_str(&test.env, "Web Development");
+    let amount = 1_000;
+    let timestamp = test.env.ledger().timestamp();
+
+    let _ = test.contract.publish(
+        &test.user1,
+        &pub_type,
+        &title,
+        &category,
+        &amount,
+        &timestamp,
+    );
+}

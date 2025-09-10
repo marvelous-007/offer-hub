@@ -3,7 +3,8 @@ use crate::events::{emit_feedback_moderated, emit_feedback_reported};
 use crate::storage::{
     get_feedback, increment_platform_stat, save_feedback_report, update_feedback,
 };
-use crate::types::{Error, FeedbackReport};
+use crate::error::Error;
+use crate::types::{FeedbackReport};
 use crate::validation::validate_moderation_action;
 use soroban_sdk::{Address, Env, String};
 
