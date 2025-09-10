@@ -79,4 +79,12 @@ impl FeeManagerContract {
     pub fn get_premium_users(env: Env) -> Vec<types::PremiumUser> {
         contract::get_premium_users(&env)
     }
+
+    pub fn set_config(env: Env, caller: Address, config: types::ContractConfig) {
+        contract::set_config(&env, caller, config);
+    }
+
+    pub fn get_config(env: Env) -> types::ContractConfig {
+        contract::get_config(&env)
+    }
 } 

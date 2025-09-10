@@ -158,4 +158,13 @@ impl DisputeResolutionContract {
         storage::reset_rate_limit(&env, &user, &limit_type);
         Ok(())
     }
+
+    pub fn set_config(env: Env, admin: Address, config: types::ContractConfig) -> Result<(), Error> {
+        contract::set_config(&env, admin, config);
+        Ok(())
+    }
+
+    pub fn get_config(env: Env) -> Result<types::ContractConfig, Error> {
+        Ok(contract::get_config(&env))
+    }
 }

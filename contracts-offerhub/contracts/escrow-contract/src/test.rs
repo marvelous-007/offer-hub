@@ -516,6 +516,12 @@ fn test_set_config_unauthorized() {
     // Initialize contract
     contract.initialize_contract(&admin);
 
+    // Initialize escrow data for the test
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let fee_manager = Address::generate(&env);
+    contract.init_contract(&client, &freelancer, &500, &fee_manager);
+
     let new_config = crate::types::ContractConfig {
         min_escrow_amount: 2000,
         max_escrow_amount: 2000000000,

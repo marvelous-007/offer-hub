@@ -510,7 +510,7 @@ pub fn set_config(env: &Env, admin: Address, config: ContractConfig) {
     env.storage().instance().set(&CONTRACT_CONFIG, &config);
     
     env.events().publish(
-        (String::from_str(env, "config_updated"), admin),
+        (String::from_str(env, "cfg_upd"), admin),
         (config.default_timeout_hours, config.max_evidence_per_dispute, config.mediation_timeout_hours),
     );
 }

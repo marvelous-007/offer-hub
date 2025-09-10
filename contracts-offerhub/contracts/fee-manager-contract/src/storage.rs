@@ -20,9 +20,9 @@ pub const DEFAULT_DISPUTE_FEE_PERCENTAGE: i128 = 500;   // 5.0%
 pub const DEFAULT_ARBITRATOR_FEE_PERCENTAGE: i128 = 300; // 3.0%
 
 // Default contract configuration values
-pub const DEFAULT_PLATFORM_FEE_PERCENTAGE: u8 = 2;      // 2%
+pub const DEFAULT_PLATFORM_FEE_PERCENTAGE: u32 = 2;      // 2%
 pub const DEFAULT_ESCROW_TIMEOUT_DAYS: u32 = 30;        // 30 days
-pub const DEFAULT_MAX_RATING_PER_DAY: u8 = 10;          // 10 ratings per day
+pub const DEFAULT_MAX_RATING_PER_DAY: u32 = 10;          // 10 ratings per day
 pub const DEFAULT_MIN_ESCROW_AMOUNT: u128 = 1000;       // Minimum 1000 units
 pub const DEFAULT_MAX_ESCROW_AMOUNT: u128 = 1000000000; // Maximum 1 billion units
 pub const DEFAULT_DISPUTE_TIMEOUT_HOURS: u32 = 168;     // 7 days (168 hours)

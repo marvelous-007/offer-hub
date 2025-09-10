@@ -202,6 +202,9 @@ fn test_admin_health_check() {
     let admin = Address::generate(&env);
     client.init(&admin);
 
+    // Mock authentication for admin
+    env.mock_all_auths();
+
     // Perform admin health check
     let health_status = client.admin_health_check(&admin);
     assert!(health_status.status.is_healthy, "Contract should be healthy");

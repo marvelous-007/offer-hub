@@ -102,6 +102,18 @@ impl EscrowContract {
     pub fn reset_rate_limit(env: Env, caller: Address, user: Address, limit_type: String) {
         contract::reset_rate_limit(&env, caller, user, limit_type);
     }
+
+    pub fn initialize_contract(env: Env, admin: Address) {
+        contract::initialize_contract(&env, admin);
+    }
+
+    pub fn set_config(env: Env, caller: Address, config: types::ContractConfig) {
+        contract::set_config(&env, caller, config);
+    }
+
+    pub fn get_config(env: Env) -> types::ContractConfig {
+        contract::get_config(&env)
+    }
 }
 
 #[cfg(test)]

@@ -18,9 +18,9 @@ pub struct FeeConfig {
 #[contracttype]
 #[derive(Clone)]
 pub struct ContractConfig {
-    pub platform_fee_percentage: u8,     // Platform fee percentage (0-100)
+    pub platform_fee_percentage: u32,     // Platform fee percentage (0-100)
     pub escrow_timeout_days: u32,         // Escrow timeout in days
-    pub max_rating_per_day: u8,           // Maximum ratings per day per user
+    pub max_rating_per_day: u32,           // Maximum ratings per day per user
     pub min_escrow_amount: u128,          // Minimum escrow amount
     pub max_escrow_amount: u128,          // Maximum escrow amount
     pub dispute_timeout_hours: u32,       // Dispute timeout in hours

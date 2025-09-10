@@ -136,7 +136,7 @@ pub const RATE_LIMIT_BYPASS: &[u8] = &[14];
 pub const CONTRACT_CONFIG: &[u8] = &[15];
 
 // Default configuration values
-pub const DEFAULT_MAX_RATING_PER_DAY: u8 = 10;          // 10 ratings per day
+pub const DEFAULT_MAX_RATING_PER_DAY: u32 = 10;          // 10 ratings per day
 pub const DEFAULT_MAX_FEEDBACK_LENGTH: u32 = 1000;      // 1000 characters
 pub const DEFAULT_MIN_RATING: u32 = 1;                  // Minimum rating 1
 pub const DEFAULT_MAX_RATING: u32 = 5;                  // Maximum rating 5
@@ -170,7 +170,7 @@ pub struct RateLimitEntry {
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
 pub struct ContractConfig {
-    pub max_rating_per_day: u8,           // Maximum ratings per day per user
+    pub max_rating_per_day: u32,           // Maximum ratings per day per user
     pub max_feedback_length: u32,         // Maximum feedback character length
     pub min_rating: u32,                  // Minimum rating value
     pub max_rating: u32,                  // Maximum rating value

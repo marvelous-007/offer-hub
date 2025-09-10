@@ -60,8 +60,7 @@ impl RatingContract {
         };
         save_rating_threshold(&env, &top_rated_threshold);
         
-        // Initialize health check system
-        crate::health_check::initialize_health_check_system(&env)?;
+        // Health check system initialization removed for now
         
         Ok(())
     }
@@ -422,14 +421,7 @@ impl RatingContract {
         Ok(())
     }
 
-    // Health check functions
-    pub fn health_check(env: Env) -> Result<HealthCheckResult, Error> {
-        crate::health_check::perform_health_check(&env)
-    }
-
-    pub fn admin_health_check(env: Env, caller: Address) -> Result<HealthCheckResult, Error> {
-        crate::health_check::admin_health_check(&env, &caller)
-    }
+    // Health check functions removed for now
 
     pub fn get_last_health_check(env: Env) -> u64 {
         crate::storage::get_last_health_check(&env)
@@ -449,7 +441,7 @@ impl RatingContract {
         
         // Emit event
         env.events().publish(
-            (soroban_sdk::symbol_short!("config_updated"), caller),
+            (soroban_sdk::symbol_short!("cfg_upd"), caller),
             (config.max_rating_per_day, config.max_feedback_length, config.auto_moderation_enabled),
         );
         

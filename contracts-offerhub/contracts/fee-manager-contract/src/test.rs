@@ -5,6 +5,7 @@ use soroban_sdk::{
     testutils::Address as _,
     Address, Env,
 };
+use crate::types::ContractConfig;
 
 #[test]
 fn test_initialize() {

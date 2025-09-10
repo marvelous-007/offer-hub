@@ -373,7 +373,7 @@ pub fn set_config(env: &Env, caller: Address, config: ContractConfig) {
     env.storage().instance().set(&CONTRACT_CONFIG, &config);
     
     env.events().publish(
-        (Symbol::new(env, "config_updated"), caller),
+        (Symbol::new(env, "cfg_upd"), caller),
         (config.platform_fee_percentage, config.escrow_timeout_days, config.max_rating_per_day),
     );
 }
