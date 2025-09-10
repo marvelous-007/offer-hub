@@ -6,12 +6,14 @@ mod storage;
 mod test;
 mod types;
 mod validation;
+mod error;
 
 // #[cfg(test)]
 // mod validation_test;
 
-use crate::types::{ArbitratorData, DisputeData, DisputeOutcome, Error, Evidence, DisputeInfo};
+use crate::types::{ArbitratorData, DisputeData, DisputeOutcome, Evidence, DisputeInfo};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
+use crate::{error::{handle_error, Error}};
 
 #[contract]
 pub struct DisputeResolutionContract;
