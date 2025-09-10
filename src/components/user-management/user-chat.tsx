@@ -86,7 +86,7 @@ export function UserChat({ onBack }: UserChatProps) {
           <Smile className="h-5 w-5 text-gray-400" />
           <Input
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)}
             placeholder="Message"
             className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
           />

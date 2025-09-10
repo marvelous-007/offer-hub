@@ -179,7 +179,7 @@ export default function PaymentHistory() {
                   placeholder="Search transactions..."
                   className="pl-10"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                 />
               </div>
               <div className="flex gap-2">

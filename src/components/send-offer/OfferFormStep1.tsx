@@ -69,7 +69,7 @@ export function OfferFormStep1({ onNext, onBack, freelancerId }: OfferFormStep1P
               id="jobTitle"
               placeholder="Give your job a title"
               value={formData.offerTitle}
-              onChange={(e) => updateField("offerTitle", e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateField("offerTitle", e.target.value)}
               className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
                 errors.offerTitle ? "border-red-500" : ""
               }`}
@@ -88,7 +88,7 @@ export function OfferFormStep1({ onNext, onBack, freelancerId }: OfferFormStep1P
               id="jobDescription"
               placeholder="Enter a description..."
               value={formData.projectDescription}
-              onChange={(e) => updateField("projectDescription", e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => updateField("projectDescription", e.target.value)}
               rows={6}
               className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none ${
                 errors.projectDescription ? "border-red-500" : ""
@@ -108,7 +108,7 @@ export function OfferFormStep1({ onNext, onBack, freelancerId }: OfferFormStep1P
               id="budget"
               placeholder="$0"
               value={formData.budgetAmount ? `$${formData.budgetAmount}` : ""}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 const value = e.target.value.replace(/[^0-9]/g, "");
                 updateField("budgetAmount", value ? parseInt(value) : 0);
               }}

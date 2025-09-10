@@ -112,7 +112,7 @@ export default function ChangePasswordForm({ onBack }: ChangePasswordFormProps) 
                     id="password"
                     type={showPassword ? "text" : "password"}
                     value={formData.password}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
                     className="h-12 pr-10"
                     placeholder="••••••••••"
                     required
@@ -174,7 +174,7 @@ export default function ChangePasswordForm({ onBack }: ChangePasswordFormProps) 
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
                     value={formData.confirmPassword}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, confirmPassword: e.target.value }))}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData((prev) => ({ ...prev, confirmPassword: e.target.value }))}
                     className={`h-12 pr-10 ${formData.confirmPassword && !passwordsMatch ? "border-red-500 focus:border-red-500" : ""}`}
                     placeholder="••••••••••"
                     required
