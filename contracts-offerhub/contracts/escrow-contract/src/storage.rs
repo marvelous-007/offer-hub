@@ -168,24 +168,67 @@ pub fn increment_escrow_transaction_count(env: &Env) -> u64 {
 use crate::types::{EscrowData, EscrowState};
 use crate::error::handle_error;
 
+// pub fn set_escrow_state(env: &Env, new_state: EscrowState) {
+//     let mut data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+
+
+//     if !data.state.can_transition_to(&new_state) {
+//         handle_error(env, Error::InvalidStatus)
+//     }
+
+//     data.state = new_state.clone();
+//     env.storage().instance().set(&ESCROW_DATA, &data);
+
+//     log!(env, "Escrow state changed to {:?}", new_state);
+// }
+
 pub fn set_escrow_state(env: &Env, new_state: EscrowState) {
-    let mut data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+        let mut data: EscrowData = crate::storage::get_escrow_data(env);
+        // Guard initialization and load
+    
+        if !data.state.can_transition_to(&new_state) {
+            handle_error(env, Error::InvalidStatus)
+        }
+    
+        let prev = data.state;
+        let now = env.ledger().timestamp();
+    
+        // Maintain audit timestamps tied to states
+        match new_state {
+            EscrowState::Funded => data.funded_at = Some(now),
+            EscrowState::Released => {
+                data.released_at = Some(now);
+                data.resolved_at = data.resolved_at.or(Some(now));
+            }
+            EscrowState::Refunded => {
+                data.resolved_at = Some(now);
+            }
+            EscrowState::Disputed => data.disputed_at = Some(now),
+            EscrowState::Created => {}
+        }
+    
+        data.state = new_state;
+        env.storage().instance().set(&ESCROW_DATA, &data);
+    
+        // Emit event + keep debug log
+        env.events().publish(
+            (Symbol::new(env, "escrow_state_changed"), env.current_contract_address()),
+            (&prev, &data.state, now),
+        );
 
-
-    if !data.state.can_transition_to(&new_state) {
-        handle_error(env, Error::InvalidStatus)
+        log!(env, "Escrow state changed from {:?} to {:?}", prev, data.state);
     }
-
-    data.state = new_state.clone();
-    env.storage().instance().set(&ESCROW_DATA, &data);
-
-    log!(env, "Escrow state changed to {:?}", new_state);
-}
 
 pub fn get_escrow_state(env: &Env) -> EscrowState {
     let data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
 
     data.state
+}
+
+pub fn get_escrow_data(env: &Env) -> EscrowData {
+    let data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+
+    data
 }
 
 pub fn is_escrow_funded(env: &Env) -> bool {

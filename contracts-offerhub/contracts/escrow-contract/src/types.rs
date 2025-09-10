@@ -19,6 +19,8 @@ impl EscrowState {
             (Funded, Released) => true,
             (Funded, Refunded) => true,
             (Funded, Disputed) => true,
+            (Disputed, Released) => true,
+            (Disputed, Refunded) => true,
             _ => false,
         }
     }
