@@ -8,7 +8,7 @@ use crate::{
     error::handle_error,
     storage::{add_call_log, CallLog, ESCROW_DATA, INITIALIZED},
     types::{
-        DisputeResult, Error, EscrowData, EscrowDataExport, EscrowStatus, Milestone,
+        DisputeResult, Error, EscrowData, EscrowDataExport, EscrowState, Milestone,
         MilestoneHistory, EscrowSummary
     },
     validation::{
@@ -769,12 +769,12 @@ pub fn get_contract_status(env: &Env, contract_id: Address) -> EscrowSummary {
     let escrow_data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
 
     // Format Escrow Status
-    let escrow_data_status = match escrow_data.status {
-        EscrowStatus::Initialized => String::from_str(&env, "Initialized"),
-        EscrowStatus::Funded => String::from_str(&env, "Funded"),
-        EscrowStatus::Released => String::from_str(&env, "Released"),
-        EscrowStatus::Disputed => String::from_str(&env, "Disputed"),
-        EscrowStatus::Resolved => String::from_str(&env, "Resolved"),
+    let escrow_data_status = match escrow_data.state {
+        EscrowState::Created => String::from_str(&env, "Initialized"),
+        EscrowState::Funded => String::from_str(&env, "Funded"),
+        EscrowState::Released => String::from_str(&env, "Released"),
+        EscrowState::Disputed => String::from_str(&env, "Disputed"),
+        EscrowState::Refunded => String::from_str(&env, "Resolved"),
     };
 
     let summary = EscrowSummary {

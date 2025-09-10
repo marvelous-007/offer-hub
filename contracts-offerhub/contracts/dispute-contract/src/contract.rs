@@ -621,7 +621,7 @@ pub fn export_all_dispute_data(env: &Env, admin: Address, limit: u32) -> AllDisp
         let summary = DisputeSummary {
             dispute_id,
             initiator: dispute_data.initiator,
-            status: dispute_data.status,
+            status: dispute_data.state,
             outcome: dispute_data.outcome,
             dispute_amount: dispute_data.dispute_amount,
             timestamp: dispute_data.timestamp,
@@ -673,12 +673,12 @@ pub fn get_dispute_info(env: &Env,  dispute_id: u32) -> Result<DisputeInfo, Erro
     };
 
     // Format dispute status
-    let dispute_status = match dispute.status {
-        DisputeStatus::Open => String::from_str(&env, "Open"),
-        DisputeStatus::UnderMediation => String::from_str(&env, "UnderMediation"),
-        DisputeStatus::UnderArbitration => String::from_str(&env, "UnderArbitration"),
-        DisputeStatus::Resolved => String::from_str(&env, "Resolved"),
-        DisputeStatus::Timeout => String::from_str(&env, "Timeout"),
+    let dispute_status = match dispute.state {
+        DisputeState::Open => String::from_str(&env, "Open"),
+        DisputeState::UnderReview(DisputeLevel::Mediation) => String::from_str(&env, "UnderMediation"),
+        DisputeState::UnderReview(DisputeLevel::Arbitration) => String::from_str(&env, "UnderArbitration"),
+        DisputeState::Resolved => String::from_str(&env, "Resolved"),
+        DisputeState::Closed => String::from_str(&env, "Timeout"),
     };
 
     // Format dispute level

@@ -1,6 +1,5 @@
 use soroban_sdk::{contracttype, symbol_short, Symbol, Address, Env, String, log};
 use crate::types::Error;
-use soroban_sdk::{contracttype, symbol_short, Address, Env, String, Symbol};
 
 pub const DISPUTES: Symbol = symbol_short!("DISPUTES");
 pub const ARBITRATOR: Symbol = symbol_short!("ARBITRTR");
@@ -93,25 +92,30 @@ pub fn set_total_disputes(env: &Env, count: u64) {
 use crate::types::{DisputeData, DisputeState};
 use crate::error::handle_error;
 
-pub fn set_dispute_state(env: &Env, new_state: DisputeState) {
-	let mut data: DisputeData = env.storage().instance().get(&DISPUTES).unwrap();
+pub fn set_dispute_state(env: &Env, job_id: u32, new_state: DisputeState) {
+     let key = (DISPUTES, job_id);
+      let mut data: DisputeData = match env.storage().instance().get(&key) {
+           Some(d) => d,
+          None => handle_error(env, Error::DisputeNotFound)
+     };
 
-	if !data.state.can_transition_to(&new_state) {
-		handle_error(env, Error::InvalidDisputeLevel)
-	}
-
-	data.state = new_state;
-	env.storage().instance().set(&DISPUTES, &data);
+    data.state = new_state;
+    env.storage().instance().set(&key, &data);
 
 	log!(env, "Dispute state changed to {:?}", new_state);
 }
 
-pub fn get_dispute_state(env: &Env) -> DisputeState {
-	let data: DisputeData = env.storage().instance().get(&DISPUTES).unwrap();
 
-	data.state
+pub fn get_dispute_state(env: &Env, job_id: u32) -> DisputeState {
+    let key = (DISPUTES, job_id);
+    let data: DisputeData = match env.storage().instance().get(&key) {
+     Some(d) => d,
+      None => handle_error(env, Error::DisputeNotFound)
+   };
+
+   data.state
 }
 
-pub fn is_dispute_initiated(env: &Env) -> bool {
-	get_dispute_state(env) == DisputeState::Open
+pub fn is_dispute_initiated(env: &Env, job_id: u32) -> bool {
+    get_dispute_state(env, job_id) == DisputeState::Open
 }
