@@ -1,5 +1,5 @@
 use crate::TokenId;
-use soroban_sdk::{Address, Env, Symbol};
+use soroban_sdk::{Address, Env, Symbol, Vec};
 
 pub fn emit_minted(env: &Env, to: &Address, token_id: &TokenId) {
     let topic = Symbol::new(env, "MINTED");
@@ -36,6 +36,36 @@ pub fn emit_achievement_minted(env: &Env, to: &Address, nft_type: &Symbol, token
         .publish((topic,), (to.clone(), nft_type.clone(), token_id));
 }
 
-pub fn emit_reputaion_contract_initiated(env : &Env , admin : &Address) {
-          env.events().publish((Symbol::new(&env , "ReputaionNFT_Contract_Init") ,admin ), env.ledger().timestamp());
+pub fn emit_reputaion_contract_initiated(env: &Env, admin: &Address) {
+    env.events().publish(
+        (Symbol::new(env, "ReputaionNFT_Contract_Init"), admin),
+        env.ledger().timestamp(),
+    );
+}
+
+pub fn emit_burned(env: &Env, token_id: &TokenId, owner: &Address) {
+    let topic = Symbol::new(env, "BURNED");
+    env.events().publish((topic,), (owner.clone(), token_id));
+}
+
+pub fn emit_batch_minted(env: &Env, owners: Vec<Address>, token_ids: Vec<TokenId>) {
+    let topic = Symbol::new(env, "BATCH_MINTED");
+    env.events().publish((topic,), (owners, token_ids));
+}
+
+pub fn emit_achievement_unlocked(
+    env: &Env,
+    user: &Address,
+    achievement_type: &Symbol,
+    token_id: &TokenId,
+) {
+    let topic = Symbol::new(env, "ACHIEVEMENT_UNLOCKED");
+    env.events()
+        .publish((topic,), (user.clone(), achievement_type.clone(), token_id));
+}
+
+pub fn emit_reputation_updated(env: &Env, user: &Address, old_score: u32, new_score: u32) {
+    let topic = Symbol::new(env, "REPUTATION_UPDATED");
+    env.events()
+        .publish((topic,), (user.clone(), old_score, new_score));
 }
