@@ -1,5 +1,5 @@
 use soroban_sdk::{contracterror, contracttype, Address, Env, String};
-
+use crate::error::Error;
 pub type TokenId = u64;
 
 #[contracttype]
@@ -29,21 +29,6 @@ pub enum RarityLevel {
     Rare,
     Epic,
     Legendary,
-}
-
-#[contracterror]
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum Error {
-    Unauthorized = 1,
-    TokenDoesNotExist = 2,
-    TokenAlreadyExists = 3,
-    AlreadyMinter = 4,
-    NotMinter = 5,
-    NonTransferableToken = 6,
-    InvalidAchievementType = 7,
-    InvalidInput = 8,
-    AchievementPrerequisiteNotMet = 9,
-    InvalidRarityLevel = 10,
 }
 
 pub const TOKEN_OWNER: &[u8] = &[0];

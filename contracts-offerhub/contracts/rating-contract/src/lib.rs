@@ -14,12 +14,14 @@ mod storage;
 mod test;
 mod types;
 mod validation;
+mod error;
 
 pub use crate::contract::RatingContract;
 use crate::types::UserRatingSummary;
 pub use types::{
-    Error, Feedback, HealthCheckResult, HealthStatus, Rating, RatingStats, UserRatingData,
+    Feedback, HealthCheckResult, HealthStatus, Rating, RatingStats, UserRatingData,
 };
+pub use error::Error;
 
 #[contract]
 pub struct Contract;
@@ -270,7 +272,6 @@ impl Contract {
     pub fn get_config(env: Env) -> Result<types::ContractConfig, Error> {
         RatingContract::get_config(env)
     }
-}
 
     /// Get contract total ratings count
     pub fn get_total_rating(env: &Env) -> Result<u64, Error> {
@@ -289,11 +290,3 @@ impl Contract {
         RatingContract::get_user_rating_summary(&env, user)
     }
 }
-
-// use soroban_sdk::contractclient;
-
-// #[contractclient(name = "ContractAClient")]
-// pub trait ContractAInterface {
-//     fn get_total_rating(env: &Env) -> u64;
-// }
-

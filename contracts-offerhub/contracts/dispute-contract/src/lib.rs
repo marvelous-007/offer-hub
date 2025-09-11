@@ -4,6 +4,7 @@ mod access;
 mod contract;
 mod storage;
 mod test;
+mod validation_test;
 mod types;
 mod validation;
 mod error;
@@ -11,8 +12,9 @@ mod error;
 // #[cfg(test)]
 // mod validation_test;
 
-use crate::types::{ArbitratorData, DisputeData, DisputeOutcome, Error, Evidence, DisputeInfo};
+use crate::types::{ArbitratorData, DisputeData, DisputeOutcome, Evidence, DisputeInfo};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
+use crate::{error::{handle_error, Error}};
 
 #[contract]
 pub struct DisputeResolutionContract;
@@ -183,6 +185,7 @@ impl DisputeResolutionContract {
 
     pub fn get_config(env: Env) -> Result<types::ContractConfig, Error> {
         Ok(contract::get_config(&env))
+    }
 
     pub fn get_total_disputes(env: Env) -> Result<u64, Error> {
         Ok(contract::get_total_disputes(&env))
@@ -194,6 +197,5 @@ impl DisputeResolutionContract {
 
      pub fn get_dispute_info(env: &Env, dispute_id: u32) -> Result<DisputeInfo, Error> {
         contract::get_dispute_info(&env, dispute_id)
-
     }
 }

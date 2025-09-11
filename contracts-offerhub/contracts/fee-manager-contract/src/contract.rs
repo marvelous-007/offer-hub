@@ -4,27 +4,13 @@ use crate::{
     error::{handle_error, Error},
     storage::{
         DEFAULT_ARBITRATOR_FEE_PERCENTAGE, DEFAULT_DISPUTE_FEE_PERCENTAGE,
-
         DEFAULT_ESCROW_FEE_PERCENTAGE, FEE_CONFIG, FEE_HISTORY, FEE_STATS, PLATFORM_BALANCE, PREMIUM_USERS,
         CONTRACT_CONFIG, DEFAULT_PLATFORM_FEE_PERCENTAGE, DEFAULT_ESCROW_TIMEOUT_DAYS, DEFAULT_MAX_RATING_PER_DAY,
         DEFAULT_MIN_ESCROW_AMOUNT, DEFAULT_MAX_ESCROW_AMOUNT, DEFAULT_DISPUTE_TIMEOUT_HOURS,
-        DEFAULT_RATE_LIMIT_WINDOW_HOURS, DEFAULT_MAX_RATE_LIMIT_CALLS,
+        DEFAULT_RATE_LIMIT_WINDOW_HOURS, DEFAULT_MAX_RATE_LIMIT_CALLS, TOTAL_FESS_COLLECTED
     },
-    types::{FeeCalculation, FeeConfig, FeeRecord, FeeStats, PremiumUser, FEE_TYPE_ESCROW, FEE_TYPE_DISPUTE, ContractConfig},
+    types::{FeeCalculation, FeeConfig, FeeRecord, FeeStats, PremiumUser, FEE_TYPE_ESCROW, FEE_TYPE_DISPUTE, PlatformStats, ContractConfig},
     validation::{validate_initialization, validate_fee_rates, validate_fee_calculation, validate_withdrawal_amount, validate_fee_type, validate_address},
-
-        DEFAULT_ESCROW_FEE_PERCENTAGE, FEE_CONFIG, FEE_HISTORY, FEE_STATS, PLATFORM_BALANCE,
-        PREMIUM_USERS, TOTAL_FESS_COLLECTED,
-    },
-    types::{
-        FeeCalculation, FeeConfig, FeeRecord, FeeStats, PlatformStats, PremiumUser, FEE_TYPE_DISPUTE,
-        FEE_TYPE_ESCROW,
-    },
-    validation::{
-        validate_address, validate_fee_calculation, validate_fee_rates, validate_fee_type,
-        validate_initialization, validate_withdrawal_amount,
-    },
-
 };
 
 pub fn initialize(env: &Env, admin: Address, platform_wallet: Address) {

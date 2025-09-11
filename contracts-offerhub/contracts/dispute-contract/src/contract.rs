@@ -1,30 +1,20 @@
-use soroban_sdk::{panic_with_error, Address, Env, IntoVal, Map, String, Symbol, Vec};
+use soroban_sdk::{panic_with_error, Address, Env, IntoVal, Map, String, Symbol, Vec, log};
 
 use crate::{
     access::{is_valid_arbitrator, is_valid_mediator},
 
-    storage::{ARBITRATOR, DISPUTES, DISPUTE_TIMEOUT, ESCROW_CONTRACT, FEE_MANAGER, check_rate_limit,
+    storage::{set_total_disputes, ARBITRATOR, DISPUTES, DISPUTE_TIMEOUT, ESCROW_CONTRACT, FEE_MANAGER, check_rate_limit,
               CONTRACT_CONFIG, DEFAULT_TIMEOUT_HOURS, DEFAULT_MAX_EVIDENCE, DEFAULT_MEDIATION_TIMEOUT,
               DEFAULT_ARBITRATION_TIMEOUT, DEFAULT_FEE_PERCENTAGE, DEFAULT_RATE_LIMIT_CALLS,
               DEFAULT_RATE_LIMIT_WINDOW_HOURS},
-    types::{DisputeData, DisputeLevel, DisputeOutcome, DisputeStatus, Error, Evidence, ContractConfig},
+    types::{DisputeData, DisputeLevel, DisputeOutcome, Evidence, ContractConfig},
     validation::{validate_open_dispute, validate_add_evidence, validate_timeout_duration, validate_address},
-
-    storage::{
-        check_rate_limit, set_total_disputes, ARBITRATOR, DISPUTES, DISPUTE_TIMEOUT,
-        ESCROW_CONTRACT, FEE_MANAGER,
-    },
-
     types::{
-        AllDisputeDataExport, DisputeData, DisputeDataExport, DisputeLevel, DisputeOutcome,
-        DisputeState, DisputeSummary, Error, Evidence, DisputeInfo
+        AllDisputeDataExport, DisputeDataExport,
+        DisputeState, DisputeSummary, DisputeInfo
     },
-
-    validation::{
-        validate_add_evidence, validate_address, validate_open_dispute, validate_timeout_duration,
-    },
-
 };
+use crate::{error::{handle_error, Error}};
 
 // Escrow integration constants
 const ESCROW_RESOLVE_DISPUTE: &str = "resolve_dispute";
@@ -40,23 +30,23 @@ pub fn initialize(
     fee_manager: Address,
 ) {
     if env.storage().instance().has(&ARBITRATOR) {
-        panic_with_error!(env, Error::AlreadyInitialized)
+        handle_error(env, Error::AlreadyInitialized)
     }
 
     admin.require_auth();
 
     // Input validation
     if let Err(_) = validate_address(&admin) {
-        panic_with_error!(env, Error::Unauthorized);
+        handle_error(env, Error::InvalidAddress);
     }
     if let Err(_) = validate_address(&escrow_contract) {
-        panic_with_error!(env, Error::Unauthorized);
+        handle_error(env, Error::InvalidAddress);
     }
     if let Err(_) = validate_address(&fee_manager) {
-        panic_with_error!(env, Error::Unauthorized);
+        handle_error(env, Error::InvalidAddress);
     }
     if let Err(_) = validate_timeout_duration(default_timeout) {
-        panic_with_error!(env, Error::InvalidTimeout);
+        handle_error(env, Error::InvalidAddress);
     }
 
     
@@ -103,8 +93,9 @@ pub fn open_dispute(
     initiator.require_auth();
 
     if !env.storage().instance().has(&ARBITRATOR) {
-        panic_with_error!(env, Error::NotInitialized);
+        handle_error(env, Error::NotInitialized);
     }
+
 
     // Rate limit: max 3 disputes per 24h per initiator
     let limit_type = String::from_str(env, "open_dispute");
@@ -120,14 +111,14 @@ pub fn open_dispute(
     // Validate escrow contract address if provided
     if let Some(ref escrow_addr) = escrow_contract {
         if let Err(_) = validate_address(escrow_addr) {
-            panic_with_error!(env, Error::Unauthorized);
+            handle_error(env, Error::InvalidAddress);
         }
     }
 
     let mut disputes: Map<u32, DisputeData> = env.storage().instance().get(&DISPUTES).unwrap();
 
     if disputes.contains_key(job_id) {
-        panic_with_error!(env, Error::DisputeAlreadyExists);
+        handle_error(env, Error::DisputeAlreadyExists);
     }
 
     let timeout_duration: u64 = env.storage().instance().get(&DISPUTE_TIMEOUT).unwrap();
@@ -167,12 +158,12 @@ pub fn open_dispute(
 
 pub fn get_dispute(env: &Env, job_id: u32) -> DisputeData {
     if !env.storage().instance().has(&ARBITRATOR) {
-        panic_with_error!(env, Error::NotInitialized);
+        handle_error(env, Error::NotInitialized);
     }
     let disputes: Map<u32, DisputeData> = env.storage().instance().get(&DISPUTES).unwrap();
     disputes
         .get(job_id)
-        .unwrap_or_else(|| panic_with_error!(env, Error::DisputeNotFound))
+        .unwrap_or_else(|| handle_error(env, Error::DisputeNotFound))
 }
 
 pub fn add_evidence(
@@ -192,10 +183,10 @@ pub fn add_evidence(
     let mut disputes: Map<u32, DisputeData> = env.storage().instance().get(&DISPUTES).unwrap();
     let mut dispute = disputes
         .get(job_id)
-        .unwrap_or_else(|| panic_with_error!(env, Error::DisputeNotFound));
+        .unwrap_or_else(|| handle_error(env, Error::DisputeNotFound));
 
     if dispute.resolved {
-        panic_with_error!(env, Error::DisputeAlreadyResolved);
+        handle_error(env, Error::DisputeAlreadyResolved);
     }
 
     let evidence = Evidence {
@@ -219,16 +210,16 @@ pub fn assign_mediator(env: &Env, job_id: u32, admin: Address, mediator: Address
     admin.require_auth();
 
     if !is_valid_mediator(env, &mediator) {
-        panic_with_error!(env, Error::InvalidArbitrator);
+        handle_error(env, Error::InvalidMediator);
     }
 
     let mut disputes: Map<u32, DisputeData> = env.storage().instance().get(&DISPUTES).unwrap();
     let mut dispute = disputes
         .get(job_id)
-        .unwrap_or_else(|| panic_with_error!(env, Error::DisputeNotFound));
+        .unwrap_or_else(|| handle_error(env, Error::DisputeNotFound));
 
     if dispute.resolved {
-        panic_with_error!(env, Error::DisputeAlreadyResolved);
+        handle_error(env, Error::DisputeAlreadyResolved);
     }
 
     dispute.mediator = Some(mediator.clone());
@@ -247,20 +238,20 @@ pub fn escalate_to_arbitration(env: &Env, job_id: u32, mediator: Address, arbitr
     mediator.require_auth();
 
     if !is_valid_arbitrator(env, &arbitrator) {
-        panic_with_error!(env, Error::InvalidArbitrator);
+        handle_error(env, Error::InvalidArbitrator);
     }
 
     let mut disputes: Map<u32, DisputeData> = env.storage().instance().get(&DISPUTES).unwrap();
     let mut dispute = disputes
         .get(job_id)
-        .unwrap_or_else(|| panic_with_error!(env, Error::DisputeNotFound));
+        .unwrap_or_else(|| handle_error(env, Error::DisputeNotFound));
 
     if dispute.resolved {
-        panic_with_error!(env, Error::DisputeAlreadyResolved);
+        handle_error(env, Error::DisputeAlreadyResolved);
     }
 
     if dispute.mediator != Some(mediator) {
-        panic_with_error!(env, Error::Unauthorized);
+        handle_error(env, Error::Unauthorized);
     }
 
     dispute.arbitrator = Some(arbitrator.clone());
@@ -280,16 +271,15 @@ pub fn escalate_to_arbitration(env: &Env, job_id: u32, mediator: Address, arbitr
 
 pub fn resolve_dispute(env: &Env, job_id: u32, decision: DisputeOutcome) {
     if !env.storage().instance().has(&ARBITRATOR) {
-        panic_with_error!(env, Error::NotInitialized);
+        handle_error(env, Error::NotInitialized);
     }
-
     let mut disputes: Map<u32, DisputeData> = env.storage().instance().get(&DISPUTES).unwrap();
     let mut dispute = disputes
         .get(job_id)
-        .unwrap_or_else(|| panic_with_error!(env, Error::DisputeNotFound));
+        .unwrap_or_else(|| handle_error(env, Error::DisputeNotFound));
 
     if dispute.resolved {
-        panic_with_error!(env, Error::DisputeAlreadyResolved);
+        handle_error(env, Error::DisputeAlreadyResolved);
     }
 
     // Check timeout
@@ -319,22 +309,22 @@ pub fn resolve_dispute(env: &Env, job_id: u32, decision: DisputeOutcome) {
                 // In a real implementation, you would check if the caller is the mediator
                 // For now, we'll assume the mediator is authorized
             } else {
-                panic_with_error!(env, Error::MediationRequired);
+                handle_error(env, Error::MediationRequired);
             }
         }
         DisputeLevel::Arbitration => {
             if let Some(ref arbitrator) = dispute.arbitrator {
                 if !is_valid_arbitrator(env, arbitrator) {
-                    panic_with_error!(env, Error::InvalidArbitrator);
+                    handle_error(env, Error::InvalidArbitrator);
                 }
             } else {
-                panic_with_error!(env, Error::ArbitrationRequired);
+                handle_error(env, Error::ArbitrationRequired);
             }
         }
     }
 
     if decision == DisputeOutcome::None {
-        panic_with_error!(env, Error::InvalidDisputeLevel);
+        handle_error(env, Error::InvalidOutcome);
     }
 
     // Calculate fees
@@ -354,7 +344,7 @@ pub fn resolve_dispute(env: &Env, job_id: u32, decision: DisputeOutcome) {
             DisputeOutcome::FavorClient => ESCROW_CLIENT_WINS,
             DisputeOutcome::FavorFreelancer => ESCROW_FREELANCER_WINS,
             DisputeOutcome::Split => ESCROW_SPLIT,
-            DisputeOutcome::None => panic_with_error!(env, Error::InvalidDisputeLevel),
+            DisputeOutcome::None => handle_error(env, Error::InvalidOutcome),
         };
 
         // Call the escrow contract to resolve the dispute
@@ -390,16 +380,16 @@ pub fn resolve_dispute_with_auth(
     caller.require_auth();
 
     if !env.storage().instance().has(&ARBITRATOR) {
-        panic_with_error!(env, Error::NotInitialized);
+        handle_error(env, Error::NotInitialized);
     }
 
     let mut disputes: Map<u32, DisputeData> = env.storage().instance().get(&DISPUTES).unwrap();
     let mut dispute = disputes
         .get(job_id)
-        .unwrap_or_else(|| panic_with_error!(env, Error::DisputeNotFound));
+        .unwrap_or_else(|| handle_error(env, Error::DisputeNotFound));
 
     if dispute.resolved {
-        panic_with_error!(env, Error::DisputeAlreadyResolved);
+        handle_error(env, Error::DisputeAlreadyResolved);
     }
 
     // Check timeout
@@ -425,25 +415,25 @@ pub fn resolve_dispute_with_auth(
         DisputeLevel::Mediation => {
             if let Some(ref mediator) = dispute.mediator {
                 if mediator != &caller {
-                    panic_with_error!(env, Error::Unauthorized);
+                    handle_error(env, Error::Unauthorized);
                 }
             } else {
-                panic_with_error!(env, Error::MediationRequired);
+                handle_error(env, Error::MediationRequired);
             }
         }
         DisputeLevel::Arbitration => {
             if let Some(ref arbitrator) = dispute.arbitrator {
                 if arbitrator != &caller || !is_valid_arbitrator(env, arbitrator) {
-                    panic_with_error!(env, Error::Unauthorized);
+                    handle_error(env, Error::Unauthorized);
                 }
             } else {
-                panic_with_error!(env, Error::ArbitrationRequired);
+                handle_error(env, Error::ArbitrationRequired);
             }
         }
     }
 
     if decision == DisputeOutcome::None {
-        panic_with_error!(env, Error::InvalidDisputeLevel);
+        handle_error(env, Error::InvalidOutcome);
     }
 
     // Calculate fees
@@ -463,7 +453,7 @@ pub fn resolve_dispute_with_auth(
             DisputeOutcome::FavorClient => ESCROW_CLIENT_WINS,
             DisputeOutcome::FavorFreelancer => ESCROW_FREELANCER_WINS,
             DisputeOutcome::Split => ESCROW_SPLIT,
-            DisputeOutcome::None => panic_with_error!(env, Error::InvalidDisputeLevel),
+            DisputeOutcome::None => handle_error(env, Error::InvalidOutcome),
         };
 
         // Call the escrow contract to resolve the dispute
@@ -487,7 +477,7 @@ pub fn check_timeout(env: &Env, job_id: u32) -> bool {
     let disputes: Map<u32, DisputeData> = env.storage().instance().get(&DISPUTES).unwrap();
     let dispute = disputes
         .get(job_id)
-        .unwrap_or_else(|| panic_with_error!(env, Error::DisputeNotFound));
+        .unwrap_or_else(|| handle_error(env, Error::DisputeNotFound));
 
     if let Some(timeout) = dispute.timeout_timestamp {
         env.ledger().timestamp() > timeout
@@ -500,7 +490,7 @@ pub fn get_dispute_evidence(env: &Env, job_id: u32) -> Vec<Evidence> {
     let disputes: Map<u32, DisputeData> = env.storage().instance().get(&DISPUTES).unwrap();
     let dispute = disputes
         .get(job_id)
-        .unwrap_or_else(|| panic_with_error!(env, Error::DisputeNotFound));
+        .unwrap_or_else(|| handle_error(env, Error::DisputeNotFound));
 
     dispute.evidence
 }
@@ -510,10 +500,10 @@ pub fn set_dispute_timeout(env: &Env, admin: Address, timeout_seconds: u64) {
 
     // Input validation
     if let Err(_) = validate_address(&admin) {
-        panic_with_error!(env, Error::Unauthorized);
+        handle_error(env, Error::InvalidAddress);
     }
     if let Err(_) = validate_timeout_duration(timeout_seconds) {
-        panic_with_error!(env, Error::InvalidTimeout);
+        handle_error(env, Error::InvalidTimeout);
     }
 
     env.storage()
@@ -593,10 +583,11 @@ fn validate_config(config: &ContractConfig) -> Result<(), Error> {
     }
     
     Ok(())
-
-pub fn get_total_disputes(env: &Env) -> u64 {
-    crate::storage::get_total_disputes(env)
 }
+
+    pub fn get_total_disputes(env: &Env) -> u64 {
+        crate::storage::get_total_disputes(env)
+    }
 
 fn increment_dispute_count(env: &Env) -> u64 {
     let current = get_total_disputes(env);
@@ -634,13 +625,13 @@ pub fn export_dispute_data(env: &Env, caller: Address, dispute_id: u32) -> Dispu
     caller.require_auth();
 
     if !env.storage().instance().has(&ARBITRATOR) {
-        panic_with_error!(env, Error::NotInitialized);
+        handle_error(env, Error::NotInitialized);
     }
 
     let disputes: Map<u32, DisputeData> = env.storage().instance().get(&DISPUTES).unwrap();
     let dispute = disputes
         .get(dispute_id)
-        .unwrap_or_else(|| panic_with_error!(env, Error::DisputeNotFound));
+        .unwrap_or_else(|| handle_error(env, Error::DisputeNotFound));
 
     // Permission check: initiator, mediator, arbitrator, or admin can export data
     let admin: Address = env.storage().instance().get(&ARBITRATOR).unwrap();
@@ -650,7 +641,7 @@ pub fn export_dispute_data(env: &Env, caller: Address, dispute_id: u32) -> Dispu
         || admin == caller;
 
     if !is_authorized {
-        panic_with_error!(env, Error::Unauthorized);
+        handle_error(env, Error::Unauthorized);
     }
 
     let evidence = get_dispute_evidence(env, dispute_id);
@@ -680,12 +671,12 @@ pub fn export_all_dispute_data(env: &Env, admin: Address, limit: u32) -> AllDisp
     admin.require_auth();
 
     if !env.storage().instance().has(&ARBITRATOR) {
-        panic_with_error!(env, Error::NotInitialized);
+        handle_error(env, Error::NotInitialized);
     }
 
     let stored_admin: Address = env.storage().instance().get(&ARBITRATOR).unwrap();
     if stored_admin != admin {
-        panic_with_error!(env, Error::Unauthorized);
+        handle_error(env, Error::Unauthorized);
     }
 
     // Apply data size limit to prevent gas issues (max 50 disputes per export)
@@ -746,13 +737,13 @@ pub fn export_all_dispute_data(env: &Env, admin: Address, limit: u32) -> AllDisp
 // Same as get_dispute
 pub fn get_dispute_info(env: &Env,  dispute_id: u32) -> Result<DisputeInfo, Error> {
     if !env.storage().instance().has(&ARBITRATOR) {
-        panic_with_error!(env, Error::NotInitialized);
+        handle_error(env, Error::NotInitialized);
     }
 
     let disputes: Map<u32, DisputeData> = env.storage().instance().get(&DISPUTES).unwrap();
     let dispute = disputes
         .get(dispute_id)
-        .unwrap_or_else(|| panic_with_error!(env, Error::DisputeNotFound));
+        .unwrap_or_else(|| handle_error(env, Error::DisputeNotFound));
 
     // Format disoute outcome
     let dispute_outcome = match dispute.outcome {
@@ -811,4 +802,4 @@ pub fn get_dispute_info(env: &Env,  dispute_id: u32) -> Result<DisputeInfo, Erro
     };
 
     Ok(dispute_info)
-
+}

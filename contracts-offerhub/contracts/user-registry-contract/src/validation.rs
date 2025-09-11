@@ -1,4 +1,5 @@
-use crate::types::{Error, VerificationLevel};
+use crate::error::Error;
+use crate::types::{VerificationLevel};
 use soroban_sdk::{Address, Env, String, Vec};
 
 // Validation constants

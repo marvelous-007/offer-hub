@@ -11,19 +11,13 @@ use crate::{
               DEFAULT_MIN_ESCROW_AMOUNT, DEFAULT_MAX_ESCROW_AMOUNT, DEFAULT_TIMEOUT_DAYS,
               DEFAULT_MAX_MILESTONES, DEFAULT_FEE_PERCENTAGE, DEFAULT_RATE_LIMIT_CALLS,
               DEFAULT_RATE_LIMIT_WINDOW_HOURS},
-    types::{DisputeResult, Error, EscrowData, EscrowStatus, Milestone, MilestoneHistory, ContractConfig},
+    types::{DisputeResult, EscrowData, Milestone, MilestoneHistory, ContractConfig},
     validation::{validate_init_contract, validate_init_contract_full, validate_add_milestone, validate_milestone_id, validate_address},
 
-    storage::{add_call_log, CallLog, ESCROW_DATA, INITIALIZED},
     types::{
-        DisputeResult, Error, EscrowData, EscrowDataExport, EscrowState, Milestone,
-        MilestoneHistory, EscrowSummary
+        EscrowDataExport, EscrowState, EscrowSummary
     },
-    validation::{
-        validate_add_milestone, validate_address, validate_init_contract,
-        validate_init_contract_full, validate_milestone_id,
-    },
-
+    error::Error,
 };
 
 const TOKEN_TRANSFER: &str = "transfer";
@@ -791,6 +785,7 @@ fn validate_config(config: &ContractConfig) -> Result<(), Error> {
     }
     
     Ok(())
+}
 
 pub fn get_total_transactions(env: &Env) -> u64 {
     crate::storage::get_total_transactions(env)

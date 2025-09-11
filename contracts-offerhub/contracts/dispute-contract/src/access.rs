@@ -2,7 +2,8 @@ use soroban_sdk::{panic_with_error, Address, Env, Map, String, Vec};
 
 use crate::{
     storage::{ARBITRATORS, MEDIATORS},
-    types::{ArbitratorData, Error},
+    types::{ArbitratorData},
+    error::{ Error},
 };
 
 pub fn add_arbitrator(

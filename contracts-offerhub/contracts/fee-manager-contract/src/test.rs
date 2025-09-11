@@ -8,9 +8,6 @@ use soroban_sdk::{
 };
 use crate::types::ContractConfig;
 
-use soroban_sdk::{log, testutils::Address as _, Address, Env};
-
-
 #[test]
 fn test_initialize() {
     let env = Env::default();
@@ -28,6 +25,29 @@ fn test_initialize() {
     assert_eq!(fee_config.dispute_fee_percentage, 500); // 5.0%
     assert_eq!(fee_config.arbitrator_fee_percentage, 300); // 3.0%
     assert!(fee_config.initialized);
+}
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #2)")]
+fn test_not_initialize() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, FeeManagerContract);
+    let client = FeeManagerContractClient::new(&env, &contract_id);
+
+    let _ = client.get_fee_config();
+}
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #1)")]
+fn test_already_initialize() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, FeeManagerContract);
+    let client = FeeManagerContractClient::new(&env, &contract_id);
+    let admin = Address::generate(&env);
+    let platform_wallet = Address::generate(&env);
+
+    client.initialize(&admin, &platform_wallet);
+    client.initialize(&admin, &platform_wallet);
 }
 
 #[test]
@@ -204,6 +224,43 @@ fn test_add_premium_user() {
     client.add_premium_user(&premium_user);
 
     assert!(client.is_premium_user(&premium_user));
+}
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #7)")]
+fn test_add_premium_user_already_exist() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, FeeManagerContract);
+    let client = FeeManagerContractClient::new(&env, &contract_id);
+    let admin = Address::generate(&env);
+    let platform_wallet = Address::generate(&env);
+    let premium_user = Address::generate(&env);
+
+    client.initialize(&admin, &platform_wallet);
+
+    // Mock admin authentication
+    env.mock_all_auths();
+
+    client.add_premium_user(&premium_user);
+    client.add_premium_user(&premium_user);
+}
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #8)")]
+fn test_remove_premium_user_not_found() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, FeeManagerContract);
+    let client = FeeManagerContractClient::new(&env, &contract_id);
+    let admin = Address::generate(&env);
+    let platform_wallet = Address::generate(&env);
+    let premium_user = Address::generate(&env);
+
+    client.initialize(&admin, &platform_wallet);
+
+    // Mock admin authentication
+    env.mock_all_auths();
+
+    client.remove_premium_user(&premium_user);
 }
 
 #[test]
@@ -539,7 +596,7 @@ fn test_get_total_fees_reset() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "HostError: Error(Contract, #3)")]
 fn test_get_total_fees_reset_failed() {
     let env = Env::default();
     env.mock_all_auths();

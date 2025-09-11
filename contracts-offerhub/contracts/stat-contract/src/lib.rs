@@ -1,12 +1,13 @@
 #![no_std]
 pub use crate::contract::StatContract;
 use crate::storage::ContractStats;
-use crate::types::Error;
+use crate::error::Error;
 use soroban_sdk::{contract, contractimpl, Address, Env};
 
 mod contract;
 mod storage;
 mod types;
+mod error;
 
 #[cfg(test)]
 mod test;

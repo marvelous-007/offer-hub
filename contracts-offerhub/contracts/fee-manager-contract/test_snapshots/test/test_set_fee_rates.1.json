@@ -69,6 +69,79 @@
                     "storage": [
                       {
                         "key": {
+                          "symbol": "CONFIG"
+                        },
+                        "val": {
+                          "map": [
+                            {
+                              "key": {
+                                "symbol": "dispute_timeout_hours"
+                              },
+                              "val": {
+                                "u32": 168
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "escrow_timeout_days"
+                              },
+                              "val": {
+                                "u32": 30
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "max_escrow_amount"
+                              },
+                              "val": {
+                                "u128": "1000000000"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "max_rate_limit_calls"
+                              },
+                              "val": {
+                                "u32": 100
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "max_rating_per_day"
+                              },
+                              "val": {
+                                "u32": 10
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "min_escrow_amount"
+                              },
+                              "val": {
+                                "u128": "1000"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "platform_fee_percentage"
+                              },
+                              "val": {
+                                "u32": 2
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "rate_limit_window_hours"
+                              },
+                              "val": {
+                                "u32": 24
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "key": {
                           "symbol": "FEE_CFG"
                         },
                         "val": {

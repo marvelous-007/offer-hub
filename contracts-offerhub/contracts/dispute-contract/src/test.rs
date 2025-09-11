@@ -43,7 +43,7 @@ fn test_initialize() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "HostError: Error(Contract, #1)")]
 fn test_initialize_already_initialized() {
     let env = setup_env();
     env.mock_all_auths();
@@ -93,7 +93,7 @@ fn test_open_dispute() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "HostError: Error(Contract, #4)")]
 fn test_open_dispute_already_exists() {
     let env = setup_env();
     env.mock_all_auths();
@@ -101,7 +101,7 @@ fn test_open_dispute_already_exists() {
     let (client, _, _, _) = create_contract(&env);
     let initiator = Address::generate(&env);
     let job_id = 1;
-    let reason = String::from_str(&env, "reason 1");
+    let reason = String::from_str(&env, "Job not completed");
     let dispute_amount = 1000000;
     let escrow_contract = Some(Address::generate(&env));
 
@@ -311,21 +311,21 @@ fn test_resolve_dispute() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "HostError: Error(Contract, #6)")]
 fn test_resolve_dispute_already_resolved() {
     let env = setup_env();
     env.mock_all_auths();
 
     let (client, admin, _, _) = create_contract(&env);
     let initiator = Address::generate(&env);
-    let arbitrator = Address::generate(&env);
+    let mediator = Address::generate(&env);
     let job_id = 1;
     let reason = String::from_str(&env, "Job not completed");
     let dispute_amount = 1000000;
     let escrow_contract: Option<Address> = None; // No escrow contract for this test
 
-    // Add arbitrator
-    client.add_arbitrator(&admin, &arbitrator, &String::from_str(&env, "John Doe"));
+    // Add mediator to the system
+    client.add_mediator_access(&admin, &mediator);
 
     // Open dispute
     client.open_dispute(
@@ -336,11 +336,12 @@ fn test_resolve_dispute_already_resolved() {
         &dispute_amount,
     );
 
-    // Resolve dispute first time
-    client.resolve_dispute(&job_id, &DisputeOutcome::FavorClient);
+    // Assign mediator
+    client.assign_mediator(&job_id, &admin, &mediator);
 
-    // Try to resolve again
-    client.resolve_dispute(&job_id, &DisputeOutcome::FavorFreelancer);
+    // Resolve dispute (favor client)
+    client.resolve_dispute(&job_id, &DisputeOutcome::FavorClient);
+    client.resolve_dispute(&job_id, &DisputeOutcome::FavorClient);
 }
 
 // #[test]
@@ -517,7 +518,8 @@ fn test_resettotal_disputes() {
 }
 
 #[test]
-#[should_panic]
+// #[should_panic]
+#[should_panic(expected = "HostError: Error(Contract, #3)")]
 fn test_reset_total_disputes_fail() {
     let env = setup_env();
     env.mock_all_auths();
