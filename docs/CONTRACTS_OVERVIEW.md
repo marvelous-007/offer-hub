@@ -164,12 +164,66 @@ User → Publication Contract (publish project)
      → Fee Manager (calculate fees)
 ```
 
+**Code Example:**
+```typescript
+// Publish a new project
+const publicationTx = await publicationContract.publish({
+  title: "Website Development",
+  description: "Build a modern React website",
+  budget: 5000,
+  deadline: "2024-02-01",
+  category: "Web Development"
+});
+
+// Deploy escrow contract
+const escrowAddress = await escrowFactory.deploy({
+  projectId: publicationTx.projectId,
+  clientAddress: userAddress,
+  freelancerAddress: selectedFreelancer,
+  totalAmount: 5000
+});
+
+// Initialize escrow with milestones
+await escrowContract.initialize({
+  escrowAddress,
+  milestones: [
+    { id: "design", amount: 1500, description: "UI/UX Design" },
+    { id: "development", amount: 2500, description: "Frontend Development" },
+    { id: "testing", amount: 1000, description: "Testing & Deployment" }
+  ]
+});
+```
+
 ### 2. Payment Flow
 ```
 Client → Escrow Contract (deposit funds)
        → Fee Manager (collect fees)
        → Escrow Contract (milestone management)
        → Freelancer (release funds)
+```
+
+**Code Example:**
+```typescript
+// Client deposits funds
+await escrowContract.deposit({
+  escrowAddress,
+  amount: 5000,
+  token: "USDC"
+});
+
+// Fee manager calculates and collects fees
+const feeAmount = await feeManager.calculateFee({
+  amount: 5000,
+  userType: "premium",
+  operation: "escrow_deposit"
+});
+
+// Release funds for completed milestone
+await escrowContract.releaseFunds({
+  escrowAddress,
+  milestoneId: "design",
+  freelancerAddress: freelancerAddress
+});
 ```
 
 ### 3. Dispute Flow
@@ -179,6 +233,33 @@ Client/Freelancer → Dispute Contract (open dispute)
                  → Mediation/Arbitration
                  → Escrow Contract (resolve payment)
                  → Fee Manager (collect dispute fees)
+```
+
+**Code Example:**
+```typescript
+// Open a dispute
+const disputeId = await disputeContract.openDispute({
+  escrowAddress,
+  initiator: userAddress,
+  reason: "Work quality not meeting requirements",
+  evidence: ["ipfs://evidence1", "ipfs://evidence2"]
+});
+
+// Submit additional evidence
+await disputeContract.submitEvidence({
+  disputeId,
+  evidence: "ipfs://additional_evidence",
+  submitter: userAddress
+});
+
+// Mediator resolves dispute
+await disputeContract.resolveDispute({
+  disputeId,
+  resolution: "partial_payment",
+  freelancerAmount: 3000,
+  clientRefund: 2000,
+  mediatorAddress: mediatorAddress
+});
 ```
 
 ### 4. Reputation Flow
@@ -240,6 +321,72 @@ Reputation NFT    |  ✓    |    ✓     |  ✗   |   ✓
 Emergency         |  ✓    |    ✗     |  ✗   |   ✓
 ```
 
+## API Reference
+
+### User Registry Contract
+```typescript
+// User management
+registerUser(userData: UserData): Promise<TransactionResult>
+verifyUser(userId: string, level: VerificationLevel): Promise<boolean>
+blacklistUser(userId: string, reason: string): Promise<void>
+getUserStatus(userId: string): Promise<UserStatus>
+
+// Admin functions
+setAdminRole(userId: string, role: AdminRole): Promise<void>
+bulkVerifyUsers(userIds: string[], level: VerificationLevel): Promise<void>
+```
+
+### Escrow Contract
+```typescript
+// Payment management
+deposit(amount: number, token: string): Promise<TransactionResult>
+releaseFunds(milestoneId: string): Promise<TransactionResult>
+withdrawFunds(amount: number): Promise<TransactionResult>
+
+// Milestone management
+createMilestone(milestone: MilestoneData): Promise<string>
+updateMilestone(milestoneId: string, updates: Partial<MilestoneData>): Promise<void>
+completeMilestone(milestoneId: string): Promise<void>
+
+// Dispute integration
+openDispute(reason: string, evidence: string[]): Promise<string>
+```
+
+### Escrow Factory Contract
+```typescript
+// Contract deployment
+deployEscrow(config: EscrowConfig): Promise<string>
+batchDeployEscrows(configs: EscrowConfig[]): Promise<string[]>
+
+// Management
+getEscrowAddress(projectId: string): Promise<string>
+archiveEscrow(escrowAddress: string): Promise<void>
+getActiveEscrows(): Promise<string[]>
+```
+
+### Dispute Resolution Contract
+```typescript
+// Dispute management
+openDispute(disputeData: DisputeData): Promise<string>
+submitEvidence(disputeId: string, evidence: string): Promise<void>
+resolveDispute(disputeId: string, resolution: DisputeResolution): Promise<void>
+
+// Mediation
+assignMediator(disputeId: string, mediatorId: string): Promise<void>
+escalateToArbitration(disputeId: string): Promise<void>
+```
+
+### Fee Manager Contract
+```typescript
+// Fee calculation
+calculateFee(amount: number, userType: UserType, operation: OperationType): Promise<number>
+collectFee(amount: number, userAddress: string): Promise<TransactionResult>
+
+// Configuration
+setFeeRate(operation: OperationType, rate: number): Promise<void>
+setPremiumDiscount(discount: number): Promise<void>
+```
+
 ## Event System
 
 ### Cross-Contract Events
@@ -275,6 +422,83 @@ All contracts emit events that enable:
 7. Publication Contract
 8. Rating Contract
 9. Reputation NFT Contract
+```
+
+**Deployment Code Example:**
+```typescript
+// Deploy contracts in correct order
+const deploymentOrder = [
+  'UserRegistry',
+  'FeeManager', 
+  'Emergency',
+  'Escrow',
+  'EscrowFactory',
+  'DisputeResolution',
+  'Publication',
+  'Rating',
+  'ReputationNFT'
+];
+
+for (const contractName of deploymentOrder) {
+  const contract = await deployContract(contractName, {
+    network: 'testnet',
+    gasLimit: 1000000
+  });
+  
+  console.log(`${contractName} deployed at: ${contract.address}`);
+  
+  // Verify deployment
+  await verifyContract(contract.address, contractName);
+}
+```
+
+## Error Handling
+
+### Common Error Scenarios
+```typescript
+// Escrow contract errors
+try {
+  await escrowContract.releaseFunds(milestoneId);
+} catch (error) {
+  switch (error.code) {
+    case 'INSUFFICIENT_FUNDS':
+      console.error('Not enough funds in escrow');
+      break;
+    case 'DISPUTE_ACTIVE':
+      console.error('Cannot release funds during active dispute');
+      break;
+    case 'MILESTONE_NOT_COMPLETE':
+      console.error('Milestone must be completed before release');
+      break;
+    case 'UNAUTHORIZED':
+      console.error('Only authorized parties can release funds');
+      break;
+    default:
+      console.error('Unknown error:', error.message);
+  }
+}
+
+// User registry errors
+try {
+  await userRegistry.verifyUser(userId, 'premium');
+} catch (error) {
+  if (error.code === 'USER_NOT_FOUND') {
+    console.error('User does not exist');
+  } else if (error.code === 'INSUFFICIENT_PERMISSIONS') {
+    console.error('Admin permissions required');
+  }
+}
+
+// Dispute resolution errors
+try {
+  await disputeContract.resolveDispute(disputeId, resolution);
+} catch (error) {
+  if (error.code === 'DISPUTE_NOT_FOUND') {
+    console.error('Dispute does not exist');
+  } else if (error.code === 'DISPUTE_ALREADY_RESOLVED') {
+    console.error('Dispute has already been resolved');
+  }
+}
 ```
 
 ## Testing Strategy
@@ -334,4 +558,27 @@ Each contract is designed to work independently while integrating seamlessly wit
 
 ---
 
-For detailed information about individual contracts, refer to their specific documentation files in the `/docs` folder.
+## Related Documentation
+
+For detailed information about individual contracts, refer to their specific documentation files:
+
+### Core Infrastructure
+- **[User Registry Contract](./USER_REGISTRY_CONTRACT.md)** - User verification and access control
+- **[Emergency Contract](./EMERGENCY_CONTRACT.md)** - Platform safety and crisis management
+- **[Fee Manager Contract](./FEE_MANAGER_CONTRACT.md)** - Centralized fee calculation and collection
+
+### Payment System
+- **[Escrow Contract](./ESCROW_CONTRACT.md)** - Secure payment management with milestone support
+- **[Escrow Factory](./ESCROW_FACTORY.md)** - Standardized deployment and batch management
+
+### Dispute & Content
+- **[Dispute Resolution Contract](./DISPUTE_CONTRACT.md)** - Two-tier mediation and arbitration system
+- **[Publication Contract](./PUBLICATION_CONTRACT.md)** - On-chain registry for services and projects
+
+### Reputation System
+- **[Rating System Integration](./RATING_SYSTEM_INTEGRATION.md)** - User rating and feedback system
+- **[Reputation NFT Contract](./REPUTATION_NFT_CONTRACT.md)** - Achievement-based NFT rewards
+
+### Implementation Guides
+- **[Freelancer Profile Implementation](./FREELANCER_PROFILE_IMPLEMENTATION.md)** - Frontend profile system integration
+- **[Contributors Guideline](./CONTRIBUTORS_GUIDELINE.md)** - Development and contribution guidelines
