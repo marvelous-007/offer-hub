@@ -17,6 +17,8 @@ import { authenticateToken } from "./middlewares/auth.middleware";
 
 import conversationRoutes from "@/routes/conversation.routes";
 import messageRoutes from "@/routes/message.routes";
+import { adminIntegrationRoutes, adminExternalApiRoutes, adminWebhookRoutes } from "@/routes/admin-integration.routes";
+import { apiRequestLoggingMiddleware } from "@/middlewares/admin-api-key.middleware";
 
 // Setup global error handlers for uncaught exceptions and unhandled rejections
 setupGlobalErrorHandlers();
@@ -44,6 +46,11 @@ app.use("/api/projects", authenticateToken(), projectRoutes);
 app.use("/api/users", authenticateToken(), userRoutes);
 app.use("/api/conversations", authenticateToken(), conversationRoutes);
 app.use("/api/messages", authenticateToken(), messageRoutes);
+
+// Admin Integration API routes
+app.use("/api/admin", adminIntegrationRoutes);
+app.use("/api/admin/external", apiRequestLoggingMiddleware, adminExternalApiRoutes);
+app.use("/api/admin/webhooks", adminWebhookRoutes);
 
 app.get("/", (_req, res) => {
   res.send("💼 OFFER-HUB backend is up and running!");
