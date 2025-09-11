@@ -10,7 +10,19 @@ pub const ESCROW_CONTRACT: Symbol = symbol_short!("ESCROW");
 pub const FEE_MANAGER: Symbol = symbol_short!("FEEMGR");
 pub const RATE_LIMITS: Symbol = symbol_short!("RLIM");
 pub const RATE_BYPASS: Symbol = symbol_short!("RLBYP");
+
+pub const CONTRACT_CONFIG: Symbol = symbol_short!("CONFIG");
+
+// Default configuration values
+pub const DEFAULT_TIMEOUT_HOURS: u32 = 168;           // 7 days (168 hours)
+pub const DEFAULT_MAX_EVIDENCE: u32 = 10;             // Maximum 10 evidence submissions
+pub const DEFAULT_MEDIATION_TIMEOUT: u32 = 72;        // 3 days (72 hours)
+pub const DEFAULT_ARBITRATION_TIMEOUT: u32 = 168;     // 7 days (168 hours)
+pub const DEFAULT_FEE_PERCENTAGE: i128 = 500;         // 5% fee
+pub const DEFAULT_RATE_LIMIT_CALLS: u32 = 3;          // 3 calls per window
+pub const DEFAULT_RATE_LIMIT_WINDOW_HOURS: u32 = 24;  // 24 hours
 pub const TOTAL_DISPUTES: Symbol = symbol_short!("DISPCOUNT");
+
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[contracttype]

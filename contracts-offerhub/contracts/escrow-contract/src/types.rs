@@ -83,6 +83,18 @@ pub struct EscrowData {
 
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ContractConfig {
+    pub min_escrow_amount: i128,          // Minimum escrow amount
+    pub max_escrow_amount: i128,          // Maximum escrow amount
+    pub default_timeout_days: u32,        // Default timeout in days
+    pub max_milestones: u32,              // Maximum number of milestones
+    pub fee_percentage: i128,             // Fee percentage (in basis points)
+    pub rate_limit_calls: u32,            // Rate limit calls per window
+    pub rate_limit_window_hours: u32,     // Rate limit window in hours
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct EscrowDataExport {
     pub contract_id: String,
     pub escrow_data: EscrowData,

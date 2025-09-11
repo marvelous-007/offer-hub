@@ -85,6 +85,16 @@ impl FeeManagerContract {
         contract::get_premium_users(&env)
     }
 
+
+    pub fn set_config(env: Env, caller: Address, config: types::ContractConfig) {
+        contract::set_config(&env, caller, config);
+    }
+
+    pub fn get_config(env: Env) -> types::ContractConfig {
+        contract::get_config(&env)
+    }
+} 
+
     pub fn get_total_fees(env: &Env) -> i128 {
         contract::get_total_fees(&env)
     }
@@ -97,3 +107,4 @@ impl FeeManagerContract {
         contract::get_platform_stats(&env)
     }
 }
+
