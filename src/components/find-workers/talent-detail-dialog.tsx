@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { VALIDATION_LIMITS } from "@/constants/magic-numbers"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -266,9 +267,11 @@ export default function TalentDetailDialog({
                       {portfolio.slice(0, VALIDATION_LIMITS.MAX_PORTFOLIO_ITEMS_DISPLAY).map((item) => (
                         <div key={item.id} className="border rounded-lg overflow-hidden">
                           <div className="h-40 bg-gray-100 flex items-center justify-center">
-                            <img
+                            <Image
                               src={item.image || "/placeholder.svg"}
                               alt={item.title}
+                              width={400}
+                              height={160}
                               className="w-full h-full object-cover"
                             />
                           </div>
@@ -294,9 +297,11 @@ export default function TalentDetailDialog({
                     {portfolio.map((item) => (
                       <div key={item.id} className="border rounded-lg overflow-hidden">
                         <div className="h-48 bg-gray-100 flex items-center justify-center">
-                          <img
+                          <Image
                             src={item.image || "/placeholder.svg"}
                             alt={item.title}
+                            width={500}
+                            height={192}
                             className="w-full h-full object-cover"
                           />
                         </div>
