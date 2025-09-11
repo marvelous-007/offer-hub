@@ -111,6 +111,15 @@ pub fn next_token_id(env: &Env) -> TokenId {
     counter
 }
 
+pub fn bump_token_counter(env: &Env, minted_id: &TokenId) {
+    let key_bytes = create_simple_key(env, TOKEN_ID_COUNTER);
+    let mut counter: TokenId = env.storage().persistent().get(&key_bytes).unwrap_or(0);
+    if *minted_id > counter {
+        counter = *minted_id;
+        env.storage().persistent().set(&key_bytes, &counter);
+    }
+}
+
 // User achievement indexing functions
 pub fn index_user_achievement(env: &Env, user: &Address, token_id: &TokenId) {
     const MAX_ACHIEVEMENTS_PER_USER: u32 = 100; // Prevent unbounded growth

@@ -48,6 +48,8 @@ impl ReputationNFTContract {
             uri,
             Some(AchievementType::Standard),
         )?;
+        // Keep the monotonic counter in sync with externally supplied IDs
+        crate::storage::bump_token_counter(&env, &token_id);
         // Index achievement for user
         index_user_achievement(&env, &to, &token_id);
         update_achievement_stats(&env, &AchievementType::Standard);
@@ -63,7 +65,6 @@ impl ReputationNFTContract {
         nft_type: Symbol,
     ) -> Result<(), Error> {
         check_minter(&env, &caller)?;
-        let token_id = next_token_id(&env);
 
         // Determine achievement type and check prerequisites
         let (name, description, uri, achievement_type) = match &nft_type {
@@ -111,6 +112,8 @@ impl ReputationNFTContract {
             ),
         };
 
+        // Generate token id after passing prerequisite checks
+        let token_id = next_token_id(&env);
         save_token_owner(&env, &token_id, &to);
         let ach_type = achievement_type;
         store_metadata(&env, &token_id, name, description, uri, Some(ach_type))?;
@@ -419,7 +422,11 @@ impl ReputationNFTContract {
         achievement_type: AchievementType,
         prerequisite: AchievementType,
     ) -> Result<(), Error> {
-        check_minter(&env, &caller)?;
+        let admin = get_admin(&env);
+        if caller != admin {
+            return Err(Error::Unauthorized);
+        }
+        check_owner(&env, &caller)?;
         crate::storage::set_achievement_prerequisite(&env, &achievement_type, &prerequisite);
         Ok(())
     }
@@ -434,7 +441,7 @@ impl ReputationNFTContract {
         total_ratings: u32,
     ) -> Result<(), Error> {
         // Auto-award achievements based on rating milestones
-        if total_ratings == 10 && rating_average >= 400 {
+        if total_ratings >= 10 && rating_average >= 400 {
             // Check if user already has this achievement
             if !Self::has_achievement_by_name(env, user, "Excellence Milestone") {
                 let token_id = next_token_id(env);
