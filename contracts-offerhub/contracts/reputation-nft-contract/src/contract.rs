@@ -68,8 +68,8 @@ impl ReputationNFTContract {
         // Determine achievement type and check prerequisites
         let (name, description, uri, achievement_type) = match &nft_type {
             s if *s == symbol_short!("tencontr") => {
-                // Check if user has prerequisite achievements (Standard -> ProjectMilestone)
-                if !check_achievement_prerequisite(&env, &to, &AchievementType::Standard) {
+                // Check prerequisite for ProjectMilestone
+                if !check_achievement_prerequisite(&env, &to, &AchievementType::ProjectMilestone) {
                     return Err(Error::AchievementPrerequisiteNotMet);
                 }
                 (
@@ -80,8 +80,8 @@ impl ReputationNFTContract {
                 )
             }
             s if *s == symbol_short!("5stars5x") => {
-                // Check if user has prerequisite achievements (Standard -> RatingMilestone)
-                if !check_achievement_prerequisite(&env, &to, &AchievementType::Standard) {
+                // Check prerequisite for RatingMilestone
+                if !check_achievement_prerequisite(&env, &to, &AchievementType::RatingMilestone) {
                     return Err(Error::AchievementPrerequisiteNotMet);
                 }
                 (
@@ -92,8 +92,8 @@ impl ReputationNFTContract {
                 )
             }
             s if *s == symbol_short!("toprated") => {
-                // Check if user has prerequisite achievements (RatingMilestone -> Reputation)
-                if !check_achievement_prerequisite(&env, &to, &AchievementType::RatingMilestone) {
+                // Check prerequisite for Reputation
+                if !check_achievement_prerequisite(&env, &to, &AchievementType::Reputation) {
                     return Err(Error::AchievementPrerequisiteNotMet);
                 }
                 (
