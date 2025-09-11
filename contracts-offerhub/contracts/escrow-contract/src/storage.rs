@@ -3,6 +3,7 @@ use crate::types::Error;
 
 pub const ESCROW_DATA: Symbol = symbol_short!("ESCROW");
 pub const INITIALIZED: Symbol = symbol_short!("INIT");
+pub const CONTRACT_CONFIG: Symbol = symbol_short!("CONFIG");
 
 // Rate limit storage keys
 pub const RATE_LIMITS: Symbol = symbol_short!("RLIM");
@@ -13,7 +14,18 @@ pub const CALL_LOGS: Symbol = symbol_short!("LOGS");
 pub const LOG_COUNT: Symbol = symbol_short!("LCOUNT");
 pub const MAX_LOGS: u32 = 100;
 
+
+// Default configuration values
+pub const DEFAULT_MIN_ESCROW_AMOUNT: i128 = 1000;       // Minimum 1000 units
+pub const DEFAULT_MAX_ESCROW_AMOUNT: i128 = 1000000000; // Maximum 1 billion units
+pub const DEFAULT_TIMEOUT_DAYS: u32 = 30;               // 30 days
+pub const DEFAULT_MAX_MILESTONES: u32 = 20;              // Maximum 20 milestones
+pub const DEFAULT_FEE_PERCENTAGE: i128 = 250;           // 2.5% fee
+pub const DEFAULT_RATE_LIMIT_CALLS: u32 = 10;           // 10 calls per window
+pub const DEFAULT_RATE_LIMIT_WINDOW_HOURS: u32 = 1;     // 1 hour window
+
 pub const TOTAL_ESCROW_COUNT: Symbol = symbol_short!("ESCCOUNT");
+
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[contracttype]

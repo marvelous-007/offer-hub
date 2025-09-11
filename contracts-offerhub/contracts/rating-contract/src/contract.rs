@@ -20,8 +20,15 @@ use crate::storage::{
     set_total_rating,
 };
 use crate::types::{
+
+    Error, Rating, RatingStats, Feedback, UserRatingData, RatingThreshold, HealthCheckResult,
+    require_auth, ContractConfig, CONTRACT_CONFIG, DEFAULT_MAX_RATING_PER_DAY, DEFAULT_MAX_FEEDBACK_LENGTH,
+    DEFAULT_MIN_RATING, DEFAULT_MAX_RATING, DEFAULT_RATE_LIMIT_CALLS, DEFAULT_RATE_LIMIT_WINDOW_HOURS,
+    DEFAULT_AUTO_MODERATION_ENABLED, DEFAULT_RESTRICTION_THRESHOLD, DEFAULT_WARNING_THRESHOLD,
+    DEFAULT_TOP_RATED_THRESHOLD
     require_auth, AllRatingDataExport, Error, Feedback, HealthCheckResult, Rating,
     RatingDataExport, RatingStats, RatingThreshold, UserRatingData, UserRatingSummary
+
 };
 use crate::validation::{validate_report_feedback, validate_submit_rating};
 use soroban_sdk::{Address, Env, IntoVal, String, Symbol, Vec};
@@ -32,27 +39,52 @@ impl RatingContract {
     pub fn init(env: Env, admin: Address) -> Result<(), Error> {
         save_admin(&env, &admin);
 
+        
+        // Initialize contract configuration
+        let contract_config = ContractConfig {
+            max_rating_per_day: DEFAULT_MAX_RATING_PER_DAY,
+            max_feedback_length: DEFAULT_MAX_FEEDBACK_LENGTH,
+            min_rating: DEFAULT_MIN_RATING,
+            max_rating: DEFAULT_MAX_RATING,
+            rate_limit_calls: DEFAULT_RATE_LIMIT_CALLS,
+            rate_limit_window_hours: DEFAULT_RATE_LIMIT_WINDOW_HOURS,
+            auto_moderation_enabled: DEFAULT_AUTO_MODERATION_ENABLED,
+            restriction_threshold: DEFAULT_RESTRICTION_THRESHOLD,
+            warning_threshold: DEFAULT_WARNING_THRESHOLD,
+            top_rated_threshold: DEFAULT_TOP_RATED_THRESHOLD,
+        };
+        env.storage().instance().set(&CONTRACT_CONFIG, &contract_config);
+        
+
+
+
         // Initialize default thresholds
         let restriction_threshold = RatingThreshold {
             threshold_type: String::from_str(&env, "restriction"),
-            value: crate::types::DEFAULT_RESTRICTION_THRESHOLD,
+            value: DEFAULT_RESTRICTION_THRESHOLD,
         };
         save_rating_threshold(&env, &restriction_threshold);
 
         let warning_threshold = RatingThreshold {
             threshold_type: String::from_str(&env, "warning"),
-            value: crate::types::DEFAULT_WARNING_THRESHOLD,
+            value: DEFAULT_WARNING_THRESHOLD,
         };
         save_rating_threshold(&env, &warning_threshold);
 
         let top_rated_threshold = RatingThreshold {
             threshold_type: String::from_str(&env, "top_rated"),
-            value: crate::types::DEFAULT_TOP_RATED_THRESHOLD,
+            value: DEFAULT_TOP_RATED_THRESHOLD,
         };
         save_rating_threshold(&env, &top_rated_threshold);
 
+        
+        // Health check system initialization removed for now
+        
+
+
         // Initialize health check system
         // crate::health_check::initialize_health_check_system(&env)?;
+
 
         Ok(())
     }
@@ -513,6 +545,9 @@ impl RatingContract {
         Ok(())
     }
 
+
+    // Health check functions removed for now
+
     // Health check functions
     // pub fn health_check(env: Env) -> Result<HealthCheckResult, Error> {
     //     crate::health_check::perform_health_check(&env)
@@ -526,6 +561,7 @@ impl RatingContract {
         crate::storage::increment_rating_count(&env)
     }
 
+
     pub fn get_last_health_check(env: Env) -> u64 {
         crate::storage::get_last_health_check(&env)
     }
@@ -533,6 +569,73 @@ impl RatingContract {
     pub fn get_contract_version(env: Env) -> String {
         crate::storage::get_contract_version(&env)
     }
+
+    pub fn set_config(env: Env, caller: Address, config: ContractConfig) -> Result<(), Error> {
+        crate::access::check_admin(&env, &caller)?;
+        
+        // Validate config parameters
+        validate_config(&config)?;
+        
+        env.storage().instance().set(&CONTRACT_CONFIG, &config);
+        
+        // Emit event
+        env.events().publish(
+            (soroban_sdk::symbol_short!("cfg_upd"), caller),
+            (config.max_rating_per_day, config.max_feedback_length, config.auto_moderation_enabled),
+        );
+        
+        Ok(())
+    }
+
+    pub fn get_config(env: Env) -> Result<ContractConfig, Error> {
+        if !env.storage().instance().has(&CONTRACT_CONFIG) {
+            return Err(Error::Unauthorized);
+        }
+        Ok(env.storage().instance().get(&CONTRACT_CONFIG).unwrap())
+    }
+}
+
+// Helper function to validate config parameters
+fn validate_config(config: &ContractConfig) -> Result<(), Error> {
+    // Validate max rating per day (1-100)
+    if config.max_rating_per_day < 1 || config.max_rating_per_day > 100 {
+        return Err(Error::InvalidRating);
+    }
+    
+    // Validate feedback length (10-5000 characters)
+    if config.max_feedback_length < 10 || config.max_feedback_length > 5000 {
+        return Err(Error::InvalidRating);
+    }
+    
+    // Validate rating range
+    if config.min_rating >= config.max_rating {
+        return Err(Error::InvalidRating);
+    }
+    
+    if config.min_rating < 1 || config.max_rating > 5 {
+        return Err(Error::InvalidRating);
+    }
+    
+    // Validate rate limit parameters
+    if config.rate_limit_window_hours < 1 || config.rate_limit_window_hours > 168 {
+        return Err(Error::InvalidRating);
+    }
+    
+    if config.rate_limit_calls < 1 || config.rate_limit_calls > 1000 {
+        return Err(Error::InvalidRating);
+    }
+    
+    // Validate thresholds
+    if config.restriction_threshold >= config.warning_threshold {
+        return Err(Error::InvalidRating);
+    }
+    
+    if config.warning_threshold >= config.top_rated_threshold {
+        return Err(Error::InvalidRating);
+    }
+    
+    Ok(())
+}
 
     pub fn get_total_rating(env: &Env) -> u64 {
         crate::storage::get_total_rating(&env)
@@ -658,3 +761,4 @@ impl RatingContract {
         Ok(export_data)
     }
 }
+

@@ -434,16 +434,42 @@ fn test_escrow_data_integrity() {
 
     contract.release_funds(&freelancer);
     let released_data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
+
+    assert_eq!(released_data.status, EscrowStatus::Released);
+}
+
+#[test]
+fn test_initialize_contract() {
+
     assert_eq!(released_data.state, EscrowState::Released);
 }
 
 #[test]
 fn test_increment_transaction_count() {
+
     let env = setup_env();
     env.mock_all_auths();
 
     let contract_id = env.register(EscrowContract, ());
     let contract = EscrowContractClient::new(&env, &contract_id);
+
+
+    let admin = Address::generate(&env);
+
+    contract.initialize_contract(&admin);
+
+    let config = env.as_contract(&contract_id, || crate::contract::get_config(&env));
+    assert_eq!(config.min_escrow_amount, 1000); // DEFAULT_MIN_ESCROW_AMOUNT
+    assert_eq!(config.max_escrow_amount, 1000000000); // DEFAULT_MAX_ESCROW_AMOUNT
+    assert_eq!(config.default_timeout_days, 30); // DEFAULT_TIMEOUT_DAYS
+    assert_eq!(config.max_milestones, 20); // DEFAULT_MAX_MILESTONES
+    assert_eq!(config.fee_percentage, 250); // DEFAULT_FEE_PERCENTAGE
+    assert_eq!(config.rate_limit_calls, 10); // DEFAULT_RATE_LIMIT_CALLS
+    assert_eq!(config.rate_limit_window_hours, 1); // DEFAULT_RATE_LIMIT_WINDOW_HOURS
+}
+
+#[test]
+fn test_set_config() {
 
     let client = Address::generate(&env);
     let freelancer = Address::generate(&env);
@@ -493,6 +519,44 @@ fn test_reset_transaction_count() {
     let contract_id = env.register(EscrowContract, ());
     let contract = EscrowContractClient::new(&env, &contract_id);
 
+
+    let admin = Address::generate(&env);
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let fee_manager = Address::generate(&env);
+
+    // Initialize contract first
+    contract.initialize_contract(&admin);
+    
+    // Initialize escrow data so client can set config
+    contract.init_contract(&client, &freelancer, &500, &fee_manager);
+
+    // Create new config
+    let new_config = crate::types::ContractConfig {
+        min_escrow_amount: 2000,
+        max_escrow_amount: 2000000000,
+        default_timeout_days: 45,
+        max_milestones: 30,
+        fee_percentage: 300,
+        rate_limit_calls: 15,
+        rate_limit_window_hours: 2,
+    };
+
+    contract.set_config(&client, &new_config);
+
+    let config = env.as_contract(&contract_id, || crate::contract::get_config(&env));
+    assert_eq!(config.min_escrow_amount, 2000);
+    assert_eq!(config.max_escrow_amount, 2000000000);
+    assert_eq!(config.default_timeout_days, 45);
+    assert_eq!(config.max_milestones, 30);
+    assert_eq!(config.fee_percentage, 300);
+    assert_eq!(config.rate_limit_calls, 15);
+    assert_eq!(config.rate_limit_window_hours, 2);
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #3)")]
+fn test_set_config_unauthorized() {
     let client = Address::generate(&env);
     let freelancer = Address::generate(&env);
     let arbitrator = Address::generate(&env);
@@ -545,6 +609,32 @@ fn test_reset_transaction_count_failed() {
 
     let contract_id = env.register(EscrowContract, ());
     let contract = EscrowContractClient::new(&env, &contract_id);
+
+
+    let admin = Address::generate(&env);
+    let unauthorized_user = Address::generate(&env);
+
+    // Initialize contract
+    contract.initialize_contract(&admin);
+
+    // Initialize escrow data for the test
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let fee_manager = Address::generate(&env);
+    contract.init_contract(&client, &freelancer, &500, &fee_manager);
+
+    let new_config = crate::types::ContractConfig {
+        min_escrow_amount: 2000,
+        max_escrow_amount: 2000000000,
+        default_timeout_days: 45,
+        max_milestones: 30,
+        fee_percentage: 300,
+        rate_limit_calls: 15,
+        rate_limit_window_hours: 2,
+    };
+
+    // This should fail because unauthorized_user is not the client
+    contract.set_config(&unauthorized_user, &new_config);
 
     let client = Address::generate(&env);
     let freelancer = Address::generate(&env);
@@ -638,4 +728,5 @@ fn test_get_contract_status() {
     assert_eq!(summary.status, String::from_str(&env, "Released")); 
     assert_eq!(summary.created_at, 3000);
     assert_eq!(summary.milestone_count, 0);
+
 }

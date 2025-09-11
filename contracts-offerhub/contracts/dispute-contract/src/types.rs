@@ -88,6 +88,18 @@ pub struct ArbitratorData {
     pub added_at: u64,
 }
 
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ContractConfig {
+    pub default_timeout_hours: u32,       // Default dispute timeout in hours
+    pub max_evidence_per_dispute: u32,    // Maximum evidence submissions per dispute
+    pub mediation_timeout_hours: u32,     // Mediation timeout in hours
+    pub arbitration_timeout_hours: u32,   // Arbitration timeout in hours
+    pub fee_percentage: i128,             // Fee percentage (in basis points)
+    pub rate_limit_calls: u32,            // Rate limit calls per window
+    pub rate_limit_window_hours: u32,     // Rate limit window in hours
+}
+
 #[contracterror]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
 #[repr(u32)]

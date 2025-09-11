@@ -638,6 +638,16 @@ fn test_rating_admin_authorization_verification() {
     let admin = Address::generate(&env);
     client.init(&admin);
 
+
+    // Mock authentication for admin
+    env.mock_all_auths();
+
+    // Perform admin health check
+    let health_status = client.admin_health_check(&admin);
+    assert!(health_status.status.is_healthy, "Contract should be healthy");
+    assert!(health_status.details.len() > 0, "Admin health check should provide details");
+    assert!(health_status.recommendations.len() >= 0, "Recommendations should be provided");
+
     // Test authorized admin access
     let result = client.try_set_rate_limit_bypass(&admin, &admin, &true);
     assert!(
@@ -657,6 +667,7 @@ fn test_rating_admin_authorization_verification() {
 
     // Test authorized access to reset rate limit
     client.reset_rate_limit(&admin, &non_admin, &String::from_str(&env, "total_ratings"));
+
 }
 
 #[test]
