@@ -4,8 +4,8 @@ use soroban_sdk::{contracterror, Env};
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
 #[repr(u32)]
 pub enum Error {
-    AlreadyInitialized = 1,           // Contract has not been initialized yet
-    NotInitialized = 2,       // Contract has already been initialized
+    AlreadyInitialized = 1,        // Contract has already been initialized
+    NotInitialized = 2,            // Contract has not been initialized yet
     Unauthorized = 3,             // Caller is not authorized to perform this action
     InvalidAmount = 4,            // Amount provided is invalid (e.g., zero or negative)
     InvalidFeePercentage = 5,     // Fee percentage is outside valid range

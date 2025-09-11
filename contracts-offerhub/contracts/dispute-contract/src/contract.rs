@@ -9,7 +9,7 @@ use crate::{
 
     types::{
         AllDisputeDataExport, DisputeData, DisputeDataExport, DisputeLevel, DisputeOutcome,
-        DisputeStatus, DisputeSummary, Evidence, DisputeInfo
+        DisputeState, DisputeSummary, Evidence, DisputeInfo
     },
 
     validation::{
@@ -39,16 +39,16 @@ pub fn initialize(
 
     // Input validation
     if let Err(_) = validate_address(&admin) {
-        handle_error(env, Error::Unauthorized);
+        handle_error(env, Error::InvalidAddress);
     }
     if let Err(_) = validate_address(&escrow_contract) {
-        handle_error(env, Error::Unauthorized);
+        handle_error(env, Error::InvalidAddress);
     }
     if let Err(_) = validate_address(&fee_manager) {
-        handle_error(env, Error::Unauthorized);
+        handle_error(env, Error::InvalidAddress);
     }
     if let Err(_) = validate_timeout_duration(default_timeout) {
-        handle_error(env, Error::InvalidTimeout);
+        handle_error(env, Error::InvalidAddress);
     }
 
     env.storage().instance().set(&ARBITRATOR, &admin);
@@ -100,7 +100,7 @@ pub fn open_dispute(
     // Validate escrow contract address if provided
     if let Some(ref escrow_addr) = escrow_contract {
         if let Err(_) = validate_address(escrow_addr) {
-            handle_error(env, Error::Unauthorized);
+            handle_error(env, Error::InvalidAddress);
         }
     }
 
@@ -199,7 +199,7 @@ pub fn assign_mediator(env: &Env, job_id: u32, admin: Address, mediator: Address
     admin.require_auth();
 
     if !is_valid_mediator(env, &mediator) {
-        handle_error(env, Error::InvalidArbitrator);
+        handle_error(env, Error::InvalidMediator);
     }
 
     let mut disputes: Map<u32, DisputeData> = env.storage().instance().get(&DISPUTES).unwrap();
@@ -259,22 +259,17 @@ pub fn escalate_to_arbitration(env: &Env, job_id: u32, mediator: Address, arbitr
 }
 
 pub fn resolve_dispute(env: &Env, job_id: u32, decision: DisputeOutcome) {
-    log!(&env, "0");
-
     if !env.storage().instance().has(&ARBITRATOR) {
         handle_error(env, Error::NotInitialized);
     }
-    log!(&env, "1");
     let mut disputes: Map<u32, DisputeData> = env.storage().instance().get(&DISPUTES).unwrap();
     let mut dispute = disputes
         .get(job_id)
         .unwrap_or_else(|| handle_error(env, Error::DisputeNotFound));
-    log!(&env, "2");
 
     if dispute.resolved {
         handle_error(env, Error::DisputeAlreadyResolved);
     }
-    log!(&env, "3");
 
     // Check timeout
     if let Some(timeout) = dispute.timeout_timestamp {
@@ -318,7 +313,7 @@ pub fn resolve_dispute(env: &Env, job_id: u32, decision: DisputeOutcome) {
     }
 
     if decision == DisputeOutcome::None {
-        handle_error(env, Error::InvalidDisputeLevel);
+        handle_error(env, Error::InvalidOutcome);
     }
 
     // Calculate fees
@@ -338,7 +333,7 @@ pub fn resolve_dispute(env: &Env, job_id: u32, decision: DisputeOutcome) {
             DisputeOutcome::FavorClient => ESCROW_CLIENT_WINS,
             DisputeOutcome::FavorFreelancer => ESCROW_FREELANCER_WINS,
             DisputeOutcome::Split => ESCROW_SPLIT,
-            DisputeOutcome::None => handle_error(env, Error::InvalidDisputeLevel),
+            DisputeOutcome::None => handle_error(env, Error::InvalidOutcome),
         };
 
         // Call the escrow contract to resolve the dispute
@@ -427,7 +422,7 @@ pub fn resolve_dispute_with_auth(
     }
 
     if decision == DisputeOutcome::None {
-        handle_error(env, Error::InvalidDisputeLevel);
+        handle_error(env, Error::InvalidOutcome);
     }
 
     // Calculate fees
@@ -447,7 +442,7 @@ pub fn resolve_dispute_with_auth(
             DisputeOutcome::FavorClient => ESCROW_CLIENT_WINS,
             DisputeOutcome::FavorFreelancer => ESCROW_FREELANCER_WINS,
             DisputeOutcome::Split => ESCROW_SPLIT,
-            DisputeOutcome::None => handle_error(env, Error::InvalidDisputeLevel),
+            DisputeOutcome::None => handle_error(env, Error::InvalidOutcome),
         };
 
         // Call the escrow contract to resolve the dispute
@@ -494,7 +489,7 @@ pub fn set_dispute_timeout(env: &Env, admin: Address, timeout_seconds: u64) {
 
     // Input validation
     if let Err(_) = validate_address(&admin) {
-        handle_error(env, Error::Unauthorized);
+        handle_error(env, Error::InvalidAddress);
     }
     if let Err(_) = validate_timeout_duration(timeout_seconds) {
         handle_error(env, Error::InvalidTimeout);

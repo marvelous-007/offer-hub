@@ -222,7 +222,7 @@
                             },
                             {
                               "key": {
-                                "symbol": "status"
+                                "symbol": "state"
                               },
                               "val": {
                                 "vec": [

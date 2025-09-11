@@ -2,6 +2,7 @@ use soroban_sdk::{contracterror, panic_with_error, Env};
 
 #[contracterror]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[repr(u32)]
 pub enum Error {
     /// Caller is not authorized to perform this operation
     Unauthorized = 1,

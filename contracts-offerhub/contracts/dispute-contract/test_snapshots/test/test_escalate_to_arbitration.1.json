@@ -494,12 +494,19 @@
                                   },
                                   {
                                     "key": {
-                                      "symbol": "status"
+                                      "symbol": "state"
                                     },
                                     "val": {
                                       "vec": [
                                         {
-                                          "symbol": "UnderArbitration"
+                                          "symbol": "UnderReview"
+                                        },
+                                        {
+                                          "vec": [
+                                            {
+                                              "symbol": "Arbitration"
+                                            }
+                                          ]
                                         }
                                       ]
                                     }

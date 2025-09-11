@@ -146,7 +146,7 @@ fn test_resolve_dispute_arbitrator() {
 
     contract.dispute(&client);
     let data = contract.get_escrow_data();
-    assert_eq!(data.status, EscrowStatus::Disputed);
+    assert_eq!(data.state, EscrowState::Disputed);
 
     contract.resolve_dispute(&arbitrator, &Symbol::new(&env, "client_wins"));
 }
@@ -218,7 +218,7 @@ fn test_invalid_dsipute_result() {
 
     contract.dispute(&client);
     let data = contract.get_escrow_data();
-    assert_eq!(data.status, EscrowStatus::Disputed);
+    assert_eq!(data.state, EscrowState::Disputed);
     contract.resolve_dispute(&arbitrator, &Symbol::new(&env, "none"));
 }
 

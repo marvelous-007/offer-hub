@@ -8,8 +8,8 @@ use crate::{
     error::handle_error,
     storage::{add_call_log, CallLog, ESCROW_DATA, INITIALIZED},
     types::{
-        DisputeResult, Error, EscrowData, EscrowDataExport, EscrowState, Milestone,
-        MilestoneHistory, EscrowSummary, EscrowStatus
+        DisputeResult, EscrowData, EscrowDataExport, EscrowState, Milestone,
+        MilestoneHistory, EscrowSummary
     },
     error::Error,
     validation::{

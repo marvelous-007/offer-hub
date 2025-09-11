@@ -104,7 +104,7 @@ fn test_add_premium_user() {
 
 #[test]
 #[should_panic(expected = "HostError: Error(Contract, #7)")]
-fn test_add_premium_user_unauthorized() {
+fn test_add_premium_user_already_exist() {
     let env = Env::default();
     let contract_id = env.register_contract(None, FeeManagerContract);
     let client = FeeManagerContractClient::new(&env, &contract_id);

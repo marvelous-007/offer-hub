@@ -171,12 +171,12 @@
                             },
                             {
                               "key": {
-                                "symbol": "status"
+                                "symbol": "state"
                               },
                               "val": {
                                 "vec": [
                                   {
-                                    "symbol": "Initialized"
+                                    "symbol": "Created"
                                   }
                                 ]
                               }

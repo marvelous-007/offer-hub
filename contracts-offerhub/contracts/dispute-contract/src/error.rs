@@ -19,6 +19,9 @@ pub enum Error {
     RateLimitExceeded = 13,         // Too many dispute actions in short period
     MediationRequired = 14,         // Must attempt mediation before arbitration
     ArbitrationRequired = 15,       // Dispute requires arbitration to proceed
+    InvalidAddress = 16,            // InvalidAddress
+    InvalidMediator = 17,           // InvalidMediator
+    InvalidOutcome = 18,            // InvalidOutcome
 }
 
 pub fn handle_error(env: &Env, error: Error) -> ! {

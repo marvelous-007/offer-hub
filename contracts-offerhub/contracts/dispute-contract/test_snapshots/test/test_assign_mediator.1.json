@@ -376,12 +376,19 @@
                                   },
                                   {
                                     "key": {
-                                      "symbol": "status"
+                                      "symbol": "state"
                                     },
                                     "val": {
                                       "vec": [
                                         {
-                                          "symbol": "UnderMediation"
+                                          "symbol": "UnderReview"
+                                        },
+                                        {
+                                          "vec": [
+                                            {
+                                              "symbol": "Mediation"
+                                            }
+                                          ]
                                         }
                                       ]
                                     }

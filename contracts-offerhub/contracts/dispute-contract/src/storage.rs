@@ -1,6 +1,5 @@
 use crate::error::Error;
 use soroban_sdk::{contracttype, symbol_short, Symbol, Address, Env, String, log};
-use crate::types::Error;
 
 pub const DISPUTES: Symbol = symbol_short!("DISPUTES");
 pub const ARBITRATOR: Symbol = symbol_short!("ARBITRTR");
