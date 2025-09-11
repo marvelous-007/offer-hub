@@ -14,9 +14,6 @@ pub const PREMIUM_USERS: Symbol = symbol_short!("PREM_USR");
 // Storage key for contract configuration
 pub const CONTRACT_CONFIG: Symbol = symbol_short!("CONFIG");
 
-
-
-+
 // Default fee percentages (in basis points: 100 = 1%)
 pub const DEFAULT_ESCROW_FEE_PERCENTAGE: i128 = 250; // 2.5%
 pub const DEFAULT_DISPUTE_FEE_PERCENTAGE: i128 = 500; // 5.0%

@@ -18,4 +18,10 @@ pub enum Error {
     
     /// Address is not registered as a minter
     NotMinter = 5,
+
+    AchievementPrerequisiteNotMet = 6,
+
+    NonTransferableToken = 7,
+
+    InvalidInput = 8,
 }

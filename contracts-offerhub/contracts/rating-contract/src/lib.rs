@@ -272,7 +272,6 @@ impl Contract {
     pub fn get_config(env: Env) -> Result<types::ContractConfig, Error> {
         RatingContract::get_config(env)
     }
-}
 
     /// Get contract total ratings count
     pub fn get_total_rating(env: &Env) -> Result<u64, Error> {
@@ -291,11 +290,3 @@ impl Contract {
         RatingContract::get_user_rating_summary(&env, user)
     }
 }
-
-// use soroban_sdk::contractclient;
-
-// #[contractclient(name = "ContractAClient")]
-// pub trait ContractAInterface {
-//     fn get_total_rating(env: &Env) -> u64;
-// }
-

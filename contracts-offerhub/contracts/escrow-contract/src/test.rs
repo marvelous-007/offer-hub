@@ -536,14 +536,9 @@ fn test_escrow_data_integrity() {
     contract.release_funds(&freelancer);
     let released_data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
 
-    assert_eq!(released_data.status, EscrowStatus::Released);
-}
-
-#[test]
-fn test_initialize_contract() {
-
     assert_eq!(released_data.state, EscrowState::Released);
 }
+
 
 #[test]
 fn test_increment_transaction_count() {
@@ -571,6 +566,11 @@ fn test_increment_transaction_count() {
 
 #[test]
 fn test_set_config() {
+    let env = setup_env();
+    env.mock_all_auths();
+
+    let contract_id = env.register(EscrowContract, ());
+    let contract = EscrowContractClient::new(&env, &contract_id);
 
     let client = Address::generate(&env);
     let freelancer = Address::generate(&env);
@@ -658,6 +658,12 @@ fn test_reset_transaction_count() {
 #[test]
 #[should_panic(expected = "Error(Contract, #3)")]
 fn test_set_config_unauthorized() {
+    let env = setup_env();
+    env.mock_all_auths();
+
+    let contract_id = env.register(EscrowContract, ());
+    let contract = EscrowContractClient::new(&env, &contract_id);
+
     let client = Address::generate(&env);
     let freelancer = Address::generate(&env);
     let arbitrator = Address::generate(&env);
@@ -697,7 +703,7 @@ fn test_set_config_unauthorized() {
     let final_count = contract.get_total_transactions();
     assert_eq!(final_count, 5);
 
-    contract.reset_transaction_count(&client);
+    contract.reset_transaction_count(&freelancer);
     let reset_transaction_count = contract.get_total_transactions();
     assert_eq!(reset_transaction_count, 0);
 }

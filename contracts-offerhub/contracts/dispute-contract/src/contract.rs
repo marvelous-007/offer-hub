@@ -3,27 +3,16 @@ use soroban_sdk::{panic_with_error, Address, Env, IntoVal, Map, String, Symbol, 
 use crate::{
     access::{is_valid_arbitrator, is_valid_mediator},
 
-    storage::{ARBITRATOR, DISPUTES, DISPUTE_TIMEOUT, ESCROW_CONTRACT, FEE_MANAGER, check_rate_limit,
+    storage::{set_total_disputes, ARBITRATOR, DISPUTES, DISPUTE_TIMEOUT, ESCROW_CONTRACT, FEE_MANAGER, check_rate_limit,
               CONTRACT_CONFIG, DEFAULT_TIMEOUT_HOURS, DEFAULT_MAX_EVIDENCE, DEFAULT_MEDIATION_TIMEOUT,
               DEFAULT_ARBITRATION_TIMEOUT, DEFAULT_FEE_PERCENTAGE, DEFAULT_RATE_LIMIT_CALLS,
               DEFAULT_RATE_LIMIT_WINDOW_HOURS},
-    types::{DisputeData, DisputeLevel, DisputeOutcome, DisputeStatus, Error, Evidence, ContractConfig},
+    types::{DisputeData, DisputeLevel, DisputeOutcome, Evidence, ContractConfig},
     validation::{validate_open_dispute, validate_add_evidence, validate_timeout_duration, validate_address},
-
-    storage::{
-        check_rate_limit, set_total_disputes, ARBITRATOR, DISPUTES, DISPUTE_TIMEOUT,
-        ESCROW_CONTRACT, FEE_MANAGER,
-    },
-
     types::{
-        AllDisputeDataExport, DisputeData, DisputeDataExport, DisputeLevel, DisputeOutcome,
-        DisputeState, DisputeSummary, Evidence, DisputeInfo
+        AllDisputeDataExport, DisputeDataExport,
+        DisputeState, DisputeSummary, DisputeInfo
     },
-
-    validation::{
-        validate_add_evidence, validate_address, validate_open_dispute, validate_timeout_duration,
-    },
-
 };
 use crate::{error::{handle_error, Error}};
 
@@ -594,10 +583,11 @@ fn validate_config(config: &ContractConfig) -> Result<(), Error> {
     }
     
     Ok(())
-
-pub fn get_total_disputes(env: &Env) -> u64 {
-    crate::storage::get_total_disputes(env)
 }
+
+    pub fn get_total_disputes(env: &Env) -> u64 {
+        crate::storage::get_total_disputes(env)
+    }
 
 fn increment_dispute_count(env: &Env) -> u64 {
     let current = get_total_disputes(env);
@@ -812,4 +802,4 @@ pub fn get_dispute_info(env: &Env,  dispute_id: u32) -> Result<DisputeInfo, Erro
     };
 
     Ok(dispute_info)
-
+}

@@ -8,9 +8,6 @@ use soroban_sdk::{
 };
 use crate::types::ContractConfig;
 
-use soroban_sdk::{log, testutils::Address as _, Address, Env};
-
-
 #[test]
 fn test_initialize() {
     let env = Env::default();

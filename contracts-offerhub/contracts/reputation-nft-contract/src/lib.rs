@@ -13,7 +13,7 @@ mod error;
 pub use crate::contract::ReputationNFTContract;
 pub use error::Error;
 pub use types::Metadata;
-pub use types::{AchievementType, Error, Metadata, RarityLevel, TokenId};
+pub use types::{AchievementType, RarityLevel, TokenId};
 
 #[contract]
 pub struct Contract;
