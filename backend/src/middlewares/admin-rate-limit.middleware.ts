@@ -104,6 +104,9 @@ export const adminRateLimitMiddleware = async (
     // Check day rate limit
     const dayUsage = await checkRateLimitUsage(apiKeyId, "day", dayStart);
     if (dayUsage >= rateLimit.requests_per_day) {
+      const reset = nextResetForWindow(now, "day");
+      const retryAfter = Math.ceil((reset.getTime() - now.getTime()) / 1000);
+      res.set("Retry-After", String(retryAfter));
       return res.status(429).json({
         success: false,
         error: {
@@ -114,8 +117,8 @@ export const adminRateLimitMiddleware = async (
           rate_limit: {
             limit: rateLimit.requests_per_day,
             remaining: 0,
-            reset_time: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(),
-            retry_after: 86400,
+            reset_time: reset.toISOString(),
+            retry_after: retryAfter,
           },
         },
       });

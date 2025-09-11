@@ -44,8 +44,8 @@ interface WebhookManagementProps {
 export function WebhookManagement({ className }: WebhookManagementProps) {
   const {
     webhooks,
-    isLoading,
-    error,
+    isLoadingWebhooks,
+    errorWebhooks,
     createWebhook,
     updateWebhook,
     deleteWebhook,
@@ -160,9 +160,9 @@ export function WebhookManagement({ className }: WebhookManagementProps) {
             variant="outline"
             size="sm"
             onClick={refreshWebhooks}
-            disabled={isLoading}
+            disabled={isLoadingWebhooks}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingWebhooks ? "animate-spin" : ""}`} />
             Refresh
           </Button>
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
@@ -211,15 +211,15 @@ export function WebhookManagement({ className }: WebhookManagementProps) {
 
       {/* Webhooks List */}
       <div className="grid gap-4">
-        {isLoading ? (
+        {isLoadingWebhooks ? (
           <div className="flex items-center justify-center py-8">
             <RefreshCw className="h-6 w-6 animate-spin mr-2" />
             Loading webhooks...
           </div>
-        ) : error ? (
+        ) : errorWebhooks ? (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{errorWebhooks}</AlertDescription>
           </Alert>
         ) : filteredWebhooks.length === 0 ? (
           <Card>
@@ -345,9 +345,14 @@ export function WebhookManagement({ className }: WebhookManagementProps) {
             <EditWebhookDialog
               webhook={selectedWebhook}
               onClose={() => setShowEditDialog(false)}
-              onSubmit={(data) => {
-                updateWebhook(selectedWebhook.id, data);
-                setShowEditDialog(false);
+              onSubmit={async (data) => {
+                try {
+                  await updateWebhook(selectedWebhook.id, data);
+                  toast.success("Webhook updated");
+                  setShowEditDialog(false);
+                } catch {
+                  toast.error("Failed to update webhook");
+                }
               }}
             />
           )}

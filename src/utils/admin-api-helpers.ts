@@ -72,7 +72,9 @@ export function formatApiKeyPermissions(permissions: any[]): string[] {
 export function validateWebhookUrl(url: string): boolean {
   try {
     const urlObj = new URL(url);
-    return urlObj.protocol === "https:" || urlObj.protocol === "http:";
+    const isLocal = ['localhost', '127.0.0.1', '::1'].includes(urlObj.hostname);
+    if (isLocal) return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+    return urlObj.protocol === 'https:';
   } catch {
     return false;
   }
@@ -81,12 +83,30 @@ export function validateWebhookUrl(url: string): boolean {
 /**
  * Generate webhook signature
  */
-export function generateWebhookSignature(payload: string, secret: string): string {
-  // This would typically use HMAC-SHA256
-  // For now, we'll use a simple hash for demonstration
+export async function generateWebhookSignature(payload: string, secret: string): Promise<string> {
+  if (!(globalThis.crypto && 'subtle' in globalThis.crypto)) {
+    throw new Error('Web Crypto API not available; cannot generate HMAC signature in this environment.');
+  }
+  
+  // Convert strings to ArrayBuffer for Web Crypto API
   const encoder = new TextEncoder();
-  const data = encoder.encode(payload + secret);
-  return Array.from(data, byte => byte.toString(16).padStart(2, '0')).join('');
+  const secretBuffer = new Uint8Array(encoder.encode(secret));
+  const payloadBuffer = new Uint8Array(encoder.encode(payload));
+  
+  const key = await crypto.subtle.importKey(
+    'raw',
+    secretBuffer,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  
+  const signature = await crypto.subtle.sign('HMAC', key, payloadBuffer);
+  const signatureArray = new Uint8Array(signature);
+  
+  return Array.from(signatureArray)
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 /**
@@ -163,15 +183,19 @@ export function validateIntegrationConfig(config: any, schema: any): { isValid: 
  * Encrypt sensitive credentials
  */
 export function encryptCredentials(credentials: any): string {
-  // In a real implementation, you would use proper encryption
-  // For now, we'll use base64 encoding as a placeholder
-  return btoa(JSON.stringify(credentials));
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('encryptCredentials must not be used in production. Perform encryption server-side.');
+  }
+  return btoa(JSON.stringify(credentials)); // dev-only placeholder
 }
 
 /**
  * Decrypt sensitive credentials
  */
 export function decryptCredentials(encryptedCredentials: string): any {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('decryptCredentials must not be used in production. Perform decryption server-side.');
+  }
   try {
     return JSON.parse(atob(encryptedCredentials));
   } catch {
@@ -292,8 +316,8 @@ export function formatDate(dateString: string, options?: Intl.DateTimeFormatOpti
     hour: "2-digit",
     minute: "2-digit",
   };
-  
-  return date.toLocaleDateString("en-US", { ...defaultOptions, ...options });
+
+  return date.toLocaleString("en-US", { ...defaultOptions, ...options });
 }
 
 /**
@@ -376,6 +400,7 @@ export function sanitizeInput(input: string): string {
  * Calculate rate limit usage percentage
  */
 export function calculateRateLimitUsage(current: number, limit: number): number {
+  if (!Number.isFinite(limit) || limit <= 0) return 100;
   return Math.min((current / limit) * 100, 100);
 }
 
@@ -448,17 +473,21 @@ export function formatError(error: any): {
  * Export data as JSON
  */
 export function exportAsJson(data: any, filename: string): void {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    console.warn('exportAsJson is only available in the browser.');
+    return;
+  }
   const jsonString = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonString], { type: "application/json" });
   const url = URL.createObjectURL(blob);
-  
+
   const link = document.createElement("a");
   link.href = url;
   link.download = `${filename}.json`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  
+
   URL.revokeObjectURL(url);
 }
 
@@ -467,23 +496,28 @@ export function exportAsJson(data: any, filename: string): void {
  */
 export function exportAsCsv(data: any[], filename: string): void {
   if (data.length === 0) return;
-  
-  const headers = Object.keys(data[0]);
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    console.warn('exportAsCsv is only available in the browser.');
+    return;
+  }
+
+  const headers = Array.from(new Set(data.flatMap(row => Object.keys(row))));
+  const escapeCell = (v: any) => String(v ?? '').replace(/"/g, '""');
   const csvContent = [
-    headers.join(","),
-    ...data.map(row => headers.map(header => `"${row[header] || ""}"`).join(","))
-  ].join("\n");
-  
-  const blob = new Blob([csvContent], { type: "text/csv" });
+    headers.join(','),
+    ...data.map(row => headers.map(h => `"${escapeCell(row[h])}"`).join(',')),
+  ].join('\n');
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
-  
+
   const link = document.createElement("a");
   link.href = url;
   link.download = `${filename}.csv`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  
+
   URL.revokeObjectURL(url);
 }
 

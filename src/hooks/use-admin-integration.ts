@@ -83,6 +83,10 @@ interface UseAdminIntegrationReturn {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 export function useAdminIntegration(): UseAdminIntegrationReturn {
+  const authHeaders = (): Record<string, string> => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
   // State for API Keys
   const [apiKeys, setApiKeys] = useState<AdminApiKey[]>([]);
   const [isLoadingApiKeys, setIsLoadingApiKeys] = useState(false);
@@ -140,7 +144,7 @@ export function useAdminIntegration(): UseAdminIntegrationReturn {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          ...authHeaders(),
         },
       });
 
@@ -169,7 +173,7 @@ export function useAdminIntegration(): UseAdminIntegrationReturn {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          ...authHeaders(),
         },
         body: JSON.stringify(data),
       });
@@ -196,7 +200,7 @@ export function useAdminIntegration(): UseAdminIntegrationReturn {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          ...authHeaders(),
         },
         body: JSON.stringify(data),
       });
@@ -223,7 +227,7 @@ export function useAdminIntegration(): UseAdminIntegrationReturn {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          ...authHeaders(),
         },
       });
 
@@ -267,7 +271,7 @@ export function useAdminIntegration(): UseAdminIntegrationReturn {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          ...authHeaders(),
         },
       });
 
@@ -296,7 +300,7 @@ export function useAdminIntegration(): UseAdminIntegrationReturn {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          ...authHeaders(),
         },
         body: JSON.stringify(data),
       });
@@ -323,7 +327,7 @@ export function useAdminIntegration(): UseAdminIntegrationReturn {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          ...authHeaders(),
         },
         body: JSON.stringify(data),
       });
@@ -350,7 +354,7 @@ export function useAdminIntegration(): UseAdminIntegrationReturn {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          ...authHeaders(),
         },
       });
 
@@ -376,7 +380,7 @@ export function useAdminIntegration(): UseAdminIntegrationReturn {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          ...authHeaders(),
         },
         body: JSON.stringify({ event_type: eventType, data: testData }),
       });
@@ -412,7 +416,7 @@ export function useAdminIntegration(): UseAdminIntegrationReturn {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          ...authHeaders(),
         },
       });
 
@@ -459,7 +463,7 @@ export function useAdminIntegration(): UseAdminIntegrationReturn {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          ...authHeaders(),
         },
       });
 
@@ -488,7 +492,7 @@ export function useAdminIntegration(): UseAdminIntegrationReturn {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          ...authHeaders(),
         },
         body: JSON.stringify(data),
       });
@@ -515,7 +519,7 @@ export function useAdminIntegration(): UseAdminIntegrationReturn {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          ...authHeaders(),
         },
         body: JSON.stringify(data),
       });
@@ -542,7 +546,7 @@ export function useAdminIntegration(): UseAdminIntegrationReturn {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          ...authHeaders(),
         },
       });
 
@@ -585,7 +589,7 @@ export function useAdminIntegration(): UseAdminIntegrationReturn {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          ...authHeaders(),
         },
       });
 
@@ -617,7 +621,7 @@ export function useAdminIntegration(): UseAdminIntegrationReturn {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          ...authHeaders(),
         },
       });
 
@@ -668,7 +672,7 @@ export function useAdminIntegration(): UseAdminIntegrationReturn {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          ...authHeaders(),
         },
       });
 

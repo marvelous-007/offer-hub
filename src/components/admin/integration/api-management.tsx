@@ -43,8 +43,8 @@ interface ApiManagementProps {
 export function ApiManagement({ className }: ApiManagementProps) {
   const {
     apiKeys,
-    isLoading,
-    error,
+    isLoadingApiKeys,
+    errorApiKeys,
     createApiKey,
     updateApiKey,
     revokeApiKey,
@@ -127,9 +127,9 @@ export function ApiManagement({ className }: ApiManagementProps) {
             variant="outline"
             size="sm"
             onClick={refreshApiKeys}
-            disabled={isLoading}
+            disabled={isLoadingApiKeys}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingApiKeys ? "animate-spin" : ""}`} />
             Refresh
           </Button>
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
@@ -178,15 +178,15 @@ export function ApiManagement({ className }: ApiManagementProps) {
 
       {/* API Keys List */}
       <div className="grid gap-4">
-        {isLoading ? (
+        {isLoadingApiKeys ? (
           <div className="flex items-center justify-center py-8">
             <RefreshCw className="h-6 w-6 animate-spin mr-2" />
             Loading API keys...
           </div>
-        ) : error ? (
+        ) : errorApiKeys ? (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{errorApiKeys}</AlertDescription>
           </Alert>
         ) : filteredApiKeys.length === 0 ? (
           <Card>

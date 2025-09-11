@@ -85,7 +85,9 @@ export class AdminIntegrationController {
 
       const { data: apiKey, error } = await supabase
         .from("admin_api_keys")
-        .select("*")
+        .select(
+          "id, name, key_prefix, permissions, rate_limit, is_active, created_by, created_at, updated_at, expires_at, last_used_at"
+        )
         .eq("id", id)
         .single();
 
@@ -237,6 +239,10 @@ export class AdminIntegrationController {
         .single();
 
       if (error) {
+        // PGRST116: No rows found for single()
+        if ((error as any).code === "PGRST116") {
+          throw new AppError("Webhook not found", 404);
+        }
         throw new AppError(`Failed to update webhook: ${error.message}`, 500);
       }
 
@@ -256,12 +262,17 @@ export class AdminIntegrationController {
     try {
       const { id } = req.params;
 
-      const { error } = await supabase
+      const { data: deleted, error } = await supabase
         .from("webhooks")
         .delete()
-        .eq("id", id);
+        .eq("id", id)
+        .select("id")
+        .single();
 
       if (error) {
+        if ((error as any).code === "PGRST116") {
+          throw new AppError("Webhook not found", 404);
+        }
         throw new AppError(`Failed to delete webhook: ${error.message}`, 500);
       }
 
@@ -403,10 +414,13 @@ export class AdminIntegrationController {
           updated_at: new Date().toISOString(),
         })
         .eq("id", id)
-        .select()
+        .select("id, provider_id, name, config, is_active, created_by, created_at, updated_at, last_sync_at")
         .single();
 
       if (error) {
+        if ((error as any).code === "PGRST116") {
+          throw new AppError("Integration instance not found", 404);
+        }
         throw new AppError(`Failed to update integration instance: ${error.message}`, 500);
       }
 
@@ -426,12 +440,17 @@ export class AdminIntegrationController {
     try {
       const { id } = req.params;
 
-      const { error } = await supabase
+      const { data: deleted, error } = await supabase
         .from("integration_instances")
         .delete()
-        .eq("id", id);
+        .eq("id", id)
+        .select("id")
+        .single();
 
       if (error) {
+        if ((error as any).code === "PGRST116") {
+          throw new AppError("Integration instance not found", 404);
+        }
         throw new AppError(`Failed to delete integration instance: ${error.message}`, 500);
       }
 
@@ -546,7 +565,10 @@ export class AdminIntegrationController {
 
       const { data: deliveries, error, count } = await supabase
         .from("webhook_deliveries")
-        .select("*", { count: "exact" })
+        .select(
+          "id, webhook_id, attempt, status, response_status, duration_ms, error_message, created_at",
+          { count: "exact" }
+        )
         .eq("webhook_id", id)
         .range((page - 1) * limit, page * limit - 1)
         .order("created_at", { ascending: false });
@@ -587,7 +609,10 @@ export class AdminIntegrationController {
 
       const { data: syncs, error, count } = await supabase
         .from("integration_syncs")
-        .select("*", { count: "exact" })
+        .select(
+          "id, instance_id, status, started_at, finished_at, items_processed, error_message",
+          { count: "exact" }
+        )
         .eq("instance_id", id)
         .range((page - 1) * limit, page * limit - 1)
         .order("started_at", { ascending: false });
@@ -678,6 +703,9 @@ export class AdminIntegrationController {
         .single();
 
       if (error) {
+        if ((error as any).code === "PGRST116") {
+          throw new AppError("Notification not found", 404);
+        }
         throw new AppError(`Failed to mark notification as read: ${error.message}`, 500);
       }
 

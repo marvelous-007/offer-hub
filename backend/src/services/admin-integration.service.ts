@@ -474,7 +474,7 @@ class AdminIntegrationService {
    */
   private async deliverWebhook(webhook: Webhook, payload: WebhookPayload): Promise<void> {
     try {
-      const signature = this.generateWebhookSignature(payload, webhook.secret);
+      const signature = await this.generateWebhookSignature(payload, webhook.secret);
 
       const delivery: WebhookDelivery = {
         id: uuidv4(),
@@ -606,7 +606,7 @@ class AdminIntegrationService {
         provider_id: data.provider_id,
         name: data.name,
         config: data.config,
-        credentials: this.encryptCredentials(data.credentials),
+        credentials: await this.encryptCredentials(data.credentials),
         is_active: true,
         created_by: createdBy,
         created_at: new Date().toISOString(),
@@ -990,7 +990,7 @@ class AdminIntegrationService {
   /**
    * Generate webhook signature
    */
-  private generateWebhookSignature(payload: WebhookPayload, secret: string): string {
+  private async generateWebhookSignature(payload: WebhookPayload, secret: string): Promise<string> {
     const payloadString = JSON.stringify(payload);
     return crypto
       .createHmac("sha256", secret)
@@ -999,19 +999,59 @@ class AdminIntegrationService {
   }
 
   /**
-   * Encrypt credentials
+   * Encrypt credentials using AES-256-GCM
    */
-  private encryptCredentials(credentials: any): string {
-    // TODO: Implement proper encryption
-    return JSON.stringify(credentials);
+  private async encryptCredentials(credentials: any): Promise<string> {
+    const crypto = require('crypto');
+    const algorithm = 'aes-256-gcm';
+    const key = Buffer.from(process.env.ADMIN_ENC_KEY || 'default-key-32-chars-long-12345', 'utf8');
+    
+    if (key.length !== 32) {
+      throw new Error('ADMIN_ENC_KEY must be exactly 32 characters for AES-256');
+    }
+
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipher(algorithm, key);
+    cipher.setAAD(Buffer.from('admin-integration', 'utf8'));
+    
+    let encrypted = cipher.update(JSON.stringify(credentials), 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    
+    const authTag = cipher.getAuthTag();
+    
+    // Combine IV + AuthTag + Encrypted data
+    return iv.toString('hex') + ':' + authTag.toString('hex') + ':' + encrypted;
   }
 
   /**
-   * Decrypt credentials
+   * Decrypt credentials using AES-256-GCM
    */
-  private decryptCredentials(encryptedCredentials: string): any {
-    // TODO: Implement proper decryption
-    return JSON.parse(encryptedCredentials);
+  private async decryptCredentials(encryptedCredentials: string): Promise<any> {
+    const crypto = require('crypto');
+    const algorithm = 'aes-256-gcm';
+    const key = Buffer.from(process.env.ADMIN_ENC_KEY || 'default-key-32-chars-long-12345', 'utf8');
+    
+    if (key.length !== 32) {
+      throw new Error('ADMIN_ENC_KEY must be exactly 32 characters for AES-256');
+    }
+
+    const parts = encryptedCredentials.split(':');
+    if (parts.length !== 3) {
+      throw new Error('Invalid encrypted credentials format');
+    }
+
+    const iv = Buffer.from(parts[0], 'hex');
+    const authTag = Buffer.from(parts[1], 'hex');
+    const encrypted = parts[2];
+
+    const decipher = crypto.createDecipher(algorithm, key);
+    decipher.setAAD(Buffer.from('admin-integration', 'utf8'));
+    decipher.setAuthTag(authTag);
+
+    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+
+    return JSON.parse(decrypted);
   }
 }
 
