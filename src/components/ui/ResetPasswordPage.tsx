@@ -59,7 +59,7 @@ const ResetPasswordPage: React.FC = () => {
               <Input
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                 placeholder="Enter new password"
                 aria-label="Enter new password"
                 className="focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-400 text-sm sm:text-base"
@@ -164,7 +164,7 @@ const ResetPasswordPage: React.FC = () => {
               <Input
                 type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm new password"
                 aria-label="Confirm new password"
                 className={`${

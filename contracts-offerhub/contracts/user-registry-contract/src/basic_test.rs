@@ -1,6 +1,9 @@
 #![cfg(test)]
 
-use crate::{Contract, types::{Error, VerificationLevel}};
+use crate::{
+    types::{Error, VerificationLevel},
+    Contract,
+};
 use soroban_sdk::{testutils::Address as _, Address, Env, String};
 
 #[test]
@@ -13,7 +16,7 @@ fn test_basic_legacy_functionality() {
         // Test unregistered user is not verified
         let is_verified = Contract::is_verified(env.clone(), user.clone());
         assert!(!is_verified);
-        
+
         // Test get_user_status for unregistered user
         let status = Contract::get_user_status(env.clone(), user.clone());
         assert!(!status.is_verified);
@@ -124,7 +127,7 @@ fn test_user_status_structure() {
 
     env.as_contract(&contract_id, || {
         let status = Contract::get_user_status(env.clone(), user.clone());
-        
+
         // Verify UserStatus has all expected fields
         assert!(!status.is_verified);
         assert_eq!(status.verification_level, VerificationLevel::Basic); // Default for non-verified

@@ -1,5 +1,5 @@
-use soroban_sdk::{Address, Env, String};
 use crate::types::Error;
+use soroban_sdk::{Address, Env, String};
 
 // Validation constants
 const MAX_AMOUNT: i128 = 1_000_000_000_000; // 1 trillion stroops

@@ -1,4 +1,4 @@
-use soroban_sdk::{contracterror, contracttype, Address, String, Vec};
+use soroban_sdk::{contracterror, contracttype, symbol_short, Address, String, Symbol, Vec};
 
 #[contracterror]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -58,6 +58,24 @@ pub struct RatingStats {
     pub two_star_count: u32,
     pub one_star_count: u32,
     pub last_updated: u64,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct UserRatingSummary {
+    pub user: Address,
+    pub total_ratings: u32,
+    pub average_rating: u32, // Multiplied by 100 for precision (e.g., 450 = 4.50)
+    pub five_star_count: u32,
+    pub four_star_count: u32,
+    pub three_star_count: u32,
+    pub two_star_count: u32,
+    pub one_star_count: u32,
+    pub last_updated: u64,
+    pub recent_ratings:  Vec<(String, Address, Address, String, u32, u64, String)>,
+    pub rating_trend: i32, // Positive for improving, negative for declining
+    pub achievement_eligible: Vec<String>,
+    pub restriction_status: String, // "none", "warning", "restricted"
 }
 
 #[contracttype]
@@ -149,11 +167,12 @@ pub const MIN_RATING: u32 = 1;
 pub const MAX_RATING: u32 = 5;
 pub const MAX_FEEDBACK_LENGTH: u32 = 1000;
 
-
 // Default thresholds
 pub const DEFAULT_RESTRICTION_THRESHOLD: u32 = 250; // 2.50 average rating
 pub const DEFAULT_WARNING_THRESHOLD: u32 = 300; // 3.00 average rating
 pub const DEFAULT_TOP_RATED_THRESHOLD: u32 = 480; // 4.80 average rating
+
+pub const TOTAL_RATING_COUNT: Symbol = symbol_short!("TOTALRATE");
 
 pub fn require_auth(address: &Address) -> Result<(), Error> {
     address.require_auth();
@@ -181,3 +200,24 @@ pub struct ContractConfig {
     pub warning_threshold: u32,           // Rating threshold for warnings
     pub top_rated_threshold: u32,         // Rating threshold for top-rated status
 }
+
+pub struct RatingDataExport {
+    pub user_address: Address,
+    pub stats: RatingStats,
+    pub ratings: Vec<Rating>,
+    pub feedback: Vec<Feedback>,
+    pub export_timestamp: u64,
+    pub export_version: String,
+    pub data_size_limit_reached: bool,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct AllRatingDataExport {
+    pub total_ratings: u64,
+    pub platform_stats: Vec<(String, String)>,
+    pub export_timestamp: u64,
+    pub export_version: String,
+    pub data_size_limit_reached: bool,
+}
+

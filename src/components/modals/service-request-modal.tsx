@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react';
 import { useServiceRequestsApi } from '@/hooks/api-connections/use-service-requests-api';
+import { VALIDATION_LIMITS } from '@/constants/magic-numbers';
 
 //import { useUser } from '@/providers/user-context';
 
@@ -66,7 +67,7 @@ const ServiceRequestModal: React.FC<ServiceRequestModalProps> = ({ open, onClose
               placeholder="Write your message for the freelancer..."
               value={message}
               onChange={e => setMessage(e.target.value)}
-              minLength={5}
+              minLength={VALIDATION_LIMITS.MIN_MESSAGE_LENGTH}
               required
             />
             {error && (

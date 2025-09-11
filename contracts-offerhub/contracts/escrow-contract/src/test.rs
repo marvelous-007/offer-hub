@@ -1,9 +1,9 @@
 #![cfg(test)]
 
-use crate::types::EscrowStatus;
+use crate::types::EscrowState;
 use crate::{EscrowContract, EscrowContractClient};
-use soroban_sdk::testutils::{Address as _, Ledger};
-use soroban_sdk::{contract, contractimpl, Address, Env, Symbol, String};
+use soroban_sdk::testutils::{Address as _, Ledger, LedgerInfo};
+use soroban_sdk::{contract, contractimpl, Address, Env, String, Symbol};
 
 #[contract]
 pub struct MockTokenContract;
@@ -44,11 +44,11 @@ fn test_deposit_and_release_token() {
     contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
     contract.deposit_funds(&client);
     let data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(data.status, EscrowStatus::Funded);
+    assert_eq!(data.state, EscrowState::Funded);
 
     contract.release_funds(&freelancer);
     let data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(data.status, EscrowStatus::Released);
+    assert_eq!(data.state, EscrowState::Released);
 }
 
 #[test]
@@ -92,7 +92,7 @@ fn test_resolve_dispute_arbitrator_only_panics_for_non_arbitrator() {
 
     contract.dispute(&client);
     let data = crate::contract::get_escrow_data(&env);
-    assert_eq!(data.status, EscrowStatus::Disputed);
+    assert_eq!(data.state, EscrowState::Disputed);
 
     contract.resolve_dispute(&client, &Symbol::new(&env, "client_wins"));
 }
@@ -141,7 +141,7 @@ fn test_resolve_dispute_unauthorized() {
 
     contract.dispute(&client);
     let data = crate::contract::get_escrow_data(&env);
-    assert_eq!(data.status, EscrowStatus::Disputed);
+    assert_eq!(data.state, EscrowState::Disputed);
 
     contract.resolve_dispute(&client, &Symbol::new(&env, "client_wins"));
 }
@@ -168,7 +168,7 @@ fn test_auto_release_after_timeout() {
 
     contract.auto_release();
     let data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(data.status, EscrowStatus::Released);
+    assert_eq!(data.state, EscrowState::Released);
 }
 
 #[test]
@@ -234,7 +234,7 @@ fn test_milestone_lifecycle() {
     let milestone_desc = String::from_str(&env, "Frontend");
     let milestone_amount = 500;
     let milestone_id = contract.add_milestone(&client, &milestone_desc, &milestone_amount);
-    
+
     let milestones = contract.get_milestones();
     assert_eq!(milestones.len(), 1);
 
@@ -267,14 +267,14 @@ fn test_dispute_resolution() {
 
     contract.dispute(&client);
     let data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(data.status, EscrowStatus::Disputed);
+    assert_eq!(data.state, EscrowState::Disputed);
 
     // Usar símbolo más simple
     let resolution = Symbol::new(&env, "freelancer");
     contract.resolve_dispute(&arbitrator, &resolution);
-    
+
     let resolved_data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(resolved_data.status, EscrowStatus::Released);
+    assert_eq!(resolved_data.state, EscrowState::Released);
 }
 
 #[test]
@@ -295,10 +295,10 @@ fn test_basic_authorization() {
 
     let milestone_desc = String::from_str(&env, "Task Description");
     let milestone_id = contract.add_milestone(&client, &milestone_desc, &500);
-    
+
     let milestones = contract.get_milestones();
     assert_eq!(milestones.len(), 1);
-    
+
     contract.approve_milestone(&client, &milestone_id);
     let updated_milestones = contract.get_milestones();
     let milestone = updated_milestones.get(0).unwrap();
@@ -327,7 +327,7 @@ fn test_timeout_functionality() {
 
     contract.auto_release();
     let data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(data.status, EscrowStatus::Released);
+    assert_eq!(data.state, EscrowState::Released);
 }
 
 #[test]
@@ -386,11 +386,11 @@ fn test_successful_escrow_flow() {
 
     contract.init_contract(&client, &freelancer, &amount, &fee_manager);
     let initial_data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(initial_data.status, EscrowStatus::Initialized);
+    assert_eq!(initial_data.state, EscrowState::Created);
 
     contract.deposit_funds(&client);
     let funded_data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(funded_data.status, EscrowStatus::Funded);
+    assert_eq!(funded_data.state, EscrowState::Funded);
 
     let milestone_desc = String::from_str(&env, "Task Description");
     let milestone_id = contract.add_milestone(&client, &milestone_desc, &500);
@@ -399,7 +399,7 @@ fn test_successful_escrow_flow() {
 
     contract.approve_milestone(&client, &milestone_id);
     contract.release_milestone(&freelancer, &milestone_id);
-    
+
     let final_milestones = contract.get_milestones();
     let milestone = final_milestones.get(0).unwrap();
     assert!(milestone.approved);
@@ -421,29 +421,38 @@ fn test_escrow_data_integrity() {
 
     contract.init_contract(&client, &freelancer, &amount, &fee_manager);
     let initial_data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    
+
     assert_eq!(initial_data.client, client);
     assert_eq!(initial_data.freelancer, freelancer);
     assert_eq!(initial_data.amount, amount);
-    assert_eq!(initial_data.status, EscrowStatus::Initialized);
+    assert_eq!(initial_data.state, EscrowState::Created);
     assert_eq!(initial_data.released_amount, 0);
 
     contract.deposit_funds(&client);
     let funded_data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(funded_data.status, EscrowStatus::Funded);
+    assert_eq!(funded_data.state, EscrowState::Funded);
 
     contract.release_funds(&freelancer);
     let released_data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
+
     assert_eq!(released_data.status, EscrowStatus::Released);
 }
 
 #[test]
 fn test_initialize_contract() {
+
+    assert_eq!(released_data.state, EscrowState::Released);
+}
+
+#[test]
+fn test_increment_transaction_count() {
+
     let env = setup_env();
     env.mock_all_auths();
 
     let contract_id = env.register(EscrowContract, ());
     let contract = EscrowContractClient::new(&env, &contract_id);
+
 
     let admin = Address::generate(&env);
 
@@ -461,11 +470,55 @@ fn test_initialize_contract() {
 
 #[test]
 fn test_set_config() {
+
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let arbitrator = Address::generate(&env);
+    let token = setup_token(&env);
+    let amount = 500;
+    let timeout = 3600;
+
+    // Check initial transaction count
+    let initial_count = contract.get_total_transactions();
+    assert_eq!(initial_count, 0);
+
+    // Initialize contract (no transaction count increment)
+    contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
+
+    // Deposit funds (should increment count)
+    contract.deposit_funds(&client);
+    let count_after_deposit = contract.get_total_transactions();
+    assert_eq!(count_after_deposit, 1);
+
+    // Add milestone (should increment count)
+    contract.add_milestone(&client, &String::from_str(&env, "Test milestone"), &200);
+    let count_after_milestone = contract.get_total_transactions();
+    assert_eq!(count_after_milestone, 2);
+
+    // Approve milestone (should increment count)
+    contract.approve_milestone(&client, &1);
+    let count_after_approve = contract.get_total_transactions();
+    assert_eq!(count_after_approve, 3);
+
+    // Release milestone (should increment count)
+    contract.release_milestone(&freelancer, &1);
+    let count_after_release_milestone = contract.get_total_transactions();
+    assert_eq!(count_after_release_milestone, 4);
+
+    // Release funds (should increment count)
+    contract.release_funds(&freelancer);
+    let final_count = contract.get_total_transactions();
+    assert_eq!(final_count, 5);
+}
+
+#[test]
+fn test_reset_transaction_count() {
     let env = setup_env();
     env.mock_all_auths();
 
     let contract_id = env.register(EscrowContract, ());
     let contract = EscrowContractClient::new(&env, &contract_id);
+
 
     let admin = Address::generate(&env);
     let client = Address::generate(&env);
@@ -504,11 +557,59 @@ fn test_set_config() {
 #[test]
 #[should_panic(expected = "Error(Contract, #3)")]
 fn test_set_config_unauthorized() {
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let arbitrator = Address::generate(&env);
+    let token = setup_token(&env);
+    let amount = 500;
+    let timeout = 3600;
+
+    // Check initial transaction count
+    let initial_count = contract.get_total_transactions();
+    assert_eq!(initial_count, 0);
+
+    // Initialize contract (no transaction count increment)
+    contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
+
+    // Deposit funds (should increment count)
+    contract.deposit_funds(&client);
+    let count_after_deposit = contract.get_total_transactions();
+    assert_eq!(count_after_deposit, 1);
+
+    // Add milestone (should increment count)
+    contract.add_milestone(&client, &String::from_str(&env, "Test milestone"), &200);
+    let count_after_milestone = contract.get_total_transactions();
+    assert_eq!(count_after_milestone, 2);
+
+    // Approve milestone (should increment count)
+    contract.approve_milestone(&client, &1);
+    let count_after_approve = contract.get_total_transactions();
+    assert_eq!(count_after_approve, 3);
+
+    // Release milestone (should increment count)
+    contract.release_milestone(&freelancer, &1);
+    let count_after_release_milestone = contract.get_total_transactions();
+    assert_eq!(count_after_release_milestone, 4);
+
+    // Release funds (should increment count)
+    contract.release_funds(&freelancer);
+    let final_count = contract.get_total_transactions();
+    assert_eq!(final_count, 5);
+
+    contract.reset_transaction_count(&client);
+    let reset_transaction_count = contract.get_total_transactions();
+    assert_eq!(reset_transaction_count, 0);
+}
+
+#[test]
+#[should_panic]
+fn test_reset_transaction_count_failed() {
     let env = setup_env();
     env.mock_all_auths();
 
     let contract_id = env.register(EscrowContract, ());
     let contract = EscrowContractClient::new(&env, &contract_id);
+
 
     let admin = Address::generate(&env);
     let unauthorized_user = Address::generate(&env);
@@ -534,4 +635,98 @@ fn test_set_config_unauthorized() {
 
     // This should fail because unauthorized_user is not the client
     contract.set_config(&unauthorized_user, &new_config);
+
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let arbitrator = Address::generate(&env);
+    let token = setup_token(&env);
+    let amount = 500;
+    let timeout = 3600;
+
+    // Check initial transaction count
+    let initial_count = contract.get_total_transactions();
+    assert_eq!(initial_count, 0);
+
+    // Initialize contract (no transaction count increment)
+    contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
+
+    // Deposit funds (should increment count)
+    contract.deposit_funds(&client);
+    let count_after_deposit = contract.get_total_transactions();
+    assert_eq!(count_after_deposit, 1);
+
+    // Add milestone (should increment count)
+    contract.add_milestone(&client, &String::from_str(&env, "Test milestone"), &200);
+    let count_after_milestone = contract.get_total_transactions();
+    assert_eq!(count_after_milestone, 2);
+
+    // Approve milestone (should increment count)
+    contract.approve_milestone(&client, &1);
+    let count_after_approve = contract.get_total_transactions();
+    assert_eq!(count_after_approve, 3);
+
+    // Release milestone (should increment count)
+    contract.release_milestone(&freelancer, &1);
+    let count_after_release_milestone = contract.get_total_transactions();
+    assert_eq!(count_after_release_milestone, 4);
+
+    // Release funds (should increment count)
+    contract.release_funds(&freelancer);
+    let final_count = contract.get_total_transactions();
+    assert_eq!(final_count, 5);
+
+    contract.reset_transaction_count(&freelancer);
+}
+
+
+#[test]
+fn test_get_contract_status() {
+     let env = setup_env();
+    env.mock_all_auths();
+
+    let contract_id = env.register(EscrowContract, ());
+    let contract = EscrowContractClient::new(&env, &contract_id);
+
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let arbitrator = Address::generate(&env);
+    let token = setup_token(&env);
+    let amount = 500;
+    let timeout = 3600; // 1 hour (minimum allowed)
+
+    
+    let timestamp = 3000;
+    env.ledger().set(LedgerInfo {
+        timestamp: timestamp,
+        protocol_version: 23,
+        sequence_number: env.ledger().sequence(),
+        network_id: Default::default(),
+        base_reserve: 0,
+        min_temp_entry_ttl: 0,
+        min_persistent_entry_ttl: 0,
+        max_entry_ttl: 0,
+    });
+    contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
+    contract.deposit_funds(&client);
+
+    let data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
+    let summary = contract.get_contract_status(&contract_id.clone());
+    assert_eq!(summary.client, client);
+    assert_eq!(summary.freelancer, freelancer);
+    assert_eq!(summary.amount, amount);
+    assert_eq!(summary.status, String::from_str(&env, "Funded")); 
+    assert_eq!(summary.created_at, 3000);
+    assert_eq!(summary.milestone_count, 0);
+
+    contract.release_funds(&freelancer);
+    let data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
+    let summary = contract.get_contract_status(&contract_id.clone());
+    // // Verify the EscrowSummary
+    assert_eq!(summary.client, client);
+    assert_eq!(summary.freelancer, freelancer);
+    assert_eq!(summary.amount, amount);
+    assert_eq!(summary.status, String::from_str(&env, "Released")); 
+    assert_eq!(summary.created_at, 3000);
+    assert_eq!(summary.milestone_count, 0);
+
 }

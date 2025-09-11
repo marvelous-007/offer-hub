@@ -1,9 +1,7 @@
 #![cfg(test)]
 
 use super::*;
-use crate::{
-    contract::PublicationContractClient, error::ContractError, storage::DataKey
-};
+use crate::{contract::PublicationContractClient, error::ContractError, storage::DataKey};
 use soroban_sdk::{
     testutils::{Address as _, Events as _},
     vec, Address, Env, IntoVal, String, Symbol, TryFromVal,
@@ -81,7 +79,6 @@ fn test_publish_service_success() {
     let event_data_u32 = u32::try_from_val(&test.env, &data).unwrap();
     assert_eq!(event_data_u32, 1);
 
-
     // Verify stored data using the getter
     let publication = test.contract.get_publication(&test.user1, &1).unwrap();
     assert_eq!(publication.publication_type, pub_type);
@@ -118,7 +115,12 @@ fn test_publish_project_and_user_counter() {
     // Verify the user's post count in storage by accessing it from within the contract's context.
     test.env.as_contract(&test.contract.address, || {
         let user_post_count_key = DataKey::UserPostCount(test.user1.clone());
-        let count: u32 = test.env.storage().instance().get(&user_post_count_key).unwrap();
+        let count: u32 = test
+            .env
+            .storage()
+            .instance()
+            .get(&user_post_count_key)
+            .unwrap();
         assert_eq!(count, 2);
     });
 }
