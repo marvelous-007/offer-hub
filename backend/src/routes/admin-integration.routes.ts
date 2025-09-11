@@ -309,6 +309,17 @@ webhookRouter.post("/receive/:webhook_id", async (req, res, next) => {
   try {
     const { webhook_id } = req.params;
     const { status, response_code, response_body, error_message } = req.body;
+    const signature = req.get("x-webhook-signature");
+    
+    if (!signature) {
+      return res.status(401).json({
+        success: false,
+        error: { code: "MISSING_SIGNATURE", message: "Missing webhook signature" },
+      });
+    }
+    
+    // TODO: Verify signature against stored secret for webhook_id
+    // await adminIntegrationService.verifyWebhookSignature(webhook_id, req.rawBody || req.body, signature);
 
     // TODO: Implement webhook delivery status update
     res.json({

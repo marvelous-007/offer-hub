@@ -352,7 +352,8 @@ class AdminIntegrationService {
         changes: { webhook_name: data.name, webhook_url: data.url },
       });
 
-      return { ...result, secret };
+      // Return the hashed value as the signing key to clients for consistency
+      return { ...result, secret: secretHash };
     } catch (error) {
       if (error instanceof AppError) throw error;
       throw new AppError("Failed to create webhook", 500);
@@ -484,7 +485,8 @@ class AdminIntegrationService {
       };
 
       // Store delivery record
-      await supabase.from("webhook_deliveries").insert(delivery);
+      const { error: insertErr } = await supabase.from("webhook_deliveries").insert(delivery);
+      if (insertErr) throw new AppError(`Failed to record webhook delivery: ${insertErr.message}`, 500);
 
       // Send webhook
       const response = await axios.post(webhook.url, payload, {

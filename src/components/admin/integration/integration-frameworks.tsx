@@ -311,7 +311,7 @@ export function IntegrationFrameworks({ className }: IntegrationFrameworksProps)
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => window.open(provider.documentation_url, "_blank")}
+                            onClick={() => window.open(provider.documentation_url, "_blank", "noopener,noreferrer")}
                           >
                             <ExternalLink className="h-3 w-3" />
                           </Button>
@@ -362,9 +362,14 @@ export function IntegrationFrameworks({ className }: IntegrationFrameworksProps)
               instance={selectedInstance}
               providers={integrationProviders}
               onClose={() => setShowEditDialog(false)}
-              onSubmit={(data) => {
-                updateIntegrationInstance(selectedInstance.id, data);
-                setShowEditDialog(false);
+              onSubmit={async (data) => {
+                try {
+                  await updateIntegrationInstance(selectedInstance.id, data);
+                  toast.success("Integration updated");
+                  setShowEditDialog(false);
+                } catch {
+                  toast.error("Failed to update integration");
+                }
               }}
             />
           )}

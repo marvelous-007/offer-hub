@@ -293,9 +293,14 @@ export function ApiManagement({ className }: ApiManagementProps) {
             <EditApiKeyDialog
               apiKey={selectedApiKey}
               onClose={() => setShowEditDialog(false)}
-              onSubmit={(data) => {
-                updateApiKey(selectedApiKey.id, data);
-                setShowEditDialog(false);
+              onSubmit={async (data) => {
+                try {
+                  await updateApiKey(selectedApiKey.id, data);
+                  toast.success("API key updated");
+                  setShowEditDialog(false);
+                } catch (e) {
+                  toast.error(e instanceof Error ? e.message : "Failed to update API key");
+                }
               }}
             />
           )}
@@ -330,8 +335,8 @@ function CreateApiKeyDialog({ onClose, onSubmit }: CreateApiKeyDialogProps) {
 
   const availableResources = [
     "users", "projects", "contracts", "services", "reviews", 
-    "disputes", "payments", "system", "api_keys", "webhooks", 
-    "integrations", "audit_logs"
+    "disputes", "payments", "system", "api-keys", "webhooks", 
+    "integrations", "audit-logs"
   ];
 
   const availableActions = ["read", "write", "delete", "admin", "create", "update"];

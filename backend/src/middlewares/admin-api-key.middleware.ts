@@ -162,7 +162,8 @@ function extractResourceFromPath(path: string): string {
   const parts = path.split("/").filter(Boolean);
   const idx = parts.findIndex(p => p === "external"); // works for "/api/admin/external/*"
   const resource = idx >= 0 ? parts[idx + 1] : parts[0];
-  return resource || "system";
+  // Normalize hyphens to underscores for consistency with backend types
+  return resource?.replace(/-/g, '_') || "system";
 }
 
 /**

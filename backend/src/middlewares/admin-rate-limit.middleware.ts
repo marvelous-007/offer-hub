@@ -366,9 +366,13 @@ async function updateQuotaUsage(apiKeyId: string): Promise<void> {
     }
 
     if (existingQuota) {
+      const expired = new Date(existingQuota.reset_time) <= now;
       await supabase
         .from("admin_api_quotas")
-        .update({ current_usage: existingQuota.current_usage + 1 })
+        .update({
+          current_usage: expired ? 1 : existingQuota.current_usage + 1,
+          reset_time: expired ? resetTime.toISOString() : existingQuota.reset_time,
+        })
         .eq("id", existingQuota.id);
     } else {
       await supabase
