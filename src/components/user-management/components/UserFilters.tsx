@@ -85,7 +85,7 @@ export function UserFilters({
             placeholder="Search by customer name"
             className="pl-9 h-10 border-[#B4B9C9] focus-visible:ring-offset-0 w-full rounded-sm"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
           />
           <Search
             className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#B4B9C9]"

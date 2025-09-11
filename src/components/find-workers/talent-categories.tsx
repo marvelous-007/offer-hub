@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Code, Smartphone, PenTool, FileText, BarChart, Video, Database, Server, ChevronRight } from "lucide-react"
+import { VALIDATION_LIMITS } from "@/constants/magic-numbers"
 
 export default function TalentCategories() {
   const categories = [
@@ -88,12 +89,12 @@ export default function TalentCategories() {
               </div>
 
               <div className="flex flex-wrap gap-2 mb-4">
-                {category.skills.slice(0, 3).map((skill) => (
+                {category.skills.slice(0, VALIDATION_LIMITS.MAX_TECHNOLOGIES_DISPLAY).map((skill) => (
                   <Badge key={skill} variant="outline">
                     {skill}
                   </Badge>
                 ))}
-                {category.skills.length > 3 && <Badge variant="outline">+{category.skills.length - 3} more</Badge>}
+                {category.skills.length > VALIDATION_LIMITS.MAX_TECHNOLOGIES_DISPLAY && <Badge variant="outline">+{category.skills.length - VALIDATION_LIMITS.MAX_TECHNOLOGIES_DISPLAY} more</Badge>}
               </div>
 
               <div className="flex items-center text-[#15949C] text-sm font-medium">

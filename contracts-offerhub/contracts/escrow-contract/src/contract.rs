@@ -8,8 +8,8 @@ use crate::{
     error::handle_error,
     storage::{add_call_log, CallLog, ESCROW_DATA, INITIALIZED},
     types::{
-        DisputeResult, EscrowData, EscrowDataExport, EscrowStatus, Milestone,
-        MilestoneHistory, EscrowSummary
+        DisputeResult, Error, EscrowData, EscrowDataExport, EscrowState, Milestone,
+        MilestoneHistory, EscrowSummary, EscrowStatus
     },
     error::Error,
     validation::{
@@ -71,7 +71,7 @@ pub fn init_contract_full(
         arbitrator: Some(arbitrator),
         token: Some(token),
         amount,
-        status: EscrowStatus::Initialized,
+        state: EscrowState::Created,
         dispute_result: DisputeResult::None as u32,
         created_at: env.ledger().timestamp(),
         funded_at: None,
@@ -117,7 +117,7 @@ pub fn init_contract(
         arbitrator: None,
         token: None,
         amount,
-        status: EscrowStatus::Initialized,
+        state: EscrowState::Created,
         dispute_result: DisputeResult::None as u32,
         created_at: env.ledger().timestamp(),
         funded_at: None,
@@ -156,7 +156,7 @@ pub fn deposit_funds(env: &Env, client: Address) {
         handle_error(env, Error::Unauthorized);
     }
 
-    if escrow_data.status != EscrowStatus::Initialized {
+    if escrow_data.state != EscrowState::Created {
         handle_error(env, Error::InvalidStatus);
     }
 
@@ -177,7 +177,7 @@ pub fn deposit_funds(env: &Env, client: Address) {
         );
     }
 
-    escrow_data.status = EscrowStatus::Funded;
+    escrow_data.state = EscrowState::Funded;
     escrow_data.funded_at = Some(env.ledger().timestamp());
 
     env.storage().instance().set(&ESCROW_DATA, &escrow_data);
@@ -211,7 +211,7 @@ pub fn release_funds(env: &Env, freelancer: Address) {
         handle_error(env, Error::Unauthorized);
     }
 
-    if escrow_data.status != EscrowStatus::Funded {
+    if escrow_data.state != EscrowState::Funded {
         handle_error(env, Error::InvalidStatus);
     }
 
@@ -227,7 +227,7 @@ pub fn release_funds(env: &Env, freelancer: Address) {
     let fee_amount = (escrow_data.amount * fee_percentage) / 10000;
     let net_amount = escrow_data.amount - fee_amount;
 
-    escrow_data.status = EscrowStatus::Released;
+    escrow_data.state = EscrowState::Released;
     escrow_data.released_at = Some(env.ledger().timestamp());
     escrow_data.fee_collected = fee_amount;
     escrow_data.net_amount = net_amount;
@@ -270,11 +270,11 @@ pub fn dispute(env: &Env, caller: Address) {
         handle_error(env, Error::Unauthorized);
     }
 
-    if escrow_data.status != EscrowStatus::Funded {
+    if escrow_data.state != EscrowState::Funded {
         handle_error(env, Error::InvalidStatus);
     }
 
-    escrow_data.status = EscrowStatus::Disputed;
+    escrow_data.state = EscrowState::Disputed;
     escrow_data.disputed_at = Some(env.ledger().timestamp());
 
     env.storage().instance().set(&ESCROW_DATA, &escrow_data);
@@ -305,7 +305,7 @@ pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
 
     let mut escrow_data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
 
-    if escrow_data.status != EscrowStatus::Disputed {
+    if escrow_data.state != EscrowState::Disputed {
         handle_error(env, Error::DisputeNotOpen);
     }
 
@@ -373,7 +373,7 @@ pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
         }
     }
 
-    escrow_data.status = EscrowStatus::Released; // CORREGIDO: cambiar a Released en lugar de Resolved
+    escrow_data.state = EscrowState::Released; // CORREGIDO: cambiar a Released en lugar de Resolved
     escrow_data.dispute_result = dispute_result as u32;
     escrow_data.resolved_at = Some(env.ledger().timestamp());
 
@@ -619,7 +619,7 @@ pub fn auto_release(env: &Env) {
         handle_error(env, Error::NotInitialized);
     }
     let mut escrow_data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
-    if escrow_data.status != EscrowStatus::Funded {
+    if escrow_data.state != EscrowState::Funded {
         handle_error(env, Error::InvalidStatus);
     }
     let funded_at = escrow_data.funded_at.unwrap_or(0);
@@ -641,7 +641,7 @@ pub fn auto_release(env: &Env) {
                 .into_val(env),
         );
     }
-    escrow_data.status = EscrowStatus::Released;
+    escrow_data.state = EscrowState::Released;
     escrow_data.released_at = Some(now);
 
     env.storage().instance().set(&ESCROW_DATA, &escrow_data);
@@ -770,12 +770,12 @@ pub fn get_contract_status(env: &Env, contract_id: Address) -> EscrowSummary {
     let escrow_data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
 
     // Format Escrow Status
-    let escrow_data_status = match escrow_data.status {
-        EscrowStatus::Initialized => String::from_str(&env, "Initialized"),
-        EscrowStatus::Funded => String::from_str(&env, "Funded"),
-        EscrowStatus::Released => String::from_str(&env, "Released"),
-        EscrowStatus::Disputed => String::from_str(&env, "Disputed"),
-        EscrowStatus::Resolved => String::from_str(&env, "Resolved"),
+    let escrow_data_status = match escrow_data.state {
+        EscrowState::Created => String::from_str(&env, "Initialized"),
+        EscrowState::Funded => String::from_str(&env, "Funded"),
+        EscrowState::Released => String::from_str(&env, "Released"),
+        EscrowState::Disputed => String::from_str(&env, "Disputed"),
+        EscrowState::Refunded => String::from_str(&env, "Resolved"),
     };
 
     let summary = EscrowSummary {

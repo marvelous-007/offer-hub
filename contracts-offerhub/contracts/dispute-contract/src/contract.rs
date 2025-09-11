@@ -121,7 +121,7 @@ pub fn open_dispute(
         timestamp: env.ledger().timestamp(),
         resolved: false,
         outcome: DisputeOutcome::None,
-        status: DisputeStatus::Open,
+        state: DisputeState::Open,
         level: DisputeLevel::Mediation,
         fee_manager,
         dispute_amount,
@@ -212,7 +212,8 @@ pub fn assign_mediator(env: &Env, job_id: u32, admin: Address, mediator: Address
     }
 
     dispute.mediator = Some(mediator.clone());
-    dispute.status = DisputeStatus::UnderMediation;
+    dispute.state = DisputeState::UnderReview(DisputeLevel::Mediation);
+    dispute.level = DisputeLevel::Mediation;
     disputes.set(job_id, dispute);
     env.storage().instance().set(&DISPUTES, &disputes);
 
@@ -243,7 +244,7 @@ pub fn escalate_to_arbitration(env: &Env, job_id: u32, mediator: Address, arbitr
     }
 
     dispute.arbitrator = Some(arbitrator.clone());
-    dispute.status = DisputeStatus::UnderArbitration;
+    dispute.state = DisputeState::UnderReview(DisputeLevel::Arbitration);
     dispute.level = DisputeLevel::Arbitration;
     disputes.set(job_id, dispute);
     env.storage().instance().set(&DISPUTES, &disputes);
@@ -278,7 +279,7 @@ pub fn resolve_dispute(env: &Env, job_id: u32, decision: DisputeOutcome) {
     // Check timeout
     if let Some(timeout) = dispute.timeout_timestamp {
         if env.ledger().timestamp() > timeout {
-            dispute.status = DisputeStatus::Timeout;
+            dispute.state = DisputeState::Closed;
             dispute.resolved = true;
             dispute.outcome = DisputeOutcome::Split; // Default timeout outcome
             dispute.resolution_timestamp = Some(env.ledger().timestamp());
@@ -327,7 +328,7 @@ pub fn resolve_dispute(env: &Env, job_id: u32, decision: DisputeOutcome) {
 
     dispute.resolved = true;
     dispute.outcome = decision;
-    dispute.status = DisputeStatus::Resolved;
+    dispute.state = DisputeState::Resolved;
     dispute.fee_collected = fee_amount;
     dispute.resolution_timestamp = Some(env.ledger().timestamp());
 
@@ -388,7 +389,7 @@ pub fn resolve_dispute_with_auth(
     // Check timeout
     if let Some(timeout) = dispute.timeout_timestamp {
         if env.ledger().timestamp() > timeout {
-            dispute.status = DisputeStatus::Timeout;
+            dispute.state = DisputeState::Closed;
             dispute.resolved = true;
             dispute.outcome = DisputeOutcome::Split; // Default timeout outcome
             dispute.resolution_timestamp = Some(env.ledger().timestamp());
@@ -436,7 +437,7 @@ pub fn resolve_dispute_with_auth(
 
     dispute.resolved = true;
     dispute.outcome = decision;
-    dispute.status = DisputeStatus::Resolved;
+    dispute.state = DisputeState::Resolved;
     dispute.fee_collected = fee_amount;
     dispute.resolution_timestamp = Some(env.ledger().timestamp());
 
@@ -626,7 +627,7 @@ pub fn export_all_dispute_data(env: &Env, admin: Address, limit: u32) -> AllDisp
         let summary = DisputeSummary {
             dispute_id,
             initiator: dispute_data.initiator,
-            status: dispute_data.status,
+            status: dispute_data.state,
             outcome: dispute_data.outcome,
             dispute_amount: dispute_data.dispute_amount,
             timestamp: dispute_data.timestamp,
@@ -678,12 +679,12 @@ pub fn get_dispute_info(env: &Env,  dispute_id: u32) -> Result<DisputeInfo, Erro
     };
 
     // Format dispute status
-    let dispute_status = match dispute.status {
-        DisputeStatus::Open => String::from_str(&env, "Open"),
-        DisputeStatus::UnderMediation => String::from_str(&env, "UnderMediation"),
-        DisputeStatus::UnderArbitration => String::from_str(&env, "UnderArbitration"),
-        DisputeStatus::Resolved => String::from_str(&env, "Resolved"),
-        DisputeStatus::Timeout => String::from_str(&env, "Timeout"),
+    let dispute_status = match dispute.state {
+        DisputeState::Open => String::from_str(&env, "Open"),
+        DisputeState::UnderReview(DisputeLevel::Mediation) => String::from_str(&env, "UnderMediation"),
+        DisputeState::UnderReview(DisputeLevel::Arbitration) => String::from_str(&env, "UnderArbitration"),
+        DisputeState::Resolved => String::from_str(&env, "Resolved"),
+        DisputeState::Closed => String::from_str(&env, "Timeout"),
     };
 
     // Format dispute level

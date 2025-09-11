@@ -1,9 +1,9 @@
 #![cfg(test)]
 
-use crate::types::EscrowStatus;
+use crate::types::EscrowState;
 use crate::{EscrowContract, EscrowContractClient};
 use soroban_sdk::testutils::{Address as _, Ledger, LedgerInfo};
-use soroban_sdk::{contract, contractimpl, log, Address, Env, String, Symbol};
+use soroban_sdk::{contract, contractimpl, Address, Env, String, Symbol};
 
 #[contract]
 pub struct MockTokenContract;
@@ -44,11 +44,11 @@ fn test_deposit_and_release_token() {
     contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
     contract.deposit_funds(&client);
     let data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(data.status, EscrowStatus::Funded);
+    assert_eq!(data.state, EscrowState::Funded);
 
     contract.release_funds(&freelancer);
     let data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(data.status, EscrowStatus::Released);
+    assert_eq!(data.state, EscrowState::Released);
 }
 
 #[test]
@@ -219,7 +219,6 @@ fn test_invalid_dsipute_result() {
     contract.dispute(&client);
     let data = contract.get_escrow_data();
     assert_eq!(data.status, EscrowStatus::Disputed);
-
     contract.resolve_dispute(&arbitrator, &Symbol::new(&env, "none"));
 }
 
@@ -270,7 +269,7 @@ fn test_auto_release_after_timeout() {
 
     contract.auto_release();
     let data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(data.status, EscrowStatus::Released);
+    assert_eq!(data.state, EscrowState::Released);
 }
 
 #[test]
@@ -369,14 +368,14 @@ fn test_dispute_resolution() {
 
     contract.dispute(&client);
     let data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(data.status, EscrowStatus::Disputed);
+    assert_eq!(data.state, EscrowState::Disputed);
 
     // Usar símbolo más simple
     let resolution = Symbol::new(&env, "freelancer");
     contract.resolve_dispute(&arbitrator, &resolution);
 
     let resolved_data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(resolved_data.status, EscrowStatus::Released);
+    assert_eq!(resolved_data.state, EscrowState::Released);
 }
 
 #[test]
@@ -429,7 +428,7 @@ fn test_timeout_functionality() {
 
     contract.auto_release();
     let data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(data.status, EscrowStatus::Released);
+    assert_eq!(data.state, EscrowState::Released);
 }
 
 #[test]
@@ -488,11 +487,11 @@ fn test_successful_escrow_flow() {
 
     contract.init_contract(&client, &freelancer, &amount, &fee_manager);
     let initial_data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(initial_data.status, EscrowStatus::Initialized);
+    assert_eq!(initial_data.state, EscrowState::Created);
 
     contract.deposit_funds(&client);
     let funded_data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(funded_data.status, EscrowStatus::Funded);
+    assert_eq!(funded_data.state, EscrowState::Funded);
 
     let milestone_desc = String::from_str(&env, "Task Description");
     let milestone_id = contract.add_milestone(&client, &milestone_desc, &500);
@@ -527,16 +526,16 @@ fn test_escrow_data_integrity() {
     assert_eq!(initial_data.client, client);
     assert_eq!(initial_data.freelancer, freelancer);
     assert_eq!(initial_data.amount, amount);
-    assert_eq!(initial_data.status, EscrowStatus::Initialized);
+    assert_eq!(initial_data.state, EscrowState::Created);
     assert_eq!(initial_data.released_amount, 0);
 
     contract.deposit_funds(&client);
     let funded_data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(funded_data.status, EscrowStatus::Funded);
+    assert_eq!(funded_data.state, EscrowState::Funded);
 
     contract.release_funds(&freelancer);
     let released_data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
-    assert_eq!(released_data.status, EscrowStatus::Released);
+    assert_eq!(released_data.state, EscrowState::Released);
 }
 
 #[test]

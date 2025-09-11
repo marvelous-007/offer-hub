@@ -1,7 +1,7 @@
 #![cfg(test)]
 
 use crate::{
-    types::{DisputeLevel, DisputeOutcome, DisputeStatus},
+    types::{DisputeLevel, DisputeOutcome, DisputeState},
     DisputeResolutionContract, DisputeResolutionContractClient,
 };
 use soroban_sdk::{
@@ -80,7 +80,7 @@ fn test_open_dispute() {
     assert_eq!(dispute.timestamp, 1000);
     assert_eq!(dispute.resolved, false);
     assert_eq!(dispute.outcome, DisputeOutcome::None);
-    assert_eq!(dispute.status, DisputeStatus::Open);
+    assert_eq!(dispute.state, DisputeState::Open);
     assert_eq!(dispute.level, DisputeLevel::Mediation);
     assert_eq!(dispute.dispute_amount, dispute_amount);
     assert_eq!(dispute.fee_collected, 0);
@@ -231,7 +231,7 @@ fn test_assign_mediator() {
 
     let dispute = client.get_dispute(&job_id);
     assert_eq!(dispute.mediator, Some(mediator));
-    assert_eq!(dispute.status, DisputeStatus::UnderMediation);
+    assert_eq!(dispute.state, DisputeState::UnderReview(DisputeLevel::Mediation));
 }
 
 #[test]
@@ -267,7 +267,7 @@ fn test_escalate_to_arbitration() {
 
     let dispute = client.get_dispute(&job_id);
     assert_eq!(dispute.arbitrator, Some(arbitrator));
-    assert_eq!(dispute.status, DisputeStatus::UnderArbitration);
+    assert_eq!(dispute.state, DisputeState::UnderReview(DisputeLevel::Arbitration));
     assert_eq!(dispute.level, DisputeLevel::Arbitration);
 }
 
@@ -305,7 +305,7 @@ fn test_resolve_dispute() {
     let dispute = client.get_dispute(&job_id);
     assert_eq!(dispute.resolved, true);
     assert_eq!(dispute.outcome, DisputeOutcome::FavorClient);
-    assert_eq!(dispute.status, DisputeStatus::Resolved);
+    assert_eq!(dispute.state, DisputeState::Resolved);
     assert!(dispute.resolution_timestamp.is_some());
     assert_eq!(dispute.fee_collected, 50000); // 5% of 1000000
 }
