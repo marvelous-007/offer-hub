@@ -123,7 +123,7 @@ pub fn index_user_achievement(env: &Env, user: &Address, token_id: &TokenId) {
 
     let mut list: Vec<TokenId> = map_data.get(user.clone()).unwrap_or_else(|| Vec::new(env));
     if list.len() >= MAX_ACHIEVEMENTS_PER_USER {
-        panic!("Maximum achievements limit reached for user");
+        soroban_sdk::panic_with_error!(env, Error::InvalidInput);
     }
     list.push_back(*token_id);
     map_data.set(user.clone(), list);

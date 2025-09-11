@@ -133,6 +133,23 @@ impl Contract {
         )
     }
 
+    // Back-compat alias to preserve the old external symbol
+    pub fn update_reputation_score(
+        env: Env,
+        caller: Address,
+        user: Address,
+        rating_average: u32,
+        total_ratings: u32,
+    ) -> Result<(), Error> {
+        ReputationNFTContract::update_reputation_score(
+            env,
+            caller,
+            user,
+            rating_average,
+            total_ratings,
+        )
+    }
+
     pub fn burn(env: Env, caller: Address, token_id: TokenId) -> Result<(), Error> {
         ReputationNFTContract::burn(env, caller, token_id)
     }

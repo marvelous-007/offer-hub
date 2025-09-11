@@ -37,10 +37,18 @@ pub fn emit_achievement_minted(env: &Env, to: &Address, nft_type: &Symbol, token
 }
 
 pub fn emit_reputaion_contract_initiated(env: &Env, admin: &Address) {
-    env.events().publish(
-        (Symbol::new(env, "ReputaionNFT_Contract_Init"), admin),
-        env.ledger().timestamp(),
-    );
+    // Legacy (typo) topic for backward-compatibility
+    let legacy = Symbol::new(env, "ReputaionNFT_Contract_Init");
+    // Corrected topic
+    let topic = Symbol::new(env, "ReputationNFT_Contract_Init");
+    let ts = env.ledger().timestamp();
+    env.events().publish((legacy, admin), ts);
+    env.events().publish((topic, admin), ts);
+}
+
+// Preferred alias with correct spelling
+pub fn emit_reputation_contract_initiated(env: &Env, admin: &Address) {
+    emit_reputaion_contract_initiated(env, admin);
 }
 
 pub fn emit_burned(env: &Env, token_id: &TokenId, owner: &Address) {

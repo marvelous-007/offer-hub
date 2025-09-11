@@ -68,8 +68,8 @@ impl ReputationNFTContract {
         // Determine achievement type and check prerequisites
         let (name, description, uri, achievement_type) = match &nft_type {
             s if *s == symbol_short!("tencontr") => {
-                // Check if user has prerequisite achievements
-                if !check_achievement_prerequisite(&env, &to, &AchievementType::ProjectMilestone) {
+                // Check if user has prerequisite achievements (Standard -> ProjectMilestone)
+                if !check_achievement_prerequisite(&env, &to, &AchievementType::Standard) {
                     return Err(Error::AchievementPrerequisiteNotMet);
                 }
                 (
@@ -80,7 +80,8 @@ impl ReputationNFTContract {
                 )
             }
             s if *s == symbol_short!("5stars5x") => {
-                if !check_achievement_prerequisite(&env, &to, &AchievementType::RatingMilestone) {
+                // Check if user has prerequisite achievements (Standard -> RatingMilestone)
+                if !check_achievement_prerequisite(&env, &to, &AchievementType::Standard) {
                     return Err(Error::AchievementPrerequisiteNotMet);
                 }
                 (
@@ -91,7 +92,8 @@ impl ReputationNFTContract {
                 )
             }
             s if *s == symbol_short!("toprated") => {
-                if !check_achievement_prerequisite(&env, &to, &AchievementType::Reputation) {
+                // Check if user has prerequisite achievements (RatingMilestone -> Reputation)
+                if !check_achievement_prerequisite(&env, &to, &AchievementType::RatingMilestone) {
                     return Err(Error::AchievementPrerequisiteNotMet);
                 }
                 (
@@ -296,14 +298,17 @@ impl ReputationNFTContract {
         uris: Vec<String>,
     ) -> Result<(), Error> {
         check_minter(&env, &caller)?;
+        const MAX_BATCH_SIZE: u32 = 50; // Aligns with PR description benchmark
         let len = tos.len();
+        if len > MAX_BATCH_SIZE {
+            return Err(Error::InvalidInput);
+        }
         if names.len() != len || descriptions.len() != len || uris.len() != len {
             return Err(Error::InvalidInput);
         }
 
         let mut token_ids = Vec::new(&env);
-        let mut i = 0u32;
-        while i < len {
+        for i in 0..len {
             let to = tos.get(i).ok_or(Error::InvalidInput)?;
             let name = names.get(i).ok_or(Error::InvalidInput)?;
             let description = descriptions.get(i).ok_or(Error::InvalidInput)?;
@@ -325,7 +330,6 @@ impl ReputationNFTContract {
             emit_minted(&env, &to, &token_id);
 
             token_ids.push_back(token_id);
-            i += 1;
         }
 
         // Emit batch event
@@ -385,6 +389,11 @@ impl ReputationNFTContract {
         new_uri: Option<String>,
     ) -> Result<(), Error> {
         check_minter(&env, &caller)?;
+
+        // Verify token exists
+        if !token_exists(&env, &token_id) {
+            return Err(Error::TokenDoesNotExist);
+        }
 
         let mut metadata = get_token_metadata(&env, &token_id)?;
 
