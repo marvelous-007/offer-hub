@@ -4,6 +4,29 @@ import { AppError } from "@/utils/AppError";
 import { v4 as uuidv4 } from "uuid";
 
 /**
+ * Floor date to window start boundary
+ */
+function floorToWindowStart(d: Date, type: "ten_seconds" | "minute" | "hour" | "day"): Date {
+  const t = new Date(d);
+  if (type === "ten_seconds") t.setSeconds(Math.floor(t.getSeconds() / 10) * 10, 0);
+  else if (type === "minute") t.setSeconds(0, 0);
+  else if (type === "hour") { t.setMinutes(0, 0, 0); }
+  else if (type === "day") { t.setHours(0, 0, 0, 0); }
+  return t;
+}
+
+/**
+ * Get next reset time for window
+ */
+function nextResetForWindow(now: Date, type: "ten_seconds" | "minute" | "hour" | "day"): Date {
+  const start = floorToWindowStart(now, type);
+  if (type === "ten_seconds") return new Date(start.getTime() + 10_000);
+  if (type === "minute") return new Date(start.getTime() + 60_000);
+  if (type === "hour") return new Date(start.getTime() + 3_600_000);
+  return new Date(start.getTime() + 86_400_000);
+}
+
+/**
  * Admin Rate Limiting Middleware
  * Implements comprehensive rate limiting for admin API endpoints
  */
@@ -33,13 +56,13 @@ export const adminRateLimitMiddleware = async (
     const rateLimit = apiKey.rate_limit;
     const now = new Date();
 
-    // Check multiple time windows
-    const minuteWindow = new Date(now.getTime() - 60 * 1000);
-    const hourWindow = new Date(now.getTime() - 60 * 60 * 1000);
-    const dayWindow = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    // Normalize windows to fixed boundaries (prevents row churn)
+    const minuteStart = floorToWindowStart(now, "minute");
+    const hourStart = floorToWindowStart(now, "hour");
+    const dayStart = floorToWindowStart(now, "day");
 
     // Check minute rate limit
-    const minuteUsage = await checkRateLimitUsage(apiKeyId, "minute", minuteWindow);
+    const minuteUsage = await checkRateLimitUsage(apiKeyId, "minute", minuteStart);
     if (minuteUsage >= rateLimit.requests_per_minute) {
       return res.status(429).json({
         success: false,
@@ -59,7 +82,7 @@ export const adminRateLimitMiddleware = async (
     }
 
     // Check hour rate limit
-    const hourUsage = await checkRateLimitUsage(apiKeyId, "hour", hourWindow);
+    const hourUsage = await checkRateLimitUsage(apiKeyId, "hour", hourStart);
     if (hourUsage >= rateLimit.requests_per_hour) {
       return res.status(429).json({
         success: false,
@@ -79,7 +102,7 @@ export const adminRateLimitMiddleware = async (
     }
 
     // Check day rate limit
-    const dayUsage = await checkRateLimitUsage(apiKeyId, "day", dayWindow);
+    const dayUsage = await checkRateLimitUsage(apiKeyId, "day", dayStart);
     if (dayUsage >= rateLimit.requests_per_day) {
       return res.status(429).json({
         success: false,
@@ -99,19 +122,19 @@ export const adminRateLimitMiddleware = async (
     }
 
     // Update rate limit counters
-    await updateRateLimitCounters(apiKeyId, minuteWindow, hourWindow, dayWindow, minuteUsage, hourUsage, dayUsage);
+    await updateRateLimitCounters(apiKeyId, minuteStart, hourStart, dayStart, minuteUsage, hourUsage, dayUsage);
 
     // Add rate limit info to response headers
     res.set({
       "X-RateLimit-Limit-Minute": rateLimit.requests_per_minute.toString(),
-      "X-RateLimit-Remaining-Minute": (rateLimit.requests_per_minute - minuteUsage - 1).toString(),
+      "X-RateLimit-Remaining-Minute": Math.max(0, rateLimit.requests_per_minute - minuteUsage - 1).toString(),
       "X-RateLimit-Limit-Hour": rateLimit.requests_per_hour.toString(),
-      "X-RateLimit-Remaining-Hour": (rateLimit.requests_per_hour - hourUsage - 1).toString(),
+      "X-RateLimit-Remaining-Hour": Math.max(0, rateLimit.requests_per_hour - hourUsage - 1).toString(),
       "X-RateLimit-Limit-Day": rateLimit.requests_per_day.toString(),
-      "X-RateLimit-Remaining-Day": (rateLimit.requests_per_day - dayUsage - 1).toString(),
-      "X-RateLimit-Reset-Minute": new Date(now.getTime() + 60 * 1000).toISOString(),
-      "X-RateLimit-Reset-Hour": new Date(now.getTime() + 60 * 60 * 1000).toISOString(),
-      "X-RateLimit-Reset-Day": new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+      "X-RateLimit-Remaining-Day": Math.max(0, rateLimit.requests_per_day - dayUsage - 1).toString(),
+      "X-RateLimit-Reset-Minute": nextResetForWindow(now, "minute").toISOString(),
+      "X-RateLimit-Reset-Hour": nextResetForWindow(now, "hour").toISOString(),
+      "X-RateLimit-Reset-Day": nextResetForWindow(now, "day").toISOString(),
     });
 
     next();
@@ -125,7 +148,7 @@ export const adminRateLimitMiddleware = async (
  */
 async function checkRateLimitUsage(
   apiKeyId: string,
-  windowType: "minute" | "hour" | "day",
+  windowType: "ten_seconds" | "minute" | "hour" | "day",
   windowStart: Date
 ): Promise<number> {
   try {
@@ -134,7 +157,7 @@ async function checkRateLimitUsage(
       .select("request_count")
       .eq("api_key_id", apiKeyId)
       .eq("window_type", windowType)
-      .gte("window_start", windowStart.toISOString())
+      .eq("window_start", windowStart.toISOString())
       .single();
 
     if (error && error.code !== "PGRST116") { // PGRST116 = no rows found
@@ -144,7 +167,8 @@ async function checkRateLimitUsage(
     return data?.request_count || 0;
   } catch (error) {
     console.error(`Failed to check ${windowType} rate limit usage:`, error);
-    return 0;
+    // Signal failure to caller
+    throw error;
   }
 }
 
@@ -179,32 +203,25 @@ async function updateRateLimitCounters(
  */
 async function updateRateLimitCounter(
   apiKeyId: string,
-  windowType: "minute" | "hour" | "day",
+  windowType: "ten_seconds" | "minute" | "hour" | "day",
   windowStart: Date,
   currentCount: number
 ): Promise<void> {
   try {
-    // Try to update existing record
+    // Upsert by exact window row (minimizes duplicates; consider atomic RPC, see note below)
     const { data, error } = await supabase
       .from("admin_api_rate_limits")
-      .update({ request_count: currentCount + 1 })
-      .eq("api_key_id", apiKeyId)
-      .eq("window_type", windowType)
-      .gte("window_start", windowStart.toISOString())
-      .select();
-
-    // If no existing record, create a new one
-    if (error || !data || data.length === 0) {
-      await supabase
-        .from("admin_api_rate_limits")
-        .insert({
+      .upsert(
+        [{
           id: uuidv4(),
           api_key_id: apiKeyId,
           window_start: windowStart.toISOString(),
           window_type: windowType,
-          request_count: 1,
-        });
-    }
+          request_count: currentCount + 1,
+        }],
+        { onConflict: "api_key_id,window_type,window_start" }
+      )
+      .select();
   } catch (error) {
     console.error(`Failed to update ${windowType} rate limit counter:`, error);
   }
@@ -237,12 +254,12 @@ export const burstRateLimitMiddleware = async (
       return next(new AppError("API key not found", 404));
     }
 
-    const burstLimit = apiKey.rate_limit.burst_limit || 10;
+    const burstLimit = apiKey.rate_limit.burst_limit ?? 10;
     const now = new Date();
-    const burstWindow = new Date(now.getTime() - 10 * 1000); // 10 second burst window
+    const tenSecondStart = floorToWindowStart(now, "ten_seconds");
 
     // Check burst usage
-    const burstUsage = await checkRateLimitUsage(apiKeyId, "minute", burstWindow);
+    const burstUsage = await checkRateLimitUsage(apiKeyId, "ten_seconds", tenSecondStart);
     
     if (burstUsage >= burstLimit) {
       return res.status(429).json({
@@ -255,12 +272,15 @@ export const burstRateLimitMiddleware = async (
           rate_limit: {
             limit: burstLimit,
             remaining: 0,
-            reset_time: new Date(now.getTime() + 10 * 1000).toISOString(),
+            reset_time: nextResetForWindow(now, "ten_seconds").toISOString(),
             retry_after: 10,
           },
         },
       });
     }
+
+    // Record this request in the 10s window
+    await updateRateLimitCounter(apiKeyId, "ten_seconds", tenSecondStart, burstUsage);
 
     next();
   } catch (error) {
@@ -289,7 +309,7 @@ export const quotaManagementMiddleware = async (
       .from("admin_api_quotas")
       .select("*")
       .eq("api_key_id", apiKeyId)
-      .lte("reset_time", new Date().toISOString());
+      .gt("reset_time", new Date().toISOString());
 
     if (error) {
       return next(new AppError("Failed to check quota usage", 500));

@@ -154,9 +154,10 @@ export class AdminIntegrationController {
       const createdBy = req.user!.id;
 
       const webhook = await adminIntegrationService.createWebhook(data, createdBy);
+      const { secret, ...safeWebhook } = webhook as any;
 
       res.status(201).json(
-        buildSuccessResponse(webhook, "Webhook created successfully")
+        buildSuccessResponse(safeWebhook, "Webhook created successfully")
       );
     } catch (error) {
       next(error);
@@ -200,7 +201,7 @@ export class AdminIntegrationController {
 
       const { data: webhook, error } = await supabase
         .from("webhooks")
-        .select("*")
+        .select("id, name, url, events, is_active, retry_policy, created_by, created_at, updated_at, last_triggered_at, failure_count")
         .eq("id", id)
         .single();
 
@@ -224,7 +225,6 @@ export class AdminIntegrationController {
     try {
       const { id } = req.params;
       const data: UpdateWebhookDTO = req.body;
-      const updatedBy = req.user!.id;
 
       const { data: webhook, error } = await supabase
         .from("webhooks")
@@ -233,7 +233,7 @@ export class AdminIntegrationController {
           updated_at: new Date().toISOString(),
         })
         .eq("id", id)
-        .select()
+        .select("id, name, url, events, is_active, retry_policy, created_by, created_at, updated_at, last_triggered_at, failure_count")
         .single();
 
       if (error) {
@@ -326,13 +326,23 @@ export class AdminIntegrationController {
       };
 
       const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 20;
+      const limit = Math.min(parseInt(req.query.limit as string) || 20, 100); // Cap at 100
 
-      const { data: instances, error, count } = await supabase
+      let query = supabase
         .from("integration_instances")
-        .select("*", { count: "exact" })
-        .range((page - 1) * limit, page * limit - 1)
-        .order("created_at", { ascending: false });
+        .select(
+          "id, provider_id, name, config, is_active, created_by, created_at, updated_at, last_sync_at",
+          { count: "exact" }
+        );
+      
+      if (filters.provider_id) query = query.eq("provider_id", filters.provider_id);
+      if (filters.is_active !== undefined) query = query.eq("is_active", filters.is_active);
+      if (filters.created_by) query = query.eq("created_by", filters.created_by);
+      if (filters.search) query = query.ilike("name", `%${filters.search}%`);
+      
+      const { data: instances, error, count } = await query
+        .order("created_at", { ascending: false })
+        .range((page - 1) * limit, page * limit - 1);
 
       if (error) {
         throw new AppError(`Failed to fetch integration instances: ${error.message}`, 500);

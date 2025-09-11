@@ -159,16 +159,10 @@ export const rateLimitMiddleware = async (
  * Extract resource type from API path
  */
 function extractResourceFromPath(path: string): string {
-  const pathSegments = path.split("/").filter(segment => segment);
-  
-  // Remove "api/admin/external" prefix
-  const resourceSegments = pathSegments.slice(3);
-  
-  if (resourceSegments.length === 0) {
-    return "system";
-  }
-  
-  return resourceSegments[0];
+  const parts = path.split("/").filter(Boolean);
+  const idx = parts.findIndex(p => p === "external"); // works for "/api/admin/external/*"
+  const resource = idx >= 0 ? parts[idx + 1] : parts[0];
+  return resource || "system";
 }
 
 /**
@@ -212,7 +206,7 @@ export function hasApiKeyPermission(
     // Check conditions if any
     if (permission.conditions && permission.conditions.length > 0) {
       // TODO: Implement condition checking logic
-      return true; // For now, assume conditions are met
+      return false; // Fail closed until implemented
     }
     
     return true;
