@@ -17,6 +17,7 @@ import { authenticateToken } from "./middlewares/auth.middleware";
 
 import conversationRoutes from "@/routes/conversation.routes";
 import messageRoutes from "@/routes/message.routes";
+import reviewResponseRoutes from "@/routes/review-response.routes";
 
 // Setup global error handlers for uncaught exceptions and unhandled rejections
 setupGlobalErrorHandlers();
@@ -44,6 +45,7 @@ app.use("/api/projects", authenticateToken(), projectRoutes);
 app.use("/api/users", authenticateToken(), userRoutes);
 app.use("/api/conversations", authenticateToken(), conversationRoutes);
 app.use("/api/messages", authenticateToken(), messageRoutes);
+app.use("/api", reviewResponseRoutes);
 
 app.get("/", (_req, res) => {
   res.send("💼 OFFER-HUB backend is up and running!");
