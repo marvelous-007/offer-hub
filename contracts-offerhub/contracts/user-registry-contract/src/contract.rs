@@ -2,9 +2,10 @@ use crate::access::AccessControl;
 use crate::events::*;
 use crate::storage::*;
 use crate::types::{
-    require_auth, AllUsersExport, ContractExportResult, Error, PlatformDataExport,
+    require_auth, AllUsersExport, ContractExportResult, PlatformDataExport,
     PublicationStatus, UserDataExport, UserProfile, UserStatus, VerificationLevel, UserProfileSummary,
 };
+use crate::error::Error;
 use crate::validation::{
     validate_bulk_verification, validate_metadata_update, validate_user_verification,
 };

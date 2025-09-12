@@ -1,4 +1,5 @@
-use crate::types::{Error, PublicationStatus, UserProfile, VerificationLevel};
+use crate::error::Error;
+use crate::types::{PublicationStatus, UserProfile, VerificationLevel};
 use soroban_sdk::{contracttype, symbol_short, Address, Env, Map, String, Symbol, Vec};
 
 pub const VERIFIED_USERS: Symbol = symbol_short!("VERIFIED");

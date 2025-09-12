@@ -1,5 +1,6 @@
 #![no_std]
-use crate::types::{Error, EscrowSummary};
+use crate::types::{EscrowSummary};
+use crate::error::Error;
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Symbol, Vec};
 
 mod contract;

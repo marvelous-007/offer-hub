@@ -1,4 +1,4 @@
-use crate::types::Error;
+use crate::error::Error;
 use soroban_sdk::{Address, Env, String};
 
 // Validation constants

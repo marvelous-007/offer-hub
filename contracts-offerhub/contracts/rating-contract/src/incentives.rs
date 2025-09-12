@@ -2,7 +2,8 @@ use crate::events::{emit_achievement_earned, emit_incentive_claimed};
 use crate::storage::{
     get_incentive_record, get_reputation_contract, get_user_rating_stats, save_incentive_record, get_admin
 };
-use crate::types::{Error, IncentiveRecord};
+use crate::error::Error;
+use crate::types::{IncentiveRecord};
 use soroban_sdk::{symbol_short, Address, Env, IntoVal, String, Vec};
 
 pub fn check_rating_incentives(env: &Env, user: &Address) -> Vec<String> {

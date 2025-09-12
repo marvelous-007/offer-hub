@@ -506,6 +506,44 @@ fn test_error_conditions() {
     });
 }
 
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #3)")]
+fn test_token_already_exist() {
+    let (env, admin, contract_id) = setup();
+    let user = Address::generate(&env);
+    let client = ContractClient::new(env.clone(), contract_id.clone());
+
+    client.init(admin.clone()).unwrap();
+    env.mock_all_auths();
+    client.add_minter(admin.clone(), admin.clone()).unwrap();
+
+    // Test: Mint first token successfully
+    client
+        .mint(
+            admin.clone(),
+            user.clone(),
+            1,
+            String::from_str(&env, "First NFT"),
+            String::from_str(&env, "First Description"),
+            String::from_str(&env, "ipfs://first"),
+        )
+        .unwrap();
+
+    client
+        .mint(
+            admin.clone(),
+            user.clone(),
+            1,
+            String::from_str(&env, "First NFT"),
+            String::from_str(&env, "First Description"),
+            String::from_str(&env, "ipfs://first"),
+        )
+        .unwrap();
+
+}
+
+
 #[test]
 fn test_minter_management() {
     let (env, admin, contract_id) = setup();

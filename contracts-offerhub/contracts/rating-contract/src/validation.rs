@@ -1,5 +1,6 @@
 use crate::storage::{get_user_restriction, has_rated_contract};
-use crate::types::{Error, MAX_FEEDBACK_LENGTH, MAX_RATING, MIN_RATING};
+use crate::error::Error;
+use crate::types::{MAX_FEEDBACK_LENGTH, MAX_RATING, MIN_RATING};
 use soroban_sdk::{Address, Env, String};
 
 // Additional validation constants

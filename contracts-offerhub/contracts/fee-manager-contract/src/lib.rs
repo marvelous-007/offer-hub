@@ -93,7 +93,6 @@ impl FeeManagerContract {
     pub fn get_config(env: Env) -> types::ContractConfig {
         contract::get_config(&env)
     }
-} 
 
     pub fn get_total_fees(env: &Env) -> i128 {
         contract::get_total_fees(&env)

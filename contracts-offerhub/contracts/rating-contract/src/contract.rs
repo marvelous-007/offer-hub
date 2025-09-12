@@ -19,16 +19,14 @@ use crate::storage::{
     save_rating_threshold, save_reputation_contract, save_user_rating_stats, set_rate_limit_bypass,
     set_total_rating,
 };
+use crate::error::Error;
 use crate::types::{
-
-    Error, Rating, RatingStats, Feedback, UserRatingData, RatingThreshold, HealthCheckResult,
-    require_auth, ContractConfig, CONTRACT_CONFIG, DEFAULT_MAX_RATING_PER_DAY, DEFAULT_MAX_FEEDBACK_LENGTH,
+    require_auth, AllRatingDataExport, Feedback, Rating,
+    RatingStats, UserRatingData, RatingThreshold,
+    ContractConfig, CONTRACT_CONFIG, DEFAULT_MAX_RATING_PER_DAY, DEFAULT_MAX_FEEDBACK_LENGTH,
     DEFAULT_MIN_RATING, DEFAULT_MAX_RATING, DEFAULT_RATE_LIMIT_CALLS, DEFAULT_RATE_LIMIT_WINDOW_HOURS,
     DEFAULT_AUTO_MODERATION_ENABLED, DEFAULT_RESTRICTION_THRESHOLD, DEFAULT_WARNING_THRESHOLD,
-    DEFAULT_TOP_RATED_THRESHOLD
-    require_auth, AllRatingDataExport, Error, Feedback, HealthCheckResult, Rating,
-    RatingDataExport, RatingStats, RatingThreshold, UserRatingData, UserRatingSummary
-
+    DEFAULT_TOP_RATED_THRESHOLD, RatingDataExport, UserRatingSummary
 };
 use crate::validation::{validate_report_feedback, validate_submit_rating};
 use soroban_sdk::{Address, Env, IntoVal, String, Symbol, Vec};
@@ -561,7 +559,6 @@ impl RatingContract {
         crate::storage::increment_rating_count(&env)
     }
 
-
     pub fn get_last_health_check(env: Env) -> u64 {
         crate::storage::get_last_health_check(&env)
     }
@@ -574,7 +571,7 @@ impl RatingContract {
         crate::access::check_admin(&env, &caller)?;
         
         // Validate config parameters
-        validate_config(&config)?;
+        Self::validate_config(&config)?;
         
         env.storage().instance().set(&CONTRACT_CONFIG, &config);
         
@@ -593,7 +590,6 @@ impl RatingContract {
         }
         Ok(env.storage().instance().get(&CONTRACT_CONFIG).unwrap())
     }
-}
 
 // Helper function to validate config parameters
 fn validate_config(config: &ContractConfig) -> Result<(), Error> {
@@ -761,4 +757,3 @@ fn validate_config(config: &ContractConfig) -> Result<(), Error> {
         Ok(export_data)
     }
 }
-

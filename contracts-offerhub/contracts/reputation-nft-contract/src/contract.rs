@@ -14,7 +14,8 @@ use crate::storage::{
     save_admin, save_token_owner, store_reputation_score, token_exists, update_achievement_stats,
     update_leaderboard,
 };
-use crate::types::{AchievementType, Error, Metadata, TokenId};
+use crate::types::{AchievementType, Metadata, TokenId};
+use crate::error::Error;
 use soroban_sdk::{symbol_short, Address, Env, Map, String, Symbol, Vec};
 
 pub struct ReputationNFTContract;

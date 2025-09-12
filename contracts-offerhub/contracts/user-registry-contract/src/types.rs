@@ -1,26 +1,5 @@
-use soroban_sdk::{contracterror, contracttype, Address, Env, String, Vec};
-
-#[contracterror]
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum Error {
-    Unauthorized = 1,
-    AlreadyRegistered = 2,
-    UserNotFound = 3,
-    AlreadyBlacklisted = 4,
-    NotBlacklisted = 5,
-    InvalidVerificationLevel = 6,
-    VerificationExpired = 7,
-    NotInitialized = 8,
-    AlreadyInitialized = 9,
-    CannotBlacklistAdmin = 10,
-    CannotBlacklistModerator = 11,
-    ProfileNotPublished = 12,
-    ProfileAlreadyPublished = 13,
-    ValidationFailed = 14,
-    InvalidValidationData = 15,
-    RateLimitExceeded = 16,
-    UnexpectedError = 17,
-}
+use soroban_sdk::{contracttype, Address, Env, String, Vec};
+use crate::error::Error;
 
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]

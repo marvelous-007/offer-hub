@@ -14,6 +14,7 @@ import authRoutes from "@/routes/auth.routes";
 import { errorHandlerMiddleware, setupGlobalErrorHandlers } from "./middlewares/errorHandler.middleware";
 import { generalLimiter, authLimiter } from "./middlewares/ratelimit.middleware";
 import { authenticateToken } from "./middlewares/auth.middleware";
+import { loggerMiddleware } from "./middlewares/logger.middleware";
 
 import conversationRoutes from "@/routes/conversation.routes";
 import messageRoutes from "@/routes/message.routes";
@@ -28,6 +29,9 @@ const port = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(express.json());
+
+// Request logging middleware
+app.use(loggerMiddleware);
 
 // Apply general rate limiting to all routes
 app.use(generalLimiter);
