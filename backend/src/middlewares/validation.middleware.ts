@@ -1,14 +1,46 @@
 import { Request, Response, NextFunction } from 'express';
-import { validationResult } from 'express-validator';
+import { validationResult, ValidationChain } from 'express-validator';
 import { AppError } from '../utils/AppError';
 
 /**
  * Middleware to validate request data using express-validator
+ * @param validations - Array of validation chains from express-validator
+ */
+export const validateRequest = (validations: ValidationChain[]) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    // Run all validations
+    for (const validation of validations) {
+      await validation.run(req);
+    }
+    
+    const errors = validationResult(req);
+    
+    if (!errors.isEmpty()) {
+      const errorMessages = errors.array().map(error => ({
+        field: error.type === 'field' ? error.path : 'unknown',
+        message: error.msg,
+        value: error.type === 'field' ? error.value : undefined
+      }));
+      
+      throw new AppError(
+        'Validation failed',
+        400,
+        'VALIDATION_ERROR',
+        errorMessages
+      );
+    }
+    
+    next();
+  };
+};
+
+/**
+ * Legacy middleware for backward compatibility
  * @param req - Express request object
- * @param res - Express response object
+ * @param res - Express response object  
  * @param next - Express next function
  */
-export const validateRequest = (req: Request, res: Response, next: NextFunction): void => {
+export const validateRequestLegacy = (req: Request, res: Response, next: NextFunction): void => {
   const errors = validationResult(req);
   
   if (!errors.isEmpty()) {
