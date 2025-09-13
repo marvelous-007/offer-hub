@@ -140,12 +140,7 @@ export function useAdminDashboard() {
 
       setRefreshInterval(newInterval);
     },
-    [
-      refreshInterval,
-      refreshStatistics,
-      refreshSystemHealth,
-      loadNotifications,
-    ],
+    [refreshStatistics, refreshSystemHealth, loadNotifications],
   );
 
   // Clean up auto-refresh
@@ -154,7 +149,7 @@ export function useAdminDashboard() {
       clearInterval(refreshInterval);
       setRefreshInterval(null);
     }
-  }, [refreshInterval]);
+  }, []);
 
   // Initialize on mount
   useEffect(() => {
