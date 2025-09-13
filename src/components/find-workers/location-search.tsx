@@ -13,7 +13,7 @@ import { useLocationSearch } from "@/hooks/use-location-search"
 import { LocationData } from "@/types/location.types"
 
 interface LocationSearchProps {
-  onLocationSelect?: (location: LocationData) => void
+  onLocationSelect?: (location: LocationData | undefined) => void
   onRadiusChange?: (radius: number) => void
   currentLocation?: LocationData | null
   currentRadius?: number
@@ -61,7 +61,7 @@ export default function LocationSearch({
   const handleClearLocation = () => {
     setSearchQuery("")
     clearSearch()
-    onLocationSelect?.(null)
+    onLocationSelect?.(undefined)
   }
 
   const handleRadiusChange = (radius: number) => {
