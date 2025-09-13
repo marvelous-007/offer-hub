@@ -716,6 +716,45 @@ export class AdminIntegrationController {
       next(error);
     }
   }
+
+  /**
+   * Update webhook delivery status
+   * POST /api/admin/webhooks/receive/:webhook_id
+   */
+  async updateWebhookDeliveryStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { webhook_id } = req.params;
+      const { status, response_code, response_body, error_message } = req.body;
+
+      // Update webhook delivery status in database
+      const { data: delivery, error } = await supabase
+        .from("webhook_deliveries")
+        .update({
+          status,
+          response_code,
+          response_body,
+          error_message,
+          delivered_at: new Date().toISOString(),
+        })
+        .eq("webhook_id", webhook_id)
+        .eq("status", "pending")
+        .select()
+        .single();
+
+      if (error) {
+        if ((error as any).code === "PGRST116") {
+          throw new AppError("Webhook delivery not found", 404);
+        }
+        throw new AppError(`Failed to update webhook delivery status: ${error.message}`, 500);
+      }
+
+      res.json(
+        buildSuccessResponse(delivery, "Webhook delivery status updated successfully")
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const adminIntegrationController = new AdminIntegrationController();

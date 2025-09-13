@@ -4,6 +4,7 @@ import { authenticateToken } from "@/middlewares/auth.middleware";
 import { requireAdmin } from "@/middlewares/role.middleware";
 import { adminApiKeyMiddleware } from "@/middlewares/admin-api-key.middleware";
 import { adminRateLimitMiddleware } from "@/middlewares/admin-rate-limit.middleware";
+import { verifyWebhookSignature } from "@/middlewares/webhook-signature.middleware";
 
 const router = Router();
 
@@ -305,27 +306,14 @@ const webhookRouter = Router();
  * @desc    Receive webhook delivery status updates
  * @access  Public (with webhook signature validation)
  */
-webhookRouter.post("/receive/:webhook_id", async (req, res, next) => {
+webhookRouter.post("/receive/:webhook_id", verifyWebhookSignature, async (req, res, next) => {
   try {
     const { webhook_id } = req.params;
     const { status, response_code, response_body, error_message } = req.body;
-    const signature = req.get("x-webhook-signature");
     
-    if (!signature) {
-      return res.status(401).json({
-        success: false,
-        error: { code: "MISSING_SIGNATURE", message: "Missing webhook signature" },
-      });
-    }
-    
-    // TODO: Verify signature against stored secret for webhook_id
-    // await adminIntegrationService.verifyWebhookSignature(webhook_id, req.rawBody || req.body, signature);
-
-    // TODO: Implement webhook delivery status update
-    res.json({
-      success: true,
-      message: "Webhook delivery status updated",
-    });
+    // Webhook signature is already verified by middleware
+    // Update webhook delivery status
+    await adminIntegrationController.updateWebhookDeliveryStatus(req, res, next);
   } catch (error) {
     next(error);
   }
