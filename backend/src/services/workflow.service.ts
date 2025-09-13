@@ -763,15 +763,11 @@ export class WorkflowService {
     }
   }
 
+  
   async cleanupExpiredWorkflows(): Promise<number> {
-    try {
-      // This would clean up expired workflows
-      // For now, return a mock number
-      return 0;
-    } catch (error) {
-      logger.error('Error cleaning up expired workflows:', error);
-      throw error;
-    }
+    // This would clean up expired workflows
+    // For now, return a mock number
+    return 0;
   }
 
   // Private helper methods
@@ -843,3 +839,4 @@ export class WorkflowService {
     };
   }
 }
+
