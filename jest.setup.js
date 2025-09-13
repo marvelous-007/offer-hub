@@ -66,7 +66,7 @@ jest.mock('@radix-ui/react-avatar', () => ({
     </div>
   ),
   Image: ({ className, ...props }) => (
-    <img className={className} {...props} />
+    <img className={className} alt="Mock image" {...props} />
   ),
   Fallback: ({ children, className, ...props }) => (
     <div className={className} {...props}>
@@ -83,7 +83,7 @@ jest.mock('@/components/ui/avatar', () => ({
     </div>
   ),
   AvatarImage: ({ className, ...props }) => (
-    <img className={className} {...props} />
+    <img className={className} alt="Mock avatar image" {...props} />
   ),
   AvatarFallback: ({ children, className, ...props }) => (
     <div className={className} {...props}>
