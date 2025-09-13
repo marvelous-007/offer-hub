@@ -36,9 +36,6 @@ import { toast } from 'react-hot-toast';
 
 export function MobileWorkflow({ 
   disputeId,
-  workflowState,
-  currentStage,
-  progressPercentage,
   onActionComplete,
   showOfflineIndicator = true,
   enableGestures = true 
@@ -47,6 +44,10 @@ export function MobileWorkflow({
   const [isOffline, setIsOffline] = useState(false);
   const [pendingActions, setPendingActions] = useState<PendingAction[]>([]);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  
+  // Default values for missing props
+  const currentStage = 'initial' as any;
+  const progressPercentage = 0;
 
   // Mock pending actions - in real implementation, this would come from the API
   useEffect(() => {

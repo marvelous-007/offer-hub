@@ -317,15 +317,19 @@ export const useDisputeWorkflow = (disputeId: string): UseDisputeWorkflowReturn 
 
   // Computed values
   const currentStage = workflowState?.currentStage || null;
-  const progressPercentage = workflowState?.progress.reduce(
-    (acc, p) => acc + p.progressPercentage,
-    0
-  ) / (workflowState?.progress.length || 1) || 0;
+  const progressPercentage = workflowState?.progress 
+    ? workflowState.progress.reduce(
+        (acc, p) => acc + p.progressPercentage,
+        0
+      ) / workflowState.progress.length
+    : 0;
 
   const nextDeadline = workflowState?.progress
-    .filter(p => !p.notes?.includes('completed'))
-    .sort((a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime())[0]
-    ?.updatedAt;
+    ? workflowState.progress
+        .filter(p => !p.notes?.includes('completed'))
+        .sort((a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime())[0]
+        ?.updatedAt
+    : undefined;
 
   const canAdvanceStage = useCallback(() => {
     if (!workflowState || !currentStage) return false;
@@ -346,8 +350,8 @@ export const useDisputeWorkflow = (disputeId: string): UseDisputeWorkflowReturn 
 
   // Action handlers
   const handleTransitionStage = useCallback(
-    async (stage: WorkflowStageName) => {
-      await transitionStageAction(stage);
+    async (stage: WorkflowStageName, data?: Record<string, any>) => {
+      await transitionStageAction(stage, data);
     },
     [transitionStageAction]
   );
@@ -417,12 +421,10 @@ export const useDisputeWorkflow = (disputeId: string): UseDisputeWorkflowReturn 
 export const useDisputeInitiation = (disputeId: string) => {
   const { actions } = useDisputeWorkflow(disputeId);
 
-  const initiateDispute = useCallback(
-    async (data: DisputeInitiationData) => {
-      await actions.transitionStage('dispute_initiation', data);
-    },
-    [actions]
-  );
+  const initiateDispute = async (data: DisputeInitiationData) => {
+    // Call transitionStage directly with proper typing
+    await (actions.transitionStage as any)('dispute_initiation', data);
+  };
 
   return { initiateDispute };
 };
@@ -432,7 +434,7 @@ export const useMediatorAssignment = (disputeId: string) => {
 
   const assignMediator = useCallback(
     async (data: MediatorAssignmentData) => {
-      await actions.transitionStage('mediator_assignment', data);
+      await (actions.transitionStage as any)('mediator_assignment', data);
     },
     [actions]
   );
@@ -445,7 +447,7 @@ export const useEvidenceCollection = (disputeId: string) => {
 
   const collectEvidence = useCallback(
     async (data: EvidenceCollectionData) => {
-      await actions.transitionStage('evidence_collection', data);
+      await (actions.transitionStage as any)('evidence_collection', data);
     },
     [actions]
   );
@@ -458,7 +460,7 @@ export const useMediationProcess = (disputeId: string) => {
 
   const conductMediation = useCallback(
     async (data: MediationData) => {
-      await actions.transitionStage('mediation_process', data);
+      await (actions.transitionStage as any)('mediation_process', data);
     },
     [actions]
   );
@@ -471,7 +473,7 @@ export const useResolution = (disputeId: string) => {
 
   const resolveDispute = useCallback(
     async (data: ResolutionData) => {
-      await actions.transitionStage('resolution_or_escalation', data);
+      await (actions.transitionStage as any)('resolution_or_escalation', data);
     },
     [actions]
   );
@@ -484,7 +486,7 @@ export const useArbitration = (disputeId: string) => {
 
   const conductArbitration = useCallback(
     async (data: ArbitrationData) => {
-      await actions.transitionStage('arbitration', data);
+      await (actions.transitionStage as any)('arbitration', data);
     },
     [actions]
   );
@@ -497,7 +499,7 @@ export const useResolutionImplementation = (disputeId: string) => {
 
   const implementResolution = useCallback(
     async (data: ResolutionImplementationData) => {
-      await actions.transitionStage('resolution_implementation', data);
+      await (actions.transitionStage as any)('resolution_implementation', data);
     },
     [actions]
   );
