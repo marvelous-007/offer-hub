@@ -20,6 +20,8 @@ import conversationRoutes from "@/routes/conversation.routes";
 import messageRoutes from "@/routes/message.routes";
 import { adminIntegrationRoutes, adminExternalApiRoutes, adminWebhookRoutes } from "@/routes/admin-integration.routes";
 import { apiRequestLoggingMiddleware } from "@/middlewares/admin-api-key.middleware";
+import reviewResponseRoutes from "@/routes/review-response.routes";
+import { workflowRoutes } from "@/routes/workflow.routes";
 
 // Setup global error handlers for uncaught exceptions and unhandled rejections
 setupGlobalErrorHandlers();
@@ -36,6 +38,9 @@ app.use(loggerMiddleware);
 // Apply general rate limiting to all routes
 app.use(generalLimiter);
 
+// Workflow routes (no authentication required for testing)
+app.use("/api/workflow", workflowRoutes);
+
 // Public routes (no authentication required)
 app.use("/api/auth", authLimiter, authRoutes);
 
@@ -50,6 +55,12 @@ app.use("/api/projects", authenticateToken(), projectRoutes);
 app.use("/api/users", authenticateToken(), userRoutes);
 app.use("/api/conversations", authenticateToken(), conversationRoutes);
 app.use("/api/messages", authenticateToken(), messageRoutes);
+app.use("/api", reviewResponseRoutes);
+
+// Simple test endpoint to verify server is working
+app.get("/test", (req, res) => {
+  res.json({ message: "Server is working", timestamp: new Date() });
+});
 
 // Admin Integration API routes
 app.use("/api/admin", adminIntegrationRoutes);

@@ -47,13 +47,13 @@ function MetricCard({
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">{title}</p>
-            <p className="text-2xl font-bold">
+            <div className="text-2xl font-bold">
               {isLoading ? (
                 <div className="h-8 w-20 bg-gray-200 animate-pulse rounded" />
               ) : (
                 value
               )}
-            </p>
+            </div>
           </div>
           <div
             className={cn(
