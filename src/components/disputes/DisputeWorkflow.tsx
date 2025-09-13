@@ -95,9 +95,6 @@ export function DisputeWorkflow({
     return (
       <MobileWorkflow 
         disputeId={disputeId}
-        workflowState={workflowState}
-        currentStage={currentStage}
-        progressPercentage={progressPercentage}
         onActionComplete={(action) => {
           console.log('Action completed:', action);
           handleRefresh();

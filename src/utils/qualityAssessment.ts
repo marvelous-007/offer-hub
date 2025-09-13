@@ -1,7 +1,7 @@
 // Quality assessment utilities for the Review Response System
 // Based on PRD requirements for response quality scoring and improvement suggestions
 
-import { ResponseQualityAssessment } from '@/types/review-responses.types';
+// import { ResponseQualityAssessment } from '@/types/review-responses.types';
 
 export interface QualityFactor {
   name: string;

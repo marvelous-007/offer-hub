@@ -324,11 +324,9 @@ export default function ReviewResponseInterface({
       {editingResponse && (
         <ResponseCreation
           reviewId={reviewId}
-          initialContent={editingResponse.content}
           onSubmit={handleUpdateResponse}
           onCancel={() => setEditingResponse(null)}
           guidelines={guidelines}
-          isEditing={true}
         />
       )}
     </div>

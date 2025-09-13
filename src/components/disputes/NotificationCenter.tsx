@@ -80,7 +80,7 @@ export function NotificationCenter({
   allowSendNotification = false,
   compact = false 
 }: NotificationCenterProps) {
-  const { actions } = useDisputeWorkflow(disputeId);
+  const { actions } = useDisputeWorkflow(disputeId || 'default');
   const [notifications, setNotifications] = useState<WorkflowNotification[]>([]);
   const [filteredNotifications, setFilteredNotifications] = useState<WorkflowNotification[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -100,7 +100,7 @@ export function NotificationCenter({
     const mockNotifications: WorkflowNotification[] = [
       {
         id: '1',
-        disputeId,
+        disputeId: disputeId || 'default',
         userId: 'user123',
         notificationType: 'stage_transition',
         title: 'Dispute moved to Mediation Process',
@@ -111,7 +111,7 @@ export function NotificationCenter({
       },
       {
         id: '2',
-        disputeId,
+        disputeId: disputeId || 'default',
         userId: 'user123',
         notificationType: 'deadline_alert',
         title: 'Evidence submission deadline approaching',
@@ -121,7 +121,7 @@ export function NotificationCenter({
       },
       {
         id: '3',
-        disputeId,
+        disputeId: disputeId || 'default',
         userId: 'user123',
         notificationType: 'action_required',
         title: 'Response required from mediator',
@@ -131,7 +131,7 @@ export function NotificationCenter({
       },
       {
         id: '4',
-        disputeId,
+        disputeId: disputeId || 'default',
         userId: 'user123',
         notificationType: 'mediator_assignment',
         title: 'Mediator assigned to your dispute',
@@ -204,7 +204,7 @@ export function NotificationCenter({
 
     try {
       const notification: Omit<WorkflowNotification, 'id' | 'sentAt'> = {
-        disputeId,
+        disputeId: disputeId || 'default',
         userId: 'current_user', // In real implementation, get from context
         notificationType: newNotification.type,
         title: newNotification.title,

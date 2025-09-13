@@ -53,7 +53,7 @@ export const useResponseModeration = (): UseResponseModerationReturn => {
     try {
       const data = await apiRequest<ReviewResponseAPIResponse>(`/api/admin/responses/pending?limit=${limit}&offset=${offset}`);
       if (data.success && 'data' in data) {
-        setPendingResponses(data.data.data);
+        setPendingResponses((data as any).data.data);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch pending responses');
@@ -171,12 +171,12 @@ export const useUserResponses = (userId: string) => {
     try {
       const data = await apiRequest<ReviewResponseAPIResponse>(`/api/users/${userId}/responses?limit=${limit}&offset=${offset}`);
       if (data.success && 'data' in data) {
-        setUserResponses(data.data.data);
+        setUserResponses((data as any).data.data);
         setPagination({
-          limit: data.data.pagination.limit,
-          offset: data.data.pagination.offset,
-          has_more: data.data.pagination.has_more,
-          total: data.data.count,
+          limit: (data as any).data.pagination.limit,
+          offset: (data as any).data.pagination.offset,
+          has_more: (data as any).data.pagination.has_more,
+          total: (data as any).data.count,
         });
       }
     } catch (err) {
@@ -196,11 +196,11 @@ export const useUserResponses = (userId: string) => {
     try {
       const data = await apiRequest<ReviewResponseAPIResponse>(`/api/users/${userId}/responses?limit=${pagination.limit}&offset=${newOffset}`);
       if (data.success && 'data' in data) {
-        setUserResponses(prev => [...prev, ...data.data.data]);
+        setUserResponses(prev => [...prev, ...(data as any).data.data]);
         setPagination(prev => ({
           ...prev,
           offset: newOffset,
-          has_more: data.data.pagination.has_more,
+          has_more: (data as any).data.pagination.has_more,
         }));
       }
     } catch (err) {

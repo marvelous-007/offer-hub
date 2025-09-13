@@ -28,10 +28,8 @@ export default function ResponseCreation({
   onCancel,
   isLoading = false,
   guidelines,
-  initialContent = '',
-  isEditing = false,
 }: ResponseCreationProps) {
-  const [content, setContent] = useState(initialContent);
+  const [content, setContent] = useState('');
   const [errors, setErrors] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   
@@ -95,7 +93,7 @@ export default function ResponseCreation({
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
-            {isEditing ? 'Edit Response' : 'Write Response'}
+            Write Response
           </CardTitle>
           <Button
             variant="ghost"
@@ -274,12 +272,12 @@ export default function ResponseCreation({
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  {isEditing ? 'Updating...' : 'Submitting...'}
+                  Submitting...
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
                   <Send className="w-4 h-4" />
-                  {isEditing ? 'Update Response' : 'Submit Response'}
+                  Submit Response
                 </div>
               )}
             </Button>

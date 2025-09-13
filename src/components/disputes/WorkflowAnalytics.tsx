@@ -48,7 +48,7 @@ export function WorkflowAnalytics({
   showDetailedMetrics = true,
   exportable = true 
 }: WorkflowAnalyticsProps) {
-  const { actions } = useDisputeWorkflow(disputeId);
+  const { actions } = useDisputeWorkflow(disputeId || 'default');
   const [analytics, setAnalytics] = useState<WorkflowAnalyticsType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTimeRange, setSelectedTimeRange] = useState(timeRange);
@@ -199,7 +199,7 @@ export function WorkflowAnalytics({
         </div>
         
         <div className="flex items-center space-x-2">
-          <Select value={selectedTimeRange} onValueChange={setSelectedTimeRange}>
+          <Select value={selectedTimeRange} onValueChange={(value) => setSelectedTimeRange(value as "7d" | "30d" | "90d" | "1y")}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>

@@ -57,7 +57,7 @@ export const useReviewResponses = (reviewId: string): UseReviewResponsesReturn =
     try {
       const data = await apiRequest<ReviewResponseAPIResponse>(`/api/reviews/${reviewId}/responses`);
       if (data.success && 'data' in data) {
-        setResponses(data.data.data);
+        setResponses((data as any).data.data);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch responses');
@@ -154,8 +154,8 @@ export const useReviewResponses = (reviewId: string): UseReviewResponsesReturn =
                 ...r,
                 analytics: {
                   ...r.analytics,
-                  helpful_votes: response.data.total_helpful,
-                  unhelpful_votes: response.data.total_unhelpful,
+                  helpful_votes: (response as any).data.total_helpful,
+                  unhelpful_votes: (response as any).data.total_unhelpful,
                 }
               }
             : r
