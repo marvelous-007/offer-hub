@@ -312,7 +312,7 @@ export function WorkflowStages({
                           <span>Requirements</span>
                         </h4>
                         <ul className="text-sm text-gray-600 space-y-1">
-                          {stage.metadata.requirements.slice(0, 3).map((requirement, reqIndex) => (
+                          {stage.metadata.requirements.slice(0, 3).map((requirement: string, reqIndex: number) => (
                             <li key={reqIndex} className="flex items-center space-x-2">
                               <div className="w-1 h-1 bg-gray-400 rounded-full" />
                               <span>{requirement}</span>
