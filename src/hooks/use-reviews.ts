@@ -102,7 +102,13 @@ export function useReviews({
     useState<ReviewFilterOptions>(initialFilters);
 
   // API hooks
-  const { fetchUserReviews, createReview, computeAverage } = useReviewsApi();
+  const {
+    fetchUserReviews,
+    createReview,
+    updateReview: updateReviewApi,
+    deleteReview: deleteReviewApi,
+    computeAverage,
+  } = useReviewsApi();
 
   // Cache hook
   const {
@@ -415,14 +421,15 @@ export function useReviews({
       try {
         log("Updating review", input);
 
-        // In a real implementation, this would call an API endpoint
-        // For now, we'll update locally
-        let updatedReview: Review | undefined;
+        // Optimistically update the UI while the API request is in progress
+        let optimisticUpdatedReview: Review | undefined;
+        let originalReviews: Review[] = [];
 
         setReviews((prev) => {
+          originalReviews = [...prev];
           const updated = prev.map((review) => {
             if (review.id === input.id) {
-              updatedReview = {
+              optimisticUpdatedReview = {
                 ...review,
                 ...(input.rating !== undefined && { rating: input.rating }),
                 ...(input.comment !== undefined && { comment: input.comment }),
@@ -436,38 +443,60 @@ export function useReviews({
                   project_value: input.project_value,
                 }),
               };
-              return updatedReview;
+              return optimisticUpdatedReview;
             }
             return review;
           });
 
-          // Update cache
-          if (enableCaching && userId && updatedReview) {
-            const cacheKey = generateCacheKey(userId);
-            cacheReviews(cacheKey, updated);
-
-            if (updatedReview.to_id !== userId) {
-              // Also invalidate cache for the reviewee
-              invalidateUserCache(updatedReview.to_id);
-            }
-          }
-
           return updated;
         });
 
-        if (!updatedReview) {
+        if (!optimisticUpdatedReview) {
           throw new Error("Review not found");
         }
 
-        // Broadcast mutation
-        broadcastMutation({
-          type: "update",
-          payload: updatedReview,
-          timestamp: Date.now(),
-        });
+        try {
+          // Call the API to persist the update
+          const updatedReview = await updateReviewApi(input);
 
-        log("Review updated", updatedReview);
-        return updatedReview;
+          // Update state with the authoritative API response
+          setReviews((prev) => {
+            const updated = prev.map((review) => {
+              if (review.id === updatedReview.id) {
+                return updatedReview;
+              }
+              return review;
+            });
+
+            // Update cache with the authoritative API data
+            if (enableCaching && userId) {
+              const cacheKey = generateCacheKey(userId);
+              cacheReviews(cacheKey, updated);
+
+              if (updatedReview.to_id !== userId) {
+                // Also invalidate cache for the reviewee
+                invalidateUserCache(updatedReview.to_id);
+              }
+            }
+
+            return updated;
+          });
+
+          // Broadcast mutation with the authoritative API data
+          broadcastMutation({
+            type: "update",
+            payload: updatedReview,
+            timestamp: Date.now(),
+          });
+
+          log("Review updated", updatedReview);
+          return updatedReview;
+        } catch (error) {
+          // Rollback the optimistic update on error
+          setReviews(originalReviews);
+          log("Update failed, rolling back", error);
+          throw error;
+        }
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to update review";
@@ -513,15 +542,23 @@ export function useReviews({
           throw new Error("Review not found");
         }
 
-        // In a real implementation, this would call an API endpoint
-        // For now, we'll delete locally
-        setReviews((prev) => {
-          const updated = prev.filter((review) => review.id !== reviewId);
+        // Store original reviews for rollback in case of API failure
+        const originalReviews = [...reviews];
 
-          // Update cache
+        // Optimistic UI update
+        setReviews((prev) => prev.filter((review) => review.id !== reviewId));
+
+        try {
+          // Call API to delete the review
+          await deleteReviewApi(reviewId);
+
+          // After successful API call, update cache
           if (enableCaching && userId) {
+            const updatedReviews = reviews.filter(
+              (review) => review.id !== reviewId
+            );
             const cacheKey = generateCacheKey(userId);
-            cacheReviews(cacheKey, updated);
+            cacheReviews(cacheKey, updatedReviews);
 
             if (reviewToDelete.to_id !== userId) {
               // Also invalidate cache for the reviewee
@@ -529,17 +566,20 @@ export function useReviews({
             }
           }
 
-          return updated;
-        });
+          // Broadcast mutation after successful API call
+          broadcastMutation({
+            type: "delete",
+            payload: reviewToDelete,
+            timestamp: Date.now(),
+          });
 
-        // Broadcast mutation
-        broadcastMutation({
-          type: "delete",
-          payload: reviewToDelete,
-          timestamp: Date.now(),
-        });
-
-        log("Review deleted", { reviewId });
+          log("Review deleted", { reviewId });
+        } catch (err) {
+          // Rollback optimistic update on API failure
+          log("Delete API failed, rolling back", err);
+          setReviews(originalReviews);
+          throw err;
+        }
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to delete review";
