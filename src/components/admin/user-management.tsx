@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import withErrorBoundary from "@/components/shared/WithErrorBoundary";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -419,7 +420,7 @@ function UserDetailsDialog({ isOpen, onClose, user }: UserDetailsDialogProps) {
   );
 }
 
-export default function UserManagement() {
+export default withErrorBoundary(UserManagement);
   const {
     users,
     totalUsers,
