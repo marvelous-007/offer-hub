@@ -22,6 +22,13 @@ const DEFAULT_CACHE_CONFIG: CacheConfig = {
  * - Cross-tab synchronization via localStorage
  * - Memory optimization with cleanup intervals
  * - Cache event subscription system
+ *
+ * Configuration can be provided in two ways:
+ * 1. On first getInstance() call: ReviewCacheManager.getInstance(config)
+ * 2. Via the configure method: ReviewCacheManager.configure(config)
+ *
+ * Attempting to pass config to getInstance() after the instance is created will throw an error.
+ * Use configure() to update the configuration of an existing instance.
  */
 class ReviewCacheManager {
   private static instance: ReviewCacheManager;
@@ -34,8 +41,8 @@ class ReviewCacheManager {
   /**
    * Private constructor to enforce singleton pattern
    */
-  private constructor(config: Partial<CacheConfig> = {}) {
-    this.config = { ...DEFAULT_CACHE_CONFIG, ...config };
+  private constructor(config: CacheConfig) {
+    this.config = config;
     this.cache = new Map();
     this.subscribers = new Set();
     this.startCleanupInterval();
@@ -44,15 +51,79 @@ class ReviewCacheManager {
   }
 
   /**
+   * Configure the cache manager with custom settings
+   * Can be called before first getInstance() to set initial config,
+   * or after creation to update config of an existing instance.
+   *
+   * @param config - Configuration to override defaults
+   */
+  public static configure(config: Partial<CacheConfig>): void {
+    if (!config || Object.keys(config).length === 0) {
+      return; // Nothing to configure
+    }
+
+    if (ReviewCacheManager.instance) {
+      // Apply config to existing instance
+      ReviewCacheManager.instance.config = {
+        ...ReviewCacheManager.instance.config,
+        ...config,
+      };
+
+      // Restart cleanup interval with new config if needed
+      if (config.cleanupInterval !== undefined) {
+        ReviewCacheManager.instance.restartCleanupInterval();
+      }
+
+      console.info(
+        "ReviewCacheManager configuration updated for existing instance."
+      );
+    } else {
+      // Store config to be applied when instance is created
+      ReviewCacheManager._config = { ...DEFAULT_CACHE_CONFIG, ...config };
+      console.info(
+        "ReviewCacheManager configuration stored for future initialization."
+      );
+    }
+  }
+
+  // Store configuration separately from instance
+  private static _config: CacheConfig = { ...DEFAULT_CACHE_CONFIG };
+
+  /**
    * Returns the singleton instance of the cache manager
    *
-   * @param config - Optional configuration to override defaults
+   * @param config - Optional configuration to use when creating the instance for the first time
    * @returns The ReviewCacheManager instance
+   * @throws Error if config is provided when the instance already exists
    */
   public static getInstance(config?: Partial<CacheConfig>): ReviewCacheManager {
-    if (!ReviewCacheManager.instance) {
-      ReviewCacheManager.instance = new ReviewCacheManager(config);
+    // If config is provided and instance exists, throw clear error
+    if (
+      config &&
+      Object.keys(config).length > 0 &&
+      ReviewCacheManager.instance
+    ) {
+      throw new Error(
+        "Cannot provide configuration to getInstance() after the instance has been created.\n" +
+          "To configure before creation, call getInstance(config) only on first use.\n" +
+          "To modify existing configuration, use ReviewCacheManager.configure(config) instead."
+      );
     }
+
+    if (!ReviewCacheManager.instance) {
+      // Apply any config provided to getInstance on first call
+      if (config && Object.keys(config).length > 0) {
+        ReviewCacheManager._config = {
+          ...ReviewCacheManager._config,
+          ...config,
+        };
+      }
+
+      ReviewCacheManager.instance = new ReviewCacheManager(
+        ReviewCacheManager._config
+      );
+    }
+
     return ReviewCacheManager.instance;
   }
 
@@ -98,7 +169,7 @@ class ReviewCacheManager {
     const stringKey = this.generateKey(key);
     const item = this.cache.get(stringKey);
 
-    if (!item && localStorage) {
+    if (!item && typeof window !== "undefined") {
       // Try local storage
       return this.hasValidLocalStorageItem(stringKey);
     }
@@ -252,12 +323,52 @@ class ReviewCacheManager {
     // Handle array keys like ['reviews', userId]
     if (Array.isArray(key)) {
       return key
-        .map((k) => (typeof k === "object" ? JSON.stringify(k) : String(k)))
+        .map((k) =>
+          k !== null && typeof k === "object"
+            ? this.deterministicStringify(k)
+            : String(k)
+        )
         .join(":");
     }
 
     // Handle object keys
-    return JSON.stringify(key);
+    return this.deterministicStringify(key);
+  }
+
+  /**
+   * Deterministic JSON stringify implementation that sorts object keys
+   * to ensure consistent output regardless of property insertion order
+   *
+   * @param obj - The value to stringify
+   * @returns A deterministic string representation of the value
+   */
+  private deterministicStringify(obj: any): string {
+    if (obj === null || obj === undefined) {
+      return String(obj);
+    }
+
+    // Handle primitive types
+    if (typeof obj !== "object") {
+      return String(obj);
+    }
+
+    // Handle arrays (preserve order but process elements recursively)
+    if (Array.isArray(obj)) {
+      return (
+        "[" +
+        obj.map((item) => this.deterministicStringify(item)).join(",") +
+        "]"
+      );
+    }
+
+    // Handle objects (sort keys alphabetically)
+    const sortedKeys = Object.keys(obj).sort();
+    const parts = sortedKeys.map((key) => {
+      const value = obj[key];
+      return `"${key}":${this.deterministicStringify(value)}`;
+    });
+
+    return "{" + parts.join(",") + "}";
   }
 
   /**
@@ -286,6 +397,15 @@ class ReviewCacheManager {
       clearInterval(this.cleanupIntervalId);
       this.cleanupIntervalId = null;
     }
+  }
+
+  /**
+   * Restart the cleanup interval with the current configuration
+   * Used when cleanup interval configuration is updated
+   */
+  private restartCleanupInterval(): void {
+    this.stopCleanupInterval();
+    this.startCleanupInterval();
   }
 
   /**
@@ -325,7 +445,12 @@ class ReviewCacheManager {
     if (typeof window === "undefined") return;
 
     try {
-      localStorage.setItem(this.storageKeyPrefix + key, JSON.stringify(item));
+      // We don't need deterministic ordering for localStorage values since they're
+      // identified by key, but using our serializer ensures consistent handling
+      localStorage.setItem(
+        this.storageKeyPrefix + key,
+        this.deterministicStringify(item)
+      );
     } catch (e) {
       // Handle localStorage errors (e.g., quota exceeded)
       console.warn("Failed to save cache item to localStorage:", e);

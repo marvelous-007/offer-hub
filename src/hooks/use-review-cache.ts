@@ -6,6 +6,7 @@ import {
   CacheItem,
   Review,
   ReviewMutationEvent,
+  ReviewQueryKey,
 } from "@/types/reviews.types";
 import ReviewCacheManager from "@/utils/review-cache-manager";
 
@@ -22,6 +23,12 @@ interface UseReviewCacheOptions extends Partial<CacheConfig> {
  * - Automatic cache invalidation
  * - Cross-tab synchronization
  * - Cache hit/miss tracking
+ *
+ * @note For CacheConfig options:
+ * - They should be set once at app startup using ReviewCacheManager.configure()
+ * - CacheConfig passed to this hook will only apply if called before the first instance
+ *   is created, and is provided for backward compatibility
+ * - Recommended usage: Call ReviewCacheManager.configure() during app initialization
  */
 export function useReviewCache(options: UseReviewCacheOptions = {}) {
   const {
@@ -37,8 +44,13 @@ export function useReviewCache(options: UseReviewCacheOptions = {}) {
     size: 0,
   });
 
-  // Initialize cache manager with configuration
-  const cacheManager = ReviewCacheManager.getInstance(cacheConfig);
+  // Apply configuration if provided (will only work before first initialization)
+  if (Object.keys(cacheConfig).length > 0) {
+    ReviewCacheManager.configure(cacheConfig);
+  }
+
+  // Get cache manager instance
+  const cacheManager = ReviewCacheManager.getInstance();
 
   // Subscribe to cache updates for statistics
   useEffect(() => {
@@ -68,22 +80,26 @@ export function useReviewCache(options: UseReviewCacheOptions = {}) {
    * Cache a review or array of reviews with an optional TTL
    */
   const cacheReviews = useCallback(
-    (key: string, data: Review | Review[], ttl?: number) => {
+    (key: string | ReviewQueryKey, data: Review | Review[], ttl?: number) => {
       cacheManager.set(key, data, ttl);
 
       if (debugMode) {
-        console.log(`[Review Cache] Cached: ${key}`);
+        console.log(
+          `[Review Cache] Cached: ${
+            typeof key === "string" ? key : JSON.stringify(key)
+          }`
+        );
       }
     },
     [cacheManager, debugMode]
   );
-
   /**
    * Get cached reviews by key
    */
   const getCachedReviews = useCallback(
-    <T extends Review | Review[]>(key: string): T | null => {
+    <T extends Review | Review[]>(key: string | ReviewQueryKey): T | null => {
       const data = cacheManager.get<T>(key);
+      const keyString = typeof key === "string" ? key : JSON.stringify(key);
 
       if (data) {
         setCacheStats((prev) => ({
@@ -92,7 +108,7 @@ export function useReviewCache(options: UseReviewCacheOptions = {}) {
         }));
 
         if (debugMode) {
-          console.log(`[Review Cache] Hit: ${key}`);
+          console.log(`[Review Cache] Hit: ${keyString}`);
         }
       } else {
         setCacheStats((prev) => ({
@@ -101,7 +117,7 @@ export function useReviewCache(options: UseReviewCacheOptions = {}) {
         }));
 
         if (debugMode) {
-          console.log(`[Review Cache] Miss: ${key}`);
+          console.log(`[Review Cache] Miss: ${keyString}`);
         }
       }
 
@@ -114,7 +130,7 @@ export function useReviewCache(options: UseReviewCacheOptions = {}) {
    * Check if reviews are cached
    */
   const hasCache = useCallback(
-    (key: string): boolean => {
+    (key: string | ReviewQueryKey): boolean => {
       return cacheManager.has(key);
     },
     [cacheManager]
@@ -124,11 +140,15 @@ export function useReviewCache(options: UseReviewCacheOptions = {}) {
    * Invalidate cached reviews by key
    */
   const invalidateCache = useCallback(
-    (key: string) => {
+    (key: string | ReviewQueryKey) => {
       cacheManager.delete(key);
 
       if (debugMode) {
-        console.log(`[Review Cache] Invalidated: ${key}`);
+        console.log(
+          `[Review Cache] Invalidated: ${
+            typeof key === "string" ? key : JSON.stringify(key)
+          }`
+        );
       }
     },
     [cacheManager, debugMode]
@@ -136,14 +156,18 @@ export function useReviewCache(options: UseReviewCacheOptions = {}) {
 
   /**
    * Invalidate all cache items matching a pattern
-   * Example: invalidatePattern('reviews:userId')
+   * Example: invalidatePattern('reviews:userId') or invalidatePattern(['reviews', userId])
    */
   const invalidatePattern = useCallback(
-    (pattern: string) => {
+    (pattern: string | ReviewQueryKey) => {
       cacheManager.invalidatePattern(pattern);
 
       if (debugMode) {
-        console.log(`[Review Cache] Invalidated pattern: ${pattern}`);
+        console.log(
+          `[Review Cache] Invalidated pattern: ${
+            typeof pattern === "string" ? pattern : JSON.stringify(pattern)
+          }`
+        );
       }
     },
     [cacheManager, debugMode]
@@ -154,7 +178,8 @@ export function useReviewCache(options: UseReviewCacheOptions = {}) {
    */
   const invalidateUserCache = useCallback(
     (userId: string) => {
-      cacheManager.invalidatePattern(`reviews:${userId}`);
+      const keyPattern: ReviewQueryKey = ["reviews", userId];
+      cacheManager.invalidatePattern(keyPattern);
 
       if (debugMode) {
         console.log(`[Review Cache] Invalidated user cache: ${userId}`);
@@ -179,11 +204,15 @@ export function useReviewCache(options: UseReviewCacheOptions = {}) {
    * Refresh a cached item's timestamp
    */
   const refreshCache = useCallback(
-    (key: string): boolean => {
+    (key: string | ReviewQueryKey): boolean => {
       const result = cacheManager.refresh(key);
 
       if (debugMode && result) {
-        console.log(`[Review Cache] Refreshed: ${key}`);
+        console.log(
+          `[Review Cache] Refreshed: ${
+            typeof key === "string" ? key : JSON.stringify(key)
+          }`
+        );
       }
 
       return result;
@@ -195,7 +224,7 @@ export function useReviewCache(options: UseReviewCacheOptions = {}) {
    * Update TTL for a cached item
    */
   const updateCacheTTL = useCallback(
-    (key: string, ttl: number): boolean => {
+    (key: string | ReviewQueryKey, ttl: number): boolean => {
       return cacheManager.updateTTL(key, ttl);
     },
     [cacheManager]
@@ -244,13 +273,13 @@ export function useReviewCache(options: UseReviewCacheOptions = {}) {
         // Handle mutation based on type
         switch (mutation.type) {
           case "create":
-            invalidatePattern(`reviews:${mutation.payload.to_id}`);
+            invalidatePattern(["reviews", mutation.payload.to_id]);
             break;
 
           case "update":
           case "delete":
-            invalidatePattern(`reviews:${mutation.payload.to_id}`);
-            invalidateCache(`review:${mutation.payload.id}`);
+            invalidatePattern(["reviews", mutation.payload.to_id]);
+            invalidateCache(["review", mutation.payload.id]);
             break;
         }
 

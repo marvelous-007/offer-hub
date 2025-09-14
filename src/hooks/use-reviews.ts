@@ -225,16 +225,7 @@ export function useReviews({
     }
   }, [userId, debouncedFilters, fetchReviews, log]);
 
-  // Handle filter changes with debounce
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (haveFiltersChanged(debouncedFilters, initialFilters)) {
-        setDebouncedFilters(initialFilters);
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [initialFilters, debouncedFilters]);
+  // This effect will be replaced with a new one after useReviewFilters
 
   // Load reviews when userId or filters change
   useEffect(() => {
@@ -275,10 +266,24 @@ export function useReviews({
     enableSearchScoring: true,
   });
 
+  // Handle filter changes with debounce - update debouncedFilters when filters change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (haveFiltersChanged(debouncedFilters, filters)) {
+        setDebouncedFilters(filters);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [filters, debouncedFilters]);
+
   // Update main filters and refresh
-  const applyFilters = useCallback((newFilters: ReviewFilterOptions) => {
-    setDebouncedFilters(newFilters);
-  }, []);
+  const applyFilters = useCallback(
+    (newFilters: ReviewFilterOptions) => {
+      setFilters(newFilters);
+    },
+    [setFilters]
+  );
 
   // Paginated reviews
   const paginatedReviews = useMemo(() => {
@@ -336,23 +341,31 @@ export function useReviews({
         const review = await createReview(input);
         log("Review created", review);
 
-        // Update local state
-        setReviews((prev) => {
-          const updated = [review, ...prev];
+        // Handle cache updates and state changes
+        if (enableCaching) {
+          // If the review is for the current viewed user, update their cache
+          if (input.to_id === userId) {
+            log("Updating current user's cache and state");
 
-          // If caching is enabled, update cache
-          if (enableCaching && userId) {
-            const cacheKey = generateCacheKey(userId);
-            cacheReviews(cacheKey, updated);
+            // Update local state only for the current user
+            setReviews((prev) => {
+              const updated = [review, ...prev];
 
-            if (input.to_id !== userId) {
-              // Also invalidate cache for the reviewee
-              invalidateUserCache(input.to_id);
-            }
+              // Update cache for the current user
+              const cacheKey = generateCacheKey(userId);
+              cacheReviews(cacheKey, updated);
+
+              return updated;
+            });
+          } else {
+            // For other users, just invalidate their cache without updating local state
+            log("Invalidating target user's cache", input.to_id);
+            invalidateUserCache(input.to_id);
           }
-
-          return updated;
-        });
+        } else if (input.to_id === userId) {
+          // If caching is disabled but the review is for the current user, still update local state
+          setReviews((prev) => [review, ...prev]);
+        }
 
         // Broadcast mutation to other tabs if enabled
         broadcastMutation({

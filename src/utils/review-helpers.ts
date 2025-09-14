@@ -283,9 +283,13 @@ export const searchReviews = (
         const commentLower = review.comment.toLowerCase();
 
         keywords.forEach((keyword) => {
-          // Count occurrences of keyword in comment
-          const regex = new RegExp(keyword, "gi");
-          const matches = (commentLower.match(regex) || []).length;
+          // Count non-overlapping occurrences safely (no regex)
+          let matches = 0;
+          let idx = 0;
+          while (keyword && (idx = commentLower.indexOf(keyword, idx)) !== -1) {
+            matches++;
+            idx = keyword.length;
+          }
           relevanceScore += matches * 2; // Comment matches have higher weight
 
           // Exact phrase match bonus

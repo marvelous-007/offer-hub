@@ -50,48 +50,63 @@ export function useReviewFilters({
 }: UseReviewFiltersOptions) {
   const [filters, setFilters] = useState<ReviewFilterOptions>(initialFilters);
 
-  // Set a specific filter
+  // Set a specific filter with type-safe values
   const setFilter = useCallback(
-    (key: keyof ReviewFilterOptions, value: any) => {
+    <K extends keyof ReviewFilterOptions>(
+      key: K,
+      value: ReviewFilterOptions[K]
+    ) => {
       setFilters((prev) => ({
         ...prev,
         [key]: value,
       }));
     },
-    []
+    [setFilters]
   );
 
   // Set rating filter
-  const setRatingFilter = useCallback((min?: number, max?: number) => {
-    setFilters((prev) => ({
-      ...prev,
-      rating: { min, max },
-    }));
-  }, []);
+  const setRatingFilter = useCallback(
+    (min?: number, max?: number) => {
+      setFilters((prev) => ({
+        ...prev,
+        rating: { min, max },
+      }));
+    },
+    [setFilters]
+  );
 
   // Set date range filter
-  const setDateRangeFilter = useCallback((from?: Date, to?: Date) => {
-    setFilters((prev) => ({
-      ...prev,
-      dateRange: { from, to },
-    }));
-  }, []);
+  const setDateRangeFilter = useCallback(
+    (from?: Date, to?: Date) => {
+      setFilters((prev) => ({
+        ...prev,
+        dateRange: { from, to },
+      }));
+    },
+    [setFilters]
+  );
 
   // Set project type filter
-  const setProjectTypeFilter = useCallback((types: string[]) => {
-    setFilters((prev) => ({
-      ...prev,
-      projectTypes: types,
-    }));
-  }, []);
+  const setProjectTypeFilter = useCallback(
+    (types: string[]) => {
+      setFilters((prev) => ({
+        ...prev,
+        projectTypes: types,
+      }));
+    },
+    [setFilters]
+  );
 
   // Set search query
-  const setSearchQuery = useCallback((query: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      search: query,
-    }));
-  }, []);
+  const setSearchQuery = useCallback(
+    (query: string) => {
+      setFilters((prev) => ({
+        ...prev,
+        search: query,
+      }));
+    },
+    [setFilters]
+  );
 
   // Set sort options
   const setSortOptions = useCallback(
@@ -102,13 +117,13 @@ export function useReviewFilters({
         sortDirection: direction,
       }));
     },
-    []
+    [setFilters]
   );
 
   // Reset all filters
   const resetFilters = useCallback(() => {
     setFilters({});
-  }, []);
+  }, [setFilters]);
 
   // Apply filters to reviews
   const filteredReviews = useMemo(() => {
