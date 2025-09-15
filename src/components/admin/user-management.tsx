@@ -356,7 +356,7 @@ function UserDetailsDialog({ isOpen, onClose, user }: UserDetailsDialogProps) {
               <p className='text-sm'>{user.projectsCompleted}</p>
             </div>
             <div>
-              <Label className='text-sm font-medium text-muted-foreground'>
+              <Label className='text-sm font-medium text-muted-.foreground'>
                 Profile Completeness
               </Label>
               <p className='text-sm'>{user.profileCompleteness}%</p>
@@ -420,7 +420,7 @@ function UserDetailsDialog({ isOpen, onClose, user }: UserDetailsDialogProps) {
   );
 }
 
-export default withErrorBoundary(UserManagement);
+function UserManagement() {
   const {
     users,
     totalUsers,
@@ -771,3 +771,5 @@ export default withErrorBoundary(UserManagement);
     </div>
   );
 }
+
+export default withErrorBoundary(UserManagement);
