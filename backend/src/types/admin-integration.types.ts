@@ -256,11 +256,13 @@ export interface AdminSystemHealth {
 }
 
 export interface ComponentHealth {
-  status: 'healthy' | 'degraded' | 'critical' | 'unknown';
+  status: 'healthy' | 'degraded' | 'critical' | 'unknown' | 'disabled' | 'unhealthy';
   response_time_ms?: number;
   error_rate?: number;
   last_check: string;
   details?: any;
+  message?: string;
+  error?: string;
 }
 
 // ============================================================================

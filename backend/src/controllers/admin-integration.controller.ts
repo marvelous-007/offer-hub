@@ -30,6 +30,10 @@ export class AdminIntegrationController {
   /**
    * Create a new admin API key
    * POST /api/admin/api-keys
+   * 
+   * SECURITY WARNING: The plaintext API key is returned only once at creation.
+   * This key should never be logged, stored, or retrieved again.
+   * The user must save it immediately as it cannot be retrieved later.
    */
   async createApiKey(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
@@ -38,8 +42,9 @@ export class AdminIntegrationController {
 
       const apiKey = await adminIntegrationService.createApiKey(data, createdBy);
 
+      // SECURITY: Do not log the response containing the plaintext API key
       res.status(201).json(
-        buildSuccessResponse(apiKey, "API key created successfully")
+        buildSuccessResponse(apiKey, "API key created successfully. Save this key immediately as it cannot be retrieved again.")
       );
     } catch (error) {
       next(error);
