@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase/supabase";
 import { AppError } from "@/utils/AppError";
-import { buildSuccessResponse } from "@/utils/responseBuilder";
+import crypto from "crypto";
 import {
   AdminApiKey,
   CreateAdminApiKeyDTO,
@@ -9,13 +9,11 @@ import {
   RateLimitConfig,
   Webhook,
   CreateWebhookDTO,
-  UpdateWebhookDTO,
   WebhookEvent,
   RetryPolicy,
   IntegrationProvider,
   IntegrationInstance,
   CreateIntegrationInstanceDTO,
-  UpdateIntegrationInstanceDTO,
   AdminApiMetrics,
   AdminSystemHealth,
   AdminAuditLog,
@@ -25,15 +23,12 @@ import {
   IntegrationInstanceFilters,
   AdminAuditLogFilters,
   PaginationMeta,
-  AdminApiResponse,
   WebhookPayload,
   WebhookDelivery,
   ComponentHealth,
-  AdminOperation,
   WebhookEventType,
 } from "@/types/admin-integration.types";
 import { v4 as uuidv4 } from "uuid";
-import crypto from "crypto";
 import axios from "axios";
 
 /**
@@ -1002,7 +997,6 @@ class AdminIntegrationService {
    * Encrypt credentials using AES-256-GCM
    */
   private async encryptCredentials(credentials: any): Promise<string> {
-    const crypto = require('crypto');
     const algorithm = 'aes-256-gcm';
     const key = Buffer.from(process.env.ADMIN_ENC_KEY || 'default-key-32-chars-long-12345', 'utf8');
     
@@ -1027,7 +1021,6 @@ class AdminIntegrationService {
    * Decrypt credentials using AES-256-GCM
    */
   private async decryptCredentials(encryptedCredentials: string): Promise<any> {
-    const crypto = require('crypto');
     const algorithm = 'aes-256-gcm';
     const key = Buffer.from(process.env.ADMIN_ENC_KEY || 'default-key-32-chars-long-12345', 'utf8');
     
@@ -1040,7 +1033,7 @@ class AdminIntegrationService {
       throw new Error('Invalid encrypted credentials format');
     }
 
-    const iv = Buffer.from(parts[0], 'hex');
+    const _iv = Buffer.from(parts[0], 'hex');
     const authTag = Buffer.from(parts[1], 'hex');
     const encrypted = parts[2];
 

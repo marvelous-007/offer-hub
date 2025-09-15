@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { adminIntegrationService } from "@/services/admin-integration.service";
 import { AppError } from "@/utils/AppError";
-import { buildSuccessResponse, buildListResponse, buildErrorResponse } from "@/utils/responseBuilder";
+import { buildSuccessResponse } from "@/utils/responseBuilder";
 import {
   CreateAdminApiKeyDTO,
   UpdateAdminApiKeyDTO,
@@ -13,8 +13,6 @@ import {
   WebhookFilters,
   IntegrationInstanceFilters,
   AdminAuditLogFilters,
-  AdminApiMetrics,
-  AdminSystemHealth,
   WebhookEventType,
 } from "@/types/admin-integration.types";
 import { AuthenticatedRequest } from "@/types/middleware.types";
@@ -156,7 +154,7 @@ export class AdminIntegrationController {
       const createdBy = req.user!.id;
 
       const webhook = await adminIntegrationService.createWebhook(data, createdBy);
-      const { secret, ...safeWebhook } = webhook as any;
+      const { secret: _, ...safeWebhook } = webhook as any;
 
       res.status(201).json(
         buildSuccessResponse(safeWebhook, "Webhook created successfully")
@@ -262,7 +260,7 @@ export class AdminIntegrationController {
     try {
       const { id } = req.params;
 
-      const { data: deleted, error } = await supabase
+      const { data: _, error } = await supabase
         .from("webhooks")
         .delete()
         .eq("id", id)
@@ -440,7 +438,7 @@ export class AdminIntegrationController {
     try {
       const { id } = req.params;
 
-      const { data: deleted, error } = await supabase
+      const { data: _, error } = await supabase
         .from("integration_instances")
         .delete()
         .eq("id", id)

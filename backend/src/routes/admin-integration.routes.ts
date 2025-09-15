@@ -276,7 +276,7 @@ externalRouter.get("/contracts", async (req, res, next) => {
  */
 externalRouter.get("/system/health", async (req, res, next) => {
   try {
-    const health = await adminIntegrationController.getSystemHealth(req, res, next);
+    await adminIntegrationController.getSystemHealth(req, res, next);
   } catch (error) {
     next(error);
   }
@@ -289,7 +289,7 @@ externalRouter.get("/system/health", async (req, res, next) => {
  */
 externalRouter.get("/metrics", async (req, res, next) => {
   try {
-    const metrics = await adminIntegrationController.getApiMetrics(req, res, next);
+    await adminIntegrationController.getApiMetrics(req, res, next);
   } catch (error) {
     next(error);
   }
@@ -308,9 +308,6 @@ const webhookRouter = Router();
  */
 webhookRouter.post("/receive/:webhook_id", verifyWebhookSignature, async (req, res, next) => {
   try {
-    const { webhook_id } = req.params;
-    const { status, response_code, response_body, error_message } = req.body;
-    
     // Webhook signature is already verified by middleware
     // Update webhook delivery status
     await adminIntegrationController.updateWebhookDeliveryStatus(req, res, next);

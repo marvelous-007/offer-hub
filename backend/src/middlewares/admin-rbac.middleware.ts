@@ -1,7 +1,6 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { AppError } from "@/utils/AppError";
 import { AuthenticatedRequest } from "@/types/middleware.types";
-import { UserRole } from "@/types/auth.types";
 
 /**
  * Admin Role-Based Access Control Middleware
