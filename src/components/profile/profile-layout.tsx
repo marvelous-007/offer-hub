@@ -7,7 +7,7 @@ import ProfileDetails from "./profile-details";
 import ProfileHeader from "./profile-header";
 import ProfileSidebar from "./profile-sidebar";
 import ProfileStats from "./profile-stats";
-import { AchievementSystem } from "@/components/achievement/achievement-system";
+import { AchievementSystem } from "@/components/reputation/achievement-system";
 import { useProfileApi } from "@/hooks/api-connections/use-profile-api";
 import { User } from '@/types/user.types';
 
@@ -77,7 +77,7 @@ export default function ProfileLayout() {
               <h2 className="text-lg font-semibold text-gray-800 mb-3">
                 Achievements
               </h2>
-              <div className="border rounded-lg">
+              <div className="border p-2 rounded-lg">
                 <AchievementSystem userId={currentUser?.id || TEMP_USER_ID} />
               </div>
             </div>

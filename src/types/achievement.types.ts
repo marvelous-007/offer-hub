@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode, CSSProperties } from 'react';
 
 // Achievement Types
 export type AchievementType = 
@@ -105,7 +105,7 @@ export interface BadgeDisplayConfig {
   showRarity: boolean;
   showTooltip: boolean;
   showAnimation: boolean;
-  customStyle?: React.CSSProperties;
+  customStyle?: CSSProperties;
 }
 
 // Achievement Analytics

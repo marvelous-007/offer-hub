@@ -216,7 +216,7 @@ export const createAchievementNotification = (
   };
 
   return {
-    id: `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    id: `notification_${Date.now()}_${crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9)}`,
     type,
     achievementId: achievement.id,
     userId,

@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useMemo } from 'react';
 import { 
   Achievement, 
@@ -63,12 +62,7 @@ export const AchievementTracking: React.FC<AchievementTrackingProps> = ({
   className
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [showNotifications, setShowNotifications] = useState(true);
 
-  const unreadNotifications = useMemo(() => 
-    notifications.filter(n => !n.isRead),
-    [notifications]
-  );
 
   const recentAchievements = useMemo(() => 
     Object.values(userAchievements)
@@ -99,22 +93,6 @@ export const AchievementTracking: React.FC<AchievementTrackingProps> = ({
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Achievement Tracking</h2>
           <p className="text-gray-600">Monitor your progress and celebrate your accomplishments</p>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowNotifications(!showNotifications)}
-          >
-            {showNotifications ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
-            Notifications
-            {unreadNotifications.length > 0 && (
-              <Badge variant="destructive" className="ml-2 text-xs">
-                {unreadNotifications.length}
-              </Badge>
-            )}
-          </Button>
         </div>
       </div>
 
@@ -153,100 +131,15 @@ export const AchievementTracking: React.FC<AchievementTrackingProps> = ({
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="progress">Progress</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Recent Achievements */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Trophy className="w-5 h-5" />
-                  <span>Recent Achievements</span>
-                </CardTitle>
-                <CardDescription>Your latest accomplishments</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {recentAchievements.length > 0 ? (
-                  recentAchievements.map((userAchievement) => {
-                    const achievement = achievements.find(a => a.id === userAchievement.achievementId);
-                    if (!achievement) return null;
-
-                    return (
-                      <div key={userAchievement.achievementId} className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
-                        <div className="text-2xl">{achievement.icon}</div>
-                        <div className="flex-1">
-                          <div className="font-medium">{achievement.name}</div>
-                          <div className="text-sm text-gray-600">{achievement.category}</div>
-                          {userAchievement.completedAt && (
-                            <div className="text-xs text-gray-500">
-                              Completed {new Date(userAchievement.completedAt).toLocaleDateString()}
-                            </div>
-                          )}
-                        </div>
-                        <Badge 
-                          variant="outline"
-                          style={{ borderColor: getRarityColor(achievement.rarity) }}
-                        >
-                          {achievement.rarity}
-                        </Badge>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="text-center py-6 text-gray-500">
-                    <Trophy className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                    <p>No achievements completed yet</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* In Progress */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Target className="w-5 h-5" />
-                  <span>In Progress</span>
-                </CardTitle>
-                <CardDescription>Work towards these achievements</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {inProgressAchievements.length > 0 ? (
-                  inProgressAchievements.slice(0, 3).map((userAchievement) => {
-                    const achievement = achievements.find(a => a.id === userAchievement.achievementId);
-                    if (!achievement) return null;
-
-                    return (
-                      <div key={userAchievement.achievementId} className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <div className="text-lg">{achievement.icon}</div>
-                            <span className="font-medium text-sm">{achievement.name}</span>
-                          </div>
-                          <span className="text-sm font-medium">{userAchievement.progress}%</span>
-                        </div>
-                        <Progress value={userAchievement.progress} className="h-2" />
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="text-center py-6 text-gray-500">
-                    <Target className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                    <p>No achievements in progress</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
           {/* Category Breakdown */}
           {analytics && (
             <Card>
@@ -542,69 +435,6 @@ export const AchievementTracking: React.FC<AchievementTrackingProps> = ({
           </Card>
         </TabsContent>
 
-        {/* Notifications Tab */}
-        <TabsContent value="notifications" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Bell className="w-5 h-5" />
-                  <span>Notifications</span>
-                </div>
-                {unreadNotifications.length > 0 && (
-                  <Badge variant="destructive">
-                    {unreadNotifications.length} unread
-                  </Badge>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {notifications.length > 0 ? (
-                <div className="space-y-3">
-                  {notifications.map((notification) => (
-                    <div 
-                      key={notification.id}
-                      className={cn(
-                        'p-4 border rounded-lg transition-colors',
-                        !notification.isRead && 'bg-blue-50 border-blue-200'
-                      )}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2">
-                            <h4 className="font-medium">{notification.title}</h4>
-                            {!notification.isRead && (
-                              <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                            )}
-                          </div>
-                          <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
-                          <p className="text-xs text-gray-500 mt-2">
-                            {new Date(notification.createdAt).toLocaleString()}
-                          </p>
-                        </div>
-                        
-                        {!notification.isRead && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onMarkNotificationRead(notification.id)}
-                          >
-                            Mark as read
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-6 text-gray-500">
-                  <Bell className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                  <p>No notifications yet</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );

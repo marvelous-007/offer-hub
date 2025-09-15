@@ -40,7 +40,7 @@ const MOCK_ACHIEVEMENTS: Achievement[] = [
     type: 'project_completion',
     category: 'Project Completion',
     rarity: 'common',
-    icon: '●',
+    icon: '/badge/badge-batman.png',
     color: '#3B82F6',
     backgroundColor: '#EFF6FF',
     requirements: [
@@ -75,7 +75,7 @@ const MOCK_ACHIEVEMENTS: Achievement[] = [
     type: 'rating_milestone',
     category: 'Rating Milestone',
     rarity: 'rare',
-    icon: '★',
+    icon: '/badge/badge-vip.png',
     color: '#F59E0B',
     backgroundColor: '#FFFBEB',
     requirements: [
@@ -117,7 +117,7 @@ const MOCK_ACHIEVEMENTS: Achievement[] = [
     type: 'community_contribution',
     category: 'Community Contribution',
     rarity: 'uncommon',
-    icon: '◈',
+    icon: '/badge/badge-child.png',
     color: '#10B981',
     backgroundColor: '#ECFDF5',
     requirements: [
@@ -160,27 +160,65 @@ export const useAchievementSystem = (userId?: string) => {
     lastUpdated: new Date().toISOString()
   });
 
+  // Fetch helper with timeout and JSON parsing
+  const fetchJson = useCallback(async (url: string, init?: RequestInit, timeoutMs: number = 5000) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, { ...init, signal: controller.signal });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } finally {
+      clearTimeout(timer);
+    }
+  }, []);
+
   // Load achievements from API
   const loadAchievements = useCallback(async () => {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
       
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/achievements');
-      // const achievements = await response.json();
-      
-      // Using mock data for now
-      const achievements = MOCK_ACHIEVEMENTS;
+      // Replace with actual API call if available
+      let achievements: Achievement[] = [];
+      try {
+        const base = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE || '';
+        achievements = await fetchJson(`${base}/api/achievements`, { cache: 'no-store' });
+      } catch {
+        achievements = MOCK_ACHIEVEMENTS;
+      }
       
       const categories = groupAchievementsByCategory(achievements);
       
-      setState(prev => ({
-        ...prev,
-        achievements,
-        categories,
-        isLoading: false,
-        lastUpdated: new Date().toISOString()
-      }));
+      setState(prev => {
+        // Initialize user achievement entries for consistency across tabs
+        const initializedUserAchievements: Record<string, UserAchievement> = { ...prev.userAchievements };
+        for (const a of achievements) {
+          if (!initializedUserAchievements[a.id]) {
+            initializedUserAchievements[a.id] = {
+              achievementId: a.id,
+              status: 'locked',
+              progress: 0,
+              progressDetails: a.requirements.map(req => ({
+                requirementId: req.id,
+                current: 0,
+                target: req.target,
+                lastUpdated: new Date().toISOString(),
+                isCompleted: false
+              })),
+              lastProgressUpdate: new Date().toISOString()
+            };
+          }
+        }
+
+        return {
+          ...prev,
+          achievements,
+          categories,
+          userAchievements: initializedUserAchievements,
+          isLoading: false,
+          lastUpdated: new Date().toISOString()
+        };
+      });
     } catch (error) {
       setState(prev => ({
         ...prev,
@@ -195,19 +233,42 @@ export const useAchievementSystem = (userId?: string) => {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
       
-      // TODO: Replace with actual API call
-      // const response = await fetch(`/api/users/${targetUserId}/achievements`);
-      // const userAchievements = await response.json();
-      
-      // Using mock data for now
-      const userAchievements: Record<string, UserAchievement> = {};
-      
-      setState(prev => ({
-        ...prev,
-        userAchievements,
-        isLoading: false,
-        lastUpdated: new Date().toISOString()
-      }));
+      let apiUserAchievements: Record<string, UserAchievement> = {};
+      try {
+        const base = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE || '';
+        apiUserAchievements = await fetchJson(`${base}/api/users/${targetUserId}/achievements`, { cache: 'no-store' });
+      } catch {
+        apiUserAchievements = {};
+      }
+
+      setState(prev => {
+        // If API returns none, initialize entries for all known achievements to maintain UI consistency
+        const merged: Record<string, UserAchievement> = { ...apiUserAchievements };
+        for (const a of prev.achievements) {
+          if (!merged[a.id]) {
+            merged[a.id] = prev.userAchievements[a.id] || {
+              achievementId: a.id,
+              status: 'locked',
+              progress: 0,
+              progressDetails: a.requirements.map(req => ({
+                requirementId: req.id,
+                current: 0,
+                target: req.target,
+                lastUpdated: new Date().toISOString(),
+                isCompleted: false
+              })),
+              lastProgressUpdate: new Date().toISOString()
+            };
+          }
+        }
+
+        return {
+          ...prev,
+          userAchievements: merged,
+          isLoading: false,
+          lastUpdated: new Date().toISOString()
+        };
+      });
     } catch (error) {
       setState(prev => ({
         ...prev,
@@ -223,71 +284,64 @@ export const useAchievementSystem = (userId?: string) => {
     eventData: Record<string, any>
   ) => {
     try {
-      const { achievements, userAchievements } = state;
-      const updatedUserAchievements = { ...userAchievements };
-      const newNotifications: AchievementNotification[] = [];
+      setState(prev => {
+        const { achievements, userAchievements } = prev;
+        const updatedUserAchievements: Record<string, UserAchievement> = { ...userAchievements };
+        const newNotifications: AchievementNotification[] = [];
 
-      for (const achievement of achievements) {
-        if (updatedUserAchievements[achievement.id]?.status === 'completed') {
-          continue; // Skip already completed achievements
+        for (const achievement of achievements) {
+          if (updatedUserAchievements[achievement.id]?.status === 'completed') {
+            continue;
+          }
+
+          const isCompleted = verifyAchievementProgress(achievement, eventData);
+          const progress = calculateAchievementProgress(achievement, eventData);
+
+          if (!updatedUserAchievements[achievement.id]) {
+            updatedUserAchievements[achievement.id] = {
+              achievementId: achievement.id,
+              status: isCompleted ? 'completed' : 'in_progress',
+              progress,
+              progressDetails: achievement.requirements.map(req =>
+                getRequirementProgress(req, eventData)
+              ),
+              lastProgressUpdate: new Date().toISOString()
+            };
+          } else {
+            const currentUA = updatedUserAchievements[achievement.id];
+            updatedUserAchievements[achievement.id] = {
+              ...currentUA,
+              progress,
+              status: isCompleted ? 'completed' : 'in_progress',
+              completedAt:
+                isCompleted && !currentUA.completedAt ? new Date().toISOString() : currentUA.completedAt,
+              progressDetails: achievement.requirements.map(req =>
+                getRequirementProgress(req, eventData)
+              ),
+              lastProgressUpdate: new Date().toISOString()
+            };
+          }
+
+          if (isCompleted && !userAchievements[achievement.id]?.completedAt) {
+            const notification = createAchievementNotification(
+              achievement,
+              targetUserId,
+              'achievement_completed'
+            );
+            newNotifications.push(notification);
+          }
         }
 
-        const isCompleted = verifyAchievementProgress(achievement, eventData);
-        const progress = calculateAchievementProgress(achievement, eventData);
+        return {
+          ...prev,
+          userAchievements: updatedUserAchievements,
+          notifications: [...prev.notifications, ...newNotifications],
+          lastUpdated: new Date().toISOString()
+        };
+      });
 
-        if (!updatedUserAchievements[achievement.id]) {
-          // Initialize user achievement
-          updatedUserAchievements[achievement.id] = {
-            achievementId: achievement.id,
-            status: isCompleted ? 'completed' : 'in_progress',
-            progress,
-            progressDetails: achievement.requirements.map(req => 
-              getRequirementProgress(req, eventData)
-            ),
-            lastProgressUpdate: new Date().toISOString()
-          };
-        } else {
-          // Update existing user achievement
-          const currentUA = updatedUserAchievements[achievement.id];
-          updatedUserAchievements[achievement.id] = {
-            ...currentUA,
-            progress,
-            status: isCompleted ? 'completed' : 'in_progress',
-            completedAt: isCompleted && !currentUA.completedAt 
-              ? new Date().toISOString() 
-              : currentUA.completedAt,
-            progressDetails: achievement.requirements.map(req => 
-              getRequirementProgress(req, eventData)
-            ),
-            lastProgressUpdate: new Date().toISOString()
-          };
-        }
-
-        // Create notification for newly completed achievements
-        if (isCompleted && !updatedUserAchievements[achievement.id].completedAt) {
-          const notification = createAchievementNotification(
-            achievement,
-            targetUserId,
-            'achievement_completed'
-          );
-          newNotifications.push(notification);
-        }
-      }
-
-      setState(prev => ({
-        ...prev,
-        userAchievements: updatedUserAchievements,
-        notifications: [...prev.notifications, ...newNotifications],
-        lastUpdated: new Date().toISOString()
-      }));
-
-      // TODO: Send API request to update user progress
-      // await fetch(`/api/users/${targetUserId}/achievements/progress`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(eventData)
-      // });
-
+      // TODO: optionally persist progress via API
+      // await fetch(`/api/users/${targetUserId}/achievements/progress`, { ... })
     } catch (error) {
       console.error('Error checking achievements:', error);
       setState(prev => ({
@@ -295,7 +349,7 @@ export const useAchievementSystem = (userId?: string) => {
         error: error instanceof Error ? error.message : 'Failed to check achievements'
       }));
     }
-  }, [state.achievements, state.userAchievements]);
+  }, []);
 
   // Claim achievement
   const claimAchievement = useCallback(async (achievementId: string, targetUserId: string) => {
@@ -323,10 +377,10 @@ export const useAchievementSystem = (userId?: string) => {
         lastUpdated: new Date().toISOString()
       }));
 
-      // TODO: Send API request to claim achievement
-      // await fetch(`/api/users/${targetUserId}/achievements/${achievementId}/claim`, {
-      //   method: 'POST'
-      // });
+      try {
+        const base = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE || '';
+        await fetch(`${base}/api/users/${targetUserId}/achievements/${achievementId}/claim`, { method: 'POST' });
+      } catch {}
 
     } catch (error) {
       setState(prev => ({
@@ -353,17 +407,14 @@ export const useAchievementSystem = (userId?: string) => {
         window.open(shareUrl, '_blank', 'noopener,noreferrer');
       }
 
-      // TODO: Log share event to API
-      // await fetch('/api/achievements/share', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     achievementId,
-      //     userId,
-      //     platform,
-      //     shareUrl
-      //   })
-      // });
+      try {
+        const base = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE || '';
+        await fetch(`${base}/api/achievements/share`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ achievementId, userId, platform, shareUrl })
+        });
+      } catch {}
 
     } catch (error) {
       setState(prev => ({
@@ -385,11 +436,10 @@ export const useAchievementSystem = (userId?: string) => {
         ),
         lastUpdated: new Date().toISOString()
       }));
-
-      // TODO: Send API request to mark notification as read
-      // await fetch(`/api/notifications/${notificationId}/read`, {
-      //   method: 'PATCH'
-      // });
+      try {
+        const base = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE || '';
+        await fetch(`${base}/api/notifications/${notificationId}/read`, { method: 'PATCH' });
+      } catch {}
 
     } catch (error) {
       setState(prev => ({
@@ -403,6 +453,14 @@ export const useAchievementSystem = (userId?: string) => {
   const updateUserProgress = useCallback(async (targetUserId: string, metric: string, value: number) => {
     try {
       await checkAchievements(targetUserId, { [metric]: value });
+      try {
+        const base = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE || '';
+        await fetch(`${base}/api/users/${targetUserId}/achievements/progress`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ metric, value })
+        });
+      } catch {}
     } catch (error) {
       setState(prev => ({
         ...prev,
@@ -412,14 +470,21 @@ export const useAchievementSystem = (userId?: string) => {
   }, [checkAchievements]);
 
   // Get achievement progress
-  const getAchievementProgress = useCallback(async (achievementId: string, targetUserId: string) => {
-    return state.userAchievements[achievementId] || null;
+  const getAchievementProgress = useCallback(async (achievementId: string, userId: string) => {
+    return Promise.resolve(state.userAchievements[achievementId] || null);
   }, [state.userAchievements]);
 
   // Refresh analytics
   const refreshAnalytics = useCallback(async () => {
     try {
-      const analytics = calculateUserAnalytics(state.achievements, state.userAchievements);
+      let analytics: AchievementAnalytics | null = null;
+      try {
+        const base = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE || '';
+        analytics = await fetchJson(`${base}/api/users/${userId}/achievements/analytics`, { cache: 'no-store' });
+      } catch {}
+      if (!analytics) {
+        analytics = calculateUserAnalytics(state.achievements, state.userAchievements);
+      }
       setState(prev => ({
         ...prev,
         analytics,
@@ -436,12 +501,12 @@ export const useAchievementSystem = (userId?: string) => {
   // Refresh leaderboard
   const refreshLeaderboard = useCallback(async () => {
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/achievements/leaderboard');
-      // const leaderboard = await response.json();
-      
-      const leaderboard: AchievementLeaderboardEntry[] = [];
-      const rankedLeaderboard = calculateLeaderboardRank(leaderboard);
+      let leaderboard: AchievementLeaderboardEntry[] = [];
+      try {
+        const base = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE || '';
+        leaderboard = await fetchJson(`${base}/api/achievements/leaderboard`, { cache: 'no-store' });
+      } catch {}
+      const rankedLeaderboard = calculateLeaderboardRank(leaderboard || []);
       
       setState(prev => ({
         ...prev,
@@ -520,7 +585,7 @@ export const useAchievementSystem = (userId?: string) => {
     if (state.achievements.length > 0 && Object.keys(state.userAchievements).length > 0) {
       refreshAnalytics();
     }
-  }, [state.achievements, state.userAchievements, refreshAnalytics]);
+  }, [state.achievements, state.userAchievements]);
 
   return {
     ...state,

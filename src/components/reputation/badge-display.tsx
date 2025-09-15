@@ -124,7 +124,22 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
       {/* Badge Icon */}
       <div className="relative z-10">
         {typeof achievement.icon === 'string' ? (
-          <span>{achievement.icon}</span>
+          achievement.icon.endsWith('.png') || achievement.icon.startsWith('/badge/') ? (
+            <img
+              src={achievement.icon.startsWith('/badge/') ? achievement.icon : `/badge/${achievement.icon}`}
+              alt={achievement.name}
+              className={cn(
+                displayConfig.size === 'xs' && 'w-8 h-8',
+                displayConfig.size === 'sm' && 'w-10 h-10',
+                displayConfig.size === 'md' && 'w-12 h-12',
+                displayConfig.size === 'lg' && 'w-14 h-14',
+                displayConfig.size === 'xl' && 'w-20 h-20',
+                'object-contain rounded-full'
+              )}
+            />
+          ) : (
+            <span>{achievement.icon}</span>
+          )
         ) : (
           achievement.icon
         )}
@@ -344,6 +359,7 @@ interface BadgeGridProps {
   onShare?: (achievement: Achievement, platform: string) => void;
   onClaim?: (achievementId: string) => void;
   className?: string;
+  variant?: 'badge' | 'achievement';
 }
 
 export const BadgeGrid: React.FC<BadgeGridProps> = ({
@@ -353,7 +369,8 @@ export const BadgeGrid: React.FC<BadgeGridProps> = ({
   onAchievementSelect,
   onShare,
   onClaim,
-  className
+  className,
+  variant = 'badge'
 }) => {
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
 
@@ -364,9 +381,16 @@ export const BadgeGrid: React.FC<BadgeGridProps> = ({
 
   return (
     <div className={cn('space-y-4', className)}>
-      {/* Badge Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-        {achievements.map((achievement) => (
+      {/* Grid */}
+      <div className={cn(
+        variant === 'badge'
+          ? 'grid grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 gap-4'
+          : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'
+      )}>
+        {achievements.map((achievement) => {
+          const ua = userAchievements[achievement.id];
+          if (variant === 'badge') {
+            return (
           <Card 
             key={achievement.id}
             className={cn(
@@ -378,14 +402,59 @@ export const BadgeGrid: React.FC<BadgeGridProps> = ({
             <CardContent className="p-4">
               <BadgeDisplay
                 achievement={achievement}
-                userAchievement={userAchievements[achievement.id]}
+                    userAchievement={ua}
                 config={config}
                 onShare={onShare}
                 onClaim={onClaim}
               />
             </CardContent>
           </Card>
-        ))}
+            );
+          }
+
+          // Achievement variant: rectangular info card with inline details
+          return (
+            <Card key={achievement.id} className="transition-all duration-200 hover:shadow-md">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-md flex items-center justify-center border text-sm" style={{ borderColor: achievement.color, color: achievement.color }}>
+                    {typeof achievement.icon === 'string' ? achievement.icon : null}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <div className="font-medium text-sm">{achievement.name}</div>
+                      {ua?.status && (
+                        <span className={cn(
+                          'text-[10px] px-2 py-0.5 rounded-full border',
+                          ua.status === 'completed' && 'border-green-300 text-green-700 bg-green-50',
+                          ua.status === 'in_progress' && 'border-yellow-300 text-yellow-700 bg-yellow-50',
+                          (!ua?.status || ua.status === 'locked') && 'border-gray-300 text-gray-600 bg-gray-50'
+                        )}>
+                          {ua.status.replace('_', ' ')}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-500">{achievement.description}</div>
+                    {ua && (
+                      <div className="mt-2">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${ua.progress || 0}%` }} />
+                        </div>
+                        <div className="mt-1 text-[11px] text-gray-500">{ua.progress || 0}%</div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" onClick={() => onAchievementSelect?.(achievement)}>View</Button>
+                    {ua?.status === 'completed' && !ua?.claimedAt && (
+                      <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => onClaim?.(achievement.id)}>Claim</Button>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Selected Achievement Details */}
