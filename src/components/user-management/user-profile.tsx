@@ -1,4 +1,5 @@
 import React from "react";
+import withErrorBoundary from "@/components/shared/WithErrorBoundary";
 import {
   Heart,
   MessageCircle,
@@ -291,4 +292,4 @@ const UserProfile = ({
   );
 };
 
-export default UserProfile;
+export default withErrorBoundary(UserProfile);
