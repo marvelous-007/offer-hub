@@ -1,6 +1,9 @@
+
 import { Request, Response, NextFunction } from "express";
 import { reviewService } from "../services/review.service";
-import { AppError } from "../utils/AppError";
+import { AppError, MissingFieldsError, ValidationError } from "../utils/AppError";
+import { buildSuccessResponse } from '../utils/responseBuilder';
+import { CreateReviewDTO, UpdateReviewDTO } from '../types/review.types';
 
 export class ReviewController {
   /**
@@ -11,78 +14,45 @@ export class ReviewController {
     res: Response,
     next: NextFunction
   ): Promise<void> => {
-    try {
-      const { from_id, to_id, contract_id, rating, comment } = req.body;
 
-      // Validate required fields
-      if (!from_id || !to_id || !contract_id || rating === undefined) {
-        throw new AppError("Missing_required_fields", 400);
-      }
+      const dto: CreateReviewDTO = req.body;
+      const review = await reviewService.createReview(dto);
+      res.status(201).json(buildSuccessResponse(review, "Review created successfully"));
 
-      // Validate rating is a number
-      if (typeof rating !== "number" || isNaN(rating)) {
-        throw new AppError("Rating_must_be_a_number", 400);
-      }
-
-      const review = await reviewService.createReview({
-        from_id,
-        to_id,
-        contract_id,
-        rating,
-        comment: comment || "",
-      });
-
-      res.status(201).json({
-        success: true,
-        message: "Review_created_successfully",
-        data: {
-          id: review.id,
-          from_id: review.from_id,
-          to_id: review.to_id,
-          contract_id: review.contract_id,
-          rating: review.rating,
-          comment: review.comment,
-          created_at: review.created_at,
-        },
-      });
-    } catch (error) {
-      next(error);
-    }
   };
 
   /**
-   * GET /api/users/:id/reviews - Get all reviews for a user
+   * GET /api/reviews/:id - Get a single review by ID
+   */
+  getReview = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    const { id } = req.params;
+    const review = await reviewService.getReviewById(id);
+    if (!review) {
+      res.status(404).json({ success: false, message: 'Review not found' });
+      return;
+    }
+    res.status(200).json(buildSuccessResponse(review, "Review fetched successfully"));
+  };
+
+  /**
+   * GET /api/users/:userId/reviews - Get all reviews for a user
    */
   getReviewsByUser = async (
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
-    try {
-      const { id } = req.params;
-
-      if (!id) {
-        throw new AppError("User_ID_is_required", 400);
-      }
-
-      const uuidRegex =
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-      if (!uuidRegex.test(id)) {
-        throw new AppError("Invalid_user_ID_format", 400);
-      }
-
-      const reviews = await reviewService.getReviewsByUser(id);
-
-      res.status(200).json({
-        success: true,
-        message: "Reviews_fetched_successfully",
-        data: reviews,
-        count: reviews.length,
-      });
-    } catch (error) {
-      next(error);
-    }
+    const { userId } = req.params;
+    if (!userId) throw new MissingFieldsError("User ID is required");
+    const reviews = await reviewService.getReviewsByUser(userId);
+    res.status(200).json(buildSuccessResponse(reviews, "Reviews fetched successfully"));
   };
+
+  // TODO: Implement updateReview and deleteReview endpoints
 }
 
 export const reviewController = new ReviewController();

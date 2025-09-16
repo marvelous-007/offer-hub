@@ -26,8 +26,8 @@ export default function FreelancersSection() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {freelancers.map((freelancer, index) => (
-            <FreelancerCard key={index} {...freelancer} />
+          {freelancers.map((freelancer) => (
+            <FreelancerCard key={freelancer.id} {...freelancer} serviceId="2d74caed-07cc-4914-bb3c-78dbef3d4657" />
           ))}
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { VALIDATION_LIMITS } from "@/constants/magic-numbers"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import userImage from "../../../public/avatar_olivia.jpg"
@@ -82,12 +83,12 @@ export function UserInfo({ user, isUserActive, isLoading }: UserInfoProps) {
 
     const getInitials = (name?: string) => {
         if (!name) return "U";
-        return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, VALIDATION_LIMITS.MAX_AVATAR_INITIALS);
     }
 
     const formatWalletAddress = (address?: string) => {
         if (!address) return "Not connected";
-        return `${address.slice(0, 6)}...${address.slice(-4)}`;
+        return `${address.slice(0, VALIDATION_LIMITS.MAX_WALLET_ADDRESS_PREFIX)}...${address.slice(-VALIDATION_LIMITS.MAX_WALLET_ADDRESS_SUFFIX)}`;
     }
 
     if (isLoading) {

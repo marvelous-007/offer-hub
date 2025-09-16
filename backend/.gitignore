@@ -16,6 +16,9 @@ yarn-error.log*
 # Optional dotenv override file
 .env.local
 
+# Allow example files
+!.env.example*
+
 # VSCode settings (opcional, si usás VSCode)
 .vscode/
 
@@ -28,3 +31,6 @@ yarn-error.log*
 # Supabase
 supabase/.temp/
 supabase/temp/
+
+# Application logs
+logs/

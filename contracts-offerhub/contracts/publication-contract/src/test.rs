@@ -1,9 +1,7 @@
 #![cfg(test)]
 
 use super::*;
-use crate::{
-    contract::PublicationContractClient, error::ContractError, storage::DataKey
-};
+use crate::{contract::PublicationContractClient, error::ContractError, storage::DataKey};
 use soroban_sdk::{
     testutils::{Address as _, Events as _},
     vec, Address, Env, IntoVal, String, Symbol, TryFromVal,
@@ -48,7 +46,7 @@ fn test_publish_service_success() {
     let title = String::from_str(&test.env, "Build a Website");
     let category = String::from_str(&test.env, "Web Development");
     let amount = 1000;
-    let timestamp = 1234567890;
+    let timestamp = test.env.ledger().timestamp();
 
     let id = test.contract.publish(
         &test.user1,
@@ -81,7 +79,6 @@ fn test_publish_service_success() {
     let event_data_u32 = u32::try_from_val(&test.env, &data).unwrap();
     assert_eq!(event_data_u32, 1);
 
-
     // Verify stored data using the getter
     let publication = test.contract.get_publication(&test.user1, &1).unwrap();
     assert_eq!(publication.publication_type, pub_type);
@@ -100,7 +97,7 @@ fn test_publish_project_and_user_counter() {
         &"First Service".into_val(&test.env),
         &"Cat A".into_val(&test.env),
         &100,
-        &1,
+        &test.env.ledger().timestamp(),
     );
 
     // Second publication by the same user should increment the ID
@@ -110,7 +107,7 @@ fn test_publish_project_and_user_counter() {
         &"Second Project".into_val(&test.env),
         &"Cat B".into_val(&test.env),
         &200,
-        &2,
+        &test.env.ledger().timestamp(),
     );
 
     assert_eq!(id, 2);
@@ -118,7 +115,12 @@ fn test_publish_project_and_user_counter() {
     // Verify the user's post count in storage by accessing it from within the contract's context.
     test.env.as_contract(&test.contract.address, || {
         let user_post_count_key = DataKey::UserPostCount(test.user1.clone());
-        let count: u32 = test.env.storage().instance().get(&user_post_count_key).unwrap();
+        let count: u32 = test
+            .env
+            .storage()
+            .instance()
+            .get(&user_post_count_key)
+            .unwrap();
         assert_eq!(count, 2);
     });
 }
@@ -134,7 +136,7 @@ fn test_multiple_users_have_separate_counters() {
         &"User 1 Service".into_val(&test.env),
         &"Cat A".into_val(&test.env),
         &100,
-        &1,
+        &test.env.ledger().timestamp(),
     );
     assert_eq!(id1, 1);
 
@@ -145,7 +147,7 @@ fn test_multiple_users_have_separate_counters() {
         &"User 2 Project".into_val(&test.env),
         &"Cat B".into_val(&test.env),
         &200,
-        &2,
+        &test.env.ledger().timestamp(),
     );
     assert_eq!(id2, 1);
 }
@@ -196,4 +198,112 @@ fn test_publish_fails_on_negative_amount() {
     );
 
     assert_eq!(result, Err(Ok(ContractError::InvalidAmount)));
+}
+
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #2)")]
+fn test_title_too_short() {
+    let test = PublicationTest::setup();
+
+    let pub_type = Symbol::new(&test.env, "service");
+    let title = String::from_str(&test.env, "Bu");
+    let category = String::from_str(&test.env, "Web Development");
+    let amount = 1000;
+    let timestamp = test.env.ledger().timestamp();
+
+    let _ = test.contract.publish(
+        &test.user1,
+        &pub_type,
+        &title,
+        &category,
+        &amount,
+        &timestamp,
+    );
+}
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #4)")]
+fn test_max_len() {
+    let test = PublicationTest::setup();
+
+    let pub_type = Symbol::new(&test.env, "service");
+    let title = String::from_str(&test.env, "Build a WebsiteBuild a WebsiteBuild a WebsiteBuild a WebsiteBuild a WebsiteBuild a WebsiteBuild a WebsiteBuild a WebsiteBuild a Website");
+    let category = String::from_str(&test.env, "Web Development");
+    let amount = 1000;
+    let timestamp = test.env.ledger().timestamp();
+
+    let _ = test.contract.publish(
+        &test.user1,
+        &pub_type,
+        &title,
+        &category,
+        &amount,
+        &timestamp,
+    );
+}
+
+
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #4)")]
+fn test_min_category() {
+    let test = PublicationTest::setup();
+
+    let pub_type = Symbol::new(&test.env, "service");
+    let title = String::from_str(&test.env, "Build a Website");
+    let category = String::from_str(&test.env, "");
+    let amount = 1000;
+    let timestamp = test.env.ledger().timestamp();
+
+    let _ = test.contract.publish(
+        &test.user1,
+        &pub_type,
+        &title,
+        &category,
+        &amount,
+        &timestamp,
+    );
+}
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #3)")]
+fn test_max_amount_invalid_amount() {
+    let test = PublicationTest::setup();
+
+    let pub_type = Symbol::new(&test.env, "service");
+    let title = String::from_str(&test.env, "Build a website");
+    let category = String::from_str(&test.env, "Web Development");
+    let amount = 1_000_000_000_001;
+    let timestamp = test.env.ledger().timestamp();
+
+    let _ = test.contract.publish(
+        &test.user1,
+        &pub_type,
+        &title,
+        &category,
+        &amount,
+        &timestamp,
+    );
+}
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #1)")]
+fn test_invalid_publication_type() {
+    let test = PublicationTest::setup();
+
+    let pub_type = Symbol::new(&test.env, "none");
+    let title = String::from_str(&test.env, "Build a website");
+    let category = String::from_str(&test.env, "Web Development");
+    let amount = 1_000;
+    let timestamp = test.env.ledger().timestamp();
+
+    let _ = test.contract.publish(
+        &test.user1,
+        &pub_type,
+        &title,
+        &category,
+        &amount,
+        &timestamp,
+    );
 }

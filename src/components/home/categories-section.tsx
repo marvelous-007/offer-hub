@@ -17,9 +17,9 @@ export default function CategoriesSection() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {categories.map((category, index) => (
+          {categories.map((category) => (
             <div
-              key={index}
+              key={category.name}
               className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 flex flex-col items-center text-center"
             >
               <div className="w-16 h-16 rounded-full bg-[#DEEFE7] flex items-center justify-center mb-4">

@@ -50,6 +50,20 @@ export function StartDisputeForm() {
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="reason"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Reason for Dispute</FormLabel>
+                <FormControl>
+                  <Input placeholder="Describe the reason for the dispute..." {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <Button type="submit" disabled={loading} className="w-full">
             {loading ? "Starting Dispute..." : "Start Dispute"}
           </Button>

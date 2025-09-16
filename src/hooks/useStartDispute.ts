@@ -6,18 +6,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { formSchema } from "../schemas/start-dispute-form.schema";
 import { toast } from "sonner";
-// import {
-//   StartDisputePayload,
-//   EscrowRequestResponse,
-// } from "@trustless-work/escrow/types"; // Temporarily commented - types not exported correctly
-// import {
-//   useSendTransaction,
-//   useStartDispute as useStartDisputeHook,
-// } from "@trustless-work/escrow/hooks"; // Temporarily commented
+import { StartDisputePayload, DisputeResponse } from "../types/escrow.types";
+import { isDisputeResponse, isErrorWithMessage } from "../utils/type-guards";
 
 export const useStartDisputeForm = () => {
   const [loading, setLoading] = useState(false);
-  const [response, setResponse] = useState<any | null>(null); // Temporarily using any
+  const [response, setResponse] = useState<DisputeResponse | null>(null);
   // const { startDispute } = useStartDisputeHook(); // Temporarily commented
   // const { sendTransaction } = useSendTransaction(); // Temporarily commented
 
@@ -26,10 +20,11 @@ export const useStartDisputeForm = () => {
     defaultValues: {
       contractId: "",
       signer: "",
+      reason: "",
     },
   });
 
-  const onSubmit = async (payload: any) => { // Temporarily using any
+  const onSubmit = async (payload: StartDisputePayload) => {
     setLoading(true);
     setResponse(null);
 
@@ -61,9 +56,9 @@ export const useStartDisputeForm = () => {
       //   signedXdr,
       //   returnEscrowDataIsRequired: false,
       // });
-      const data = { status: "SUCCESS", message: "Temporary success" }; // Temporary placeholder
+      const data: DisputeResponse = { status: "SUCCESS", message: "Temporary success" }; // Temporary placeholder
 
-      if (data.status === "SUCCESS") {
+      if (isDisputeResponse(data) && data.status === "SUCCESS") {
         setResponse(data);
         toast.success("Dispute started successfully!");
         form.reset();
@@ -72,7 +67,7 @@ export const useStartDisputeForm = () => {
       }
     } catch (error) {
       console.error("Error starting dispute:", error);
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      const errorMessage = isErrorWithMessage(error) ? error.message : "An unknown error occurred";
       toast.error(errorMessage);
     } finally {
       setLoading(false);

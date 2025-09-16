@@ -4,6 +4,12 @@
 
 # 🌟 OFFER-HUB | Decentralized Freelance Platform
 
+
+[![Backend CI/CD](https://github.com/OFFER-HUB/offer-hub/workflows/Backend%20CI%20CD/badge.svg)](https://github.com/OFFER-HUB/offer-hub/actions/workflows/backend-ci.yml)
+
+[![Frontend CI/CD](https://github.com/OFFER-HUB/offer-hub/workflows/Frontend%20CI%20CD/badge.svg)](https://github.com/OFFER-HUB/offer-hub/actions/workflows/frontend-ci.yml)
+
+
 Welcome to **OFFER-HUB**! This platform aims to revolutionize the freelance marketplace by leveraging **blockchain technology**, **cryptocurrency payments**, and **smart contracts** to create a secure and efficient environment for freelancers and clients worldwide.
 
 Our mission is to remove intermediaries, reduce fees, and empower users with tools to collaborate seamlessly in areas like design, programming, writing, and consulting. 🚀
@@ -69,6 +75,48 @@ The backend lives in the `/backend` folder and includes all APIs and database mi
 
 👉 For full instructions, refer to the dedicated backend guide:
 [`/backend/README.md`](./backend/README.md)
+
+---
+
+## 📋 Smart Contracts Documentation
+
+The Offer Hub platform is powered by a comprehensive suite of Soroban smart contracts. Each contract serves a specific purpose in creating a secure, decentralized freelance marketplace.
+
+### 📚 Contract Documentation
+
+#### Core Infrastructure
+- **[Contracts Overview](./docs/CONTRACTS_OVERVIEW.md)** - Complete system architecture and contract interactions
+- **[User Registry Contract](./docs/USER_REGISTRY_CONTRACT.md)** - User verification and access control system
+- **[Emergency Contract](./docs/EMERGENCY_CONTRACT.md)** - Platform safety and crisis management
+
+#### Payment System
+- **[Escrow Contract](./docs/ESCROW_CONTRACT.md)** - Secure payment management with milestone support
+- **[Escrow Factory](./docs/ESCROW_FACTORY.md)** - Standardized deployment and batch management
+- **[Fee Manager Contract](./docs/FEE_MANAGER_CONTRACT.md)** - Centralized fee calculation and collection
+
+#### Dispute & Content
+- **[Dispute Resolution Contract](./docs/DISPUTE_CONTRACT.md)** - Two-tier mediation and arbitration system
+- **[Publication Contract](./docs/PUBLICATION_CONTRACT.md)** - On-chain registry for services and projects
+
+#### Reputation System
+- **[Rating System Integration](./docs/RATING_SYSTEM_INTEGRATION.md)** - User rating and feedback system
+- **[Reputation NFT Contract](./docs/REPUTATION_NFT_CONTRACT.md)** - Achievement-based NFT rewards
+
+### 🔗 Contract Interactions
+
+The contracts work together to create a seamless platform experience:
+
+```
+User Registration → Service/Project Publication → Escrow Creation → 
+Payment Processing → Work Completion → Rating & Reputation → NFT Rewards
+```
+
+For disputes: `Escrow → Dispute Resolution → Mediation/Arbitration → Resolution`
+
+### 🛠 Development Resources
+
+- **[Freelancer Profile Implementation](./docs/FREELANCER_PROFILE_IMPLEMENTATION.md)** - Frontend profile system
+- **[Contributors Guidelines](./docs/CONTRIBUTORS_GUIDELINE.md)** - Development standards and practices
 
 ---
 
