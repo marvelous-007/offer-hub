@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import withErrorBoundary from "@/components/shared/WithErrorBoundary";
 import { ProjectCard } from "@/components/projects/ProjectCard"
 import { ProjectTabs } from "@/components/projects/ProjectTabs"
 import { ProjectsList } from "@/components/projects/ProjectsList"
@@ -16,7 +17,7 @@ const TABS = [
 
 type TabKey = (typeof TABS)[number]["key"]
 
-export function ProjectDashboard() {
+function ProjectDashboard() {
   const [tab, setTab] = useState<TabKey>("completed")
   const projects = getMockProjects()
 
@@ -48,4 +49,6 @@ export function ProjectDashboard() {
     </div>
   )
 }
+
+export default withErrorBoundary(ProjectDashboard);
 
