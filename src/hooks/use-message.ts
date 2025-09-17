@@ -2,9 +2,9 @@
 import { useState, useRef } from "react"
 import type React from "react"
 
-interface UseMessageComposerReturn {
+export interface UseMessageComposerReturn {
   newMessage: string;
-  setNewMessage: (message: string) => void;
+  setNewMessage: React.Dispatch<React.SetStateAction<string>>;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   handleSendMessage: () => void;
   handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
