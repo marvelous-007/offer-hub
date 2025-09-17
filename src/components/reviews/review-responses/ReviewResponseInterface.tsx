@@ -11,7 +11,6 @@ import {
   ThumbsDown,
   Edit,
   Trash2,
-  MoreHorizontal,
 } from "lucide-react";
 import {
   ReviewResponseInterfaceProps,

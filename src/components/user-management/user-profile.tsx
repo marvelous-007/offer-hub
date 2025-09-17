@@ -3,7 +3,7 @@ import {
   MessageCircle,
   ChevronLeft,
   ChevronRight,
-  Star,
+
 } from "lucide-react";
 import StarRating from "@/components/ui/star-rating";
 import { useReviewsApi } from "@/hooks/api-connections/use-reviews-api";

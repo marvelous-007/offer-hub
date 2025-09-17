@@ -27,12 +27,6 @@ import {
   Eye,
   MousePointer,
   Clock,
-  BarChart3,
-  PieChart,
-  Globe,
-  Smartphone,
-  Monitor,
-  Calendar,
   ArrowRight,
   Download,
   Filter,
@@ -43,8 +37,6 @@ import {
   AreaChart,
   BarChart,
   PieChart as PieChartComponent,
-  ScatterChart,
-  RadarChart,
 } from "@/components/ui/charts";
 import { useUserAnalytics } from "@/hooks/use-platform-monitoring";
 import { TimeRange } from "@/types/monitoring.types";

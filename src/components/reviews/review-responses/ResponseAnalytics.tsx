@@ -7,20 +7,15 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   BarChart3,
   TrendingUp,
-  
   MessageSquare,
   ThumbsUp,
   ThumbsDown,
   Eye,
   Star,
-  
-  
   Download,
   RefreshCw,
   AlertCircle,
   CheckCircle,
-  Clock,
-  Flag,
 } from "lucide-react";
 import {
   ResponseAnalyticsProps,
