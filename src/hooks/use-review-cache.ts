@@ -16,6 +16,24 @@ interface UseReviewCacheOptions extends Partial<CacheConfig> {
   debugMode?: boolean;
 }
 
+interface UseReviewCacheReturn {
+  cacheReviews: (key: string | ReviewQueryKey, data: Review | Review[], ttl?: number) => void;
+  getCachedReviews: <T extends Review | Review[]>(key: string | ReviewQueryKey) => T | null;
+  hasCache: (key: string | ReviewQueryKey) => boolean;
+  invalidateCache: (key: string | ReviewQueryKey) => void;
+  invalidatePattern: (pattern: string | ReviewQueryKey) => void;
+  invalidateUserCache: (userId: string) => void;
+  clearCache: () => void;
+  refreshCache: (key: string | ReviewQueryKey) => boolean;
+  updateCacheTTL: (key: string | ReviewQueryKey, ttl: number) => boolean;
+  broadcastMutation: (event: ReviewMutationEvent) => void;
+  cacheStats: {
+    hits: number;
+    misses: number;
+    size: number;
+  };
+}
+
 /**
  * useReviewCache - Custom hook for managing review data caching
  * Features:
@@ -30,7 +48,7 @@ interface UseReviewCacheOptions extends Partial<CacheConfig> {
  *   is created, and is provided for backward compatibility
  * - Recommended usage: Call ReviewCacheManager.configure() during app initialization
  */
-export function useReviewCache(options: UseReviewCacheOptions = {}) {
+export function useReviewCache(options: UseReviewCacheOptions = {}): UseReviewCacheReturn {
   const {
     onCacheUpdate,
     syncAcrossTabs = true,

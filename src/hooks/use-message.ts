@@ -2,7 +2,16 @@
 import { useState, useRef } from "react"
 import type React from "react"
 
-export function useMessages(onSendMessage: (content: string, file?: File) => void) {
+interface UseMessagesReturn {
+  newMessage: string;
+  setNewMessage: (message: string) => void;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
+  handleSendMessage: () => void;
+  handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleKeyPress: (e: React.KeyboardEvent) => void;
+}
+
+export function useMessages(onSendMessage: (content: string, file?: File) => void): UseMessagesReturn {
   const [newMessage, setNewMessage] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
 

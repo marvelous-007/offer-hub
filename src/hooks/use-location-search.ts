@@ -123,7 +123,20 @@ const popularLocations: LocationData[] = [
   mockLocations.find(l => l.id === 'tokyo-jp')!,
 ]
 
-export function useLocationSearch() {
+interface UseLocationSearchReturn {
+  suggestions: LocationData[];
+  isLoading: boolean;
+  recentLocations: LocationData[];
+  popularLocations: LocationData[];
+  searchLocations: (query: string) => Promise<void>;
+  clearSearch: () => void;
+  addToRecentLocations: (location: LocationData) => void;
+  getLocationById: (id: string) => LocationData | undefined;
+  searchByCoordinates: (lat: number, lng: number) => Promise<LocationData | null>;
+  getCurrentLocation: () => Promise<LocationData | null>;
+}
+
+export function useLocationSearch(): UseLocationSearchReturn {
   const [suggestions, setSuggestions] = useState<LocationData[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [recentLocations, setRecentLocations] = useState<LocationData[]>(() => {

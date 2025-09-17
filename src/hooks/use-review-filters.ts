@@ -29,6 +29,31 @@ interface UseReviewFiltersOptions {
   enableSearchScoring?: boolean;
 }
 
+interface UseReviewFiltersReturn {
+  // Filter state
+  filters: ReviewFilterOptions;
+  setFilters: (filters: ReviewFilterOptions) => void;
+  setFilter: <K extends keyof ReviewFilterOptions>(key: K, value: ReviewFilterOptions[K]) => void;
+
+  // Specific filter setters
+  setRatingFilter: (min?: number, max?: number) => void;
+  setDateRangeFilter: (from?: Date, to?: Date) => void;
+  setProjectTypeFilter: (types: string[]) => void;
+  setSearchQuery: (query: string) => void;
+  setSortOptions: (field: ReviewSortField, direction: SortDirection) => void;
+  resetFilters: () => void;
+
+  // Results
+  filteredReviews: Review[];
+  searchResults: ReviewSearchResult[];
+
+  // Metadata
+  availableProjectTypes: string[];
+  hasActiveFilters: boolean;
+  activeFiltersSummary: string[];
+  totalResults: number;
+}
+
 /**
  * Advanced Review Filtering Hook
  *
@@ -47,7 +72,7 @@ export function useReviewFilters({
   initialFilters = {},
   reviews = [],
   enableSearchScoring = false,
-}: UseReviewFiltersOptions) {
+}: UseReviewFiltersOptions): UseReviewFiltersReturn {
   const [filters, setFilters] = useState<ReviewFilterOptions>(initialFilters);
 
   // Set a specific filter with type-safe values
@@ -187,7 +212,7 @@ export function useReviewFilters({
 
   // Check if filters are active
   const hasActiveFilters = useMemo(() => {
-    return (
+    return Boolean(
       filters.rating?.min !== undefined ||
       filters.rating?.max !== undefined ||
       filters.dateRange?.from !== undefined ||
