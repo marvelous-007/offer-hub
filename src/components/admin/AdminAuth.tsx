@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,7 +23,7 @@ export function AdminAuth({ onAuthenticated }: AdminAuthProps) {
   const [showCreateAdmin, setShowCreateAdmin] = useState(false);
   const { createAdminUser, setAuthToken, loading, error } = useAdminUsersApi();
 
-  const handleTokenSubmit = (e: React.FormEvent) => {
+  const handleTokenSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (token.trim()) {
       setAuthToken(token.trim());
