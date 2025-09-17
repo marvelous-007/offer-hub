@@ -1,4 +1,3 @@
-import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarIcon, Search } from "lucide-react";
@@ -45,10 +44,7 @@ export function UserFilters({
   return (
     <div className="flex flex-col md:flex-row flex-wrap items-start md:items-center justify-between gap-4 bg-white p-3 rounded border-b">
       <div className="flex flex-col sm:flex-row w-full md:w-auto flex-wrap items-start sm:items-center gap-3 md:gap-4">
-        <Select
-          value={roleFilter}
-          onValueChange={setRoleFilter}
-        >
+        <Select value={roleFilter} onValueChange={setRoleFilter}>
           <SelectTrigger className="w-full sm:w-[140px] rounded-sm h-10 border-[#B4B9C9]">
             <SelectValue placeholder="Select role" />
           </SelectTrigger>
@@ -65,10 +61,7 @@ export function UserFilters({
           </Button>
         </div>
 
-        <Select
-          value={statusFilter}
-          onValueChange={setStatusFilter}
-        >
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-full sm:w-[140px] rounded-sm h-10 border-[#B4B9C9]">
             <SelectValue placeholder="Select status" />
           </SelectTrigger>
@@ -85,7 +78,9 @@ export function UserFilters({
             placeholder="Search by customer name"
             className="pl-9 h-10 border-[#B4B9C9] focus-visible:ring-offset-0 w-full rounded-sm"
             value={searchQuery}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setSearchQuery(e.target.value)
+            }
           />
           <Search
             className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#B4B9C9]"
