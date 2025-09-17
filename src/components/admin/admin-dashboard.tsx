@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Admin dashboard component for managing platform statistics and operations
+ * @author Offer Hub Team
+ */
+
 "use client";
 
 import React from "react";

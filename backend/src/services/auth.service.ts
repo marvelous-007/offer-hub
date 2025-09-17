@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Authentication service providing user authentication and token management
+ * @author Offer Hub Team
+ */
+
 import { CreateUserDTO } from "@/types/user.types";
 import { userService } from "./user.service";
 import {

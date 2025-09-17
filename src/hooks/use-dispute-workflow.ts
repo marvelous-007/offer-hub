@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Custom hook for dispute workflow management and state tracking
+ * @author Offer Hub Team
+ */
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';

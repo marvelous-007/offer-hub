@@ -1,3 +1,8 @@
+/**
+ * @fileoverview User controller handling user management operations and profile updates
+ * @author Offer Hub Team
+ */
+
 import { Request, Response, NextFunction } from "express";
 import { userService } from "@/services/user.service";
 import { AppError, MissingFieldsError, NotFoundError, ValidationError, BadRequestError, mapSupabaseError } from "@/utils/AppError";

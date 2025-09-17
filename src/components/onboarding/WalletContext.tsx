@@ -12,30 +12,36 @@ interface WalletContextType {
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
-export function WalletProvider({ children }: { children: ReactNode }) {
-  const [address, setAddress] = useState<string | null>(null);
-  const [name, setName] = useState<string | null>(null);
-  const [connected, setConnected] = useState(false);
 
-  const connect = (address: string, name: string) => {
-    setAddress(address);
-    setName(name);
-    setConnected(true);
-  };
+interface WalletProviderProps {
+  children: ReactNode;
+}
 
-  const disconnect = () => {
-    setAddress(null);
-    setName(null);
-    setConnected(false);
-  };
+export function WalletProvider({ children }: WalletProviderProps) {
+	const [address, setAddress] = useState<string | null>(null);
+	const [name, setName] = useState<string | null>(null);
+	const [connected, setConnected] = useState(false);
 
-  return (
-    <WalletContext.Provider
-      value={{ address, name, connected, connect, disconnect }}
-    >
-      {children}
-    </WalletContext.Provider>
-  );
+	const connect = (address: string, name: string) => {
+		setAddress(address);
+		setName(name);
+		setConnected(true);
+	};
+
+	const disconnect = () => {
+		setAddress(null);
+		setName(null);
+		setConnected(false);
+	};
+
+	return (
+		<WalletContext.Provider
+			value={{ address, name, connected, connect, disconnect }}
+		>
+			{children}
+		</WalletContext.Provider>
+	);
+
 }
 
 export function useWalletContext() {
