@@ -2,7 +2,7 @@
 import { useState, useRef } from "react"
 import type React from "react"
 
-interface UseMessagesReturn {
+interface UseMessageComposerReturn {
   newMessage: string;
   setNewMessage: (message: string) => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
@@ -11,7 +11,7 @@ interface UseMessagesReturn {
   handleKeyPress: (e: React.KeyboardEvent) => void;
 }
 
-export function useMessages(onSendMessage: (content: string, file?: File) => void): UseMessagesReturn {
+export function useMessageComposer(onSendMessage: (content: string, file?: File) => void): UseMessageComposerReturn {
   const [newMessage, setNewMessage] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
 

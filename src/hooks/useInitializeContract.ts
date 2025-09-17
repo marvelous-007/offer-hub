@@ -20,8 +20,8 @@ import { InitializeContractPayload } from "../types/escrow.types";
  */
 
 interface UseInitializeContractReturn {
-  deployEscrow: any;
-  sendTransaction: any;
+  deployEscrow: unknown;
+  sendTransaction: unknown;
   handleSubmit: (payload: InitializeContractPayload) => Promise<void>;
 }
 
