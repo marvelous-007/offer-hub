@@ -165,7 +165,7 @@ const TalentProfilePage = () => {
           <ReviewsCarousel
             itemsPerPage={3}
             reviews={talent.reviews}
-            renderStars={() => renderStars(5)}
+            renderStars={renderStars}
           />
         </div>
       </TalentLayout>
