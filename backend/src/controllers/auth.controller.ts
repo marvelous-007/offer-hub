@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Authentication controller handling user authentication operations
+ * @author Offer Hub Team
+ */
+
 import { NextFunction, Request, Response } from "express";
 import * as authService from "@/services/auth.service";
 

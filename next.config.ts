@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Next.js configuration file for build and runtime settings
+ * @author Offer Hub Team
+ */
+
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
