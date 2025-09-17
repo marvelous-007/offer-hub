@@ -2,7 +2,7 @@
 import { useState } from "react";
 import ServiceRequestModal from "@/components/modals/service-request-modal";
 
-const TestServiceRequestModalPage: React.FC = () => {
+const TestServiceRequestModalPage = () => {
   const [open, setOpen] = useState(false);
 
   const serviceId = "123e4567-e89b-12d3-a456-426614174000";
