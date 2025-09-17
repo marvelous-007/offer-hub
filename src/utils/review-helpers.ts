@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Helper utilities for review data processing and management
+ * @author Offer Hub Team
+ */
+
 import {
   Review,
   CreateReviewDTO,

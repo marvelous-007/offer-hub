@@ -1,3 +1,8 @@
+/**
+ * @fileoverview JWT utility functions for token generation and validation
+ * @author Offer Hub Team
+ */
+
 import jwt from "jsonwebtoken";
 import { JWTPayload } from "@/types/auth.types";
 import { createHash } from "crypto";

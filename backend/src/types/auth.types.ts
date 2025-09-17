@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Type definitions for authentication-related data structures
+ * @author Offer Hub Team
+ */
+
 import { User } from "./user.types";
 
 export type UserRole = "freelancer" | "client" | "admin" | "moderator";

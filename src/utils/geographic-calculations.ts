@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Utilities for geographic distance calculations and location services
+ * @author Offer Hub Team
+ */
+
 export interface Coordinates {
     lat: number
     lng: number

@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Custom hook for admin dashboard functionality and data management
+ * @author Offer Hub Team
+ */
+
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
