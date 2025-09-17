@@ -1,4 +1,4 @@
-use soroban_sdk::{Address, Env, IntoVal, String, Symbol, Vec};
+use soroban_sdk::{log, Address, Env, IntoVal, String, Symbol, Vec};
 
 use crate::storage::{
     check_rate_limit, increment_escrow_transaction_count, reset_rate_limit as rl_reset,
@@ -22,6 +22,7 @@ use crate::{
 
 const TOKEN_TRANSFER: &str = "transfer";
 const TOKEN_BALANCE: &str = "balance";
+const MAX_AGE: u64 = 365 * 24 * 60 * 60; // 1 year in seconds 31_536_000
 
 pub fn initialize_contract(env: &Env, admin: Address) {
     if env.storage().instance().has(&CONTRACT_CONFIG) {
@@ -78,6 +79,12 @@ pub fn init_contract_full(
 
     if env.storage().instance().has(&INITIALIZED) {
         handle_error(env, Error::AlreadyInitialized);
+    }
+
+
+    // Validate timeout_secs timestamp
+    if let Err(e) = validate_timestamp(env, env.ledger().timestamp() + timeout_secs) {
+        handle_error(env, e);
     }
 
     // Input validation
@@ -179,6 +186,13 @@ pub fn deposit_funds(env: &Env, client: Address) {
 
     let mut escrow_data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
 
+    // Validate timeout hasn't expired
+    if let Some(timeout_secs) = escrow_data.timeout_secs {
+        if let Err(e) = validate_timestamp(env, escrow_data.created_at + timeout_secs) {
+            handle_error(env, e);
+        }
+    }
+
     if escrow_data.client != client {
         handle_error(env, Error::Unauthorized);
     }
@@ -233,6 +247,13 @@ pub fn release_funds(env: &Env, freelancer: Address) {
     }
 
     let mut escrow_data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+
+    // Validate timeout hasn't expired
+    if let Some(timeout_secs) = escrow_data.timeout_secs {
+        if let Err(e) = validate_timestamp(env, escrow_data.created_at + timeout_secs) {
+            handle_error(env, e);
+        }
+    }
 
     if escrow_data.freelancer != freelancer {
         handle_error(env, Error::Unauthorized);
@@ -652,6 +673,12 @@ pub fn auto_release(env: &Env) {
     let funded_at = escrow_data.funded_at.unwrap_or(0);
     let timeout = escrow_data.timeout_secs.unwrap_or(0);
     let now = env.ledger().timestamp();
+    
+    // Validate timestamp
+    if let Err(e) = validate_timestamp(env, funded_at + timeout) {
+        handle_error(env, e);
+    }
+
     if now < funded_at + timeout {
         handle_error(env, Error::InvalidStatus);
     }
@@ -889,4 +916,35 @@ pub fn get_contract_status(env: &Env, contract_id: Address) -> EscrowSummary {
     );
 
     summary
+}
+
+// pub fn validate_timestamp(env: &Env, timestamp: u64) -> Result<(), Error> {
+//     let current_time = env.ledger().timestamp();
+//     log!(&env, "current_time: {}", current_time);
+//     log!(&env, "timestamp: {}", timestamp);
+//     if timestamp > current_time {
+//         return Err(Error::InvalidTimestamp);
+//     }
+//     if current_time - timestamp > MAX_AGE {
+//         return Err(Error::TimestampTooOld);
+//     }
+//     Ok(())
+// }
+
+pub fn validate_timestamp(env: &Env, timestamp: u64) -> Result<(), Error> {
+    let current_time = env.ledger().timestamp();
+    log!(&env, "current_time: {}", current_time);
+    log!(&env, "timestamp: {}", timestamp);
+
+    // Allow timestamps up to MAX_AGE in the future
+    if timestamp > current_time + MAX_AGE {
+        return Err(Error::InvalidTimestamp); // Too far in the future
+    }
+    
+    // Prevent timestamps older than MAX_AGE
+    if timestamp < current_time && current_time - timestamp > MAX_AGE {
+        return Err(Error::TimestampTooOld);
+    }
+    
+    Ok(())
 }

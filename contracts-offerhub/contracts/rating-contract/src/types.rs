@@ -155,6 +155,8 @@ pub const DEFAULT_TOP_RATED_THRESHOLD: u32 = 480; // 4.80 average rating
 
 pub const TOTAL_RATING_COUNT: Symbol = symbol_short!("TOTALRATE");
 
+pub const MAX_RATING_AGE: u64 = 30 * 24 * 60 * 60; // 30 days in seconds
+
 pub fn require_auth(address: &Address) -> Result<(), Error> {
     address.require_auth();
     Ok(())

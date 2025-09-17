@@ -99,7 +99,7 @@ impl PublicationContract {
         Ok(new_id)
     }
 
-    // /// This is a helper function primarily for verification and testing.
+    /// This is a helper function primarily for verification and testing.
     // pub fn get_publication(env: Env, user: Address, id: u32) -> Option<PublicationData> {
     //     let key = DataKey::Publication(user, id);
     //     env.storage().instance().get(&key)
