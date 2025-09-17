@@ -195,7 +195,7 @@ const OnboardingContent: React.FC = () => {
 };
 
 // Main component that wraps OnboardingContent in Suspense
-const OnboardingPage: React.FC = () => {
+const OnboardingPage = () => {
   return (
     <Suspense
       fallback={
