@@ -29,7 +29,7 @@ interface OnboardingState {
 }
 
 // Component that uses useSearchParams - needs to be wrapped in Suspense
-const OnboardingContent: React.FC = () => {
+const OnboardingContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
