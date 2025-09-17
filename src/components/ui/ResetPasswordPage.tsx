@@ -173,7 +173,7 @@ import type { ChangeEvent } from "react";
               <Input
                 type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   setConfirmPassword(e.target.value)
                 }
                 placeholder="Confirm new password"
