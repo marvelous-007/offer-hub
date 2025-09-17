@@ -59,7 +59,9 @@ const ResetPasswordPage: React.FC = () => {
               <Input
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+import type { ChangeEvent } from "react";
+
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   setPassword(e.target.value)
                 }
                 placeholder="Enter new password"
