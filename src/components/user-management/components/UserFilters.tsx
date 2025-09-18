@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
+import type { ChangeEvent } from "react";
 import { Calendar as CalendarIcon, Search } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -79,7 +79,7 @@ export function UserFilters({
             placeholder="Search by customer name"
             className="pl-9 h-10 border-[#B4B9C9] focus-visible:ring-offset-0 w-full rounded-sm"
             value={searchQuery}
-import type { ChangeEvent } from "react";
+
 
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               setSearchQuery(e.target.value)
