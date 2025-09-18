@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { useAuthValidation } from "@/hooks/use-auth-validation";
 import ValidationError from "./validation-error";
