@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Circle, CircleCheck } from "lucide-react";
-
+import type { ChangeEvent } from "react";
 const ResetPasswordPage: React.FC = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -59,7 +59,7 @@ const ResetPasswordPage: React.FC = () => {
               <Input
                 type={showPassword ? "text" : "password"}
                 value={password}
-import type { ChangeEvent } from "react";
+
 
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   setPassword(e.target.value)
