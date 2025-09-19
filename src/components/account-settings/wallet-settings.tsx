@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { AccessDenied } from "../auth/AccessDenied"
 
 interface WalletSettingsProps {
     walletAddress: string
