@@ -16,7 +16,7 @@ interface AuthGuardProps {
 
 export const AuthGuard = ({ children, roles }: AuthGuardProps) => {
 
-    const { isLoading, hasAccess, error } = useAuthGuard(roles)
+    const { isLoading, hasAccess, error, isAuthenticated } = useAuthGuard(roles)
 
 
     if (isLoading) {
@@ -36,6 +36,10 @@ export const AuthGuard = ({ children, roles }: AuthGuardProps) => {
                 <p className="text-red-600 font-medium">{error}</p>
             </div>
         )
+    }
+
+    if (!isAuthenticated) {
+        return "Please get authenticated"
     }
 
     if (!hasAccess) {

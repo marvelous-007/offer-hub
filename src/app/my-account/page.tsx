@@ -9,8 +9,9 @@ export default function Page() {
 
     // This will be handled by the auth and stored in the backend
     useEffect(() => {
-        localStorage.setItem("roles", JSON.stringify(["admin"]));
+        localStorage.setItem("roles", JSON.stringify(["user"]));
     }, [])
+
 
 
     return (

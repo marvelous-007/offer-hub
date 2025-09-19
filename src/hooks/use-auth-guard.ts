@@ -6,7 +6,7 @@ import { useEffect, useState } from "react"
 
 export const useAuthGuard = (roles?: string[]) => {
     // mocked wallet connection
-    const address = null
+    const address = "0x.........."
     const isConnected = !!address
 
     const router = useRouter()
@@ -34,7 +34,9 @@ export const useAuthGuard = (roles?: string[]) => {
                     // If neither is valid, user is taken to the onboarding page
                     router.push(`/onboarding?redirect=${pathname}`)
                 }
-
+                else {
+                    setIsAuthenticated(true)
+                }
 
                 // Role-based access control
                 // 1. Get the current user's roles from localStorage
@@ -52,7 +54,7 @@ export const useAuthGuard = (roles?: string[]) => {
                     logAccessAttempt(pathname, allowed ? "granted" : "denied")
 
                     if (!allowed) {
-                        setIsAuthenticated(false)
+                        setHasAccess(false)
                         return
                     }
                 } else {
