@@ -5,6 +5,7 @@
 
 import { NextFunction, Request, Response } from "express";
 import * as authService from "@/services/auth.service";
+import { EmailLoginDTO } from "@/types/auth.types";
 
 export async function getNonce(
   req: Request,
@@ -93,5 +94,139 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
     res.status(200).json({ message });
   } catch (err) {
     next(err);
+  }
+}
+
+export async function loginWithEmail(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { email, password } = req.body as EmailLoginDTO;
+
+    // Basic input validation
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+        error: {
+          code: "MISSING_CREDENTIALS",
+        },
+        metadata: {
+          timestamp: new Date().toISOString(),
+          requestId: req.headers['x-request-id'] as string || 'unknown',
+        },
+      });
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email format",
+        error: {
+          code: "INVALID_EMAIL_FORMAT",
+        },
+        metadata: {
+          timestamp: new Date().toISOString(),
+          requestId: req.headers['x-request-id'] as string || 'unknown',
+        },
+      });
+    }
+
+    // Password length validation
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters long",
+        error: {
+          code: "PASSWORD_TOO_SHORT",
+        },
+        metadata: {
+          timestamp: new Date().toISOString(),
+          requestId: req.headers['x-request-id'] as string || 'unknown',
+        },
+      });
+    }
+
+    // Get device info for audit logging
+    const deviceInfo = {
+      ip_address: req.ip || req.connection.remoteAddress || 'unknown',
+      user_agent: req.get('User-Agent') || 'unknown',
+      device_type: getDeviceType(req.get('User-Agent') || ''),
+    };
+
+    const result = await authService.loginWithEmail({ email, password }, deviceInfo);
+
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      data: result,
+      metadata: {
+        timestamp: new Date().toISOString(),
+        requestId: req.headers['x-request-id'] as string || 'unknown',
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Get user sessions
+ * GET /api/auth/sessions
+ */
+export async function getSessions(req: Request, res: Response, next: NextFunction) {
+  try {
+    const userId = req.user.id;
+    const result = await authService.getUserSessions(userId);
+
+    res.status(200).json({
+      success: true,
+      data: result,
+      metadata: {
+        timestamp: new Date().toISOString(),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Deactivate a user session
+ * DELETE /api/auth/sessions/:sessionId
+ */
+export async function deactivateSession(req: Request, res: Response, next: NextFunction) {
+  try {
+    const userId = req.user.id;
+    const sessionId = req.params.sessionId;
+
+    await authService.deactivateSession(userId, sessionId);
+
+    res.status(200).json({
+      success: true,
+      message: "Session deactivated successfully",
+      metadata: {
+        timestamp: new Date().toISOString(),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Determine device type from user agent
+ * @param userAgent - User agent string
+ * @returns Device type
+ */
+function getDeviceType(userAgent: string): string {
+  const ua = userAgent.toLowerCase();
+
+  if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) {
+    return 'mobile';
+  } else if (ua.includes('tablet') || ua.includes('ipad')) {
+    return 'tablet';
+  } else {
+    return 'desktop';
   }
 }
