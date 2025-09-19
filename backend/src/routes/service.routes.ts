@@ -7,6 +7,7 @@ import {
   deleteServiceHandler,
 } from "@/controllers/service.controller";
 import { authorizeRoles, verifyToken } from "@/middlewares/auth.middleware";
+import { UserRole } from "@/types/auth.types";
 
 const router = Router();
 
@@ -15,7 +16,7 @@ const router = Router();
 router.post(
   "/",
   verifyToken,
-  authorizeRoles("freelancer", "admin"),
+  authorizeRoles(UserRole.FREELANCER, UserRole.ADMIN),
   createServiceHandler
 );
 // GET /api/services - List all services with optional filters
@@ -31,7 +32,7 @@ router.get("/:id", getServiceByIdHandler);
 router.patch(
   "/:id",
   verifyToken,
-  authorizeRoles("freelancer", "admin"),
+  authorizeRoles(UserRole.FREELANCER, UserRole.ADMIN),
   updateServiceHandler
 );
 // DELETE /api/services/:id - Delete service (soft delete)
@@ -39,7 +40,7 @@ router.patch(
 router.delete(
   "/:id",
   verifyToken,
-  authorizeRoles("freelancer", "admin"),
+  authorizeRoles(UserRole.FREELANCER, UserRole.ADMIN),
   deleteServiceHandler
 );
 export default router;

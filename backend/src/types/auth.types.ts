@@ -5,7 +5,8 @@ export enum UserRole {
   ADMIN = 'admin',
   USER = 'user',
   MODERATOR = 'moderator',
-  GUEST = 'guest'
+  FREELANCER = 'freelancer',
+  CLIENT = 'client'
 }
 
 // Permission Types (defined locally to avoid circular imports)
@@ -475,6 +476,81 @@ export interface UserPayload {
   email: string;
   role: UserRole;
   permissions: string[];
+  iat: number;
+  exp: number;
+  iss?: string;
+  aud?: string;
+}
+
+// Additional missing types
+export interface AuthUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: UserRole;
+  permissions: Permission[];
+  isActive: boolean;
+  isEmailVerified: boolean;
+  lastLoginAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  wallet_address?: string; // For backward compatibility
+}
+
+export interface LoginDTO {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+  wallet_address?: string; // For backward compatibility
+  signature?: string; // For backward compatibility
+}
+
+export interface EmailLoginDTO {
+  email: string;
+  password: string;
+}
+
+export interface RefreshTokenRecord {
+  id: string;
+  userId: string;
+  tokenHash: string;
+  isRevoked: boolean;
+  expiresAt: Date;
+  createdAt: Date;
+  revokedAt?: Date;
+  replacedByToken?: string;
+  user_id?: string; // For backward compatibility
+  token_hash?: string; // For backward compatibility
+  created_at?: Date; // For backward compatibility
+}
+
+export interface AuditLogEntry {
+  id: string;
+  userId: string;
+  action: string;
+  resource: string;
+  details?: Record<string, unknown>;
+  ipAddress: string;
+  userAgent: string;
+  timestamp: Date;
+}
+
+export interface DeviceInfo {
+  type: 'desktop' | 'mobile' | 'tablet';
+  os: string;
+  browser: string;
+  version?: string;
+  ip_address?: string; // For backward compatibility
+  user_agent?: string; // For backward compatibility
+}
+
+export interface JWTPayload {
+  sub: string;
+  email: string;
+  role: UserRole;
+  permissions: string[];
+  user_id?: string; // For backward compatibility
   iat: number;
   exp: number;
   iss?: string;

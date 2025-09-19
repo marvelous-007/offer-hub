@@ -49,7 +49,8 @@ describe('UserRole Enum', () => {
     expect(UserRole.ADMIN).toBe('admin');
     expect(UserRole.USER).toBe('user');
     expect(UserRole.MODERATOR).toBe('moderator');
-    expect(UserRole.GUEST).toBe('guest');
+    expect(UserRole.FREELANCER).toBe('freelancer');
+    expect(UserRole.CLIENT).toBe('client');
   });
 });
 
