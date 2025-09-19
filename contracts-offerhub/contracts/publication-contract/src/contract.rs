@@ -3,12 +3,38 @@ use soroban_sdk::{contract, contractimpl, Address, Env, String, Symbol};
 use crate::error::ContractError;
 use crate::event;
 use crate::storage::{DataKey, PublicationData};
+use crate::utils::StorageOptimizer;
+use crate::validation::validate_publication;
+use crate::types::PublicationState;
+// Constants for time validations
+const MIN_AGE: u64 = 60; // Minimum age of timestamp (1 minute)
+const MAX_AGE: u64 = 604_800; // Maximum age of timestamp (7 days)
+const EXPIRATION_PERIOD: u64 = 2_592_000; // Default expiration period (30 days)
 
 #[contract]
 pub struct PublicationContract;
 
 #[contractimpl]
 impl PublicationContract {
+    /// Validates the timestamp against current block time with min/max constraints
+    pub fn validate_timestamp(env: &Env, timestamp: u64) -> Result<(), ContractError> {
+        let current_time = env.ledger().timestamp();
+        if timestamp < current_time && current_time - timestamp < MIN_AGE {
+            return Err(ContractError::InvalidTimestamp);
+        }
+        if current_time - timestamp > MAX_AGE {
+            return Err(ContractError::TimestampTooOld);
+        }
+        Ok(())
+    }
+
+    fn check_expiration(env: &Env, publication: &mut PublicationData) {
+        let current_time = env.ledger().timestamp();
+        if current_time > publication.expiration && publication.state != PublicationState::Expired && publication.state != PublicationState::Completed {
+            publication.state = PublicationState::Expired;
+        }
+    }
+
     /// Publishes a new service or project on-chain.
     /// This function must be called before the data is stored in any off-chain database.
     pub fn publish(
@@ -20,21 +46,20 @@ impl PublicationContract {
         amount: i128,
         timestamp: u64,
     ) -> Result<u32, ContractError> {
-       
         user.require_auth();
 
-        // Validate input data.
-        if publication_type != Symbol::new(&env, "service")
-            && publication_type != Symbol::new(&env, "project")
-        {
-            return Err(ContractError::InvalidPublicationType);
-        }
-        if title.len() < 3 {
-            return Err(ContractError::TitleTooShort);
-        }
-        if amount < 0 {
-            return Err(ContractError::InvalidAmount);
-        }
+        // Comprehensive input validation
+        validate_publication(
+            &env,
+            &user,
+            &publication_type,
+            &title,
+            &category,
+            amount,
+            timestamp,
+        )?;
+
+        Self::validate_timestamp(&env, timestamp)?;
 
         // Get the next publication ID for this specific user.
         let user_post_count_key = DataKey::UserPostCount(user.clone());
@@ -45,18 +70,26 @@ impl PublicationContract {
             .unwrap_or(0)
             + 1;
 
-        // Create the publication data struct.
+        // Create the publication data struct with optimized storage.
+        let compressed_title = StorageOptimizer::compress_string(&env, &title);
+        let compressed_category = StorageOptimizer::compress_string(&env, &category);
+        let expiration = timestamp + EXPIRATION_PERIOD; // Set expiration timestamp
+
         let publication_data = PublicationData {
             publication_type: publication_type.clone(),
-            title,
-            category,
+            title: compressed_title,
+            category: compressed_category,
             amount,
             timestamp,
+            expiration,
+            state: PublicationState::Published, // Initial state
         };
 
         // Store the publication data on-chain, keyed by user and their unique ID.
         let publication_key = DataKey::Publication(user.clone(), new_id);
-        env.storage().instance().set(&publication_key, &publication_data);
+        env.storage()
+            .instance()
+            .set(&publication_key, &publication_data);
 
         // Update the user's post count.
         env.storage().instance().set(&user_post_count_key, &new_id);
@@ -66,14 +99,18 @@ impl PublicationContract {
         Ok(new_id)
     }
 
-    /// Retrieves a specific publication for a user.
     /// This is a helper function primarily for verification and testing.
-    pub fn get_publication(
-        env: Env,
-        user: Address,
-        id: u32,
-    ) -> Option<PublicationData> {
+    // pub fn get_publication(env: Env, user: Address, id: u32) -> Option<PublicationData> {
+    //     let key = DataKey::Publication(user, id);
+    //     env.storage().instance().get(&key)
+    // }
+
+    /// Retrieves a specific publication for a user and checks expiration
+    pub fn get_publication(env: Env, user: Address, id: u32) -> Option<PublicationData> {
         let key = DataKey::Publication(user, id);
-        env.storage().instance().get(&key)
+        let mut publication: PublicationData = env.storage().instance().get(&key)?;
+        Self::check_expiration(&env, &mut publication);
+        env.storage().instance().set(&key, &publication); // Update state if changed
+        Some(publication)
     }
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-// import { useUpdateEscrow as usePackageUpdateEscrow, useSendTransaction, UpdateEscrowPayload, UpdateEscrowResponse } from '@trustless-work/escrow'; // Temporarily commented - types not exported correctly
+import { UpdateEscrowPayload, EscrowUpdateResponse } from '../types/escrow.types';
+import { isEscrowUpdateResponse, isErrorWithMessage } from '../utils/type-guards';
 
 /**
  * Hook to update escrow details using the @trustless-work/escrow package.
@@ -8,18 +9,25 @@ import { useState } from 'react';
  * - It requires a contractId and signer address
  * - Updates can include milestone information, amounts, and other escrow parameters
  */
-export const useUpdateEscrow = () => {
+
+interface UseUpdateEscrowReturn {
+  error: Error | null;
+  response: EscrowUpdateResponse | null;
+  handleUpdateEscrow: (payload: UpdateEscrowPayload) => Promise<void>;
+}
+
+export const useUpdateEscrow = (): UseUpdateEscrowReturn => {
     // const { updateEscrow, isPending, isError, isSuccess } = usePackageUpdateEscrow(); // Temporarily commented
     // const { sendTransaction } = useSendTransaction(); // Temporarily commented
     const [error, setError] = useState<Error | null>(null);
-    const [response, setResponse] = useState<any | null>(null); // Temporarily using any
+    const [response, setResponse] = useState<EscrowUpdateResponse | null>(null);
 
     /**
      * @Note:
      * - We need to pass the payload to the updateEscrow function
      * - The result will be an unsigned transaction
      */
-    const handleUpdateEscrow = async (payload: any) => { // Temporarily using any
+    const handleUpdateEscrow = async (payload: UpdateEscrowPayload) => {
         if (!payload.contractId || !payload.signer) {
             throw new Error('Contract ID and signer are required');
         }
@@ -64,9 +72,9 @@ export const useUpdateEscrow = () => {
             // const data = await sendTransaction(signedXdr); // Temporarily commented
             
             // Temporary placeholder
-            const data = { status: 'SUCCESS', message: 'Temporary success' };
+            const data: EscrowUpdateResponse = { status: 'SUCCESS', message: 'Temporary success' };
 
-            if (data.status === 'SUCCESS') {
+            if (isEscrowUpdateResponse(data) && data.status === 'SUCCESS') {
                 /**
                  * @Note:
                  * - The escrow was updated successfully
@@ -74,21 +82,21 @@ export const useUpdateEscrow = () => {
                  * - Here, you can save the escrow in your database as the contract between client and freelancer
                  * - You can also show a success toast
                  */
-                setResponse(data as any); // Temporarily using any
+                setResponse(data);
             } else {
                 throw new Error('Failed to update escrow');
             }
         } catch (err) {
-            setError(err instanceof Error ? err : new Error('Failed to update escrow'));
-            throw err;
+            const errorMessage = isErrorWithMessage(err) ? err.message : 'Failed to update escrow';
+            const error = err instanceof Error ? err : new Error(errorMessage);
+            setError(error);
+            throw error;
         }
     };
 
     return {
         handleUpdateEscrow,
-        loading: false, // Temporarily false - isPending not available
-        error: error, // Removed isError reference as it's not available
-        isSuccess: false, // Temporarily false - isSuccess not available
+        error,
         response,
     };
 };

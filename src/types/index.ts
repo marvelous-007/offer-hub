@@ -71,6 +71,7 @@ export interface TabItem {
   label: string;
   value: string;
   component: ReactNode;
+  href?: string;
 }
 
 export interface PillTabsProps {
@@ -78,4 +79,33 @@ export interface PillTabsProps {
   defaultValue?: string;
   className?: string;
   tabsListclassName?: string;
+  triggerClassName?: string;
+  activeTriggerClassName?: string;
+  inactiveTriggerClassName?: string;
+  value?: string;
+  onValueChange?: (v: string) => void;
+  renderContent?: boolean; // if false, only render the tab triggers
+}
+
+// Active Project Management Types
+export interface Milestone {
+  id: string;
+  name: string;
+  amount: string;
+  status: "paid" | "in-escrow" | "pending";
+  icon: ReactNode;
+}
+
+export interface ProjectData {
+  id: string;
+  title: string;
+  freelancer: {
+    name: string;
+    avatar: string;
+    location: string;
+    timezone: string;
+  };
+  totalPayment: string;
+  inEscrow: string;
+  milestones: Milestone[];
 }

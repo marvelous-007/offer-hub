@@ -1,6 +1,11 @@
+/**
+ * @fileoverview User service providing user data management and database operations
+ * @author Offer Hub Team
+ */
+
 import { supabase } from "@/lib/supabase/supabase";
-import { AppError } from "@/utils/AppError";
-import { CreateUserDTO } from "@/types/user.types";
+import { AppError, BadRequestError, ConflictError, InternalServerError } from "@/utils/AppError";
+import { CreateUserDTO, User, UserFilters } from "@/types/user.types";
 
 class UserService {
     async createUser(data: CreateUserDTO) {
@@ -11,7 +16,7 @@ class UserService {
         .eq("wallet_address", data.wallet_address)
         .single();
 
-    if (walletUser) throw new AppError("Wallet_address_already_registered", 409);
+    if (walletUser) throw new ConflictError("Wallet_address_already_registered");
 
     // Verify unique username
     const { data: usernameUser } = await supabase
@@ -20,7 +25,7 @@ class UserService {
         .eq("username", data.username)
         .single();
 
-    if (usernameUser) throw new AppError("Username_already_taken", 409);
+    if (usernameUser) throw new ConflictError("Username_already_taken");
 
     const { data: newUser, error: insertError } = await supabase
         .from("users")
@@ -35,7 +40,7 @@ class UserService {
         .select()
         .single();
 
-        if (insertError) throw new AppError("Error_creating_user", 500);
+        if (insertError) throw new InternalServerError("Error_creating_user");
         
         return newUser;
     }
@@ -43,7 +48,7 @@ class UserService {
     async getUserById(id: string) {
         const { data, error } = await supabase
             .from("users")
-            .select("id, wallet_address, username, name, bio, is_freelancer")
+            .select("id, wallet_address, username, name, bio, email, is_freelancer, created_at")
             .eq("id", id)
             .single();
 
@@ -55,7 +60,7 @@ class UserService {
     async updateUser(id: string, updates: Partial<CreateUserDTO>) {
         // Do not allow changes to wallet_address or is_freelancer
         if ('wallet_address' in updates || 'is_freelancer' in updates) {
-        throw new AppError("Cannot_update_restricted_fields", 400);
+        throw new BadRequestError("Cannot_update_restricted_fields");
         }
 
         // Validate unique username
@@ -67,7 +72,7 @@ class UserService {
             .neq("id", id)
             .single();
 
-        if (existing) throw new AppError("Username_already_taken", 409);
+        if (existing) throw new ConflictError("Username_already_taken");
         }
 
         const { data, error } = await supabase
@@ -77,8 +82,63 @@ class UserService {
         .select()
         .single();
 
-        if (error) throw new AppError("Error_updating_user", 500);
+        if (error) throw new InternalServerError("Error_updating_user");
         return data;
+    }
+
+    async getAllUsers(filters: UserFilters): Promise<{ users: User[]; total: number }> {
+        const {
+            page = 1,
+            limit = 20,
+            search,
+            is_freelancer
+        } = filters;
+
+        let query = supabase
+            .from("users")
+            .select(
+                `
+                id,
+                wallet_address,
+                username,
+                name,
+                bio,
+                email,
+                is_freelancer,
+                created_at
+                `,
+                { count: "exact" }
+            );
+
+        // Apply search filter
+        if (search) {
+            query = query.or(
+                `name.ilike.%${search}%,email.ilike.%${search}%,username.ilike.%${search}%`
+            );
+        }
+
+        // Apply role filter
+        if (is_freelancer !== undefined) {
+            query = query.eq("is_freelancer", is_freelancer);
+        }
+
+        // Add pagination
+        const offset = (page - 1) * limit;
+        query = query.range(offset, offset + limit - 1);
+
+        // Order by creation date (newest first)
+        query = query.order("created_at", { ascending: false });
+
+        const { data: users, error, count } = await query;
+
+        if (error) {
+            throw new InternalServerError(`Failed to fetch users: ${error.message}`);
+        }
+
+        return {
+            users: users || [],
+            total: count || 0
+        };
     }
 }
 

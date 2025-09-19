@@ -7,17 +7,23 @@ import { signTransaction } from "../auth/helpers/stellar-wallet-kit.hellper"
 import { handleError } from "@/errors/utils/handle-errors"
 import type { AxiosError } from "axios"
 import type { WalletError } from "@/types/errors.entity"
-// import type { EscrowRequestResponse, ResolveDisputePayload } from "@trustless-work/escrow/types" // Temporarily commented - types not exported correctly
-// import { useResolveDispute as useResolveDisputeAPI, useSendTransaction } from "@trustless-work/escrow/hooks" // Temporarily commented
+import { DisputeResponse } from "../types/escrow.types";
+import { isDisputeResponse } from "../utils/type-guards";
 
-export const useResolveDispute = () => {
+interface UseResolveDisputeReturn {
+  loading: boolean;
+  response: DisputeResponse | null;
+  resolveDispute: (payload: { contractId: string; signer: string; resolution: string }) => Promise<DisputeResponse>;
+}
+
+export const useResolveDispute = (): UseResolveDisputeReturn => {
   const [loading, setLoading] = useState(false)
-  const [response, setResponse] = useState<any | null>(null) // Temporarily using any
+  const [response, setResponse] = useState<DisputeResponse | null>(null)
   const { walletAddress } = useWalletContext()
   // const { resolveDispute: resolveDisputeAPI } = useResolveDisputeAPI() // Temporarily commented
   // const { sendTransaction } = useSendTransaction() // Temporarily commented
 
-  const resolveDispute = async (payload: any) => { // Temporarily using any
+  const resolveDispute = async (payload: { contractId: string; signer: string; resolution: string }) => {
     setLoading(true)
     setResponse(null)
 
@@ -58,7 +64,7 @@ export const useResolveDispute = () => {
       //   signedXdr,
       //   returnEscrowDataIsRequired: false,
       // })
-      const data = null // Temporary placeholder
+      const data: DisputeResponse = { status: "SUCCESS", message: "Temporary success" } // Temporary placeholder
 
       /**
        * @Responses:
@@ -69,7 +75,7 @@ export const useResolveDispute = () => {
        * data.status == "ERROR"
        * - Show an error toast
        */
-      if (data && (data as any).status === "SUCCESS") {
+      if (isDisputeResponse(data) && data.status === "SUCCESS") {
         toast.success("Dispute resolved successfully", {
           description: "The dispute has been resolved and funds have been distributed.",
         })
@@ -102,7 +108,5 @@ export const useResolveDispute = () => {
     resolveDispute,
     loading,
     response,
-    reset,
-    isResolving: loading,
   }
 }

@@ -1,24 +1,36 @@
-// services/review.service.ts
-import { supabase } from "@/lib/supabase/supabase";
-import { GetReview, PostReview } from "../types/review.types";
-import { AppError } from "../utils/AppError";
 
+import { supabase } from "@/lib/supabase/supabase";
+import { Review, CreateReviewDTO } from "../types/review.types";
+import { AppError } from "../utils/AppError";
 export class ReviewService {
-  async createReview(data: PostReview): Promise<GetReview> {
-    const { from_id, to_id, contract_id, rating, comment } = data;
+  /**
+   * Get a review by its ID (for ownership/authorization checks)
+   */
+  async getReviewById(reviewId: string): Promise<Review | null> {
+    const { data, error } = await supabase
+      .from('reviews')
+      .select('id, from_user_id, to_user_id, contract_id, rating, comment, created_at')
+      .eq('id', reviewId)
+      .maybeSingle();
+    if (error) this.handleDbError(error);
+    return data ?? null;
+  }
+
+  async createReview(data: CreateReviewDTO): Promise<Review> {
+    const { from_user_id, to_user_id, contract_id, rating, comment } = data;
 
     if (rating < 1 || rating > 5) {
       throw new AppError("Rating_OverFlow", 400);
     }
 
-    if (from_id === to_id) {
+    if (from_user_id === to_user_id) {
       throw new AppError("Cannot_Review_yourself", 400);
     }
 
     const { data: existingReview, error: er1 } = await supabase
       .from("reviews")
       .select("id")
-      .eq("from_id", from_id)
+      .eq("from_user_id", from_user_id)
       .eq("contract_id", contract_id)
       .maybeSingle();
 
@@ -41,16 +53,16 @@ export class ReviewService {
       throw new AppError("Contract_not_released_yet", 400);
     }
 
-    if (contract.client_id !== from_id && contract.freelancer_id !== from_id) {
+    if (contract.client_id !== from_user_id && contract.freelancer_id !== from_user_id) {
       throw new AppError("You_are_not_part_of_this_contract", 403);
     }
 
     const expectedToUser =
-      contract.client_id === from_id
+      contract.client_id === from_user_id
         ? contract.freelancer_id
         : contract.client_id;
 
-    if (to_id !== expectedToUser) {
+    if (to_user_id !== expectedToUser) {
       throw new AppError(
         "You_can_only_review_the_other_party_in_the_contract",
         400
@@ -60,45 +72,31 @@ export class ReviewService {
     const { data: review, error: er3 } = await supabase
       .from("reviews")
       .insert({
-        from_id,
-        to_id,
+        from_user_id,
+        to_user_id,
         contract_id,
         rating,
         comment,
       })
-      .select("id, from_id, to_id, contract_id, rating, comment, created_at")
+      .select("id, from_user_id, to_user_id, contract_id, rating, comment, created_at")
       .single();
 
     if (er3) this.handleDbError(er3);
     if (!review) throw new AppError("Failed_to_create_review", 500);
-
     return review;
+
   }
 
-  async getReviewsByUser(userId: string): Promise<GetReview[]> {
+  async getReviewsByUser(userId: string): Promise<Review[]> {
     const { data: reviews, error } = await supabase
       .from("reviews")
       .select(
-        `
-        id,
-        from_id,
-        to_id,
-        contract_id,
-        rating,
-        comment,
-        created_at,
-        from_user:users!from_id(
-          id,
-          username,
-          avatar_url
-        )
-      `
+        `id, from_user_id, to_user_id, contract_id, rating, comment, created_at`
       )
-      .eq("to_id", userId)
+      .eq("to_user_id", userId)
       .order("created_at", { ascending: false });
 
     if (error) this.handleDbError(error);
-
     return reviews ?? [];
   }
 

@@ -37,7 +37,6 @@ CREATE TABLE workflow_stages (
 );
 
 -- Create workflow_progress table
-CREATE TABLE workflow_progress (
     -- Unique identifier for each progress entry
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     
@@ -63,6 +62,7 @@ CREATE TABLE workflow_progress (
     updated_by UUID NOT NULL REFERENCES users(id),
     
     -- When this progress entry was created
+    
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

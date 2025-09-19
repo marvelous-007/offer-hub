@@ -1,8 +1,61 @@
-import { useState } from "react";
-import { users } from "@/data/landing-data";
-import { User } from "@/interfaces/user.interface";
+import { useState, useEffect, useCallback } from "react";
+import { User, AdminUser, mapAdminUserToLegacy } from "@/interfaces/user.interface";
+import { useAdminUsersApi } from "@/hooks/api-connections/use-admin-users-api";
+import { UserFilters as ApiUserFilters } from "@/types/admin.types";
 
-export function useFilteredUsers() {
+interface UseFilteredUsersReturn {
+  userType: "Freelancer" | "Customer";
+  setUserType: (type: "Freelancer" | "Customer") => void;
+  roleFilter: string;
+  setRoleFilter: (role: string) => void;
+  statusFilter: string;
+  setStatusFilter: (status: string) => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  date: Date | undefined;
+  setDate: (date: Date | undefined) => void;
+  isModalOpen: boolean;
+  setIsModalOpen: (open: boolean) => void;
+  isEditModalOpen: boolean;
+  setIsEditModalOpen: (open: boolean) => void;
+  isViewModalOpen: boolean;
+  setIsViewModalOpen: (open: boolean) => void;
+  selectedUser: User | null;
+  setSelectedUser: (user: User | null) => void;
+  userToEdit: User | null;
+  setUserToEdit: (user: User | null) => void;
+  userData: User[];
+  setUserData: React.Dispatch<React.SetStateAction<User[]>>;
+  adminUsers: AdminUser[];
+  setAdminUsers: (users: AdminUser[]) => void;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  totalPages: number;
+  setTotalPages: (pages: number) => void;
+  totalUsers: number;
+  setTotalUsers: (count: number) => void;
+  loading: boolean;
+  error: string | null;
+  filteredData: User[];
+  fetchUsersData: () => Promise<void>;
+  handleEditUser: (user: User) => void;
+  handleViewUser: (user: User) => void;
+  handleDeleteUser: (userId: string) => Promise<void>;
+  handleUpdateUser: (updatedUser: User) => Promise<void>;
+  handleSearch: (query: string) => void;
+  handleFilterChange: (filterType: string, value: string) => void;
+  handleDateChange: (date: Date | undefined) => void;
+  clearFilters: () => void;
+  refreshUsers: () => Promise<void>;
+  getUserRole: (user: User) => string;
+  handleExport: () => void;
+  handleViewFile: (userId: number) => void;
+  handleNotify: (user: User) => void;
+  handleOverflowAction: (action: string, userId: number) => void;
+  updateUser: (userId: string, updates: Partial<User>) => Promise<AdminUser | null>;
+}
+
+export function useFilteredUsers(): UseFilteredUsersReturn {
   const [userType, setUserType] = useState<"Freelancer" | "Customer">("Freelancer");
   const [roleFilter, setRoleFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -14,36 +67,55 @@ export function useFilteredUsers() {
 
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
-  const [userData, setUserData] = useState<User[]>(users);
+  const [userData, setUserData] = useState<User[]>([]);
+  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalUsers, setTotalUsers] = useState(0);
+
+  const { fetchUsers, updateUser, loading, error } = useAdminUsersApi();
+
+  const fetchUsersData = useCallback(async () => {
+    const filters: ApiUserFilters = {
+      page: currentPage,
+      limit: 20,
+    };
+
+    if (searchQuery.trim()) {
+      filters.search = searchQuery.trim();
+    }
+
+    if (roleFilter !== "All") {
+      if (roleFilter.toLowerCase() === "freelancer") {
+        filters.is_freelancer = true;
+      } else if (roleFilter.toLowerCase() === "customer" || roleFilter.toLowerCase() === "client") {
+        filters.is_freelancer = false;
+      }
+    }
+
+    const response = await fetchUsers(filters);
+    if (response) {
+      setAdminUsers(response.data);
+      setUserData(response.data.map(mapAdminUserToLegacy));
+      setTotalPages(response.pagination.total_pages);
+      setTotalUsers(response.pagination.total_users);
+    }
+  }, [currentPage, searchQuery, roleFilter, fetchUsers]);
+
+  useEffect(() => {
+    fetchUsersData();
+  }, [fetchUsersData]);
 
   const getUserRole = (user: User): string => {
-    if (
-      user.name.toLowerCase().includes("freelancer") ||
-      user.email.toLowerCase().includes("freelancer")
-    )
-      return "Freelancer";
-    if (
-      user.name.toLowerCase().includes("customer") ||
-      user.email.toLowerCase().includes("customer")
-    )
-      return "Customer";
-    if (user.id % 3 === 0) return "User";
-    if (user.id % 3 === 1) return "Customer";
-    return "Freelancer";
+    if (user.role === "Freelancer") return "Freelancer";
+    if (user.role === "Customer" || user.role === "Client") return "Customer";
+    return "Unknown";
   };
-
   const filteredData = userData.filter((user) => {
-    const query = searchQuery.trim().toLowerCase();
-    const matchesSearch =
-      user.name.toLowerCase().includes(query) ||
-      user.email.toLowerCase().includes(query);
-    const role = getUserRole(user);
-    const matchesRole =
-      roleFilter === "All" || role.toLowerCase() === roleFilter.toLowerCase();
     const matchesStatus =
       statusFilter === "All" ||
       user.status.toLowerCase() === statusFilter.toLowerCase();
-    return matchesSearch && matchesRole && matchesStatus;
+    return matchesStatus;
   });
 
   const handleExport = () => {
@@ -102,5 +174,58 @@ export function useFilteredUsers() {
     handleViewFile,
     handleNotify,
     handleOverflowAction,
+    loading,
+    error,
+    adminUsers,
+    setAdminUsers,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    setTotalPages,
+    totalUsers,
+    setTotalUsers,
+    fetchUsersData,
+    handleEditUser: (user: User) => {
+      setUserToEdit(user);
+      setIsEditModalOpen(true);
+    },
+    handleViewUser: (user: User) => {
+      setSelectedUser(user);
+      setIsViewModalOpen(true);
+    },
+    handleDeleteUser: async (userId: string) => {
+      // Implementation for deleting user
+      console.log(`Deleting user: ${userId}`);
+    },
+    handleUpdateUser: async (updatedUser: User) => {
+      // Implementation for updating user
+      console.log(`Updating user:`, updatedUser);
+    },
+    handleSearch: (query: string) => {
+      setSearchQuery(query);
+    },
+    handleFilterChange: (filterType: string, value: string) => {
+      if (filterType === "role") {
+        setRoleFilter(value);
+      } else if (filterType === "status") {
+        setStatusFilter(value);
+      }
+    },
+    handleDateChange: (date: Date | undefined) => {
+      setDate(date);
+    },
+    clearFilters: () => {
+      setRoleFilter("All");
+      setStatusFilter("All");
+      setSearchQuery("");
+      setDate(undefined);
+    },
+    refreshUsers: async () => {
+      await fetchUsersData();
+    },
+    getUserRole: (user: User) => {
+      return user.role || "Unknown";
+    },
+    updateUser,
   };
 }
