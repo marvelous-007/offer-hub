@@ -3,7 +3,14 @@
 import { useState, useEffect } from "react"
 import { type TalentProfile, talentProfileData } from "@/lib/mockData/talent-mock-data"
 
-export const useTalentData = () => {
+interface UseTalentDataReturn {
+  talents: TalentProfile[];
+  loading: boolean;
+  getTalentById: (id: number) => TalentProfile | undefined;
+  getTalentsByCategory: (category: string) => TalentProfile[];
+}
+
+export const useTalentData = (): UseTalentDataReturn => {
   const [talents, setTalents] = useState<TalentProfile[]>([])
   const [loading, setLoading] = useState(true)
 

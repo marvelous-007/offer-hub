@@ -25,7 +25,16 @@ type UIMessage = {
 
 const getUser = (id: string) => users.find(u => u.id === id);
 
-export function useMessagesMock() {
+interface UseMessagesMockReturn {
+  conversations: UIConversation[];
+  activeConversationId: string;
+  setActiveConversationId: (id: string) => void;
+  activeConversation: UIConversation | null;
+  messages: UIMessage[];
+  handleSendMessage: (text: string) => void;
+}
+
+export function useMessagesMock(): UseMessagesMockReturn {
   // Conversaciones adaptadas a la UI
   const conversations: UIConversation[] = useMemo(() => {
     return rawConvs.map((c) => {

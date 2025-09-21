@@ -837,3 +837,106 @@ fn test_get_contract_status() {
     assert_eq!(summary.milestone_count, 0);
 
 }
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #12)")]
+fn test_init_contract_full_fails() {
+    let env = setup_env();
+    env.ledger().with_mut(|l| l.timestamp = 1_000_000);
+    env.mock_all_auths();
+    
+    let contract_id = env.register(EscrowContract, ());
+    let contract = EscrowContractClient::new(&env, &contract_id);
+    
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let arbitrator = Address::generate(&env);
+    let token = setup_token(&env);
+    let amount = 500_000_000;
+    let timeout = 32_000_000; // Too far: 1_000_000 + 32_000_000 > 1_000_000 + 31_536_000
+    
+    // Fails with Error::InvalidTimestamp
+    contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
+}
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #13)")]
+fn test_deposit_funds_fails() {
+    let env = setup_env();
+    env.ledger().with_mut(|l| l.timestamp = 33_000_000); // Far in future
+    env.mock_all_auths();
+    
+    let contract_id = env.register(EscrowContract, ());
+    let contract = EscrowContractClient::new(&env, &contract_id);
+    
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let arbitrator = Address::generate(&env);
+    let token = setup_token(&env);
+    let amount = 500;
+    let timeout = 3600;
+    
+    contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
+    let mut data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
+    data.created_at = 1_000_000;
+    let _ = env.as_contract(&contract_id, || crate::contract::set_escrow_data(&env, &data));
+    
+    // Fails with Error::TimestampTooOld
+    contract.deposit_funds(&client);
+}
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #13)")]
+fn test_release_funds_fails() {
+    let env = setup_env();
+    env.ledger().with_mut(|l| l.timestamp = 33_000_000);
+    env.mock_all_auths();
+    
+    let contract_id = env.register(EscrowContract, ());
+    let contract = EscrowContractClient::new(&env, &contract_id);
+    
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let arbitrator = Address::generate(&env);
+    let token = setup_token(&env);
+    let amount = 500;
+    let timeout = 3600;
+    
+    contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
+    contract.deposit_funds(&client);
+
+    let mut data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
+    data.created_at = 1_000_000;
+    let _ = env.as_contract(&contract_id, || crate::contract::set_escrow_data(&env, &data));
+    
+    // Fails with Error::TimestampTooOld
+    contract.release_funds(&freelancer);
+}
+
+#[test]
+#[should_panic(expected = "HostError: Error(Contract, #13)")]
+fn test_auto_release_fails() {
+    let env = setup_env();
+    env.ledger().with_mut(|l| l.timestamp = 33_000_000);
+    env.mock_all_auths();
+    
+    let contract_id = env.register(EscrowContract, ());
+    let contract = EscrowContractClient::new(&env, &contract_id);
+    
+    let client = Address::generate(&env);
+    let freelancer = Address::generate(&env);
+    let arbitrator = Address::generate(&env);
+    let token = setup_token(&env);
+    let amount = 500;
+    let timeout = 3600;
+    
+    contract.init_contract_full(&client, &freelancer, &arbitrator, &token, &amount, &timeout);
+    contract.deposit_funds(&client);
+
+    let mut data = env.as_contract(&contract_id, || crate::contract::get_escrow_data(&env));
+    data.funded_at = Some(1_000_000);
+    let _ = env.as_contract(&contract_id, || crate::contract::set_escrow_data(&env, &data));
+
+    // Fails with Error::TimestampTooOld
+    contract.auto_release();
+}

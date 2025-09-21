@@ -18,6 +18,13 @@ import { loggerMiddleware } from "./middlewares/logger.middleware";
 import { logger } from "./utils/logger";
 import conversationRoutes from "@/routes/conversation.routes";
 import messageRoutes from "@/routes/message.routes";
+import { adminIntegrationRoutes, adminExternalApiRoutes, adminWebhookRoutes } from "@/routes/admin-integration.routes";
+import { apiRequestLoggingMiddleware } from "@/middlewares/sensitive-data-redaction.middleware";
+import { requireAdminRole } from "@/middlewares/admin-rbac.middleware";
+import { adminRateLimitMiddleware, burstRateLimitMiddleware } from "@/middlewares/admin-rate-limit.middleware";
+import { adminApiKeyMiddleware } from "@/middlewares/admin-api-key.middleware";
+import { rawBodyParser, verifyWebhookSignature } from "@/middlewares/webhook-signature.middleware";
+import { redactSensitiveHeaders } from "@/middlewares/sensitive-data-redaction.middleware";
 import reviewResponseRoutes from "@/routes/review-response.routes";
 import { workflowRoutes } from "@/routes/workflow.routes";
 
@@ -68,6 +75,30 @@ app.get("/test", (req, res) => {
   logger.debug("Test endpoint accessed");
   res.json({ message: "Server is working", timestamp: new Date() });
 });
+
+// Admin Integration API routes with comprehensive security
+app.use("/api/admin", 
+  redactSensitiveHeaders,
+  authenticateToken(),
+  requireAdminRole,
+  adminRateLimitMiddleware,
+  adminIntegrationRoutes
+);
+
+app.use("/api/admin/external", 
+  redactSensitiveHeaders,
+  adminApiKeyMiddleware,
+  burstRateLimitMiddleware,
+  adminRateLimitMiddleware,
+  apiRequestLoggingMiddleware,
+  adminExternalApiRoutes
+);
+
+app.use("/api/admin/webhooks", 
+  redactSensitiveHeaders,
+  rawBodyParser,
+  adminWebhookRoutes
+);
 
 app.get("/", (_req, res) => {
   logger.debug("Root endpoint accessed");

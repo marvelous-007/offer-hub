@@ -18,6 +18,30 @@ interface UseReviewStatsOptions {
   includeTrends?: boolean;
 }
 
+interface UseReviewStatsReturn {
+  statistics: ReviewStatistics;
+  ratingTrends: Array<{ month: string; avgRating: number; reviewCount: number }> | null;
+  projectValueStats: {
+    totalValue: number;
+    averageValue: number;
+    minValue: number;
+    maxValue: number;
+    valueByRating?: Record<number, number>;
+  } | null;
+  insights: string[];
+  
+  // Common derived values for convenience
+  averageRating: number;
+  totalReviews: number;
+  fiveStarReviews: number;
+  fiveStarPercentage: number;
+  ratingDistribution: Record<number, number>;
+  totalProjectValue: number;
+  
+  // Helper for calculating time period statistics
+  getStatsForPeriod: (startDate: Date, endDate: Date) => ReviewStatistics;
+}
+
 /**
  * Review Statistics and Analytics Hook
  *
@@ -35,7 +59,7 @@ export function useReviewStats({
   reviews,
   includeProjectValues = true,
   includeTrends = true,
-}: UseReviewStatsOptions) {
+}: UseReviewStatsOptions): UseReviewStatsReturn {
   // Calculate basic statistics
   const statistics = useMemo<ReviewStatistics>(() => {
     return calculateReviewStatistics(reviews);

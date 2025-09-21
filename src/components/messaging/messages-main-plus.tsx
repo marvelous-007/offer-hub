@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import type { MessagesMainProps } from '@/types';
 import { cn } from '@/lib/utils';
-import { useMessages } from '@/hooks/use-message';
+import { useMessageComposer } from '@/hooks/use-message';
 import { TIMEOUTS, VALIDATION_LIMITS } from '@/constants/magic-numbers';
 
 import { useEffect, useRef, useState } from 'react';
@@ -31,7 +31,7 @@ export function MessagesMainPlus({
     handleSendMessage,
     handleFileUpload,
     handleKeyPress,
-  } = useMessages(onSendMessage);
+  } = useMessageComposer(onSendMessage);
 
   const [statusById, setStatusById] = useState<Record<string, MsgStatus>>({});
   const [typing, setTyping] = useState(false);

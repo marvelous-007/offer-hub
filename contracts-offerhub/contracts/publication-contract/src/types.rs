@@ -8,7 +8,8 @@ pub enum PublicationState {
     Published, 
     InProgress, 
     Completed, 
-    Cancelled
+    Cancelled,
+    Expired
 }
 
 impl PublicationState {
