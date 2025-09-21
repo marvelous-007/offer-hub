@@ -1,5 +1,5 @@
-
 import type React from "react"
+import Image from "next/image"
 import type { Invoice, InvoiceTemplate } from "@/types/invoice.types"
 import { formatCurrency, formatDate } from "@/utils/invoice-helpers"
 import { Badge } from "@/components/ui/badge"
@@ -20,9 +20,18 @@ export function ProfessionalTemplate  ({ invoice, template }: TemplateProps) {
           <p className="text-white/80 text-lg">{invoice.invoiceNumber}</p>
         </div>
         {template.includeCompanyLogo && (
-          <div className="w-20 h-20 bg-white/20 rounded-lg flex items-center justify-center text-2xl font-bold">
-            {invoice.company.name.charAt(0)}
-          </div>
+        
+            
+                <Image
+                             src="/oh-logo.png"
+                             alt="offer-hub logo"
+                             width={80}
+                             height={80}
+                             className="object-contain"
+                             priority
+                           />
+            
+          
         )}
       </div>
     </div>
