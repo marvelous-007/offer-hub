@@ -527,11 +527,12 @@ export const useInvoiceManagement = () => {
     setInvoices(mockInvoices)
   }, [])
 
-  // Helper function to get date range based on time range string
+  // Helper function to get date range based on time ran
+  // ge string
   const getDateRangeFromTimeRange = useCallback((timeRange: string) => {
     const now = new Date()
     const endDate = new Date(now)
-    let startDate = new Date(now)
+    const startDate = new Date(now)
 
     switch (timeRange) {
       case "1month":

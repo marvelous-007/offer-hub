@@ -24,7 +24,6 @@ export function InvoiceAnalyticsHeader({
   timeRange,
   setTimeRange,
 }: InvoiceAnalyticsHeaderProps) {
-  // Export analytics data
   const handleExportAnalytics = async (format: "json" | "pdf") => {
     try {
       const baseData = {
