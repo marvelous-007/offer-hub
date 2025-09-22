@@ -30,7 +30,45 @@ const initialState: MonitoringState = {
   lastUpdate: null,
 };
 
-export function usePlatformMonitoring() {
+interface UsePlatformMonitoringReturn {
+  // State
+  systemMetrics: SystemMetrics | null;
+  performanceMetrics: PerformanceMetrics | null;
+  userMetrics: UserBehaviorMetrics | null;
+  businessMetrics: BusinessMetrics | null;
+  alerts: RealTimeAlert[];
+  dashboards: MonitoringDashboard[];
+  activeDashboard: MonitoringDashboard | null;
+  isConnected: boolean;
+  isLoading: boolean;
+  error: string | null;
+  lastUpdate: Date | null;
+  selectedTimeRange: TimeRange;
+  
+  // Actions
+  initializeMonitoring: () => Promise<void>;
+  refreshMetrics: () => Promise<void>;
+  startAutoRefresh: (interval?: number) => void;
+  stopAutoRefresh: () => void;
+  updateTimeRange: (timeRange: TimeRange) => void;
+  
+  // Alert management
+  acknowledgeAlert: (alertId: string) => Promise<void>;
+  resolveAlert: (alertId: string, resolution?: string) => Promise<void>;
+  
+  // Dashboard management
+  loadDashboard: (dashboardId: string) => Promise<void>;
+  createDashboard: (dashboard: Omit<MonitoringDashboard, 'id' | 'createdAt' | 'updatedAt'>) => Promise<MonitoringDashboard>;
+  updateDashboard: (id: string, updates: Partial<MonitoringDashboard>) => Promise<MonitoringDashboard>;
+  deleteDashboard: (id: string) => Promise<void>;
+  
+  // Derived state
+  unacknowledgedAlerts: number;
+  criticalAlerts: number;
+  systemHealthStatus: 'healthy' | 'warning' | 'critical';
+}
+
+export function usePlatformMonitoring(): UsePlatformMonitoringReturn {
   const [state, setState] = useState<MonitoringState>(initialState);
   const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRange>({
     start: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
@@ -363,8 +401,16 @@ function getSystemHealthStatus(
   return 'healthy';
 }
 
+interface UseSystemMonitoringReturn {
+  systemMetrics: SystemMetrics | null;
+  performanceMetrics: PerformanceMetrics | null;
+  isLoading: boolean;
+  error: string | null;
+  refreshMetrics: () => Promise<void>;
+}
+
 // Specialized hooks for specific monitoring aspects
-export function useSystemMonitoring() {
+export function useSystemMonitoring(): UseSystemMonitoringReturn {
   const { systemMetrics, performanceMetrics, isLoading, error, refreshMetrics } = usePlatformMonitoring();
   
   return {
@@ -376,7 +422,15 @@ export function useSystemMonitoring() {
   };
 }
 
-export function useUserAnalytics() {
+interface UseUserAnalyticsReturn {
+  analyticsData: UserAnalyticsData | null;
+  isLoading: boolean;
+  error: string | null;
+  loadUserAnalytics: (timeRange: TimeRange) => Promise<void>;
+  loadHeatmapData: (page: string, timeRange: TimeRange) => Promise<HeatmapData[]>;
+}
+
+export function useUserAnalytics(): UseUserAnalyticsReturn {
   const [analyticsData, setAnalyticsData] = useState<UserAnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -413,7 +467,17 @@ export function useUserAnalytics() {
   };
 }
 
-export function useCustomMetrics() {
+interface UseCustomMetricsReturn {
+  metrics: CustomMetric[];
+  isLoading: boolean;
+  error: string | null;
+  loadCustomMetrics: () => Promise<void>;
+  createCustomMetric: (metric: Omit<CustomMetric, 'id' | 'createdAt'>) => Promise<CustomMetric>;
+  updateCustomMetric: (id: string, updates: Partial<CustomMetric>) => Promise<CustomMetric>;
+  deleteCustomMetric: (id: string) => Promise<void>;
+}
+
+export function useCustomMetrics(): UseCustomMetricsReturn {
   const [metrics, setMetrics] = useState<CustomMetric[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

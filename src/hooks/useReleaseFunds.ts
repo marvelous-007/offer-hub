@@ -9,10 +9,20 @@ import { ReleaseFundsPayload } from "../types/escrow.types";
  * - It requires a contractId and signer address
  * - The release signer must be authorized to release funds
  */
-export const useReleaseFunds = () => {
-  const [error, setError] = useState<Error | null>(null);
-  const [response, setResponse] = useState<EscrowRequestResponse | null>(null);
-  const [loading, setLoading] = useState(false);
+
+
+interface UseReleaseFundsReturn {
+  error: Error | null;
+  response: EscrowRequestResponse | null;
+  loading: boolean;
+  handleReleaseFunds: (payload: ReleaseFundsPayload) => Promise<void>;
+}
+
+export const useReleaseFunds = (): UseReleaseFundsReturn => {
+    const [error, setError] = useState<Error | null>(null);
+    const [response, setResponse] = useState<EscrowRequestResponse | null>(null);
+    const [loading, setLoading] = useState(false);
+
 
   /**
    * @Note:
@@ -42,11 +52,12 @@ export const useReleaseFunds = () => {
     }
   };
 
-  return {
-    handleReleaseFunds,
-    loading,
-    error,
-    isSuccess: false,
-    response,
-  };
+
+    return {
+        handleReleaseFunds,
+        loading,
+        error,
+        response,
+    };
+
 };

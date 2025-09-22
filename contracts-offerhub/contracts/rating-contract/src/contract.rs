@@ -17,19 +17,19 @@ use crate::storage::{
     get_user_feedback_ids, get_user_rating_history, get_user_rating_stats, increment_platform_stat,
     increment_rating_count, reset_rate_limit, save_admin, save_feedback, save_rating,
     save_rating_threshold, save_reputation_contract, save_user_rating_stats, set_rate_limit_bypass,
-    set_total_rating,
+    set_total_rating, 
 };
 use crate::error::Error;
 use crate::types::{
     require_auth, AllRatingDataExport, Feedback, Rating,
     RatingStats, UserRatingData, RatingThreshold,
-    ContractConfig, CONTRACT_CONFIG, DEFAULT_MAX_RATING_PER_DAY, DEFAULT_MAX_FEEDBACK_LENGTH,
+    ContractConfig, CONTRACT_CONFIG, DEFAULT_MAX_RATING_PER_DAY, DEFAULT_MAX_FEEDBACK_LENGTH, MAX_RATING_AGE,
     DEFAULT_MIN_RATING, DEFAULT_MAX_RATING, DEFAULT_RATE_LIMIT_CALLS, DEFAULT_RATE_LIMIT_WINDOW_HOURS,
     DEFAULT_AUTO_MODERATION_ENABLED, DEFAULT_RESTRICTION_THRESHOLD, DEFAULT_WARNING_THRESHOLD,
     DEFAULT_TOP_RATED_THRESHOLD, RatingDataExport, UserRatingSummary
 };
 use crate::validation::{validate_report_feedback, validate_submit_rating};
-use soroban_sdk::{Address, Env, IntoVal, String, Symbol, Vec};
+use soroban_sdk::{log, Address, Env, IntoVal, String, Symbol, Vec, Bytes};
 
 pub struct RatingContract;
 
@@ -97,6 +97,15 @@ impl RatingContract {
         work_category: String,
     ) -> Result<(), Error> {
         require_auth(&caller)?;
+        let user_rating = get_user_rating_history(&env, &rated_user, 3, 0);
+
+        let mut user_time = 0;
+        if let Some(rating) = user_rating.get(0) {
+            user_time = rating.timestamp;
+        }
+        
+        Self::validate_timestamp(&env, user_time)?;
+
         // Rate limit: max 5 per hour per user
         let limit_type = String::from_str(&env, "submit_rating");
         // 3600 seconds
@@ -115,6 +124,8 @@ impl RatingContract {
 
         // Generate unique IDs
         let rating_id = Self::generate_rating_id(&env, &caller, &rated_user, &contract_id);
+        // log!(&env, " rating_id: {}", rating_id);
+
         let feedback_id = Self::generate_feedback_id(&env, &rating_id);
 
         // Create rating record
@@ -496,8 +507,35 @@ impl RatingContract {
         let _timestamp = env.ledger().timestamp();
         let _sequence = env.ledger().sequence();
         // Create a simple ID without format! macro
-        String::from_str(env, "rating_id")
+        // String::from_str(env, "rating_id")
+        Self::u32_to_string(&env, _sequence)
     }
+
+    pub fn u32_to_string(env: &Env, n: u32) -> String {
+        // Simple conversion: handle 0 and build digits
+        let mut len = 0;
+
+        if n == 0 {
+            return String::from_str(env, "0");
+        }
+        let mut digits = Vec::<u32>::new(env);
+        let mut num = n;
+        while num > 0 {
+            len += 1;
+            let digit = (num % 10) as u8;
+            digits.push_front((b'0' + digit).into());
+            num /= 10;
+        }
+        let mut bytes = Bytes::new(env);
+        for digit in digits.iter() {
+            bytes.push_back(digit.try_into().unwrap());
+        }
+
+        let mut result = [0u8; 1024]; 
+        let new_slice = &mut result[..len as usize];
+        bytes.copy_into_slice(new_slice);
+        String::from_bytes(env, &new_slice)
+}
 
     fn generate_feedback_id(env: &Env, _rating_id: &String) -> String {
         // Create a simple ID without format! macro
@@ -755,5 +793,21 @@ fn validate_config(config: &ContractConfig) -> Result<(), Error> {
         );
 
         Ok(export_data)
+    }
+
+    pub fn validate_timestamp(env: &Env, timestamp: u64) -> Result<(), Error> {
+        let current_time = env.ledger().timestamp();
+        const GRACE_PERIOD: u64 = 60; // Allow 60 seconds for slight clock skew
+
+        // Prevent future timestamps beyond grace period
+        if timestamp > current_time + GRACE_PERIOD {
+            return Err(Error::InvalidTimestamp);
+        }
+
+        if current_time - timestamp > MAX_RATING_AGE {
+            return Err(Error::TimestampTooOld);
+        }
+
+        Ok(())
     }
 }

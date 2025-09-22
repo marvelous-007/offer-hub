@@ -15,4 +15,6 @@ pub enum ContractError {
     
     /// The input data failed validation checks
     ValidationError = 4,
+    InvalidTimestamp = 5,
+    TimestampTooOld = 6,
 }

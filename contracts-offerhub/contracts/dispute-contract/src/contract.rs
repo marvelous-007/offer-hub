@@ -46,7 +46,7 @@ pub fn initialize(
         handle_error(env, Error::InvalidAddress);
     }
     if let Err(_) = validate_timeout_duration(default_timeout) {
-        handle_error(env, Error::InvalidAddress);
+        handle_error(env, Error::InvalidTimeout);
     }
 
     
