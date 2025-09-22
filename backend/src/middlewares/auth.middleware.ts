@@ -25,6 +25,25 @@ import { v4 as uuidv4 } from "uuid";
 /**
  * Enhanced authentication middleware with comprehensive security features
  * Implements JWT validation, automatic token refresh, and security logging
+ * 
+ * @param options - Configuration options for authentication behavior
+ * @param options.authErrorMessage - Custom error message for authentication failures
+ * @returns Express middleware function that validates JWT tokens
+ * 
+ * This middleware:
+ * - Extracts JWT token from Authorization header in "Bearer <token>" format
+ * - Validates token format, signature, and expiration
+ * - Fetches user data from database and attaches to req.user
+ * - Checks if token needs refresh and provides token info
+ * - Logs authentication attempts for security auditing
+ * - Sets security headers for protected routes
+ * - Skips authentication for public routes
+ * 
+ * Usage:
+ * ```typescript
+ * app.use('/api/protected', authenticateToken());
+ * app.use('/api/admin', authenticateToken({ authErrorMessage: 'Admin access required' }));
+ * ```
  */
 export const authenticateToken = (options: AuthMiddlewareOptions = {}) => {
   return async (
@@ -193,14 +212,48 @@ export const authenticateToken = (options: AuthMiddlewareOptions = {}) => {
 
 /**
  * Legacy function for backward compatibility
- * @deprecated Use authenticateToken() instead
+ * 
+ * @deprecated Use authenticateToken() instead for new implementations
+ * 
+ * This is a convenience wrapper around authenticateToken() with default options.
+ * Provided for backward compatibility with existing code that uses verifyToken.
+ * 
+ * @returns Express middleware function that validates JWT tokens
+ * 
+ * Usage:
+ * ```typescript
+ * app.use('/api/legacy', verifyToken);
+ * ```
  */
 export const verifyToken = authenticateToken();
 
 /**
  * Role-based authorization middleware
- * @param roles - Array of allowed roles
- * @returns middleware function
+ * 
+ * Authorizes user access based on their assigned roles. Must be used after authentication middleware.
+ * Checks if the authenticated user's role is included in the allowed roles list.
+ * 
+ * @param roles - Variable number of allowed UserRole values (e.g., UserRole.ADMIN, UserRole.FREELANCER)
+ * @returns Express middleware function that validates user roles
+ * 
+ * This middleware:
+ * - Requires user to be authenticated (req.user must exist)
+ * - Checks if user's role is in the allowed roles array
+ * - Returns 403 Forbidden if user doesn't have required role
+ * - Logs unauthorized access attempts for security auditing
+ * - Calls next() if user has sufficient permissions
+ * 
+ * Usage:
+ * ```typescript
+ * // Single role
+ * app.use('/api/admin', authenticateToken(), authorizeRoles(UserRole.ADMIN));
+ * 
+ * // Multiple roles
+ * app.use('/api/protected', authenticateToken(), authorizeRoles(UserRole.ADMIN, UserRole.MODERATOR));
+ * 
+ * // Client and freelancer access
+ * app.use('/api/jobs', authenticateToken(), authorizeRoles(UserRole.CLIENT, UserRole.FREELANCER));
+ * ```
  */
 export function authorizeRoles(...roles: UserRole[]) {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -238,7 +291,20 @@ export function authorizeRoles(...roles: UserRole[]) {
 
 /**
  * Set security headers for protected routes
- * @param res - Express response object
+ * 
+ * Configures HTTP security headers to protect against common web vulnerabilities
+ * like XSS, clickjacking, and content type sniffing attacks.
+ * 
+ * @param res - Express response object to set headers on
+ * 
+ * Sets the following security headers:
+ * - X-Frame-Options: Prevents clickjacking attacks
+ * - X-Content-Type-Options: Prevents MIME type sniffing
+ * - X-XSS-Protection: Enables browser XSS filtering
+ * - Strict-Transport-Security: Enforces HTTPS connections
+ * - Content-Security-Policy: Defines allowed content sources
+ * 
+ * Headers are configured via authConfig.securityHeaders setting.
  */
 function setSecurityHeaders(res: Response): void {
   const headers = authConfig.securityHeaders;
@@ -252,7 +318,31 @@ function setSecurityHeaders(res: Response): void {
 
 /**
  * Log authentication attempts for security auditing
- * @param logEntry - Authentication attempt log entry
+ * 
+ * Records authentication events for security monitoring and audit trails.
+ * Logs include success/failure status, user information, and security context.
+ * 
+ * @param logEntry - Authentication attempt log entry containing security context and results
+ * @param logEntry.requestId - Unique identifier for the request
+ * @param logEntry.ipAddress - Client IP address
+ * @param logEntry.userAgent - Client user agent string
+ * @param logEntry.timestamp - When the attempt occurred
+ * @param logEntry.endpoint - API endpoint being accessed
+ * @param logEntry.method - HTTP method used
+ * @param logEntry.isAuthenticated - Whether authentication was successful
+ * @param logEntry.userId - User ID (if authenticated)
+ * @param logEntry.userRole - User role (if authenticated)
+ * @param logEntry.success - Whether the attempt was successful
+ * @param logEntry.errorMessage - Error message (if failed)
+ * @param logEntry.tokenInfo - Token validation details (if applicable)
+ * 
+ * Logging behavior is controlled by authConfig.logging settings:
+ * - logAuthAttempts: Whether to log at all
+ * - logSuccessfulAuth: Whether to log successful authentications
+ * - logRoleAccess: Whether to log role-based access attempts
+ * 
+ * In production, logs should be sent to a centralized logging service.
+ * Currently outputs structured JSON to console for development.
  */
 async function logAuthAttempt(logEntry: AuthAttemptLog): Promise<void> {
   if (!authConfig.logging.logAuthAttempts) return;
@@ -274,8 +364,39 @@ async function logAuthAttempt(logEntry: AuthAttemptLog): Promise<void> {
 
 /**
  * Validate token and return detailed result
- * @param token - JWT token to validate
- * @returns TokenValidationResult
+ * 
+ * Performs comprehensive validation of a JWT token including format, expiration,
+ * signature verification, and refresh status. Returns detailed validation results
+ * for programmatic handling of token states.
+ * 
+ * @param token - JWT token string to validate
+ * @returns TokenValidationResult object with validation details
+ * @returns TokenValidationResult.isValid - Whether token is valid and usable
+ * @returns TokenValidationResult.isExpired - Whether token has expired
+ * @returns TokenValidationResult.needsRefresh - Whether token should be refreshed soon
+ * @returns TokenValidationResult.payload - Decoded token payload (if valid)
+ * @returns TokenValidationResult.error - Error message (if validation failed)
+ * 
+ * This function:
+ * - Checks token format validity
+ * - Validates token expiration
+ * - Verifies token signature
+ * - Determines if token needs refresh
+ * - Returns structured result for easy handling
+ * 
+ * Usage:
+ * ```typescript
+ * const result = validateToken(userToken);
+ * if (!result.isValid) {
+ *   if (result.isExpired) {
+ *     // Redirect to login
+ *   } else {
+ *     // Handle other validation errors
+ *   }
+ * } else if (result.needsRefresh) {
+ *   // Request new token
+ * }
+ * ```
  */
 export function validateToken(token: string): TokenValidationResult {
   try {
@@ -320,7 +441,38 @@ export function validateToken(token: string): TokenValidationResult {
 
 /**
  * Enhanced refresh token validation middleware
- * Validates refresh tokens and handles token cleanup
+ * 
+ * Validates refresh tokens for token renewal requests and handles automatic cleanup
+ * of expired tokens. Ensures refresh tokens are valid, not expired, and properly
+ * associated with the requesting user.
+ * 
+ * @param req - Express request object containing refreshToken in body
+ * @param req.body.refreshToken - Refresh token string to validate
+ * @param res - Express response object
+ * @param next - Express next function to continue middleware chain
+ * 
+ * This middleware:
+ * - Validates refresh token format and presence
+ * - Hashes token and checks against database records
+ * - Verifies token signature and expiration
+ * - Ensures token belongs to the requesting user
+ * - Automatically cleans up expired tokens from database
+ * - Attaches token record to req.refreshTokenRecord for downstream use
+ * 
+ * Error responses:
+ * - 400: Missing refresh token
+ * - 403: Invalid, expired, or mismatched refresh token
+ * 
+ * Usage:
+ * ```typescript
+ * app.post('/api/auth/refresh', validateRefreshToken, refreshTokenController);
+ * ```
+ * 
+ * The refresh token record is attached to the request for use in token renewal:
+ * ```typescript
+ * // In the controller after this middleware
+ * const tokenRecord = req.refreshTokenRecord;
+ * ```
  */
 export const validateRefreshToken = async (
   req: Request,
