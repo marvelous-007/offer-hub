@@ -90,9 +90,16 @@ CREATE TABLE workflow_progress (
 
 -- Create workflow_notifications table
 CREATE TABLE workflow_notifications (
+    -- Unique identifier for each notification
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    
+    -- Reference to the dispute this notification belongs to
     dispute_id UUID NOT NULL,
+    
+    -- User who should receive this notification
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    
+    -- Type of notification (stage_transition, deadline_alert, action_required, etc.)
     notification_type VARCHAR(50) NOT NULL CHECK (notification_type IN (
         'stage_transition',
         'deadline_alert',
@@ -103,17 +110,31 @@ CREATE TABLE workflow_notifications (
         'mediator_assignment',
         'arbitration_escalation'
     )),
+    
+    -- Notification title/subject
     title VARCHAR(200) NOT NULL,
+    
+    -- Detailed notification message
     message TEXT NOT NULL,
+    
+    -- When the notification was sent
     sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    -- When the notification was read (if applicable)
     read_at TIMESTAMP WITH TIME ZONE,
+    
+    -- Delivery method for the notification (in_app, email, sms, push)
     delivery_method VARCHAR(20) NOT NULL DEFAULT 'in_app' CHECK (delivery_method IN (
         'in_app',
         'email',
         'sms',
         'push'
     )),
+    
+    -- Additional metadata for the notification
     metadata JSONB DEFAULT '{}',
+    
+    -- Record creation timestamp
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
