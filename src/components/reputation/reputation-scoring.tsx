@@ -10,7 +10,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Tooltip } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ReputationScore, ReputationCategory, BenchmarkData } from "@/types/reputation-analytics.types";
 import { Star, TrendingUp, TrendingDown, Minus, Info, Award } from "lucide-react";
 
@@ -99,7 +99,8 @@ export default function ReputationScoring({
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <TooltipProvider>
+      <div className={`space-y-6 ${className}`}>
       <Card className="border-2">
         <CardContent className="p-6">
           <div className="text-center mb-6">
@@ -160,8 +161,13 @@ export default function ReputationScoring({
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
                         <h4 className="font-medium text-lg">{category.name}</h4>
-                        <Tooltip content={category.description}>
-                          <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {category.description}
+                          </TooltipContent>
                         </Tooltip>
                         <div className="flex items-center space-x-1">
                           {getTrendIcon(category.trend, category.trendPercentage)}
@@ -265,6 +271,7 @@ export default function ReputationScoring({
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
