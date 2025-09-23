@@ -57,9 +57,9 @@ export default function Header() {
             </Link>
             <Link
               href="/financial-dashboard-demo"
-              className="text-[#002333] hover:text-[#15949C] transition-colors bg-blue-50 px-3 py-1 rounded-md border border-blue-200"
+              className="text-[#002333] hover:text-[#15949C] transition-colors px-3 py-1 rounded-md "
             >
-              📊 Financial Dashboard
+             Financial Dashboard
             </Link>
           </nav>
         </div>
