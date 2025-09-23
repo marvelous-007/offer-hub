@@ -5,7 +5,7 @@ use crate::types::{
     TOTAL_RATING_COUNT, USER_RATING_STATS, USER_RESTRICTIONS,
 };
 use crate::error::Error;
-use soroban_sdk::{Address, Env, String, Symbol, Vec};
+use soroban_sdk::{Address, Env, String, Symbol, Vec, log};
 
 // Admin and moderator management
 pub fn save_admin(env: &Env, admin: &Address) {
@@ -31,12 +31,12 @@ pub fn is_moderator(env: &Env, address: &Address) -> bool {
     env.storage().persistent().get(&key).unwrap_or(false)
 }
 
+
 // Rating storage
 pub fn save_rating(env: &Env, rating: &Rating) {
     let key = (RATING, rating.id.clone());
     env.storage().persistent().set(&key, rating);
 
-    // Also index by user and contract for efficient retrieval
     add_rating_to_user_index(env, &rating.rated_user, &rating.id);
     add_rating_to_contract_index(env, &rating.contract_id, &rating.id);
 }

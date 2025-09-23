@@ -1,5 +1,10 @@
+import { PublicRoute } from "@/components/auth/public-route";
 import WalletConnectPage from "../../components/onboarding/ConnectWalletPage";
 
 export default function WalletPage() {
-   return <WalletConnectPage />;
+   return (
+      <PublicRoute>
+         <WalletConnectPage />
+      </PublicRoute>
+   );
 }
