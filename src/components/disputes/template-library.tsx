@@ -4,12 +4,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Template,
-  TemplateLibrary,
   TemplateSearchFilters,
   TemplateLibraryProps,
   TemplateType,
   DisputeCategory
 } from '@/types/templates.types';
+import type { TemplateLibrary } from '@/types/templates.types';
 import { useResolutionTemplates } from '@/hooks/use-resolution-templates';
 import {
   Search,
@@ -39,7 +39,9 @@ import {
   Award,
   Zap,
   Clock,
-  BarChart3
+  BarChart3,
+  Bell,
+  CheckCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

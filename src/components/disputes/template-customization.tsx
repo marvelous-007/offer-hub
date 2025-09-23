@@ -6,9 +6,9 @@ import {
   Template,
   TemplateSection,
   TemplateVariable,
-  TemplateCustomization,
   TemplateCustomizationProps
 } from '@/types/templates.types';
+import type { TemplateCustomization } from '@/types/templates.types';
 import { useTemplatePreview } from '@/hooks/use-resolution-templates';
 import {
   Save,
