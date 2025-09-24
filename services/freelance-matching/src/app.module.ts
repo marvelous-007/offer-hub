@@ -5,6 +5,7 @@ import { AppService } from "./app.service";
 import { PrismaModule } from "./prisma/prisma.module";
 import { RedisModule } from "./redis/redis.module";
 import { QueueModule } from "./queue/queue.module";
+import { AiModule } from "./ai/ai.module";
 import * as Joi from "joi";
 
 @Module({
@@ -22,11 +23,13 @@ import * as Joi from "joi";
         REDIS_PASSWORD: Joi.string().allow("", null),
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRATION: Joi.string().default("1h"),
+        HF_API_KEY: Joi.string().required(),
       }),
     }),
     PrismaModule,
     RedisModule,
     QueueModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
