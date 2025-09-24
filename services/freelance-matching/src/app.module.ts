@@ -6,6 +6,7 @@ import { PrismaModule } from "./prisma/prisma.module";
 import { RedisModule } from "./redis/redis.module";
 import { QueueModule } from "./queue/queue.module";
 import { AiModule } from "./ai/ai.module";
+import { MatchModule } from "./match/match.module";
 import * as Joi from "joi";
 
 @Module({
@@ -30,6 +31,7 @@ import * as Joi from "joi";
     RedisModule,
     QueueModule,
     AiModule,
+    MatchModule,
   ],
   controllers: [AppController],
   providers: [AppService],
