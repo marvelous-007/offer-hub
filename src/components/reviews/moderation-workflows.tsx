@@ -492,7 +492,6 @@ export default function ModerationWorkflows({
                     value={step.name}
                     onChange={(e) => updateStep(step.id, { name: e.target.value })}
                     placeholder="Step name"
-                    size="sm"
                   />
                 </div>
 
@@ -504,7 +503,7 @@ export default function ModerationWorkflows({
                     value={step.type}
                     onValueChange={(value: any) => updateStep(step.id, { type: value })}
                   >
-                    <SelectTrigger size="sm">
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -523,7 +522,7 @@ export default function ModerationWorkflows({
                     value={step.action}
                     onValueChange={(value: any) => updateStep(step.id, { action: value })}
                   >
-                    <SelectTrigger size="sm">
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -546,7 +545,6 @@ export default function ModerationWorkflows({
                       value={step.assigneeRole || ''}
                       onChange={(e) => updateStep(step.id, { assigneeRole: e.target.value })}
                       placeholder="e.g., moderator, senior_moderator"
-                      size="sm"
                     />
                   </div>
 
@@ -559,7 +557,6 @@ export default function ModerationWorkflows({
                       value={step.timeoutMinutes || ''}
                       onChange={(e) => updateStep(step.id, { timeoutMinutes: parseInt(e.target.value) })}
                       placeholder="60"
-                      size="sm"
                     />
                   </div>
                 </div>

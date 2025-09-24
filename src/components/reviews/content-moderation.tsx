@@ -159,6 +159,7 @@ export default function ContentModeration({
       }
 
       const decision = await actions.makeDecision(item.reviewId, {
+        reviewId: item.reviewId,
         moderatorId: 'current_user',
         action,
         reason,

@@ -762,7 +762,7 @@ export const evaluateCondition = (
 
   switch (operator) {
     case 'contains':
-      return typeof compareValue === 'string' && compareValue.includes(targetValue);
+      return typeof compareValue === 'string' && typeof targetValue === 'string' && compareValue.includes(targetValue);
     case 'equals':
       return compareValue === targetValue;
     case 'greater_than':
