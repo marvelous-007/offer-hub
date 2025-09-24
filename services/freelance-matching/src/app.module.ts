@@ -25,6 +25,7 @@ import * as Joi from "joi";
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRATION: Joi.string().default("1h"),
         HF_API_KEY: Joi.string().required(),
+        OPENAI_API_KEY: Joi.string().required(),
       }),
     }),
     PrismaModule,
