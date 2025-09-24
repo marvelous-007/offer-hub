@@ -34,4 +34,8 @@ pub enum Error {
     NotModerator = 14,
     /// Rate limit exceeded, try again later
     RateLimitExceeded = 15,
+    InvalidTimestamp = 16, 
+    
+    TimestampTooOld = 17, 
+    NoRatingsFound = 18,
 }

@@ -109,10 +109,30 @@
                             },
                             {
                               "key": {
+                                "symbol": "expiration"
+                              },
+                              "val": {
+                                "u64": "2592000"
+                              }
+                            },
+                            {
+                              "key": {
                                 "symbol": "publication_type"
                               },
                               "val": {
                                 "symbol": "service"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "state"
+                              },
+                              "val": {
+                                "vec": [
+                                  {
+                                    "symbol": "Published"
+                                  }
+                                ]
                               }
                             },
                             {
