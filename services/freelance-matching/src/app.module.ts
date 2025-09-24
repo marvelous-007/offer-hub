@@ -4,6 +4,7 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { PrismaModule } from "./prisma/prisma.module";
 import { RedisModule } from "./redis/redis.module";
+import { QueueModule } from "./queue/queue.module";
 import * as Joi from "joi";
 
 @Module({
@@ -25,6 +26,7 @@ import * as Joi from "joi";
     }),
     PrismaModule,
     RedisModule,
+    QueueModule,
   ],
   controllers: [AppController],
   providers: [AppService],
