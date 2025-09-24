@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { HfInference } from '@huggingface/inference';
 import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '../prisma/prisma.service';
+import { performance } from 'perf_hooks';
 
 @Injectable()
 export class LowCostModelService {
@@ -8,7 +10,10 @@ export class LowCostModelService {
   private readonly hf: HfInference;
   private readonly defaultModel = 'sentence-transformers/all-MiniLM-L6-v2';
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly prisma: PrismaService
+  ) {
     const hfApiKey = this.configService.get<string>('HF_API_KEY');
     this.hf = new HfInference(hfApiKey);
   }
@@ -67,5 +72,57 @@ export class LowCostModelService {
     
     // Calculate cosine similarity
     return dotProduct / (magA * magB);
+  }
+
+  /**
+   * Pre-filter candidates using cosine similarity on embeddings
+   * @param embedding The query embedding vector
+   * @param type The type of embedding to search ('freelancer' or 'project')
+   * @param limit Maximum number of results to return
+   * @returns Array of candidates sorted by similarity
+   */
+  async preFilter(
+    embedding: number[], 
+    type: 'freelancer' | 'project', 
+    limit: number = 50
+  ): Promise<{ id: string; similarity: number; latencyMs: number }[]> {
+    const startTime = performance.now();
+    this.logger.log(`Starting pre-filter for ${type} with limit ${limit}`);
+    
+    try {
+      // Convert embedding array to PostgreSQL vector format
+      const vectorString = `[${embedding.join(',')}]`;
+      
+      // Determine which table to query based on type
+      const tableName = type === 'freelancer' ? 'FreelancerEmbedding' : 'ProjectEmbedding';
+      const idField = type === 'freelancer' ? 'userId' : 'projectId';
+      
+      // Use raw SQL with pgvector's <-> operator for cosine distance
+      // Note: <-> returns distance (smaller is better), so we negate it for similarity
+      const query = `
+        SELECT 
+          "${idField}" as id, 
+          1 - (embedding <-> $1::vector) as similarity
+        FROM "${tableName}"
+        ORDER BY similarity DESC
+        LIMIT $2
+      `;
+      
+      const results = await this.prisma.$queryRawUnsafe(query, vectorString, limit);
+      
+      const endTime = performance.now();
+      const latencyMs = endTime - startTime;
+      
+      this.logger.log(`Pre-filter completed in ${latencyMs.toFixed(2)}ms, found ${results.length} results`);
+      
+      // Add latency information to the result
+      return results.map(result => ({
+        ...result,
+        latencyMs
+      }));
+    } catch (error) {
+      this.logger.error(`Error in pre-filter: ${error.message}`, error.stack);
+      throw new Error(`Failed to pre-filter candidates: ${error.message}`);
+    }
   }
 }
