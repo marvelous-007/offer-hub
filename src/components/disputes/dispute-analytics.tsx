@@ -404,6 +404,7 @@ const OverviewDashboard: React.FC<{
             title="Dispute Volume Trend"
             description="Daily dispute volume over time"
             loading={isLoading}
+            data={timeSeriesData}
           >
             <LineChartVisualization
               data={timeSeriesData}
@@ -419,6 +420,7 @@ const OverviewDashboard: React.FC<{
             title="Dispute Status Distribution"
             description="Current status breakdown"
             loading={isLoading}
+            data={chartData}
           >
             <DonutChartVisualization
               data={chartData}
@@ -525,6 +527,7 @@ const PerformanceDashboard: React.FC<{
           title="Resolution Performance"
           description="Key performance indicators"
           loading={isLoading}
+          data={[]}
         >
           <div className="grid grid-cols-2 gap-4">
             <GaugeVisualization
@@ -546,6 +549,7 @@ const PerformanceDashboard: React.FC<{
           title="Performance Trends"
           description="Weekly performance comparison"
           loading={isLoading}
+          data={trendData}
         >
           <AreaChartVisualization
             data={trendData}
@@ -561,6 +565,7 @@ const PerformanceDashboard: React.FC<{
         title="Dispute Category Performance"
         description="Resolution rates by category"
         loading={isLoading}
+        data={chartData}
       >
         <BarChartVisualization
           data={chartData}
@@ -587,6 +592,7 @@ const TrendsDashboard: React.FC<{
         title="Volume Trends"
         description="Dispute volume over time"
         loading={isLoading}
+        data={timeSeriesData}
       >
         <LineChartVisualization
           data={timeSeriesData}
@@ -601,6 +607,7 @@ const TrendsDashboard: React.FC<{
           title="Resolution Time Trends"
           description="Average resolution time changes"
           loading={isLoading}
+          data={trendData}
         >
           <AreaChartVisualization
             data={trendData}
@@ -615,6 +622,7 @@ const TrendsDashboard: React.FC<{
           title="Satisfaction Trends"
           description="User satisfaction over time"
           loading={isLoading}
+          data={trendData}
         >
           <LineChartVisualization
             data={trendData}

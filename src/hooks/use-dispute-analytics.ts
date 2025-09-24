@@ -246,7 +246,7 @@ export function useDisputeAnalytics(
         error: undefined
       }));
     } catch (error) {
-      if (error.name !== 'AbortError') {
+      if ((error as any)?.name !== 'AbortError') {
         handleError(error, 'refreshData');
       }
     }

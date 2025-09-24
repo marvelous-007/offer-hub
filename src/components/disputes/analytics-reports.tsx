@@ -330,7 +330,6 @@ export const ReportBuilder: React.FC<{
                     </div>
                     <Checkbox
                       checked={selectedMetrics.find(m => m.name === metric.name) !== undefined}
-                      readOnly
                     />
                   </div>
                 </div>
@@ -364,7 +363,6 @@ export const ReportBuilder: React.FC<{
                     </div>
                     <Checkbox
                       checked={selectedVisualizations.includes(viz.type)}
-                      readOnly
                     />
                   </div>
                 </div>
@@ -723,7 +721,7 @@ export const ReportViewer: React.FC<{
           <MetricCard
             key={metric.id}
             title={metric.name}
-            value={performanceMetrics ? performanceMetrics[metric.name.toLowerCase().replace(/\s+/g, '')] || 0 : 0}
+            value={performanceMetrics ? (performanceMetrics as any)[metric.name.toLowerCase().replace(/\s+/g, '')] || 0 : 0}
             format={metric.format === DisplayFormat.PERCENTAGE ? 'percentage' :
                    metric.format === DisplayFormat.DURATION ? 'duration' :
                    metric.format === DisplayFormat.CURRENCY ? 'currency' : 'number'}

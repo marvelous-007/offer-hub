@@ -276,7 +276,7 @@ export class AnalyticsService {
     }
   }
 
-  static async downloadExport(blob: Blob, filename: string, format: ExportFormat): void {
+  static async downloadExport(blob: Blob, filename: string, format: ExportFormat): Promise<void> {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
