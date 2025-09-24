@@ -7,7 +7,9 @@ import {
   SystemMessagePromptTemplate,
 } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
+import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { RunnableSequence } from '@langchain/core/runnables';
+import { Match } from '../../match/match.service';
 
 export interface PromptChainInput {
   systemPrompt: string;
@@ -25,6 +27,29 @@ export interface PromptChainResult {
   };
   modelName: string;
   latencyMs: number;
+}
+
+export interface RefinedMatch extends Match {
+  explanation: string;
+  adjustedScore: number;
+}
+
+export interface RefinementRequest {
+  sourceType: 'freelancer' | 'project';
+  sourceId: string;
+  sourceInfo?: any;
+  matches: Match[];
+  limit?: number;
+}
+
+export interface RefinementResponse {
+  matches: RefinedMatch[];
+  latencyMs: number;
+  tokenUsage: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
 }
 
 @Injectable()
