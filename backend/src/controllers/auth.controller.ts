@@ -82,6 +82,30 @@ export async function register(
   }
 }
 
+/**
+ * Authenticate user login
+ * @route POST /api/auth/login
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param next - Express next function
+ *
+ * Expected request body:
+ * {
+ *   "wallet_address": "string (required) - User's wallet address",
+ *   "signature": "string (required) - Signed message from wallet",
+ *   "nonce": "string (required) - Nonce used for signing"
+ * }
+ *
+ * Response format:
+ * {
+ *   "status": "success",
+ *   "user": { ... },
+ *   "tokens": {
+ *     "accessToken": "string",
+ *     "refreshToken": "string"
+ *   }
+ * }
+ */
 export async function login(req: Request, res: Response, next: NextFunction) {
   try {
     const { user, tokens } = await authService.login(req.body);
