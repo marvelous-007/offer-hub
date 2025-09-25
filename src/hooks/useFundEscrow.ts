@@ -5,7 +5,13 @@ interface FundEscrowPayload {
   amount: string;
 }
 
-export const useFundEscrow = () => {
+interface UseFundEscrowReturn {
+  loading: boolean;
+  error: string | null;
+  handleFundEscrow: (payload: FundEscrowPayload) => Promise<boolean>;
+}
+
+export const useFundEscrow = (): UseFundEscrowReturn => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const handleFundEscrow = async (payload: FundEscrowPayload) => {
@@ -60,7 +66,7 @@ export const useFundEscrow = () => {
     }
   };
   return {
-    fundEscrow: handleFundEscrow,
+    handleFundEscrow,
     loading,
     error
   };

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import withErrorBoundary from "@/components/shared/WithErrorBoundary";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -355,7 +356,7 @@ function UserDetailsDialog({ isOpen, onClose, user }: UserDetailsDialogProps) {
               <p className='text-sm'>{user.projectsCompleted}</p>
             </div>
             <div>
-              <Label className='text-sm font-medium text-muted-foreground'>
+              <Label className='text-sm font-medium text-muted-.foreground'>
                 Profile Completeness
               </Label>
               <p className='text-sm'>{user.profileCompleteness}%</p>
@@ -419,7 +420,7 @@ function UserDetailsDialog({ isOpen, onClose, user }: UserDetailsDialogProps) {
   );
 }
 
-export default function UserManagement() {
+function UserManagement() {
   const {
     users,
     totalUsers,
@@ -770,3 +771,5 @@ export default function UserManagement() {
     </div>
   );
 }
+
+export default withErrorBoundary(UserManagement);

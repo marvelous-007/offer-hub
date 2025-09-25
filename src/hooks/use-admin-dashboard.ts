@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Custom hook for admin dashboard functionality and data management
+ * @author Offer Hub Team
+ */
+
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -12,7 +17,31 @@ import {
 } from '@/types/admin.types';
 import { adminService } from '@/services/admin.service';
 
-export function useAdminDashboard() {
+interface UseAdminDashboardReturn {
+  // State
+  user: any;
+  platformStats: any;
+  systemHealth: any;
+  notifications: any[];
+  unreadNotificationsCount: number;
+  widgets: any[];
+  isLoading: boolean;
+  error: string | null;
+  systemHealthStatus: 'healthy' | 'warning' | 'critical' | 'unknown';
+  platformGrowthTrend: any;
+
+  // Actions
+  initializeDashboard: () => Promise<void>;
+  refreshStatistics: () => Promise<void>;
+  refreshSystemHealth: () => Promise<void>;
+  loadNotifications: () => Promise<void>;
+  markNotificationAsRead: (id: string) => Promise<void>;
+  markAllNotificationsAsRead: () => Promise<void>;
+  setupAutoRefresh: (intervalMs?: number) => void;
+  cleanupAutoRefresh: () => void;
+}
+
+export function useAdminDashboard(): UseAdminDashboardReturn {
   const [state, setState] = useState<AdminDashboardState>({
     user: null,
     platformStats: null,
@@ -213,8 +242,26 @@ export function useAdminDashboard() {
   };
 }
 
+interface UseUserManagementReturn {
+  users: PlatformUser[];
+  totalUsers: number;
+  currentPage: number;
+  totalPages: number;
+  filters: UserManagementFilters;
+  selectedUsers: string[];
+  isLoading: boolean;
+  error: string | null;
+  loadUsers: (page?: number, limit?: number) => Promise<void>;
+  updateFilters: (newFilters: UserManagementFilters) => void;
+  toggleUserSelection: (userId: string) => void;
+  selectAllUsers: () => void;
+  clearSelection: () => void;
+  searchUsers: (query: string) => Promise<void>;
+  setCurrentPage: (page: number) => void;
+}
+
 // Hook for user management
-export function useUserManagement() {
+export function useUserManagement(): UseUserManagementReturn {
   const [users, setUsers] = useState<PlatformUser[]>([]);
   const [totalUsers, setTotalUsers] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -315,8 +362,18 @@ export function useUserManagement() {
   };
 }
 
+interface UseSystemMonitoringReturn {
+  systemHealth: SystemHealthMetrics | null;
+  securityEvents: SecurityEvent[];
+  isLoading: boolean;
+  error: string | null;
+  loadSystemHealth: () => Promise<void>;
+  loadSecurityEvents: () => Promise<void>;
+  initializeMonitoring: () => Promise<void>;
+}
+
 // Hook for system monitoring
-export function useSystemMonitoring() {
+export function useSystemMonitoring(): UseSystemMonitoringReturn {
   const [systemHealth, setSystemHealth] = useState<SystemHealthMetrics | null>(
     null,
   );
@@ -381,8 +438,19 @@ export function useSystemMonitoring() {
   };
 }
 
+interface UseContentModerationReturn {
+  moderationQueue: ContentModerationItem[];
+  totalItems: number;
+  currentPage: number;
+  isLoading: boolean;
+  error: string | null;
+  loadModerationQueue: (status?: string, page?: number) => Promise<void>;
+  moderateContent: (id: string, action: 'approve' | 'reject', reason?: string) => Promise<void>;
+  setCurrentPage: (page: number) => void;
+}
+
 // Hook for content moderation
-export function useContentModeration() {
+export function useContentModeration(): UseContentModerationReturn {
   const [moderationQueue, setModerationQueue] = useState<
     ContentModerationItem[]
   >([]);
@@ -443,8 +511,15 @@ export function useContentModeration() {
   };
 }
 
+interface UseFinancialMetricsReturn {
+  financialData: FinancialMetrics | null;
+  isLoading: boolean;
+  error: string | null;
+  loadFinancialMetrics: (dateRange?: { from: Date; to: Date }) => Promise<void>;
+}
+
 // Hook for financial metrics
-export function useFinancialMetrics() {
+export function useFinancialMetrics(): UseFinancialMetricsReturn {
   const [financialData, setFinancialData] = useState<FinancialMetrics | null>(
     null,
   );
