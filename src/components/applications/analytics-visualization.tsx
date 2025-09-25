@@ -24,10 +24,7 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
   Radar,
-  FunnelChart,
-  Funnel,
   LabelList,
-  Treemap,
 } from 'recharts';
 import {
   Card,
@@ -371,34 +368,41 @@ export const AnalyticsVisualization: React.FC<AnalyticsVisualizationProps> = ({
 
       case VisualizationType.FUNNEL_CHART:
         return (
-          <FunnelChart>
-            <Funnel
-              dataKey="value"
-              data={processedData}
-              isAnimationActive={config.animation}
-            >
+          <BarChart data={processedData} layout="vertical">
+            {config.showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />}
+            <XAxis type="number" tick={{ fontSize: 12 }} stroke="#666" />
+            <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} stroke="#666" />
+            {config.showTooltip && <Tooltip content={<CustomTooltip />} />}
+            {config.showLegend && <Legend />}
+            <Bar dataKey="value" radius={[0, 4, 4, 0]} animationDuration={config.animation ? 1500 : 0}>
               {processedData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.fill} />
               ))}
-              <LabelList position="center" style={{ fontSize: '14px', fontWeight: 'bold' }} />
-            </Funnel>
-            {config.showTooltip && <Tooltip content={<CustomTooltip />} />}
-          </FunnelChart>
+            </Bar>
+          </BarChart>
         );
 
       case VisualizationType.TREEMAP:
         return (
-          <Treemap
-            data={processedData}
-            dataKey="value"
-            stroke="#fff"
-            strokeWidth={2}
-            animationDuration={config.animation ? 1500 : 0}
-          >
-            {processedData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.fill} />
-            ))}
-          </Treemap>
+          <PieChart>
+            <Pie
+              data={processedData}
+              cx="50%"
+              cy="50%"
+              innerRadius={0}
+              outerRadius={100}
+              paddingAngle={2}
+              dataKey="value"
+              animationDuration={config.animation ? 1500 : 0}
+            >
+              {processedData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.fill} />
+              ))}
+              <LabelList dataKey="name" position="outside" style={{ fontSize: '12px', fill: '#666' }} />
+            </Pie>
+            {config.showTooltip && <Tooltip content={<CustomTooltip />} />}
+            {config.showLegend && <Legend />}
+          </PieChart>
         );
 
       case VisualizationType.GAUGE:
