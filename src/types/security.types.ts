@@ -19,6 +19,7 @@ export interface FraudAlert {
   type: FraudType;
   severity: AlertSeverity;
   userId: string;
+  amount: string;
   description: string;
   timestamp: Date;
   riskScore: number;
@@ -28,6 +29,17 @@ export interface FraudAlert {
   investigationNotes?: string;
   resolvedBy?: string;
   resolvedAt?: Date;
+  location?: {
+    city?: string;
+    country?: string;
+  };
+  deviceInfo?: DeviceInfo;
+}
+
+export interface DeviceInfo {
+  type?: string;
+  os?: string;
+  browser?: string;
 }
 
 export interface SecurityEvent {
@@ -113,6 +125,12 @@ export interface UserRiskProfile {
   behaviorAnalysis: BehaviorAnalysis;
   lastAssessed: Date;
   flags: SecurityFlag[];
+  totalTransactions?: number;
+  flaggedTransactions?: number;
+  accountAge?: number;
+  deviceFingerprints?: number;
+  fraudHistory?: number;
+  lastActivity?: Date;
 }
 
 export interface RiskFactor {

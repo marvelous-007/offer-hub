@@ -103,7 +103,7 @@ const FraudDetection = () => {
   const [selectedAlerts, setSelectedAlerts] = useState<string[]>([]);
   const [showDetails, setShowDetails] = useState<string | null>(null);
   const [actionModalOpen, setActionModalOpen] = useState(false);
-  const [selectedAlert, setSelectedAlert] = useState(null);
+  const [selectedAlert, setSelectedAlert] = useState<FraudAlert | null>(null);
 
   // Mock data generation
   useEffect(() => {
@@ -200,7 +200,7 @@ const FraudDetection = () => {
         })),
       };
 
-      setFraudAlerts(mockAlerts as FraudAlert[]);
+      setFraudAlerts(mockAlerts as unknown as FraudAlert[]);
       setUserProfiles(mockProfiles as unknown as UserRiskProfile[]);
       setAnalytics(mockAnalytics as FraudAnalytics);
     };
@@ -790,8 +790,8 @@ const FraudDetection = () => {
                                         </span>
                                         <span className="text-gray-900 flex items-center">
                                           <MapPin className="h-3 w-3 mr-1" />
-                                          {alert.location.city},{" "}
-                                          {alert.location.country}
+                                          {alert.location?.city},{" "}
+                                          {alert.location?.country}
                                         </span>
                                       </div>
                                       <div className="flex justify-between">
@@ -799,8 +799,8 @@ const FraudDetection = () => {
                                           Device:
                                         </span>
                                         <span className="text-gray-900">
-                                          {alert.deviceInfo.type} -{" "}
-                                          {alert.deviceInfo.os}
+                                          {alert.deviceInfo?.type} -{" "}
+                                          {alert.deviceInfo?.os}
                                         </span>
                                       </div>
                                       <div className="flex justify-between">
@@ -808,7 +808,7 @@ const FraudDetection = () => {
                                           Browser:
                                         </span>
                                         <span className="text-gray-900">
-                                          {alert.deviceInfo.browser}
+                                          {alert.deviceInfo?.browser}
                                         </span>
                                       </div>
                                     </div>
@@ -938,7 +938,7 @@ const FraudDetection = () => {
                           <span className="text-gray-500">Flagged:</span>
                           <span
                             className={`font-medium ${
-                              profile.flaggedTransactions > 5
+                              (profile.flaggedTransactions as number) > 5
                                 ? "text-red-600"
                                 : "text-gray-900"
                             }`}
@@ -962,7 +962,7 @@ const FraudDetection = () => {
                           <span className="text-gray-500">Fraud History:</span>
                           <span
                             className={`font-medium ${
-                              profile.fraudHistory > 0
+                              (profile.fraudHistory as number) > 0
                                 ? "text-red-600"
                                 : "text-green-600"
                             }`}
@@ -973,7 +973,7 @@ const FraudDetection = () => {
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-500">Last Activity:</span>
                           <span className="font-medium">
-                            {profile.lastActivity.toLocaleDateString()}
+                            {profile.lastActivity?.toLocaleDateString()}
                           </span>
                         </div>
                       </div>
