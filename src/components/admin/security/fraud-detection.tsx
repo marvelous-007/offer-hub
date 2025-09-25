@@ -78,7 +78,7 @@ const AlertStatus = {
 };
 
 const FraudDetection = () => {
-  const [fraudAlerts, setFraudAlerts] = useState<FraudAlert[]>([]);
+  const [fraudAlerts, setFraudAlerts] = useState<FraudAlert[] | String[]>([]);
   const [userProfiles, setUserProfiles] = useState<UserRiskProfile[]>([]);
   type FraudAnalytics = {
     fraudTrends: Array<{ date: string; count: number; amount: number; type: string }>;
