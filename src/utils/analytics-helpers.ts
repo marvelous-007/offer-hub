@@ -8,6 +8,7 @@ import {
   ApplicationAnalyticsFilter,
   ChartData,
   TimeSeriesData,
+  EngagementLevel,
   SegmentData,
   SkillMetric,
   TimeMetric,
@@ -743,12 +744,12 @@ export class ApplicationAnalyticsCalculator {
     return recommendations;
   }
 
-  private static calculateEngagementLevel(app: ApplicationAnalytics) {
+  private static calculateEngagementLevel(app: ApplicationAnalytics): EngagementLevel {
     const score = this.calculateEngagementScore([app]);
-    if (score > 80) return 'very_high' as const;
-    if (score > 60) return 'high' as const;
-    if (score > 40) return 'medium' as const;
-    return 'low' as const;
+    if (score > 80) return EngagementLevel.VERY_HIGH;
+    if (score > 60) return EngagementLevel.HIGH;
+    if (score > 40) return EngagementLevel.MEDIUM;
+    return EngagementLevel.LOW;
   }
 
   private static getColorByIndex(index: number): string {
@@ -947,5 +948,229 @@ export class ApplicationAnalyticsCalculator {
 
   private static calculateSecurityComplianceScore(applications: ApplicationAnalytics[]): number {
     return Math.random() * 20 + 80;
+  }
+}
+
+// Legacy Dispute Analytics Calculator for backward compatibility
+export class DisputeAnalyticsCalculator {
+  static calculatePerformanceMetrics(disputes: any[]): any {
+    const total = disputes.length;
+    const resolved = disputes.filter(d => d.status === 'resolved').length;
+    const pending = disputes.filter(d => ['pending', 'in_review', 'investigating'].includes(d.status)).length;
+
+    const decisionsWithTime = disputes.filter(d => d.resolutionTime !== undefined);
+    const avgResolutionTime = decisionsWithTime.length > 0
+      ? decisionsWithTime.reduce((sum, d) => sum + (d.resolutionTime || 0), 0) / decisionsWithTime.length
+      : 0;
+
+    const satisfactionScores = disputes.filter(d => d.userSatisfactionScore !== undefined);
+    const avgSatisfaction = satisfactionScores.length > 0
+      ? satisfactionScores.reduce((sum, d) => sum + (d.userSatisfactionScore || 0), 0) / satisfactionScores.length
+      : 0;
+
+    const escalated = disputes.filter(d => d.escalationLevel > 0).length;
+
+    return {
+      totalDisputes: total,
+      resolvedDisputes: resolved,
+      pendingDisputes: pending,
+      averageResolutionTime: avgResolutionTime,
+      resolutionRate: total > 0 ? (resolved / total) * 100 : 0,
+      userSatisfactionRate: avgSatisfaction,
+      escalationRate: total > 0 ? (escalated / total) * 100 : 0,
+      recurringDisputeRate: 0
+    };
+  }
+
+  static calculateTrendData(disputes: any[], period: string, metric: string): any[] {
+    // Simplified trend calculation for disputes
+    const groupedData = this.groupDisputesByPeriod(disputes, period);
+    const trends: any[] = [];
+
+    const sortedPeriods = Object.keys(groupedData).sort();
+
+    sortedPeriods.forEach((periodKey, index) => {
+      const currentData = groupedData[periodKey];
+      const previousData = index > 0 ? groupedData[sortedPeriods[index - 1]] : null;
+
+      let value = 0;
+      let previousValue = 0;
+
+      switch (metric) {
+        case 'count':
+          value = currentData.length;
+          previousValue = previousData ? previousData.length : 0;
+          break;
+        case 'resolution_time':
+          const resolved = currentData.filter(d => d.resolutionTime);
+          value = resolved.length > 0
+            ? resolved.reduce((sum, d) => sum + (d.resolutionTime || 0), 0) / resolved.length
+            : 0;
+          const prevResolved = previousData?.filter(d => d.resolutionTime) || [];
+          previousValue = prevResolved.length > 0
+            ? prevResolved.reduce((sum, d) => sum + (d.resolutionTime || 0), 0) / prevResolved.length
+            : 0;
+          break;
+        case 'satisfaction':
+          const withSatisfaction = currentData.filter(d => d.userSatisfactionScore);
+          value = withSatisfaction.length > 0
+            ? withSatisfaction.reduce((sum, d) => sum + (d.userSatisfactionScore || 0), 0) / withSatisfaction.length
+            : 0;
+          break;
+        default:
+          value = currentData.length;
+      }
+
+      const change = value - previousValue;
+      const changePercentage = previousValue > 0 ? (change / previousValue) * 100 : 0;
+
+      trends.push({
+        period: periodKey,
+        value,
+        change,
+        changePercentage
+      });
+    });
+
+    return trends;
+  }
+
+  static identifyDisputePatterns(disputes: any[]): any[] {
+    const patterns: Map<string, any[]> = new Map();
+
+    disputes.forEach(dispute => {
+      const key = `${dispute.type}_${dispute.category}`;
+      if (!patterns.has(key)) {
+        patterns.set(key, []);
+      }
+      patterns.get(key)!.push(dispute);
+    });
+
+    return Array.from(patterns.entries()).map(([key, groupedDisputes]) => {
+      const [type, category] = key.split('_');
+      const resolved = groupedDisputes.filter(d => d.status === 'resolved');
+      const avgResolutionTime = resolved.length > 0
+        ? resolved.reduce((sum, d) => sum + (d.resolutionTime || 0), 0) / resolved.length
+        : 0;
+
+      const successRate = groupedDisputes.length > 0
+        ? (resolved.length / groupedDisputes.length) * 100
+        : 0;
+
+      return {
+        type: `${type} - ${category}`,
+        frequency: groupedDisputes.length,
+        averageResolutionTime: avgResolutionTime,
+        successRate,
+        trend: 'stable'
+      };
+    }).sort((a, b) => b.frequency - a.frequency);
+  }
+
+  static generatePredictiveModel(disputes: any[]): any {
+    const factors = [
+      {
+        name: 'Historical Volume',
+        weight: 0.3,
+        impact: 'neutral',
+        description: 'Based on recent dispute volume trends',
+        currentValue: 0.5
+      }
+    ];
+
+    return {
+      riskScore: 50,
+      likelihood: 50,
+      factors,
+      confidence: 75,
+      recommendations: ['Continue monitoring dispute patterns']
+    };
+  }
+
+  static convertToTimeSeriesData(disputes: any[], metric: string): any[] {
+    const grouped = this.groupDisputesByPeriod(disputes, 'daily');
+
+    return Object.entries(grouped).map(([date, disputeList]) => ({
+      timestamp: new Date(date),
+      value: this.calculateMetricValue(disputeList, metric),
+      label: date
+    })).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+  }
+
+  static createSegmentedData(disputes: any[], segmentBy: string): any[] {
+    const segments: Map<string, any[]> = new Map();
+
+    disputes.forEach(dispute => {
+      const segmentValue = String(dispute[segmentBy] || 'unknown');
+      if (!segments.has(segmentValue)) {
+        segments.set(segmentValue, []);
+      }
+      segments.get(segmentValue)!.push(dispute);
+    });
+
+    const total = disputes.length;
+
+    return Array.from(segments.entries()).map(([segment, segmentDisputes]) => {
+      const value = segmentDisputes.length;
+      const percentage = total > 0 ? (value / total) * 100 : 0;
+
+      return {
+        segment,
+        value,
+        percentage,
+        trend: 0
+      };
+    }).sort((a, b) => b.value - a.value);
+  }
+
+  private static groupDisputesByPeriod(disputes: any[], period: string): Record<string, any[]> {
+    const groups: Record<string, any[]> = {};
+
+    disputes.forEach(dispute => {
+      const date = new Date(dispute.createdAt || Date.now());
+      let key: string;
+
+      switch (period) {
+        case 'daily':
+          key = date.toISOString().split('T')[0];
+          break;
+        case 'weekly':
+          const weekStart = new Date(date);
+          weekStart.setDate(date.getDate() - date.getDay());
+          key = weekStart.toISOString().split('T')[0];
+          break;
+        case 'monthly':
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+          break;
+        default:
+          key = date.toISOString().split('T')[0];
+      }
+
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(dispute);
+    });
+
+    return groups;
+  }
+
+  private static calculateMetricValue(disputes: any[], metric: string): number {
+    switch (metric) {
+      case 'count':
+        return disputes.length;
+      case 'resolution_time':
+        const resolved = disputes.filter(d => d.resolutionTime);
+        return resolved.length > 0
+          ? resolved.reduce((sum, d) => sum + (d.resolutionTime || 0), 0) / resolved.length
+          : 0;
+      case 'satisfaction':
+        const withSatisfaction = disputes.filter(d => d.userSatisfactionScore);
+        return withSatisfaction.length > 0
+          ? withSatisfaction.reduce((sum, d) => sum + (d.userSatisfactionScore || 0), 0) / withSatisfaction.length
+          : 0;
+      default:
+        return disputes.length;
+    }
   }
 }
