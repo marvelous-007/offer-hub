@@ -1,59 +1,88 @@
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
+"use client";
 
-import { cn } from "@/lib/utils"
+import React from "react";
+import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from "lucide-react";
+import { AlertProps, AlertVariant } from "@/types/alert-types";
+import { cn } from "@/lib/utils";
 
-const alertVariants = cva(
-  "relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
-  {
-    variants: {
-      variant: {
-        default: "bg-background text-foreground",
-        destructive:
-          "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-)
+// Componente Alert básico reutilizable
+export function Alert({
+  variant = "default",
+  size = "md",
+  title,
+  message,
+  dismissible = false,
+  onDismiss,
+  className,
+  icon,
+}: AlertProps) {
+  const getVariantStyles = (variant: AlertVariant) => {
+    switch (variant) {
+      case "success":
+        return "bg-green-50 border-green-200 text-green-800";
+      case "error":
+        return "bg-red-50 border-red-200 text-red-800";
+      case "warning":
+        return "bg-yellow-50 border-yellow-200 text-yellow-800";
+      case "info":
+        return "bg-blue-50 border-blue-200 text-blue-800";
+      default:
+        return "bg-gray-50 border-gray-200 text-gray-800";
+    }
+  };
 
-const Alert = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants>
->(({ className, variant, ...props }, ref) => (
-  <div
-    ref={ref}
-    role="alert"
-    className={cn(alertVariants({ variant }), className)}
-    {...props}
-  />
-))
-Alert.displayName = "Alert"
+  const getSizeStyles = (size: string) => {
+    switch (size) {
+      case "sm":
+        return "p-3 text-sm";
+      case "lg":
+        return "p-6 text-lg";
+      default:
+        return "p-4 text-base";
+    }
+  };
 
-const AlertTitle = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
-  <h5
-    ref={ref}
-    className={cn("mb-1 font-medium leading-none tracking-tight", className)}
-    {...props}
-  />
-))
-AlertTitle.displayName = "AlertTitle"
+  const getIcon = (variant: AlertVariant) => {
+    if (icon) return icon;
+    
+    switch (variant) {
+      case "success":
+        return <CheckCircle className="w-5 h-5 text-green-600" />;
+      case "error":
+        return <AlertCircle className="w-5 h-5 text-red-600" />;
+      case "warning":
+        return <AlertTriangle className="w-5 h-5 text-yellow-600" />;
+      case "info":
+        return <Info className="w-5 h-5 text-blue-600" />;
+      default:
+        return <Info className="w-5 h-5 text-gray-600" />;
+    }
+  };
 
-const AlertDescription = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("text-sm [&_p]:leading-relaxed", className)}
-    {...props}
-  />
-))
-AlertDescription.displayName = "AlertDescription"
-
-export { Alert, AlertTitle, AlertDescription }
+  return (
+    <div
+      className={cn(
+        "border rounded-lg flex items-start gap-3",
+        getVariantStyles(variant),
+        getSizeStyles(size),
+        className
+      )}
+    >
+      {getIcon(variant)}
+      <div className="flex-1">
+        {title && (
+          <h4 className="font-semibold mb-1">{title}</h4>
+        )}
+        <p className="text-sm">{message}</p>
+      </div>
+      {dismissible && (
+        <button
+          onClick={onDismiss}
+          className="ml-auto hover:opacity-70 transition-opacity"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      )}
+    </div>
+  );
+}
