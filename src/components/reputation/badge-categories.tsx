@@ -164,7 +164,7 @@ export const BadgeCategories: React.FC<BadgeCategoriesProps> = ({
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    <div className="text-right">
+                    <div className="text-right hidden sm:block">
                       <div className="text-sm font-medium text-gray-900">
                         {stats.completed}/{stats.total}
                       </div>
@@ -230,7 +230,7 @@ export const BadgeCategories: React.FC<BadgeCategoriesProps> = ({
                           <div
                             key={achievement.id}
                             className={cn(
-                              "flex items-center justify-between p-3 rounded-lg border transition-colors",
+                              "flex flex-col sm:flex-row items-center justify-between p-3 rounded-lg border transition-colors",
                               "hover:bg-gray-50 cursor-pointer",
                               status === "completed" &&
                                 "bg-green-50 border-green-200",
@@ -242,7 +242,21 @@ export const BadgeCategories: React.FC<BadgeCategoriesProps> = ({
                             onClick={() => onAchievementSelect?.(achievement)}
                           >
                             <div className="flex items-center space-x-3">
-                              <div className="text-2xl">{achievement.icon}</div>
+                              <div className=" flex items-center justify-center">
+                                {typeof achievement.icon === 'string' ? (
+                                  achievement.icon.endsWith('.png') || achievement.icon.startsWith('/badge/') ? (
+                                    <img
+                                      src={achievement.icon.startsWith('/badge/') ? achievement.icon : `/badge/${achievement.icon}`}
+                                      alt={achievement.name}
+                                      className="w-10 sm:w-20 h-10 sm:h-20 object-contain rounded-full"
+                                    />
+                                  ) : (
+                                    <span className="text-2xl">{achievement.icon}</span>
+                                  )
+                                ) : (
+                                  achievement.icon
+                                )}
+                              </div>
                               <div>
                                 <div className="font-medium text-sm">
                                   {achievement.name}

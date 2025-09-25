@@ -202,8 +202,8 @@ export const AchievementSystem: React.FC<AchievementSystemProps> = ({
       <div className="flex items-center justify-end">
         <div className="flex items-center space-x-2">
           <Button variant="outline" size="sm" onClick={handleRefresh}>
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh
+            <RefreshCw className="w-4 h-4 sm:mr-2" />
+            <span className='hidden sm:block'>Refresh</span>
           </Button>
           
           {(
@@ -228,12 +228,14 @@ export const AchievementSystem: React.FC<AchievementSystemProps> = ({
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="achievements">Achievements</TabsTrigger>
-          <TabsTrigger value="categories">Categories</TabsTrigger>
-          <TabsTrigger value="collection">Collection</TabsTrigger>
-        </TabsList>
+        <div className='overflow-hidden'>
+          <TabsList className="sm:grid flex justify-start sm:overflow-auto overflow-scroll w-full grid-cols-4">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="achievements">Achievements</TabsTrigger>
+            <TabsTrigger value="categories">Categories</TabsTrigger>
+            <TabsTrigger value="collection">Collection</TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4">
@@ -368,7 +370,7 @@ export const AchievementSystem: React.FC<AchievementSystemProps> = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {Object.entries(analytics.categoryBreakdown).map(([category, stats]) => (
                     <div key={category} className="space-y-2">
                       <div className="flex items-center justify-between">
@@ -409,7 +411,7 @@ export const AchievementSystem: React.FC<AchievementSystemProps> = ({
                   <select
                     value={filterRarity || ''}
                     onChange={(e) => setFilterRarity(e.target.value || null)}
-                    className="px-3 py-2 border rounded-md text-sm"
+                    className="px-2 sm:px-3 py-2 border rounded-md text-sm"
                   >
                     <option value="" className='mr-2 '>All Rarities</option>
                     <option value="common">Common</option>
@@ -424,7 +426,7 @@ export const AchievementSystem: React.FC<AchievementSystemProps> = ({
                     <select
                       value={filterStatus || ''}
                       onChange={(e) => setFilterStatus(e.target.value || null)}
-                      className="px-3 py-2 border rounded-md text-sm"
+                      className="px-2 sm:px-3 py-2 border rounded-md text-sm"
                     >
                       <option value="">All Status</option>
                       <option value="completed">Completed</option>
@@ -435,8 +437,8 @@ export const AchievementSystem: React.FC<AchievementSystemProps> = ({
                   
                   <Button
                     variant="outline"
-                    size="sm"
-                    className="h-full"
+                    size="icon"
+                    className=""
                     onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
                   >
                     {viewMode === 'grid' ? <List className="w-4 h-4" /> : <Grid className="w-4 h-4" />}

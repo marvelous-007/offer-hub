@@ -18,15 +18,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { 
   Share2, 
   Trophy, 
-  Star, 
   Lock, 
-  CheckCircle, 
-  Clock, 
-  Download,
-  ExternalLink,
   Copy,
-  Heart,
-  MessageSquare,
   Twitter,
   Linkedin,
   Facebook
@@ -384,7 +377,7 @@ export const BadgeGrid: React.FC<BadgeGridProps> = ({
       {/* Grid */}
       <div className={cn(
         variant === 'badge'
-          ? 'grid grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 gap-4'
+          ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 gap-4'
           : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'
       )}>
         {achievements.map((achievement) => {
@@ -457,59 +450,6 @@ export const BadgeGrid: React.FC<BadgeGridProps> = ({
         })}
       </div>
 
-      {/* Selected Achievement Details */}
-      {selectedAchievement && (
-        <Card className="mt-6">
-          <CardContent className="p-6">
-            <div className="flex items-start space-x-4">
-              <BadgeDisplay
-                achievement={selectedAchievement}
-                userAchievement={userAchievements[selectedAchievement.id]}
-                config={{ ...config, size: 'lg' }}
-                onShare={onShare}
-                onClaim={onClaim}
-              />
-              
-              <div className="flex-1 space-y-4">
-                <div>
-                  <h3 className="text-xl font-bold">{selectedAchievement.name}</h3>
-                  <p className="text-gray-600">{selectedAchievement.description}</p>
-                  {selectedAchievement.detailedDescription && (
-                    <p className="text-sm text-gray-500 mt-2">
-                      {selectedAchievement.detailedDescription}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <Badge variant="outline">
-                    {selectedAchievement.category}
-                  </Badge>
-                  <Badge 
-                    variant="outline"
-                    style={{ 
-                      borderColor: getRarityColor(selectedAchievement.rarity),
-                      color: getRarityColor(selectedAchievement.rarity)
-                    }}
-                  >
-                    {getRarityIcon(selectedAchievement.rarity)} {selectedAchievement.rarity}
-                  </Badge>
-                </div>
-
-                {selectedAchievement.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {selectedAchievement.tags.map((tag, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };
@@ -540,7 +480,7 @@ export const BadgeCollection: React.FC<BadgeCollectionProps> = ({
     return sum + points;
   }, 0);
 
-  const rarityBreakdown = completedAchievements.reduce((acc, ua) => {
+  const rarityBreakdown = completedAchievements.reduce((acc: Record<string, number>, ua) => {
     const achievement = achievements.find(a => a.id === ua.achievementId);
     if (achievement) {
       acc[achievement.rarity] = (acc[achievement.rarity] || 0) + 1;
@@ -583,11 +523,11 @@ export const BadgeCollection: React.FC<BadgeCollectionProps> = ({
                 key={rarity}
                 variant="outline"
                 style={{ 
-                  borderColor: getRarityColor(rarity as any),
-                  color: getRarityColor(rarity as any)
+                  borderColor: getRarityColor(rarity as unknown as any),
+                  color: getRarityColor(rarity as unknown as any)
                 }}
               >
-                {getRarityIcon(rarity as any)} {rarity}: {count}
+                {getRarityIcon(rarity as unknown as any)} {rarity}: {count}
               </Badge>
             ))}
           </div>
