@@ -1,7 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FraudAlert, UserRiskProfile } from "@/types/security.types";
+import {
+  FraudAlert,
+  UserRiskProfile,
+  AlertStatus,
+} from "@/types/security.types";
 import {
   Eye,
   EyeOff,
@@ -63,14 +67,6 @@ const AlertSeverity = {
   MEDIUM: "medium",
   HIGH: "high",
   CRITICAL: "critical",
-};
-
-const AlertStatus = {
-  OPEN: "open",
-  INVESTIGATING: "investigating",
-  RESOLVED: "resolved",
-  FALSE_POSITIVE: "false_positive",
-  ESCALATED: "escalated",
 };
 
 const FraudDetection = () => {
@@ -307,9 +303,11 @@ const FraudDetection = () => {
     setSelectedAlerts([]);
   };
 
-  const updateAlertStatus = async (alertId, status) => {
+  const updateAlertStatus = async (alertId: string, status: AlertStatus) => {
     setFraudAlerts((prev) =>
-      prev.map((alert) => (alert.id === alertId ? { ...alert, status } : alert))
+      prev.map((alert) =>
+        alert.id === alertId ? ({ ...alert, status } as FraudAlert) : alert
+      )
     );
   };
 
