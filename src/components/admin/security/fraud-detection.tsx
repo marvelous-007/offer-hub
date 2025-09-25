@@ -229,7 +229,9 @@ const FraudDetection = () => {
     return true;
   });
 
-  const getSeverityColor = (severity) => {
+  type SeverityLevel = "critical" | "high" | "medium" | "low" | "info";
+
+  const getSeverityColor = (severity: SeverityLevel) => {
     switch (severity) {
       case "critical":
         return "text-red-600 bg-red-50 border-red-200";
@@ -246,7 +248,14 @@ const FraudDetection = () => {
     }
   };
 
-  const getStatusColor = (status) => {
+  type AlertStatus =
+    | "open"
+    | "investigating"
+    | "escalated"
+    | "resolved"
+    | "false_positive";
+
+  const getStatusColor = (status: AlertStatus) => {
     switch (status) {
       case "open":
         return "text-red-600 bg-red-50";
@@ -263,7 +272,15 @@ const FraudDetection = () => {
     }
   };
 
-  const getRiskLevelColor = (level) => {
+  type Level =
+    | "critical"
+    | "very_high"
+    | "high"
+    | "medium"
+    | "low"
+    | "very_low";
+
+  const getRiskLevelColor = (level: Level) => {
     switch (level) {
       case "critical":
         return "text-red-600 bg-red-100";
@@ -282,7 +299,7 @@ const FraudDetection = () => {
     }
   };
 
-  const handleBulkAction = async (action) => {
+  const handleBulkAction = async (action: string) => {
     if (selectedAlerts.length === 0) return;
 
     // Mock bulk action processing
