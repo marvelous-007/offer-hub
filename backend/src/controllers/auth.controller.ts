@@ -27,6 +27,44 @@ export async function getNonce(
   }
 }
 
+
+/**
+ *Register a new user
+
+ * @route POST /api/auth/register
+
+ * @param req - Express request object
+
+ * @param res - Express response object
+
+ * @param next - Express next function
+ *
+
+ *Expected request body:
+
+ * {
+
+ *   "wallet_address": "string (required) - User's wallet address",
+ *   "email": "string (optional) - User's email address",
+ *   "username": "string (required) - Unique username",
+ *   "name": "string (optional) - User's display name",
+ *   "bio": "string (optional) - User's description",
+ *   "is_freelancer": "boolean (optional) - Whether user is a freelancer"
+
+ * }
+ *
+
+ *Response format:
+
+ * {
+
+ *   "status": "success",
+ *   "user": { ... },
+ *   "tokens": { ... }
+
+ * }
+
+ */
 export async function register(
   req: Request,
   res: Response,
