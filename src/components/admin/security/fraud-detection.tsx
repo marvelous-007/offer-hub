@@ -1,19 +1,20 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { FraudAlert, UserRiskProfile } from "@/types/security.types";
 import {
   Eye,
   EyeOff,
   AlertTriangle,
   Users,
-  CreditCard,
+  
   TrendingUp,
   Filter,
   Search,
   Download,
   Clock,
   CheckCircle,
-  XCircle,
+  
   Ban,
   Flag,
   Activity,
@@ -24,7 +25,7 @@ import {
   Shield,
   Target,
   User,
-  Calendar,
+  
 } from "lucide-react";
 import {
   LineChart,
@@ -39,8 +40,7 @@ import {
   PieChart,
   Pie,
   Cell,
-  ScatterChart,
-  Scatter,
+  
   RadarChart,
   PolarGrid,
   PolarAngleAxis,
@@ -78,11 +78,16 @@ const AlertStatus = {
 };
 
 const FraudDetection = () => {
-  const [fraudAlerts, setFraudAlerts] = useState([]);
-  const [userProfiles, setUserProfiles] = useState([]);
-  const [analytics, setAnalytics] = useState(null);
+  const [fraudAlerts, setFraudAlerts] = useState<FraudAlert[]>([]);
+  const [userProfiles, setUserProfiles] = useState<UserRiskProfile[]>([]);
+  type FraudAnalytics = {
+    fraudTrends: Array<{ date: string; count: number; amount: number; type: string }>;
+    riskDistribution: Array<{ level: string; count: number; percentage?: number }>;
+    fraudByType: Array<{ type: string; count: number; amount: number }>;
+  } | null;
+  const [analytics, setAnalytics] = useState<FraudAnalytics>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [_error, _setError] = useState<string | null>(null);
 
   const [filters, setFilters] = useState({
     type: "",
@@ -94,8 +99,8 @@ const FraudDetection = () => {
   });
 
   const [selectedTab, setSelectedTab] = useState("alerts");
-  const [selectedAlerts, setSelectedAlerts] = useState([]);
-  const [showDetails, setShowDetails] = useState(null);
+  const [selectedAlerts, setSelectedAlerts] = useState<string[]>([]);
+  const [showDetails, setShowDetails] = useState<string | null>(null);
   const [actionModalOpen, setActionModalOpen] = useState(false);
   const [selectedAlert, setSelectedAlert] = useState(null);
 
