@@ -464,19 +464,27 @@ export const AnalyticsVisualization: React.FC<AnalyticsVisualizationProps> = ({
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {processedData.map((row, index) => (
-                  <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {row.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatValue(row.value, 'number')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {row.percentage ? ApplicationAnalyticsCalculator.formatPercentage(row.percentage) : '-'}
-                    </td>
-                  </tr>
-                ))}
+                {processedData.map((row, index) => {
+                  const name = 'name' in row ? row.name :
+                              'label' in row ? row.label :
+                              'segment' in row ? row.segment :
+                              `Item ${index + 1}`;
+                  const percentage = 'percentage' in row ? row.percentage : undefined;
+
+                  return (
+                    <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {formatValue(row.value, 'number')}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {percentage ? ApplicationAnalyticsCalculator.formatPercentage(percentage) : '-'}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
