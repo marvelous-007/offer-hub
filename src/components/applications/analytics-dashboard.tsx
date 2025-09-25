@@ -11,6 +11,7 @@ import {
 import {
   Button,
 } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -418,6 +419,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     applyFilters,
     clearFilters,
     currentFilters,
+    refreshAllData,
   } = useApplicationAnalytics({
     autoRefresh: true,
     refreshInterval: 60000, // 1 minute
@@ -505,6 +507,19 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           </p>
         </div>
         <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={refreshAllData}
+            disabled={loading.isLoading}
+          >
+            {loading.isLoading ? (
+              <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            Refresh
+          </Button>
           <Badge variant="secondary">
             {applications.length} Applications
           </Badge>
