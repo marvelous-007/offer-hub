@@ -665,7 +665,16 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             <CardContent>
               {userPatterns && userPatterns.length > 0 ? (
                 <AnalyticsVisualization
-                  data={userPatterns.slice(0, 20)}
+                  data={userPatterns.slice(0, 20).map(pattern => ({
+                    name: `User ${pattern.userId.slice(-6)}`,
+                    value: pattern.engagementScore,
+                    percentage: pattern.successPrediction,
+                    metadata: {
+                      applicationFrequency: pattern.applicationFrequency,
+                      averageQuality: pattern.averageApplicationQuality,
+                      devicePreference: pattern.devicePreference.mobile > 50 ? 'Mobile' : 'Desktop'
+                    }
+                  }))}
                   type={VisualizationType.TABLE}
                 />
               ) : (
