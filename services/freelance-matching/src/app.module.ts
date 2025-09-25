@@ -1,5 +1,8 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { GraphQLModule } from "@nestjs/graphql";
+import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
+import { join } from "path";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { PrismaModule } from "./prisma/prisma.module";
@@ -7,6 +10,7 @@ import { RedisModule } from "./redis/redis.module";
 import { QueueModule } from "./queue/queue.module";
 import { AiModule } from "./ai/ai.module";
 import { MatchModule } from "./match/match.module";
+import { GraphQLAppModule } from "./graphql/graphql.module";
 import * as Joi from "joi";
 
 @Module({
@@ -28,11 +32,24 @@ import * as Joi from "joi";
         OPENAI_API_KEY: Joi.string().required(),
       }),
     }),
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+        sortSchema: true,
+        playground: configService.get('NODE_ENV') !== 'production',
+        introspection: configService.get('NODE_ENV') !== 'production',
+        context: ({ req }) => ({ req }),
+      }),
+    }),
     PrismaModule,
     RedisModule,
     QueueModule,
     AiModule,
     MatchModule,
+    GraphQLAppModule,
   ],
   controllers: [AppController],
   providers: [AppService],
