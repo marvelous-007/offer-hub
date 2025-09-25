@@ -205,8 +205,8 @@ const FraudDetection = () => {
       };
 
       setFraudAlerts(mockAlerts as FraudAlert[]);
-      setUserProfiles(mockProfiles);
-      setAnalytics(mockAnalytics);
+      setUserProfiles(mockProfiles as UserRiskProfile[]);
+      setAnalytics(mockAnalytics as FraudAnalytics);
     };
 
     generateMockData();
