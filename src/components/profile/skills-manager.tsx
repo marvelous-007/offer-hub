@@ -140,7 +140,7 @@ export const SkillsManager: React.FC = () => {
 
   // Filter and sort skills
   const filteredAndSortedSkills = useMemo(() => {
-    let filtered = skills.filter((skill) => {
+    const filtered = skills.filter((skill) => {
       const matchesSearch = skill.name
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
