@@ -37,7 +37,11 @@ export abstract class MatchBase {
  */
 @ObjectType({ description: 'Match between a source entity and a target entity' })
 export class MatchType extends MatchBase {
-  // Additional fields can be added here for specific match types
+  @Field(() => String, { nullable: true, description: 'Explanation of why this match is relevant (only available with premium)' })
+  explanation?: string;
+
+  @Field(() => Float, { nullable: true, description: 'Adjusted score based on deeper analysis (only available with premium)' })
+  adjustedScore?: number;
 }
 
 /**
@@ -73,4 +77,7 @@ export class MatchRequestInput {
 
   @Field(() => Int, { nullable: true, defaultValue: 50, description: 'Maximum number of matches to return' })
   limit?: number;
+
+  @Field(() => Boolean, { nullable: true, defaultValue: false, description: 'Whether to use premium matching with enhanced results' })
+  usePremium?: boolean;
 }
