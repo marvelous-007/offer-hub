@@ -11,6 +11,8 @@ import { QueueModule } from "./queue/queue.module";
 import { AiModule } from "./ai/ai.module";
 import { MatchModule } from "./match/match.module";
 import { GraphQLAppModule } from "./graphql/graphql.module";
+import { AuthModule } from "./auth/auth.module";
+import { AppThrottlerModule } from "./throttler/throttler.module";
 import * as Joi from "joi";
 
 @Module({
@@ -50,6 +52,8 @@ import * as Joi from "joi";
     AiModule,
     MatchModule,
     GraphQLAppModule,
+    AuthModule,
+    AppThrottlerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
