@@ -19,7 +19,7 @@ export interface FraudAlert {
   type: FraudType;
   severity: AlertSeverity;
   userId: string;
-  amount: string;
+  amount?: string;
   description: string;
   timestamp: Date;
   riskScore: number;
