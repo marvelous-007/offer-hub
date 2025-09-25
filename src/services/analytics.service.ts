@@ -18,7 +18,7 @@ import {
   DisputeCategory,
   DisputePriority
 } from '@/types/analytics.types';
-import { AnalyticsCalculator } from '@/utils/analytics-helpers';
+import { ApplicationAnalyticsCalculator } from '@/utils/analytics-helpers';
 
 export class AnalyticsService {
   private static baseUrl = '/api/analytics';
@@ -54,7 +54,7 @@ export class AnalyticsService {
 
     try {
       const disputes = await this.getDisputeAnalytics(filters);
-      const metrics = AnalyticsCalculator.calculatePerformanceMetrics(disputes.data);
+      const metrics = ApplicationAnalyticsCalculator.calculatePerformanceMetrics(disputes.data);
 
       const result = {
         data: metrics,
@@ -80,7 +80,7 @@ export class AnalyticsService {
 
     try {
       const disputes = await this.getDisputeAnalytics(filters);
-      const trends = AnalyticsCalculator.calculateTrendData(disputes.data, period, metric);
+      const trends = ApplicationAnalyticsCalculator.calculateTrendData(disputes.data, period, metric);
 
       const result = {
         data: trends,
@@ -102,7 +102,7 @@ export class AnalyticsService {
 
     try {
       const disputes = await this.getDisputeAnalytics(filters);
-      const patterns = AnalyticsCalculator.identifyDisputePatterns(disputes.data);
+      const patterns = ApplicationAnalyticsCalculator.identifyDisputePatterns(disputes.data);
 
       const result = {
         data: patterns,
@@ -124,7 +124,7 @@ export class AnalyticsService {
 
     try {
       const disputes = await this.getDisputeAnalytics(filters);
-      const model = AnalyticsCalculator.generatePredictiveModel(disputes.data);
+      const model = ApplicationAnalyticsCalculator.generatePredictiveModel(disputes.data);
 
       const result = {
         data: model,
@@ -149,7 +149,7 @@ export class AnalyticsService {
 
     try {
       const disputes = await this.getDisputeAnalytics(filters);
-      const segmentedData = AnalyticsCalculator.createSegmentedData(disputes.data, type);
+      const segmentedData = ApplicationAnalyticsCalculator.createSegmentedData(disputes.data, type);
       const chartData = segmentedData.map((segment, index) => ({
         name: segment.segment,
         value: segment.value,
@@ -180,7 +180,7 @@ export class AnalyticsService {
 
     try {
       const disputes = await this.getDisputeAnalytics(filters);
-      const timeSeriesData = AnalyticsCalculator.convertToTimeSeriesData(disputes.data, metric);
+      const timeSeriesData = ApplicationAnalyticsCalculator.convertToTimeSeriesData(disputes.data, metric);
 
       const result = {
         data: timeSeriesData,

@@ -29,7 +29,7 @@ import {
   TrendIndicator
 } from './analytics-visualization';
 import { AnalyticsReports } from './analytics-reports';
-import { AnalyticsCalculator } from '@/utils/analytics-helpers';
+import { ApplicationAnalyticsCalculator } from '@/utils/analytics-helpers';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -454,7 +454,7 @@ const OverviewDashboard: React.FC<{
                     <div>
                       <p className="font-medium">{dispute.type}</p>
                       <p className="text-sm text-gray-600">
-                        {AnalyticsCalculator.formatDuration(dispute.averageResolutionTime)} avg
+                        {ApplicationAnalyticsCalculator.formatDuration(dispute.averageResolutionTime)} avg
                       </p>
                     </div>
                   </div>
