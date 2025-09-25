@@ -174,4 +174,114 @@ export class HighQualityModelService {
       };
     }
   }
+
+  /**
+   * Refines matches using the high-quality model to provide better ranking and explanations
+   * @param request The refinement request containing source info and pre-filtered matches
+   * @returns Refined matches with explanations and adjusted scores
+   */
+  async refineMatches(request: RefinementRequest): Promise<RefinementResponse> {
+    const startTime = performance.now();
+    const { sourceType, sourceId, sourceInfo, matches, limit = 10 } = request;
+    
+    try {
+      this.logger.log(`Refining ${matches.length} matches for ${sourceType} with ID ${sourceId}`);
+      
+      // Limit the number of matches to refine to save tokens
+      const matchesToRefine = matches.slice(0, Math.min(matches.length, limit));
+      
+      // Prepare the source information and matches for the prompt
+      const sourceDescription = sourceInfo ? 
+        JSON.stringify(sourceInfo, null, 2) : 
+        `${sourceType} with ID ${sourceId}`;
+      
+      const matchesDescription = matchesToRefine.map(match => (
+        `{ "id": "${match.id}", "similarity": ${match.similarity}, "score": ${match.score} }`
+      )).join(',\n');
+      
+      // Create system prompt for refinement
+      const systemPrompt = `You are an expert matching system that refines and ranks matches between freelancers and projects.
+      Your task is to analyze the provided matches and improve their ranking based on deeper reasoning.
+      
+      You MUST return your response as a valid JSON array of objects with the following structure:
+      [
+        {
+          "id": "the original ID of the match",
+          "similarity": the original similarity score (0-1),
+          "score": the original score (0-100),
+          "adjustedScore": a new score (0-100) based on your analysis,
+          "explanation": "a brief explanation of why this match is good or bad"
+        },
+        ...
+      ]
+      
+      Sort the results by adjustedScore in descending order (highest score first).
+      Focus on providing meaningful explanations that highlight strengths or weaknesses of each match.`;
+      
+      // Create user prompt with the source and matches information
+      const userPrompt = `Source: ${sourceDescription}\n\nMatches to refine:\n[${matchesDescription}]\n\nPlease analyze these matches and provide refined rankings with explanations.`;
+      
+      // Execute the prompt chain
+      const chainResult = await this.executePromptChain({
+        systemPrompt,
+        userPrompt,
+        temperature: 0.3, // Lower temperature for more consistent results
+      });
+      
+      // Parse the JSON response
+      let refinedMatches: RefinedMatch[] = [];
+      
+      try {
+        const parsedResponse = JSON.parse(chainResult.output);
+        
+        if (!Array.isArray(parsedResponse)) {
+          throw new Error('Model did not return an array');
+        }
+        
+        // Validate and transform the response
+        refinedMatches = parsedResponse.map(match => {
+          // Ensure all required fields are present
+          if (!match.id || typeof match.adjustedScore !== 'number' || !match.explanation) {
+            this.logger.warn(`Invalid match in response: ${JSON.stringify(match)}`);
+          }
+          
+          return {
+            id: match.id || '',
+            similarity: match.similarity || 0,
+            score: match.score || 0,
+            adjustedScore: match.adjustedScore || 0,
+            explanation: match.explanation || 'No explanation provided',
+          };
+        });
+        
+        // Sort by adjustedScore (descending)
+        refinedMatches.sort((a, b) => b.adjustedScore - a.adjustedScore);
+        
+      } catch (parseError) {
+        this.logger.error(`Error parsing model response: ${parseError.message}`);
+        
+        // Fallback: If JSON parsing fails, use the original matches with default explanations
+        refinedMatches = matchesToRefine.map(match => ({
+          ...match,
+          adjustedScore: match.score,
+          explanation: 'Could not generate explanation due to parsing error',
+        }));
+      }
+      
+      const endTime = performance.now();
+      const latencyMs = endTime - startTime;
+      
+      this.logger.log(`Refinement completed in ${latencyMs.toFixed(2)}ms, refined ${refinedMatches.length} matches`);
+      
+      return {
+        matches: refinedMatches,
+        latencyMs,
+        tokenUsage: chainResult.tokenUsage,
+      };
+      
+    } catch (error) {
+      this.logger.error(`Error refining matches: ${error.message}`, error.stack);
+      throw new Error(`Failed to refine matches: ${error.message}`);
+    }
+  }
 }
