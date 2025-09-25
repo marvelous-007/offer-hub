@@ -36,7 +36,7 @@ export function UserFilters({
     roleFilter: "All",
     statusFilter: "All",
     date: undefined,
-    userType: "All"
+    userType: "All" as "Freelancer" | "Customer" | "User" | "All"
   });
 
   const [isApplying, setIsApplying] = useState(false);
@@ -56,12 +56,12 @@ export function UserFilters({
   };
 
   const clearFilters = () => {
-    const clearedFilters = {
+    const clearedFilters: UserFilterState = {
       searchQuery: "",
       roleFilter: "All",
       statusFilter: "All",
       date: undefined,
-      userType: "All"
+      userType: "All" as "Freelancer" | "Customer" | "User" | "All"
     };
     setFilters(clearedFilters);
     onFiltersChange?.(clearedFilters);
