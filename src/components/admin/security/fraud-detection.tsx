@@ -74,7 +74,7 @@ const AlertStatus = {
 };
 
 const FraudDetection = () => {
-  const [fraudAlerts, setFraudAlerts] = useState<FraudAlert[] | string[]>([]);
+  const [fraudAlerts, setFraudAlerts] = useState<FraudAlert[]>([]);
   const [userProfiles, setUserProfiles] = useState<UserRiskProfile[]>([]);
   type FraudAnalytics = {
     fraudTrends: Array<{
@@ -204,7 +204,7 @@ const FraudDetection = () => {
         })),
       };
 
-      setFraudAlerts(mockAlerts);
+      setFraudAlerts(mockAlerts as FraudAlert[]);
       setUserProfiles(mockProfiles);
       setAnalytics(mockAnalytics);
     };
