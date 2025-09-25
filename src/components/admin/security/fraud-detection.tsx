@@ -7,14 +7,12 @@ import {
   EyeOff,
   AlertTriangle,
   Users,
-  
   TrendingUp,
   Filter,
   Search,
   Download,
   Clock,
   CheckCircle,
-  
   Ban,
   Flag,
   Activity,
@@ -25,7 +23,6 @@ import {
   Shield,
   Target,
   User,
-  
 } from "lucide-react";
 import {
   LineChart,
@@ -40,7 +37,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  
   RadarChart,
   PolarGrid,
   PolarAngleAxis,
@@ -78,11 +74,20 @@ const AlertStatus = {
 };
 
 const FraudDetection = () => {
-  const [fraudAlerts, setFraudAlerts] = useState<FraudAlert[] | String[]>([]);
+  const [fraudAlerts, setFraudAlerts] = useState<FraudAlert[] | string[]>([]);
   const [userProfiles, setUserProfiles] = useState<UserRiskProfile[]>([]);
   type FraudAnalytics = {
-    fraudTrends: Array<{ date: string; count: number; amount: number; type: string }>;
-    riskDistribution: Array<{ level: string; count: number; percentage?: number }>;
+    fraudTrends: Array<{
+      date: string;
+      count: number;
+      amount: number;
+      type: string;
+    }>;
+    riskDistribution: Array<{
+      level: string;
+      count: number;
+      percentage?: number;
+    }>;
     fraudByType: Array<{ type: string; count: number; amount: number }>;
   } | null;
   const [analytics, setAnalytics] = useState<FraudAnalytics>(null);
