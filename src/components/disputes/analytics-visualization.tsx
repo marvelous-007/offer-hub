@@ -31,7 +31,7 @@ import {
   DisputePattern,
   SegmentData
 } from '@/types/analytics.types';
-import { AnalyticsCalculator } from '@/utils/analytics-helpers';
+import { ApplicationAnalyticsCalculator } from '@/utils/analytics-helpers';
 
 interface BaseVisualizationProps {
   data: any[];
@@ -124,13 +124,13 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 
     switch (format) {
       case 'percentage':
-        return AnalyticsCalculator.formatPercentage(val);
+        return ApplicationAnalyticsCalculator.formatPercentage(val);
       case 'currency':
-        return `$${AnalyticsCalculator.formatNumber(val)}`;
+        return `$${ApplicationAnalyticsCalculator.formatNumber(val)}`;
       case 'duration':
-        return AnalyticsCalculator.formatDuration(val);
+        return ApplicationAnalyticsCalculator.formatDuration(val);
       default:
-        return AnalyticsCalculator.formatNumber(val);
+        return ApplicationAnalyticsCalculator.formatNumber(val);
     }
   };
 
@@ -496,11 +496,11 @@ export const TrendIndicator: React.FC<{
   const formatValue = (val: number) => {
     switch (format) {
       case 'percentage':
-        return AnalyticsCalculator.formatPercentage(val);
+        return ApplicationAnalyticsCalculator.formatPercentage(val);
       case 'duration':
-        return AnalyticsCalculator.formatDuration(val);
+        return ApplicationAnalyticsCalculator.formatDuration(val);
       default:
-        return AnalyticsCalculator.formatNumber(val);
+        return ApplicationAnalyticsCalculator.formatNumber(val);
     }
   };
 
