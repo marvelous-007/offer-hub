@@ -15,7 +15,8 @@ export function Alert({
   onDismiss,
   className,
   icon,
-}: AlertProps) {
+  children,
+}: AlertProps & { children?: React.ReactNode }) {
   const getVariantStyles = (variant: AlertVariant) => {
     switch (variant) {
       case "success":
@@ -73,7 +74,8 @@ export function Alert({
         {title && (
           <h4 className="font-semibold mb-1">{title}</h4>
         )}
-        <p className="text-sm">{message}</p>
+        {message && <p className="text-sm">{message}</p>}
+        {children}
       </div>
       {dismissible && (
         <button
@@ -83,6 +85,21 @@ export function Alert({
           <X className="w-4 h-4" />
         </button>
       )}
+    </div>
+  );
+}
+
+// Componente AlertDescription para compatibilidad
+export function AlertDescription({ 
+  children, 
+  className 
+}: { 
+  children: React.ReactNode; 
+  className?: string; 
+}) {
+  return (
+    <div className={cn("text-sm", className)}>
+      {children}
     </div>
   );
 }
