@@ -397,7 +397,8 @@ export function applyLocationFilter(
   const { lat, lng } = locationFilter.coordinates
   const radius = locationFilter.radius || 50
   const radiusInKm = locationFilter.radiusUnit === 'miles' ? radius * 1.609 : radius
-  
+
+  //@ts-ignore
   return results
     .map(freelancer => {
       if (!freelancer.location?.coordinates) {
