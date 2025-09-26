@@ -171,7 +171,7 @@ export function detectRatingOutliers(
   const confidence = Math.min(100, maxZScore * 20);
 
   let reason = '';
-  let recommendations: string[] = [];
+  const recommendations: string[] = [];
 
   if (isOutlier) {
     if (maxZScore > 3) {
@@ -519,7 +519,7 @@ export function validateReviewAgainstTemplate(
   const errors: string[] = [];
   const warnings: string[] = [];
   let completionScore = 0;
-  let totalSections = template.sections.length;
+  const totalSections = template.sections.length;
   let completedSections = 0;
 
   for (const section of template.sections) {
