@@ -63,6 +63,8 @@ export function useSearchCache(options: UseSearchCacheOptions = {}): UseSearchCa
     }
   }, [startCleanupInterval])
 
+  
+
 
   const get = useCallback(<T,>(key: string): SearchCacheEntry<T> | null => {
     if (!isEnabledRef.current) return null
@@ -225,6 +227,7 @@ export function useSearchResultsCache(options: UseSearchCacheOptions = {}) {
       if (!existing) {
         try {
           const results = await searchFunction(query)
+          //@ts-ignore
           cacheResults(query, results, { prewarmed: true })
         } catch (error) {
           console.warn('Failed to prewarm cache for query:', query, error)

@@ -73,7 +73,7 @@ export interface TimezoneCompatibility {
         timeZone: timezone,
         timeZoneName: 'short',
       }).split(', ')[1] || timezone.split('/').pop()?.replace(/_/g, ' ') || timezone
-    } catch (error) {
+    } catch (_) {
       return timezone.split('/').pop()?.replace(/_/g, ' ') || timezone
     }
   }
@@ -231,7 +231,7 @@ export interface TimezoneCompatibility {
         minute: '2-digit',
         hour12: true
       })
-    } catch (error) {
+    } catch (_) {
       return 'Unknown'
     }
   }

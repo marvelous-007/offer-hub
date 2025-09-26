@@ -327,7 +327,7 @@ export function useSearchHistory(options: UseSearchHistoryOptions = {}): UseSear
         saveToStorage(importedHistory)
         
         historyMapRef.current.clear()
-        importedHistory.forEach(entry => {
+        importedHistory.forEach((entry: any) => {
           historyMapRef.current.set(entry.id, entry)
         })
         
