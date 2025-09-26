@@ -27,6 +27,8 @@ export function Alert({
         return "bg-yellow-50 border-yellow-200 text-yellow-800";
       case "info":
         return "bg-blue-50 border-blue-200 text-blue-800";
+      case "destructive":
+        return "bg-red-50 border-red-200 text-red-800";
       default:
         return "bg-gray-50 border-gray-200 text-gray-800";
     }
@@ -55,6 +57,8 @@ export function Alert({
         return <AlertTriangle className="w-5 h-5 text-yellow-600" />;
       case "info":
         return <Info className="w-5 h-5 text-blue-600" />;
+      case "destructive":
+        return <AlertCircle className="w-5 h-5 text-red-600" />;
       default:
         return <Info className="w-5 h-5 text-gray-600" />;
     }

@@ -1,5 +1,5 @@
 // Tipos para componentes de alerta reutilizables
-export type AlertVariant = 'success' | 'error' | 'warning' | 'info' | 'default';
+export type AlertVariant = 'success' | 'error' | 'warning' | 'info' | 'default' | 'destructive';
 
 export type AlertSize = 'sm' | 'md' | 'lg';
 
