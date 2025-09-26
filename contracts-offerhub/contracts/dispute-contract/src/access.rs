@@ -2,7 +2,8 @@ use soroban_sdk::{panic_with_error, Address, Env, Map, String, Vec};
 
 use crate::{
     storage::{ARBITRATORS, MEDIATORS},
-    types::{ArbitratorData, Error},
+    types::{ArbitratorData},
+    error::{ Error},
 };
 
 pub fn add_arbitrator(
@@ -110,7 +111,7 @@ pub fn add_mediator(env: &Env, admin: Address, mediator: Address) -> Result<(), 
 pub fn remove_mediator(env: &Env, admin: Address, mediator: Address) -> Result<(), Error> {
     admin.require_auth();
 
-    let mut mediators: Vec<Address> = env
+    let mediators: Vec<Address> = env
         .storage()
         .instance()
         .get(&MEDIATORS)
@@ -118,7 +119,7 @@ pub fn remove_mediator(env: &Env, admin: Address, mediator: Address) -> Result<(
 
     let mut found = false;
     let mut new_mediators = Vec::new(env);
-    
+
     for i in 0..mediators.len() {
         let current_mediator = mediators.get(i).unwrap();
         if current_mediator == mediator {
@@ -153,7 +154,7 @@ pub fn is_valid_mediator(env: &Env, mediator: &Address) -> bool {
 }
 
 pub fn get_arbitrators(env: &Env) -> Vec<ArbitratorData> {
-    let arbitrators: Map<Address, ArbitratorData> = env
+    let _arbitrators: Map<Address, ArbitratorData> = env
         .storage()
         .instance()
         .get(&ARBITRATORS)

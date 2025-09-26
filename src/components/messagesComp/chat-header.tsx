@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { VALIDATION_LIMITS } from "@/constants/magic-numbers";
 
 export function ChatHeader({
   name = "John Doe",
@@ -20,7 +21,7 @@ export function ChatHeader({
             {name
               .split(" ")
               .map((n) => n[0])
-              .slice(0, 2)
+              .slice(0, VALIDATION_LIMITS.MAX_AVATAR_INITIALS)
               .join("")
               .toUpperCase()}
           </AvatarFallback>

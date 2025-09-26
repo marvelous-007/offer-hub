@@ -6,27 +6,39 @@ import {
   getContractsByUserHandler,
   getContractsByStatusHandler,
 } from "@/controllers/contract.controller";
+import { authorizeRoles, verifyToken } from "@/middlewares/auth.middleware";
+import { UserRole } from "@/types/auth.types";
 
 const router = Router();
 
 // POST /api/contracts - Create contract
 // Protected route - requires authentication
-router.post("/", createContractHandler);
+router.post("/", verifyToken, authorizeRoles(UserRole.CLIENT), createContractHandler);
 
 // GET /api/contracts/:id - Get contract details
-// Public route - no authentication required
-router.get("/:id", getContractByIdHandler);
+// Protected route - requires authentication
+router.get("/:id", verifyToken, getContractByIdHandler);
 
 // PATCH /api/contracts/:id - Update escrow status
 // Protected route - requires authentication and authorization
-router.patch("/:id", updateContractStatusHandler);
+router.patch(
+  "/:id",
+  verifyToken,
+  authorizeRoles(UserRole.CLIENT, UserRole.ADMIN),
+  updateContractStatusHandler
+);
 
 // GET /api/contracts/user/:userId - Get contracts by user
-// Public route - no authentication required
-router.get("/user/:userId", getContractsByUserHandler);
+// Protected route - requires authentication
+router.get("/user/:userId", verifyToken, getContractsByUserHandler);
 
 // GET /api/contracts/status/:status - Get contracts by status
-// Public route - no authentication required
-router.get("/status/:status", getContractsByStatusHandler);
+// Protected route - requires authentication
+router.get(
+  "/status/:status",
+  verifyToken,
+  authorizeRoles(UserRole.ADMIN),
+  getContractsByStatusHandler
+);
 
-export default router; 
+export default router;

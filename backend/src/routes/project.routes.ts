@@ -1,18 +1,39 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
   createProjectHandler,
   getAllProjectsHandler,
   getProjectByIdHandler,
   updateProjectHandler,
-  deleteProjectHandler
-} from '@/controllers/project.controller';
+  deleteProjectHandler,
+} from "@/controllers/project.controller";
+import { authorizeRoles, verifyToken } from "@/middlewares/auth.middleware";
+import { UserRole } from "@/types/auth.types";
 
 const router = Router();
 
-router.post('/', createProjectHandler);
-router.get('/', getAllProjectsHandler);
-router.get('/:id', getProjectByIdHandler);
-router.patch('/:id', updateProjectHandler);
-router.delete('/:id', deleteProjectHandler);
+router.post(
+  "/",
+  verifyToken,
+  authorizeRoles(UserRole.CLIENT, UserRole.ADMIN),
+  createProjectHandler
+);
+
+router.get("/", getAllProjectsHandler);
+
+router.get("/:id", getProjectByIdHandler);
+
+router.patch(
+  "/:id",
+  verifyToken,
+  authorizeRoles(UserRole.CLIENT, UserRole.ADMIN),
+  updateProjectHandler
+);
+
+router.delete(
+  "/:id",
+  verifyToken,
+  authorizeRoles(UserRole.CLIENT, UserRole.ADMIN),
+  deleteProjectHandler
+);
 
 export default router;

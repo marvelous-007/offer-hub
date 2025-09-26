@@ -1,3 +1,8 @@
+/**
+ * @fileoverview User service providing user data management and database operations
+ * @author Offer Hub Team
+ */
+
 import { supabase } from "@/lib/supabase/supabase";
 import { AppError, BadRequestError, ConflictError, InternalServerError } from "@/utils/AppError";
 import { CreateUserDTO, User, UserFilters } from "@/types/user.types";

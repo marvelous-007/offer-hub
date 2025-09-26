@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Root layout component for the Next.js application
+ * @author Offer Hub Team
+ */
+
 import './globals.css';
 
 import { Geist, Geist_Mono } from 'next/font/google';
@@ -7,6 +12,14 @@ import type { Metadata } from 'next';
 import { Toaster } from 'sonner';
 import { TrustlessWorkProvider } from '@/providers/TrustlessWorkProvider';
 import { WalletProvider } from '@/components/onboarding/WalletContext';
+import ErrorBoundary from '@/components/shared/ErrorBoundary';
+import { NotificationProvider } from '@/lib/contexts/NotificatonContext';
+import { TalentProvider } from '@/lib/contexts/TalentContext';
+import { OfferProvider } from '@/lib/contexts/OfferContext';
+import { Suspense } from 'react';
+import NotificationToast from '@/components/shared/NotificationToast';
+import { MessageProvider } from '@/lib/contexts/MessageContext';
+import { KeyboardShortcutsProvider } from '@/components/common/keyboard-shortcuts-provider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -34,12 +47,29 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <TrustlessWorkProvider>
-          <WalletProvider>
-            <EscrowProvider>
-              <main>{children}</main>
-              <Toaster position="top-right" />
-            </EscrowProvider>
-          </WalletProvider>
+          <ErrorBoundary>
+            <NotificationProvider>
+              <TalentProvider>
+                <MessageProvider>
+                  <OfferProvider>
+                    <WalletProvider>
+                      <EscrowProvider>
+                        <KeyboardShortcutsProvider>
+                          <Suspense fallback={null}>
+                            <main>
+                              {children}
+                            </main>
+                            <NotificationToast />
+                          </Suspense>
+                          <Toaster position="top-right" />
+                        </KeyboardShortcutsProvider>
+                      </EscrowProvider>
+                    </WalletProvider>
+                  </OfferProvider>
+                </MessageProvider>
+              </TalentProvider>
+            </NotificationProvider>
+          </ErrorBoundary>
         </TrustlessWorkProvider>
       </body>
     </html>

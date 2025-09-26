@@ -4,10 +4,17 @@ mod access;
 mod contract;
 mod storage;
 mod test;
+mod validation_test;
 mod types;
+mod validation;
+mod error;
 
-use crate::types::{DisputeData, DisputeOutcome, Error, Evidence, ArbitratorData};
+// #[cfg(test)]
+// mod validation_test;
+
+use crate::types::{ArbitratorData, DisputeData, DisputeOutcome, Evidence, DisputeInfo};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
+use crate::{error::{handle_error, Error}};
 
 #[contract]
 pub struct DisputeResolutionContract;
@@ -33,7 +40,14 @@ impl DisputeResolutionContract {
         escrow_contract: Option<Address>,
         dispute_amount: i128,
     ) -> Result<(), Error> {
-        contract::open_dispute(&env, job_id, initiator, reason, escrow_contract, dispute_amount);
+        contract::open_dispute(
+            &env,
+            job_id,
+            initiator,
+            reason,
+            escrow_contract,
+            dispute_amount,
+        );
         Ok(())
     }
 
@@ -95,7 +109,11 @@ impl DisputeResolutionContract {
         Ok(contract::get_dispute_evidence(&env, job_id))
     }
 
-    pub fn set_dispute_timeout(env: Env, admin: Address, timeout_seconds: u64) -> Result<(), Error> {
+    pub fn set_dispute_timeout(
+        env: Env,
+        admin: Address,
+        timeout_seconds: u64,
+    ) -> Result<(), Error> {
         contract::set_dispute_timeout(&env, admin, timeout_seconds);
         Ok(())
     }
@@ -110,19 +128,11 @@ impl DisputeResolutionContract {
         access::add_arbitrator(&env, admin, arbitrator, name)
     }
 
-    pub fn remove_arbitrator(
-        env: Env,
-        admin: Address,
-        arbitrator: Address,
-    ) -> Result<(), Error> {
+    pub fn remove_arbitrator(env: Env, admin: Address, arbitrator: Address) -> Result<(), Error> {
         access::remove_arbitrator(&env, admin, arbitrator)
     }
 
-    pub fn add_mediator_access(
-        env: Env,
-        admin: Address,
-        mediator: Address,
-    ) -> Result<(), Error> {
+    pub fn add_mediator_access(env: Env, admin: Address, mediator: Address) -> Result<(), Error> {
         access::add_mediator(&env, admin, mediator)
     }
 
@@ -140,5 +150,52 @@ impl DisputeResolutionContract {
 
     pub fn get_mediators(env: Env) -> Result<Vec<Address>, Error> {
         Ok(access::get_mediators(&env))
+    }
+
+    // ===== Rate limiting admin helpers =====
+    pub fn set_rate_limit_bypass(
+        env: Env,
+        admin: Address,
+        user: Address,
+        bypass: bool,
+    ) -> Result<(), Error> {
+        storage::set_bypass(&env, &admin, &user, bypass)
+    }
+
+    pub fn reset_rate_limit(
+        env: Env,
+        admin: Address,
+        user: Address,
+        limit_type: String,
+    ) -> Result<(), Error> {
+        // simple admin check against ARBITRATOR key
+        let stored_admin: Option<Address> = env.storage().instance().get(&storage::ARBITRATOR);
+        if stored_admin.as_ref() != Some(&admin) {
+            return Err(Error::Unauthorized);
+        }
+        storage::reset_rate_limit(&env, &user, &limit_type);
+        Ok(())
+    }
+
+
+    pub fn set_config(env: Env, admin: Address, config: types::ContractConfig) -> Result<(), Error> {
+        contract::set_config(&env, admin, config);
+        Ok(())
+    }
+
+    pub fn get_config(env: Env) -> Result<types::ContractConfig, Error> {
+        Ok(contract::get_config(&env))
+    }
+
+    pub fn get_total_disputes(env: Env) -> Result<u64, Error> {
+        Ok(contract::get_total_disputes(&env))
+    }
+
+    pub fn reset_dispute_count(env: &Env, admin: Address) -> Result<(), Error> {
+        contract::reset_dispute_count(&env, admin)
+    }
+
+     pub fn get_dispute_info(env: &Env, dispute_id: u32) -> Result<DisputeInfo, Error> {
+        contract::get_dispute_info(&env, dispute_id)
     }
 }

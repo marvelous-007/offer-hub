@@ -1,7 +1,8 @@
 {
   "generators": {
     "address": 5,
-    "nonce": 0
+    "nonce": 0,
+    "mux_id": 0
   },
   "auth": [
     [],
@@ -30,9 +31,9 @@
     []
   ],
   "ledger": {
-    "protocol_version": 22,
+    "protocol_version": 23,
     "sequence_number": 0,
-    "timestamp": 1101,
+    "timestamp": 4601,
     "network_id": "0000000000000000000000000000000000000000000000000000000000000000",
     "base_reserve": 0,
     "min_persistent_entry_ttl": 4096,
@@ -64,6 +65,14 @@
                     "storage": [
                       {
                         "key": {
+                          "symbol": "ESCCOUNT"
+                        },
+                        "val": {
+                          "u64": "2"
+                        }
+                      },
+                      {
+                        "key": {
                           "symbol": "ESCROW"
                         },
                         "val": {
@@ -73,10 +82,7 @@
                                 "symbol": "amount"
                               },
                               "val": {
-                                "i128": {
-                                  "hi": 0,
-                                  "lo": 500
-                                }
+                                "i128": "500"
                               }
                             },
                             {
@@ -100,7 +106,7 @@
                                 "symbol": "created_at"
                               },
                               "val": {
-                                "u64": 1000
+                                "u64": "1000"
                               }
                             },
                             {
@@ -122,10 +128,7 @@
                                 "symbol": "fee_collected"
                               },
                               "val": {
-                                "i128": {
-                                  "hi": 0,
-                                  "lo": 0
-                                }
+                                "i128": "0"
                               }
                             },
                             {
@@ -149,7 +152,7 @@
                                 "symbol": "funded_at"
                               },
                               "val": {
-                                "u64": 1000
+                                "u64": "1000"
                               }
                             },
                             {
@@ -173,10 +176,7 @@
                                 "symbol": "net_amount"
                               },
                               "val": {
-                                "i128": {
-                                  "hi": 0,
-                                  "lo": 500
-                                }
+                                "i128": "500"
                               }
                             },
                             {
@@ -184,10 +184,7 @@
                                 "symbol": "released_amount"
                               },
                               "val": {
-                                "i128": {
-                                  "hi": 0,
-                                  "lo": 0
-                                }
+                                "i128": "0"
                               }
                             },
                             {
@@ -195,7 +192,7 @@
                                 "symbol": "released_at"
                               },
                               "val": {
-                                "u64": 1101
+                                "u64": "4601"
                               }
                             },
                             {
@@ -206,7 +203,7 @@
                             },
                             {
                               "key": {
-                                "symbol": "status"
+                                "symbol": "state"
                               },
                               "val": {
                                 "vec": [
@@ -221,7 +218,7 @@
                                 "symbol": "timeout_secs"
                               },
                               "val": {
-                                "u64": 100
+                                "u64": "3600"
                               }
                             },
                             {
@@ -242,6 +239,142 @@
                         "val": {
                           "bool": true
                         }
+                      },
+                      {
+                        "key": {
+                          "symbol": "LCOUNT"
+                        },
+                        "val": {
+                          "u32": 2
+                        }
+                      },
+                      {
+                        "key": {
+                          "vec": [
+                            {
+                              "symbol": "LOGS"
+                            },
+                            {
+                              "u32": 0
+                            }
+                          ]
+                        },
+                        "val": {
+                          "map": [
+                            {
+                              "key": {
+                                "symbol": "caller"
+                              },
+                              "val": {
+                                "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "function_name"
+                              },
+                              "val": {
+                                "string": "init_contract_full"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "gas_used"
+                              },
+                              "val": {
+                                "u64": "0"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "success"
+                              },
+                              "val": {
+                                "bool": true
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "timestamp"
+                              },
+                              "val": {
+                                "u64": "1000"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "transaction_hash"
+                              },
+                              "val": {
+                                "string": "unknown"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "key": {
+                          "vec": [
+                            {
+                              "symbol": "LOGS"
+                            },
+                            {
+                              "u32": 1
+                            }
+                          ]
+                        },
+                        "val": {
+                          "map": [
+                            {
+                              "key": {
+                                "symbol": "caller"
+                              },
+                              "val": {
+                                "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "function_name"
+                              },
+                              "val": {
+                                "string": "deposit_funds"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "gas_used"
+                              },
+                              "val": {
+                                "u64": "0"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "success"
+                              },
+                              "val": {
+                                "bool": true
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "timestamp"
+                              },
+                              "val": {
+                                "u64": "1000"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "transaction_hash"
+                              },
+                              "val": {
+                                "string": "unknown"
+                              }
+                            }
+                          ]
+                        }
                       }
                     ]
                   }
@@ -259,7 +392,7 @@
             "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
             "key": {
               "ledger_key_nonce": {
-                "nonce": 801925984706572462
+                "nonce": "801925984706572462"
               }
             },
             "durability": "temporary"
@@ -274,7 +407,7 @@
                 "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
                 "key": {
                   "ledger_key_nonce": {
-                    "nonce": 801925984706572462
+                    "nonce": "801925984706572462"
                   }
                 },
                 "durability": "temporary",

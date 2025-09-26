@@ -92,9 +92,9 @@ export function DisputeMessageBubble({
 
         {attachments && attachments.length > 0 && (
           <div className="mt-2 space-y-2">
-            {attachments.map((attachment, index) => (
+            {attachments.map((attachment) => (
               <div
-                key={index}
+                key={`${attachment.name}-${attachment.url}`}
                 className="border border-gray-200 rounded-lg p-3 bg-white max-w-xs"
               >
                 {attachment.type === "image" ? (

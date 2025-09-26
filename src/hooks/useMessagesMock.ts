@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import {  useMemo, useState } from "react";
 import { conversations as rawConvs } from "@/lib/mockData/conversations-mock";
 import { messages as rawMsgs } from "@/lib/mockData/messages-mock";
 import { currentUserId, users } from "@/lib/mockData/users-mock";
@@ -25,16 +25,24 @@ type UIMessage = {
 
 const getUser = (id: string) => users.find(u => u.id === id);
 
-export function useMessagesMock() {
+interface UseMessagesMockReturn {
+  conversations: UIConversation[];
+  activeConversationId: string;
+  setActiveConversationId: (id: string) => void;
+  activeConversation: UIConversation | null;
+  messages: UIMessage[];
+  handleSendMessage: (text: string) => void;
+}
+
+export function useMessagesMock(): UseMessagesMockReturn {
   // Conversaciones adaptadas a la UI
   const conversations: UIConversation[] = useMemo(() => {
     return rawConvs.map((c) => {
-      const otherId = c.participants.find((p) => p !== currentUserId) || c.participants[0];
-      const other = getUser(otherId);
+      const other = c.participants.find((p) => p.id !== currentUserId) || c.participants[0];
       return {
         id: c.id,
-        name: other?.name ?? otherId,
-        avatarUrl: other?.avatarUrl,
+        name: other.name,
+        avatarUrl: other.avatarUrl,
         unreadCount: c.unreadCount ?? 0,
       };
     });
@@ -51,7 +59,7 @@ export function useMessagesMock() {
         type: m.fileUrl ? "file" : "text",
         fileData: m.fileUrl
           ? {
-              name: m.fileName ?? "file",
+              name: "file",
               size: "—",
               uploadDate: new Date(m.createdAt).toLocaleDateString(),
               status: m.status === "read" ? "Read" : m.status === "delivered" ? "Delivered" : "Sent",

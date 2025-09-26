@@ -4,11 +4,13 @@ mod contract;
 mod error;
 mod event;
 mod storage;
-mod utils;
 #[cfg(test)]
 mod test;
 #[cfg(test)]
 mod test_optimization;
+mod types;
+mod utils;
+mod validation;
 
 use crate::contract::PublicationContract;
 use crate::error::ContractError;
@@ -46,4 +48,3 @@ impl Contract {
         PublicationContract::get_publication(env, user, id)
     }
 }
-

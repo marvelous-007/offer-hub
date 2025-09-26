@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -10,6 +9,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { useStartDisputeForm } from "../../hooks/useStartDispute";
 
 export function StartDisputeForm() {
@@ -44,6 +44,20 @@ export function StartDisputeForm() {
                 <FormLabel>Signer Address</FormLabel>
                 <FormControl>
                   <Input placeholder="GSIGN...XYZ" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="reason"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Reason for Dispute</FormLabel>
+                <FormControl>
+                  <Input placeholder="Describe the reason for the dispute..." {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

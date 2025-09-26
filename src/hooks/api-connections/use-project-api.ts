@@ -1,6 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { CreateProjectDTO, ProjectDraft, ProjectResponse } from "@/types/project.types";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import { isApiError } from "@/utils/type-guards";
 
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000",
@@ -13,8 +14,14 @@ const handleRequest = async <T>(request: Promise<{ data: T }>): Promise<T> => {
     try {
         const { data } = await request;
         return data;
-    } catch (error: any) {
-        throw new Error(error.response?.data?.message || 'API request failed');
+    } catch (error: unknown) {
+        if (isApiError(error)) {
+            const message = error.response?.data && typeof error.response.data === 'object' && 'message' in error.response.data 
+                ? String(error.response.data.message) 
+                : 'API request failed';
+            throw new Error(message);
+        }
+        throw new Error('API request failed');
     }
 }
 

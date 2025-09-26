@@ -1,11 +1,13 @@
 "use client"
 
 import { useMemo, useState } from "react"
+
+import withErrorBoundary from "@/components/shared/WithErrorBoundary";
 import { ProjectCard } from "@/components/projects/ProjectCard"
 import { ProjectTabs } from "@/components/projects/ProjectTabs"
 import { ProjectsList } from "@/components/projects/ProjectsList"
-import { MoreHorizontal } from "lucide-react"
-import { getMockProjects, type Project } from "@/lib/mockData/projects-list-mock"
+
+import { getMockProjects} from "@/lib/mockData/projects-list-mock"
 
 const TABS = [
   { key: "active", label: "Active project" },
@@ -16,7 +18,7 @@ const TABS = [
 
 type TabKey = (typeof TABS)[number]["key"]
 
-export function ProjectDashboard() {
+function ProjectDashboard() {
   const [tab, setTab] = useState<TabKey>("completed")
   const projects = getMockProjects()
 
@@ -28,9 +30,13 @@ export function ProjectDashboard() {
     return []
   }, [tab, projects])
 
+  const handleTabChange = (newTab: string) => {
+    setTab(newTab as TabKey);
+  };
+
   return (
     <div className="p-3 sm:p-6">
-      <ProjectTabs tabs={TABS} activeTab={tab} onTabChange={setTab} />
+      <ProjectTabs tabs={TABS} activeTab={tab} onTabChange={handleTabChange} />
       
       <div className="mx-auto w-full max-w-[680px] mt-3 sm:mt-4 space-y-4">
         {tab === "analytics" ? (
@@ -44,4 +50,6 @@ export function ProjectDashboard() {
     </div>
   )
 }
+
+export default withErrorBoundary(ProjectDashboard);
 

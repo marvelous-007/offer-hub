@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import SearchBar from "@/components/freelancer-search/search-bar"
 import FiltersSection from "@/components/freelancer-search/filters-section"
 import FreelancerCard from "@/components/freelancer-search/freelancer-card"
@@ -26,7 +26,7 @@ export interface Freelancer {
   category: string
 }
 
-export default function Home() {
+function FreelancerSearchContent() {
   // Get URL parameters for initial state
   const searchParams = useSearchParams()
   const initialSearchQuery = searchParams.get('q') || ""
@@ -287,6 +287,14 @@ export default function Home() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FreelancerSearchContent />
+    </Suspense>
   )
 }
 
