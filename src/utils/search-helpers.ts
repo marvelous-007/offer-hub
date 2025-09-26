@@ -301,10 +301,9 @@ function applyPriceFilter(
       freelancer.currency, 
       priceFilter.currency
     )
-    
-    const meetsMin = !priceFilter.min || freelancerRate >= priceFilter.min
-    const meetsMax = !priceFilter.max || freelancerRate <= priceFilter.max
-    
+    const meetsMin = priceFilter.min === undefined || freelancerRate >= priceFilter.min
+    const meetsMax = priceFilter.max === undefined || freelancerRate <= priceFilter.max
+
     return meetsMin && meetsMax
   })
 }

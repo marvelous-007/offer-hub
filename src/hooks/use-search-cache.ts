@@ -5,7 +5,8 @@ import {
   SearchCacheEntry, 
   CacheOperations,
   SearchResults,
-  SearchQuery 
+  SearchQuery ,
+  SearchResultMetadata
 } from '../types/freelancer-search.types'
 import { SearchCache } from '../utils/search-performance'
 import { generateCacheKey } from '../utils/search-helpers'
@@ -181,7 +182,7 @@ export function useSearchResultsCache(options: UseSearchCacheOptions = {}) {
   const cacheResults = useCallback((
     query: SearchQuery, 
     results: SearchResults,
-    metadata?: Record<string, any>
+    metadata?: Partial<SearchResultMetadata>
   ): void => {
     const tags = [
       'search_results',
@@ -192,7 +193,15 @@ export function useSearchResultsCache(options: UseSearchCacheOptions = {}) {
       query.filters.priceRange?.currency ? `currency_${query.filters.priceRange.currency}` : ''
     ].filter(Boolean)
 
-    cache.set(generateCacheKey(query), { ...results, metadata }, undefined, tags)
+    cache.set(
+      generateCacheKey(query),
+      { 
+        ...results, 
+        metadata: metadata ? { ...results.metadata, ...metadata } : results.metadata 
+      },
+      undefined,
+      tags
+    )
   }, [cache])
 
   
