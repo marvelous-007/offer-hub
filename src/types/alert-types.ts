@@ -7,7 +7,7 @@ export interface AlertProps {
   variant?: AlertVariant;
   size?: AlertSize;
   title?: string;
-  message: string;
+  message?: string;
   dismissible?: boolean;
   onDismiss?: () => void;
   className?: string;
