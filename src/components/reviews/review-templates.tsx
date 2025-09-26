@@ -21,7 +21,8 @@ import {
   Copy,
   Download,
   Upload,
-  Settings
+  Settings,
+  X
 } from 'lucide-react';
 import {
   ReviewTemplate,
