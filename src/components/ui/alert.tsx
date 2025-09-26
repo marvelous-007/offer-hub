@@ -93,6 +93,21 @@ export function Alert({
   );
 }
 
+// Componente AlertTitle para compatibilidad
+export function AlertTitle({ 
+  children, 
+  className 
+}: { 
+  children: React.ReactNode; 
+  className?: string; 
+}) {
+  return (
+    <h4 className={cn("font-semibold mb-1", className)}>
+      {children}
+    </h4>
+  );
+}
+
 // Componente AlertDescription para compatibilidad
 export function AlertDescription({ 
   children, 
