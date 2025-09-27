@@ -15,6 +15,12 @@ pub enum Error {
     MilestoneNotFound = 9,
     RateLimitExceeded = 10,
     UnexpectedError = 11,
+    InvalidTimestamp = 12,
+    TimestampTooOld = 13,
+    AlreadyPaused = 14,
+    NotPaused = 15,
+    ContractPaused = 16,
+    
 }
 
 pub fn handle_error(env: &Env, error: Error) -> ! {
