@@ -1,5 +1,6 @@
 #![no_std]
-use crate::types::{Error, EscrowSummary};
+use crate::types::{EscrowSummary};
+use crate::error::Error;
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Symbol, Vec};
 
 mod contract;
@@ -24,6 +25,22 @@ impl EscrowContract {
         fee_manager: Address,
     ) {
         contract::init_contract(&env, client, freelancer, amount, fee_manager);
+    }
+
+    pub fn pause(env: Env, admin: Address) -> Result<(), Error> {
+        contract::pause(&env, admin)
+    }
+
+    pub fn is_paused(env: Env) -> bool {
+        contract::is_paused(&env)
+    }
+
+    pub fn unpause(env: Env, admin: Address) -> Result<(), Error> {
+        contract::unpause(&env, admin)
+    }
+
+    pub fn emergency_withdraw(env: &Env, admin: Address) -> Result<(), Error> {
+        contract::emergency_withdraw(&env, admin)
     }
 
     pub fn deposit_funds(env: Env, client: Address) {
@@ -112,10 +129,23 @@ impl EscrowContract {
         contract::reset_rate_limit(&env, caller, user, limit_type);
     }
 
+    pub fn initialize_contract(env: Env, admin: Address) {
+        contract::initialize_contract(&env, admin);
+    }
+
+    pub fn set_config(env: Env, caller: Address, config: types::ContractConfig) {
+        contract::set_config(&env, caller, config);
+    }
+
+    pub fn get_config(env: Env) -> types::ContractConfig {
+        contract::get_config(&env)
+    }
+
     pub fn get_contract_status(env: &Env, contract_id: Address) -> EscrowSummary {
         contract::get_contract_status(&env, contract_id)
 
     }
+
 
 }
 

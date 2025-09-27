@@ -1,4 +1,9 @@
 
+/**
+ * @fileoverview Custom hook for managing user messages and chat functionality
+ * @author Offer Hub Team
+ */
+
 import { useState, useEffect, useCallback } from 'react';
 import type { Conversation, Message, CreateMessageDTO } from '@/types/messages.types';
 import {

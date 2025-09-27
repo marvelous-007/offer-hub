@@ -1,7 +1,8 @@
 
 use soroban_sdk::{Address, Env, Symbol};
 use crate::storage::{ContractStats};
-use crate::types::{DataKey, Error};
+use crate::error::Error;
+use crate::types::{DataKey};
 use escrow_contract;
 
 use rating_contract;

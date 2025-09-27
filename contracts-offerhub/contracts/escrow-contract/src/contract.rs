@@ -1,4 +1,4 @@
-use soroban_sdk::{Address, Env, IntoVal, String, Symbol, Vec};
+use soroban_sdk::{log, Address, Env, IntoVal, String, Symbol, Vec};
 
 use crate::storage::{
     check_rate_limit, increment_escrow_transaction_count, reset_rate_limit as rl_reset,
@@ -6,19 +6,152 @@ use crate::storage::{
 };
 use crate::{
     error::handle_error,
-    storage::{add_call_log, CallLog, ESCROW_DATA, INITIALIZED},
+
+    storage::{ESCROW_DATA, INITIALIZED, add_call_log, CallLog, CONTRACT_CONFIG, 
+              DEFAULT_MIN_ESCROW_AMOUNT, DEFAULT_MAX_ESCROW_AMOUNT, DEFAULT_TIMEOUT_DAYS,
+              DEFAULT_MAX_MILESTONES, DEFAULT_FEE_PERCENTAGE, DEFAULT_RATE_LIMIT_CALLS,
+              DEFAULT_RATE_LIMIT_WINDOW_HOURS, PAUSED},
+    types::{DisputeResult, EscrowData, Milestone, MilestoneHistory, ContractConfig},
+    validation::{validate_init_contract, validate_init_contract_full, validate_add_milestone, validate_milestone_id, validate_address},
+
     types::{
-        DisputeResult, Error, EscrowData, EscrowDataExport, EscrowStatus, Milestone,
-        MilestoneHistory, EscrowSummary
+        EscrowDataExport, EscrowState, EscrowSummary
     },
-    validation::{
-        validate_add_milestone, validate_address, validate_init_contract,
-        validate_init_contract_full, validate_milestone_id,
-    },
+    error::Error,
 };
 
 const TOKEN_TRANSFER: &str = "transfer";
 const TOKEN_BALANCE: &str = "balance";
+const MAX_AGE: u64 = 365 * 24 * 60 * 60; // 1 year in seconds 31_536_000
+
+pub fn initialize_contract(env: &Env, admin: Address) {
+    if env.storage().instance().has(&CONTRACT_CONFIG) {
+        handle_error(env, Error::AlreadyInitialized);
+    }
+    
+    admin.require_auth();
+    
+    let contract_config = ContractConfig {
+        min_escrow_amount: DEFAULT_MIN_ESCROW_AMOUNT,
+        max_escrow_amount: DEFAULT_MAX_ESCROW_AMOUNT,
+        default_timeout_days: DEFAULT_TIMEOUT_DAYS,
+        max_milestones: DEFAULT_MAX_MILESTONES,
+        fee_percentage: DEFAULT_FEE_PERCENTAGE,
+        rate_limit_calls: DEFAULT_RATE_LIMIT_CALLS,
+        rate_limit_window_hours: DEFAULT_RATE_LIMIT_WINDOW_HOURS,
+    };
+    
+    env.storage().instance().set(&CONTRACT_CONFIG, &contract_config);
+    env.storage().instance().set(&PAUSED, &false);
+    
+    env.events().publish(
+        (Symbol::new(env, "contract_initialized"), admin),
+        env.ledger().timestamp(),
+    );
+}
+
+pub fn is_paused(env: &Env) -> bool {
+    env.storage().instance().get(&PAUSED).unwrap_or(false)
+}
+
+pub fn pause(env: &Env, admin: Address) -> Result<(), Error> {
+    admin.require_auth();
+    let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap_or_else(|| handle_error(env, Error::NotInitialized));
+    if escrow.client != admin {
+        return Err(Error::Unauthorized);
+    }
+    
+    if is_paused(env) {
+        return Err(Error::AlreadyPaused);
+    }
+    
+    env.storage().instance().set(&PAUSED, &true);
+    
+    env.events().publish(
+        (Symbol::new(env, "contract_paused"), admin),
+        env.ledger().timestamp(),
+    );
+    
+    Ok(())
+}
+
+pub fn unpause(env: &Env, admin: Address) -> Result<(), Error> {
+    admin.require_auth();
+    let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap_or_else(|| handle_error(env, Error::NotInitialized));
+    if escrow.client != admin {
+        return Err(Error::Unauthorized);
+    }
+    
+    if !is_paused(env) {
+        return Err(Error::NotPaused);
+    }
+    
+    env.storage().instance().set(&PAUSED, &false);
+    
+    env.events().publish(
+        (Symbol::new(env, "contract_unpaused"), admin),
+        env.ledger().timestamp(),
+    );
+    
+    Ok(())
+}
+
+
+// Emergency withdrawal function
+pub fn emergency_withdraw(env: &Env, admin: Address) -> Result<(), Error> {
+    admin.require_auth();
+    
+    if !is_paused(env) {
+        return Err(Error::NotPaused);
+    }
+    
+    let mut escrow_data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap_or_else(|| handle_error(env, Error::NotInitialized));
+    
+    if escrow_data.client != admin && escrow_data.freelancer != admin {
+        return Err(Error::Unauthorized);
+    }
+    
+    if escrow_data.state == EscrowState::Released || escrow_data.state == EscrowState::Refunded {
+        return Err(Error::InvalidStatus);
+    }
+    
+    if let (Some(token), amount) = (escrow_data.token.clone(), escrow_data.amount) {
+        let contract_addr = env.current_contract_address();
+        let half = amount / 2;
+        
+        env.invoke_contract::<()>(
+            &token,
+            &Symbol::new(env, TOKEN_TRANSFER),
+            (contract_addr.clone(), escrow_data.client.clone(), half).into_val(env),
+        );
+        env.invoke_contract::<()>(
+            &token,
+            &Symbol::new(env, TOKEN_TRANSFER),
+            (contract_addr, escrow_data.freelancer.clone(), amount - half).into_val(env),
+        );
+        
+        escrow_data.state = EscrowState::Released;
+        escrow_data.dispute_result = DisputeResult::Split as u32;
+        escrow_data.resolved_at = Some(env.ledger().timestamp());
+        escrow_data.released_at = Some(env.ledger().timestamp());
+        
+        env.storage().instance().set(&ESCROW_DATA, &escrow_data);
+        
+        env.events().publish(
+            (Symbol::new(env, "emergency_withdrawal"), admin),
+            (escrow_data.amount, env.ledger().timestamp()),
+        );
+        
+        let total_escrow_transaction = increment_escrow_transaction_count(env);
+        env.events().publish(
+            (Symbol::new(env, "escrow_tx_count"),),
+            total_escrow_transaction,
+        );
+    }
+    
+    Ok(())
+}
+
 
 // Helper function to log function calls
 fn log_function_call(env: &Env, function_name: &str, caller: &Address, success: bool) {
@@ -45,11 +178,21 @@ pub fn init_contract_full(
 ) {
     let caller = client.clone();
 
+    if is_paused(env) {
+        handle_error(env, Error::ContractPaused);
+    }
+
     // Log function call start
     log_function_call(env, "init_contract_full", &caller, true);
 
     if env.storage().instance().has(&INITIALIZED) {
         handle_error(env, Error::AlreadyInitialized);
+    }
+
+
+    // Validate timeout_secs timestamp
+    if let Err(e) = validate_timestamp(env, env.ledger().timestamp() + timeout_secs) {
+        handle_error(env, e);
     }
 
     // Input validation
@@ -70,7 +213,7 @@ pub fn init_contract_full(
         arbitrator: Some(arbitrator),
         token: Some(token),
         amount,
-        status: EscrowStatus::Initialized,
+        state: EscrowState::Created,
         dispute_result: DisputeResult::None as u32,
         created_at: env.ledger().timestamp(),
         funded_at: None,
@@ -98,6 +241,10 @@ pub fn init_contract(
 ) {
     let caller = client.clone();
 
+    if is_paused(env) {
+        handle_error(env, Error::ContractPaused);
+    }
+
     // Log function call start
     log_function_call(env, "init_contract", &caller, true);
 
@@ -116,7 +263,7 @@ pub fn init_contract(
         arbitrator: None,
         token: None,
         amount,
-        status: EscrowStatus::Initialized,
+        state: EscrowState::Created,
         dispute_result: DisputeResult::None as u32,
         created_at: env.ledger().timestamp(),
         funded_at: None,
@@ -137,7 +284,12 @@ pub fn init_contract(
     env.events().publish((Symbol::new(env  , "initiated_contract") ,caller ), (freelancer , amount , fee_manager , env.ledger().timestamp()));
 }
 
+
 pub fn deposit_funds(env: &Env, client: Address) {
+    if is_paused(env) {
+        handle_error(env, Error::ContractPaused);
+    }
+
     let caller = client.clone();
 
     // Log function call start
@@ -151,11 +303,18 @@ pub fn deposit_funds(env: &Env, client: Address) {
 
     let mut escrow_data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
 
+    // Validate timeout hasn't expired
+    if let Some(timeout_secs) = escrow_data.timeout_secs {
+        if let Err(e) = validate_timestamp(env, escrow_data.created_at + timeout_secs) {
+            handle_error(env, e);
+        }
+    }
+
     if escrow_data.client != client {
         handle_error(env, Error::Unauthorized);
     }
 
-    if escrow_data.status != EscrowStatus::Initialized {
+    if escrow_data.state != EscrowState::Created {
         handle_error(env, Error::InvalidStatus);
     }
 
@@ -176,7 +335,7 @@ pub fn deposit_funds(env: &Env, client: Address) {
         );
     }
 
-    escrow_data.status = EscrowStatus::Funded;
+    escrow_data.state = EscrowState::Funded;
     escrow_data.funded_at = Some(env.ledger().timestamp());
 
     env.storage().instance().set(&ESCROW_DATA, &escrow_data);
@@ -193,6 +352,10 @@ pub fn deposit_funds(env: &Env, client: Address) {
 }
 
 pub fn release_funds(env: &Env, freelancer: Address) {
+    if is_paused(env) {
+        handle_error(env, Error::ContractPaused);
+    }
+
     let caller = freelancer.clone();
 
     // Log function call start
@@ -206,11 +369,18 @@ pub fn release_funds(env: &Env, freelancer: Address) {
 
     let mut escrow_data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
 
+    // Validate timeout hasn't expired
+    if let Some(timeout_secs) = escrow_data.timeout_secs {
+        if let Err(e) = validate_timestamp(env, escrow_data.created_at + timeout_secs) {
+            handle_error(env, e);
+        }
+    }
+
     if escrow_data.freelancer != freelancer {
         handle_error(env, Error::Unauthorized);
     }
 
-    if escrow_data.status != EscrowStatus::Funded {
+    if escrow_data.state != EscrowState::Funded {
         handle_error(env, Error::InvalidStatus);
     }
 
@@ -226,7 +396,7 @@ pub fn release_funds(env: &Env, freelancer: Address) {
     let fee_amount = (escrow_data.amount * fee_percentage) / 10000;
     let net_amount = escrow_data.amount - fee_amount;
 
-    escrow_data.status = EscrowStatus::Released;
+    escrow_data.state = EscrowState::Released;
     escrow_data.released_at = Some(env.ledger().timestamp());
     escrow_data.fee_collected = fee_amount;
     escrow_data.net_amount = net_amount;
@@ -252,6 +422,10 @@ pub fn release_funds(env: &Env, freelancer: Address) {
 }
 
 pub fn dispute(env: &Env, caller: Address) {
+    if is_paused(env) {
+        handle_error(env, Error::ContractPaused);
+    }
+
     let caller_addr = caller.clone();
 
     // Log function call start
@@ -269,11 +443,11 @@ pub fn dispute(env: &Env, caller: Address) {
         handle_error(env, Error::Unauthorized);
     }
 
-    if escrow_data.status != EscrowStatus::Funded {
+    if escrow_data.state != EscrowState::Funded {
         handle_error(env, Error::InvalidStatus);
     }
 
-    escrow_data.status = EscrowStatus::Disputed;
+    escrow_data.state = EscrowState::Disputed;
     escrow_data.disputed_at = Some(env.ledger().timestamp());
 
     env.storage().instance().set(&ESCROW_DATA, &escrow_data);
@@ -291,6 +465,10 @@ pub fn dispute(env: &Env, caller: Address) {
 }
 
 pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
+    if is_paused(env) {
+        handle_error(env, Error::ContractPaused);
+    }
+
     let caller_addr = caller.clone();
 
     // Log function call start
@@ -304,7 +482,7 @@ pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
 
     let mut escrow_data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
 
-    if escrow_data.status != EscrowStatus::Disputed {
+    if escrow_data.state != EscrowState::Disputed {
         handle_error(env, Error::DisputeNotOpen);
     }
 
@@ -372,7 +550,7 @@ pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
         }
     }
 
-    escrow_data.status = EscrowStatus::Released; // CORREGIDO: cambiar a Released en lugar de Resolved
+    escrow_data.state = EscrowState::Released; // CORREGIDO: cambiar a Released en lugar de Resolved
     escrow_data.dispute_result = dispute_result as u32;
     escrow_data.resolved_at = Some(env.ledger().timestamp());
 
@@ -391,6 +569,10 @@ pub fn resolve_dispute(env: &Env, caller: Address, result: Symbol) {
 }
 
 pub fn add_milestone(env: &Env, client: Address, desc: String, amount: i128) -> u32 {
+    if is_paused(env) {
+        handle_error(env, Error::ContractPaused);
+    }
+
     let caller = client.clone();
 
     // Log function call start
@@ -454,6 +636,10 @@ pub fn add_milestone(env: &Env, client: Address, desc: String, amount: i128) -> 
 // Admin helpers for rate limiting: admin is the escrow client
 pub fn set_rate_limit_bypass(env: &Env, caller: Address, user: Address, bypass: bool) {
     caller.require_auth();
+    if is_paused(env) {
+        handle_error(env, Error::ContractPaused);
+    }
+
     // Only escrow client can toggle bypass
     let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
     if escrow.client != caller {
@@ -466,6 +652,10 @@ pub fn set_rate_limit_bypass(env: &Env, caller: Address, user: Address, bypass: 
 
 pub fn reset_rate_limit(env: &Env, caller: Address, user: Address, limit_type: String) {
     caller.require_auth();
+    if is_paused(env) {
+        handle_error(env, Error::ContractPaused);
+    }
+
     let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
     if escrow.client != caller {
         handle_error(env, Error::Unauthorized);
@@ -476,6 +666,10 @@ pub fn reset_rate_limit(env: &Env, caller: Address, user: Address, limit_type: S
 
 // CORREGIDO: usar índice correcto (milestone_id - 1)
 pub fn approve_milestone(env: &Env, client: Address, milestone_id: u32) {
+    if is_paused(env) {
+        handle_error(env, Error::ContractPaused);
+    }
+
     let caller = client.clone();
 
     // Log function call start
@@ -541,6 +735,10 @@ pub fn approve_milestone(env: &Env, client: Address, milestone_id: u32) {
 
 // CORREGIDO: usar índice correcto (milestone_id - 1)
 pub fn release_milestone(env: &Env, freelancer: Address, milestone_id: u32) {
+    if is_paused(env) {
+        handle_error(env, Error::ContractPaused);
+    }
+
     let caller = freelancer.clone();
 
     // Log function call start
@@ -614,16 +812,26 @@ pub fn get_escrow_data(env: &Env) -> EscrowData {
 }
 
 pub fn auto_release(env: &Env) {
+    if is_paused(env) {
+        handle_error(env, Error::ContractPaused);
+    }
+
     if !env.storage().instance().has(&INITIALIZED) {
         handle_error(env, Error::NotInitialized);
     }
     let mut escrow_data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
-    if escrow_data.status != EscrowStatus::Funded {
+    if escrow_data.state != EscrowState::Funded {
         handle_error(env, Error::InvalidStatus);
     }
     let funded_at = escrow_data.funded_at.unwrap_or(0);
     let timeout = escrow_data.timeout_secs.unwrap_or(0);
     let now = env.ledger().timestamp();
+    
+    // Validate timestamp
+    if let Err(e) = validate_timestamp(env, funded_at + timeout) {
+        handle_error(env, e);
+    }
+
     if now < funded_at + timeout {
         handle_error(env, Error::InvalidStatus);
     }
@@ -640,7 +848,7 @@ pub fn auto_release(env: &Env) {
                 .into_val(env),
         );
     }
-    escrow_data.status = EscrowStatus::Released;
+    escrow_data.state = EscrowState::Released;
     escrow_data.released_at = Some(now);
 
     env.storage().instance().set(&ESCROW_DATA, &escrow_data);
@@ -671,6 +879,10 @@ pub fn get_milestone_history(env: &Env) -> Vec<MilestoneHistory> {
 }
 
 pub fn set_escrow_data(env: &Env, data: &EscrowData) {
+    if is_paused(env) {
+        handle_error(env, Error::ContractPaused);
+    }
+
     env.storage().instance().set(&ESCROW_DATA, data);
 }
 
@@ -682,6 +894,10 @@ pub fn get_call_logs(env: &Env) -> Vec<CallLog> {
 pub fn clear_call_logs(env: &Env, caller: Address) {
     caller.require_auth();
 
+    if is_paused(env) {
+        handle_error(env, Error::ContractPaused);
+    }
+
     // Only escrow client can clear logs
     let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
     if escrow.client != caller {
@@ -691,12 +907,88 @@ pub fn clear_call_logs(env: &Env, caller: Address) {
     crate::storage::clear_call_logs(env);
 }
 
+
+pub fn set_config(env: &Env, caller: Address, config: ContractConfig) {
+    caller.require_auth();
+
+    if is_paused(env) {
+        handle_error(env, Error::ContractPaused);
+    }
+    
+    // Only escrow client can set config (admin functionality)
+    let escrow: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+    if escrow.client != caller { 
+        handle_error(env, Error::Unauthorized); 
+    }
+    
+    // Validate config parameters
+    if let Err(e) = validate_config(&config) {
+        handle_error(env, e);
+    }
+    
+    env.storage().instance().set(&CONTRACT_CONFIG, &config);
+    
+    env.events().publish(
+        (Symbol::new(env, "cfg_upd"), caller),
+        (config.min_escrow_amount, config.max_escrow_amount, config.default_timeout_days),
+    );
+}
+
+pub fn get_config(env: &Env) -> ContractConfig {
+    if !env.storage().instance().has(&CONTRACT_CONFIG) {
+        handle_error(env, Error::NotInitialized);
+    }
+    env.storage().instance().get(&CONTRACT_CONFIG).unwrap()
+}
+
+// Helper function to validate config parameters
+fn validate_config(config: &ContractConfig) -> Result<(), Error> {
+    // Validate escrow amounts
+    if config.min_escrow_amount >= config.max_escrow_amount {
+        return Err(Error::InvalidAmount);
+    }
+    
+    if config.min_escrow_amount < 1 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    // Validate timeout (1-365 days)
+    if config.default_timeout_days < 1 || config.default_timeout_days > 365 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    // Validate max milestones (1-100)
+    if config.max_milestones < 1 || config.max_milestones > 100 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    // Validate fee percentage (0-10%)
+    if config.fee_percentage > 1000 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    // Validate rate limit parameters
+    if config.rate_limit_window_hours < 1 || config.rate_limit_window_hours > 168 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    if config.rate_limit_calls < 1 || config.rate_limit_calls > 1000 {
+        return Err(Error::InvalidAmount);
+    }
+    
+    Ok(())
+}
+
 pub fn get_total_transactions(env: &Env) -> u64 {
     crate::storage::get_total_transactions(env)
 }
 
 pub fn reset_transaction_count(env: &Env, admin: Address) -> Result<(), Error> {
     admin.require_auth();
+    if is_paused(env) {
+        handle_error(env, Error::ContractPaused);
+    }
+
     let escrow_data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
 
     if escrow_data.client != admin {
@@ -718,6 +1010,10 @@ pub fn reset_transaction_count(env: &Env, admin: Address) -> Result<(), Error> {
 
 /// Export escrow data (client, freelancer, or arbitrator can access)
 pub fn export_escrow_data(env: &Env, caller: Address, contract_id: String) -> EscrowDataExport {
+    if is_paused(env) {
+        handle_error(env, Error::ContractPaused);
+    }
+    
     let caller_addr = caller.clone();
 
     // Log function call start
@@ -769,12 +1065,12 @@ pub fn get_contract_status(env: &Env, contract_id: Address) -> EscrowSummary {
     let escrow_data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
 
     // Format Escrow Status
-    let escrow_data_status = match escrow_data.status {
-        EscrowStatus::Initialized => String::from_str(&env, "Initialized"),
-        EscrowStatus::Funded => String::from_str(&env, "Funded"),
-        EscrowStatus::Released => String::from_str(&env, "Released"),
-        EscrowStatus::Disputed => String::from_str(&env, "Disputed"),
-        EscrowStatus::Resolved => String::from_str(&env, "Resolved"),
+    let escrow_data_status = match escrow_data.state {
+        EscrowState::Created => String::from_str(&env, "Initialized"),
+        EscrowState::Funded => String::from_str(&env, "Funded"),
+        EscrowState::Released => String::from_str(&env, "Released"),
+        EscrowState::Disputed => String::from_str(&env, "Disputed"),
+        EscrowState::Refunded => String::from_str(&env, "Resolved"),
     };
 
     let summary = EscrowSummary {
@@ -793,4 +1089,22 @@ pub fn get_contract_status(env: &Env, contract_id: Address) -> EscrowSummary {
     );
 
     summary
+}
+
+pub fn validate_timestamp(env: &Env, timestamp: u64) -> Result<(), Error> {
+    let current_time = env.ledger().timestamp();
+    log!(&env, "current_time: {}", current_time);
+    log!(&env, "timestamp: {}", timestamp);
+
+    // Allow timestamps up to MAX_AGE in the future
+    if timestamp > current_time + MAX_AGE {
+        return Err(Error::InvalidTimestamp); // Too far in the future
+    }
+    
+    // Prevent timestamps older than MAX_AGE
+    if timestamp < current_time && current_time - timestamp > MAX_AGE {
+        return Err(Error::TimestampTooOld);
+    }
+    
+    Ok(())
 }

@@ -95,7 +95,7 @@ export default function ProjectRequirements({ projectData, updateProjectData }: 
                   id="skills"
                   placeholder="e.g. JavaScript, Photoshop, Content Writing"
                   value={skillInput}
-                  onChange={(e) => setSkillInput(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSkillInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                 />
                 <Button type="button" onClick={addSkill} className="bg-[#15949C] hover:bg-[#15949C]/90 flex-shrink-0">
@@ -145,7 +145,7 @@ export default function ProjectRequirements({ projectData, updateProjectData }: 
               <Label htmlFor="experience-level">Experience Level</Label>
               <Select
                 value={projectData.experienceLevel}
-                onValueChange={(value) => updateProjectData("experienceLevel", value)}
+                onValueChange={(value: string) => updateProjectData("experienceLevel", value)}
               >
                 <SelectTrigger id="experience-level">
                   <SelectValue placeholder="Select required experience level" />

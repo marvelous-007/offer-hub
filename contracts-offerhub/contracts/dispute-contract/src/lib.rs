@@ -4,14 +4,17 @@ mod access;
 mod contract;
 mod storage;
 mod test;
+mod validation_test;
 mod types;
 mod validation;
+mod error;
 
 // #[cfg(test)]
 // mod validation_test;
 
-use crate::types::{ArbitratorData, DisputeData, DisputeOutcome, Error, Evidence, DisputeInfo};
+use crate::types::{ArbitratorData, DisputeData, DisputeOutcome, Evidence, DisputeInfo};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
+use crate::{error::{handle_error, Error}};
 
 #[contract]
 pub struct DisputeResolutionContract;
@@ -27,6 +30,18 @@ impl DisputeResolutionContract {
     ) -> Result<(), Error> {
         contract::initialize(&env, admin, default_timeout, escrow_contract, fee_manager);
         Ok(())
+    }
+
+    pub fn pause(env: Env, admin: Address) -> Result<(), Error> {
+        contract::pause(&env, admin)
+    }
+
+    pub fn is_paused(env: Env) -> bool {
+        contract::is_paused(&env)
+    }
+
+    pub fn unpause(env: Env, admin: Address) -> Result<(), Error> {
+        contract::unpause(&env, admin)
     }
 
     pub fn open_dispute(
@@ -172,6 +187,16 @@ impl DisputeResolutionContract {
         }
         storage::reset_rate_limit(&env, &user, &limit_type);
         Ok(())
+    }
+
+
+    pub fn set_config(env: Env, admin: Address, config: types::ContractConfig) -> Result<(), Error> {
+        contract::set_config(&env, admin, config);
+        Ok(())
+    }
+
+    pub fn get_config(env: Env) -> Result<types::ContractConfig, Error> {
+        Ok(contract::get_config(&env))
     }
 
     pub fn get_total_disputes(env: Env) -> Result<u64, Error> {

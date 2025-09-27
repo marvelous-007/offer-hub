@@ -1,5 +1,5 @@
-use crate::types::Error;
 use soroban_sdk::{Address, Env, String};
+use crate::{error::{Error}};
 
 // Validation constants
 const MIN_REASON_LENGTH: u32 = 10;

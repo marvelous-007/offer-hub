@@ -8,9 +8,11 @@ mod storage;
 mod test;
 pub mod types;
 mod validation;
+mod error;
 
 use crate::contract::UserRegistryContract;
-use crate::types::{Error, UserProfile,UserProfileSummary,  UserStatus, VerificationLevel};
+use crate::error::Error;
+use crate::types::{UserProfile,UserProfileSummary,  UserStatus, VerificationLevel};
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec};
 
 #[contract]
@@ -23,6 +25,18 @@ impl Contract {
     /// Initialize the contract with an admin
     pub fn initialize_admin(env: Env, admin: Address) -> Result<(), Error> {
         UserRegistryContract::initialize_admin(env, admin)
+    }
+
+     pub fn pause(env: Env, admin: Address) -> Result<(), Error> {
+        UserRegistryContract::pause(&env, admin)
+    }
+
+    pub fn is_paused(env: Env) -> bool {
+        UserRegistryContract::is_paused(&env)
+    }
+
+    pub fn unpause(env: Env, admin: Address) -> Result<(), Error> {
+        UserRegistryContract::unpause(&env, admin)
     }
 
     // ==================== LEGACY FUNCTIONS (for backward compatibility) ====================

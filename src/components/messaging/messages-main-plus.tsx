@@ -7,7 +7,8 @@ import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import type { MessagesMainProps } from '@/types';
 import { cn } from '@/lib/utils';
-import { useMessages } from '@/hooks/use-message';
+import { useMessageComposer } from '@/hooks/use-message';
+import { TIMEOUTS, VALIDATION_LIMITS } from '@/constants/magic-numbers';
 
 import { useEffect, useRef, useState } from 'react';
 import TypingIndicator from '@/components/messaging/TypingIndicator';
@@ -30,7 +31,7 @@ export function MessagesMainPlus({
     handleSendMessage,
     handleFileUpload,
     handleKeyPress,
-  } = useMessages(onSendMessage);
+  } = useMessageComposer(onSendMessage);
 
   const [statusById, setStatusById] = useState<Record<string, MsgStatus>>({});
   const [typing, setTyping] = useState(false);
@@ -40,8 +41,8 @@ export function MessagesMainPlus({
       const id = String(m.id);
       if (!id || !m.isOutgoing || statusById[id]) return;
       setStatusById((s) => ({ ...s, [id]: 'sent' }));
-      const t1 = setTimeout(() => setStatusById((s) => ({ ...s, [id]: 'delivered' })), 600);
-      const t2 = setTimeout(() => setStatusById((s) => ({ ...s, [id]: 'read' })), 1400);
+      const t1 = setTimeout(() => setStatusById((s) => ({ ...s, [id]: 'delivered' })), TIMEOUTS.MESSAGE_STATUS_DELIVERED_DELAY);
+      const t2 = setTimeout(() => setStatusById((s) => ({ ...s, [id]: 'read' })), TIMEOUTS.MESSAGE_STATUS_READ_DELAY);
       return () => { clearTimeout(t1); clearTimeout(t2); };
     });
   }, [messages, statusById]);
@@ -49,8 +50,8 @@ export function MessagesMainPlus({
   useEffect(() => {
     const i = setInterval(() => {
       setTyping(true);
-      setTimeout(() => setTyping(false), 1000);
-    }, 6500);
+      setTimeout(() => setTyping(false), TIMEOUTS.TYPING_INDICATOR_DURATION);
+    }, TIMEOUTS.TYPING_SIMULATION_INTERVAL);
     return () => clearInterval(i);
   }, []);
 
@@ -86,7 +87,7 @@ export function MessagesMainPlus({
           </div>
           <h2 className="font-medium text-gray-900">
             {dispute?.parties
-              ? dispute.parties.map((e) => e.name).join(', ').slice(0, 45) + '...'
+              ? dispute.parties.map((e) => e.name).join(', ').slice(0, VALIDATION_LIMITS.MAX_DISPUTE_PARTY_NAME_LENGTH) + '...'
               : activeConversation.name}
           </h2>
         </div>

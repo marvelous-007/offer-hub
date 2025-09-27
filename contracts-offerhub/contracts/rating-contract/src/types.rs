@@ -1,24 +1,5 @@
 use soroban_sdk::{contracterror, contracttype, symbol_short, Address, String, Symbol, Vec};
-
-#[contracterror]
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum Error {
-    Unauthorized = 1,
-    InvalidRating = 2,
-    AlreadyRated = 3,
-    ContractNotFound = 4,
-    InsufficientRatings = 5,
-    RatingRestricted = 6,
-    FeedbackNotFound = 7,
-    InvalidModerationAction = 8,
-    ThresholdNotFound = 9,
-    IncentiveNotFound = 10,
-    IncentiveAlreadyClaimed = 11,
-    ReputationContractNotSet = 12,
-    AlreadyModerator = 13,
-    NotModerator = 14,
-    RateLimitExceeded = 15,
-}
+use crate::error::Error;
 
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
@@ -151,6 +132,16 @@ pub const PLATFORM_STATS: &[u8] = &[11];
 pub const USER_RESTRICTIONS: &[u8] = &[12];
 pub const RATE_LIMITS: &[u8] = &[13];
 pub const RATE_LIMIT_BYPASS: &[u8] = &[14];
+pub const CONTRACT_CONFIG: &[u8] = &[15];
+
+// Default configuration values
+pub const DEFAULT_MAX_RATING_PER_DAY: u32 = 10;          // 10 ratings per day
+pub const DEFAULT_MAX_FEEDBACK_LENGTH: u32 = 1000;      // 1000 characters
+pub const DEFAULT_MIN_RATING: u32 = 1;                  // Minimum rating 1
+pub const DEFAULT_MAX_RATING: u32 = 5;                  // Maximum rating 5
+pub const DEFAULT_RATE_LIMIT_CALLS: u32 = 5;           // 5 calls per window
+pub const DEFAULT_RATE_LIMIT_WINDOW_HOURS: u32 = 1;    // 1 hour window
+pub const DEFAULT_AUTO_MODERATION_ENABLED: bool = true; // Auto-moderation enabled
 
 // Rating validation constants
 pub const MIN_RATING: u32 = 1;
@@ -163,6 +154,9 @@ pub const DEFAULT_WARNING_THRESHOLD: u32 = 300; // 3.00 average rating
 pub const DEFAULT_TOP_RATED_THRESHOLD: u32 = 480; // 4.80 average rating
 
 pub const TOTAL_RATING_COUNT: Symbol = symbol_short!("TOTALRATE");
+
+pub const MAX_RATING_AGE: u64 = 30 * 24 * 60 * 60; // 30 days in seconds
+pub const PAUSED: Symbol = symbol_short!("PAUSED");
 
 pub fn require_auth(address: &Address) -> Result<(), Error> {
     address.require_auth();
@@ -178,6 +172,19 @@ pub struct RateLimitEntry {
 
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
+pub struct ContractConfig {
+    pub max_rating_per_day: u32,           // Maximum ratings per day per user
+    pub max_feedback_length: u32,         // Maximum feedback character length
+    pub min_rating: u32,                  // Minimum rating value
+    pub max_rating: u32,                  // Maximum rating value
+    pub rate_limit_calls: u32,            // Rate limit calls per window
+    pub rate_limit_window_hours: u32,     // Rate limit window in hours
+    pub auto_moderation_enabled: bool,    // Whether auto-moderation is enabled
+    pub restriction_threshold: u32,       // Rating threshold for restrictions
+    pub warning_threshold: u32,           // Rating threshold for warnings
+    pub top_rated_threshold: u32,         // Rating threshold for top-rated status
+}
+
 pub struct RatingDataExport {
     pub user_address: Address,
     pub stats: RatingStats,
@@ -197,3 +204,4 @@ pub struct AllRatingDataExport {
     pub export_version: String,
     pub data_size_limit_reached: bool,
 }
+

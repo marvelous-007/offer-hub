@@ -372,6 +372,71 @@
                       },
                       {
                         "key": {
+                          "symbol": "CONFIG"
+                        },
+                        "val": {
+                          "map": [
+                            {
+                              "key": {
+                                "symbol": "arbitration_timeout_hours"
+                              },
+                              "val": {
+                                "u32": 168
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "default_timeout_hours"
+                              },
+                              "val": {
+                                "u32": 168
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "fee_percentage"
+                              },
+                              "val": {
+                                "i128": "500"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "max_evidence_per_dispute"
+                              },
+                              "val": {
+                                "u32": 10
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "mediation_timeout_hours"
+                              },
+                              "val": {
+                                "u32": 72
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "rate_limit_calls"
+                              },
+                              "val": {
+                                "u32": 3
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "rate_limit_window_hours"
+                              },
+                              "val": {
+                                "u32": 24
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "key": {
                           "symbol": "DISPUTES"
                         },
                         "val": {
@@ -494,12 +559,19 @@
                                   },
                                   {
                                     "key": {
-                                      "symbol": "status"
+                                      "symbol": "state"
                                     },
                                     "val": {
                                       "vec": [
                                         {
-                                          "symbol": "UnderArbitration"
+                                          "symbol": "UnderReview"
+                                        },
+                                        {
+                                          "vec": [
+                                            {
+                                              "symbol": "Arbitration"
+                                            }
+                                          ]
                                         }
                                       ]
                                     }
@@ -552,6 +624,14 @@
                               "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMDR4"
                             }
                           ]
+                        }
+                      },
+                      {
+                        "key": {
+                          "symbol": "PAUSED"
+                        },
+                        "val": {
+                          "bool": false
                         }
                       },
                       {

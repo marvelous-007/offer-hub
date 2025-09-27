@@ -1,5 +1,5 @@
-use crate::types::Error;
-use soroban_sdk::{contracttype, symbol_short, Address, Env, String, Symbol};
+use crate::error::Error;
+use soroban_sdk::{contracttype, symbol_short, Symbol, Address, Env, String, log};
 
 pub const DISPUTES: Symbol = symbol_short!("DISPUTES");
 pub const ARBITRATOR: Symbol = symbol_short!("ARBITRTR");
@@ -10,7 +10,21 @@ pub const ESCROW_CONTRACT: Symbol = symbol_short!("ESCROW");
 pub const FEE_MANAGER: Symbol = symbol_short!("FEEMGR");
 pub const RATE_LIMITS: Symbol = symbol_short!("RLIM");
 pub const RATE_BYPASS: Symbol = symbol_short!("RLBYP");
+
+pub const CONTRACT_CONFIG: Symbol = symbol_short!("CONFIG");
+
+pub const PAUSED: Symbol = symbol_short!("PAUSED");
+
+// Default configuration values
+pub const DEFAULT_TIMEOUT_HOURS: u32 = 168;           // 7 days (168 hours)
+pub const DEFAULT_MAX_EVIDENCE: u32 = 10;             // Maximum 10 evidence submissions
+pub const DEFAULT_MEDIATION_TIMEOUT: u32 = 72;        // 3 days (72 hours)
+pub const DEFAULT_ARBITRATION_TIMEOUT: u32 = 168;     // 7 days (168 hours)
+pub const DEFAULT_FEE_PERCENTAGE: i128 = 500;         // 5% fee
+pub const DEFAULT_RATE_LIMIT_CALLS: u32 = 3;          // 3 calls per window
+pub const DEFAULT_RATE_LIMIT_WINDOW_HOURS: u32 = 24;  // 24 hours
 pub const TOTAL_DISPUTES: Symbol = symbol_short!("DISPCOUNT");
+
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[contracttype]
@@ -86,4 +100,36 @@ pub fn get_total_disputes(env: &Env) -> u64 {
 
 pub fn set_total_disputes(env: &Env, count: u64) {
     env.storage().persistent().set(&TOTAL_DISPUTES, &count);
+}
+
+// --- Dispute state handling ---
+use crate::types::{DisputeData, DisputeState};
+use crate::error::handle_error;
+
+pub fn set_dispute_state(env: &Env, job_id: u32, new_state: DisputeState) {
+     let key = (DISPUTES, job_id);
+      let mut data: DisputeData = match env.storage().instance().get(&key) {
+           Some(d) => d,
+          None => handle_error(env, Error::DisputeNotFound)
+     };
+
+    data.state = new_state;
+    env.storage().instance().set(&key, &data);
+
+	log!(env, "Dispute state changed to {:?}", new_state);
+}
+
+
+pub fn get_dispute_state(env: &Env, job_id: u32) -> DisputeState {
+    let key = (DISPUTES, job_id);
+    let data: DisputeData = match env.storage().instance().get(&key) {
+     Some(d) => d,
+      None => handle_error(env, Error::DisputeNotFound)
+   };
+
+   data.state
+}
+
+pub fn is_dispute_initiated(env: &Env, job_id: u32) -> bool {
+    get_dispute_state(env, job_id) == DisputeState::Open
 }

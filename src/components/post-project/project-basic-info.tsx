@@ -83,7 +83,7 @@ export default function ProjectBasicInfo({ projectData, updateProjectData }: Pro
                 id="project-title"
                 placeholder="e.g. Professional Website Design for Small Business"
                 value={projectData.title}
-                onChange={(e) => updateProjectData("title", e.target.value )}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateProjectData("title", e.target.value )}
               />
               <p className="text-sm text-muted-foreground">
                 A clear title helps attract the right freelancers (50-80 characters recommended)
@@ -95,7 +95,7 @@ export default function ProjectBasicInfo({ projectData, updateProjectData }: Pro
                 <Label htmlFor="category">Category</Label>
                 <Select
                   value={projectData.category}
-                  onValueChange={(value) => updateProjectData("category", value)}
+                  onValueChange={(value: string) => updateProjectData("category", value)}
                 >
                   <SelectTrigger id="category">
                     <SelectValue placeholder="Select a category" />
@@ -114,7 +114,7 @@ export default function ProjectBasicInfo({ projectData, updateProjectData }: Pro
                 <Label htmlFor="subcategory">Subcategory</Label>
                 <Select
                   value={projectData.subcategory}
-                  onValueChange={(value) => updateProjectData("subcategory", value)}
+                  onValueChange={(value: string) => updateProjectData("subcategory", value)}
                   disabled={!projectData.category || !subcategories[projectData.category]}
                 >
                   <SelectTrigger id="subcategory">
@@ -139,7 +139,7 @@ export default function ProjectBasicInfo({ projectData, updateProjectData }: Pro
                 placeholder="Describe your project in detail..."
                 className="min-h-[200px]"
                 value={projectData.description}
-                onChange={(e) => updateProjectData("description", e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => updateProjectData("description", e.target.value)}
               />
               <p className="text-sm text-muted-foreground">
                 Include all details about your project requirements, goals, and expectations
@@ -150,7 +150,7 @@ export default function ProjectBasicInfo({ projectData, updateProjectData }: Pro
               <Label>Project Type</Label>
               <RadioGroup
                 value={projectData.projectType}
-                onValueChange={(value) => updateProjectData("projectType", value)}
+                onValueChange={(value: string) => updateProjectData("projectType", value)}
                 className="grid grid-cols-1 md:grid-cols-2 gap-4"
               >
                 <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-gray-50">
@@ -174,7 +174,7 @@ export default function ProjectBasicInfo({ projectData, updateProjectData }: Pro
               <Label>Project Visibility</Label>
               <RadioGroup
                 value={projectData.visibility}
-                onValueChange={(value) => updateProjectData("visibility", value)}
+                onValueChange={(value: string) => updateProjectData("visibility", value)}
                 className="grid grid-cols-1 md:grid-cols-2 gap-4"
               >
                 <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-gray-50">

@@ -1,26 +1,26 @@
 "use client";
 
 import type React from "react";
-import Image from "next/image";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Ellipsis } from "lucide-react";
 
 export interface ProjectCardProps {
   title?: string;
   person?: string;
-  freelancerName?: string; 
+  freelancerName?: string;
   date?: string;
-  dateRange?: string; 
+  dateRange?: string;
   avatarSrc?: string;
-  freelancerAvatar?: string; 
+  freelancerAvatar?: string;
   menuIcon?: React.ReactNode;
   onMessage?: () => void;
   showDropdownMenu?: boolean;
@@ -38,11 +38,11 @@ export function ProjectCard({
   onMessage,
   showDropdownMenu = true,
 }: ProjectCardProps) {
-
   const displayTitle = title;
   const displayPerson = person || freelancerName || "Freelancer Name";
   const displayDate = date || dateRange || "Today";
-  const displayAvatar = avatarSrc || freelancerAvatar || "/placeholder.svg?height=40&width=40";
+  const displayAvatar =
+    avatarSrc || freelancerAvatar || "/placeholder.svg?height=40&width=40";
 
   return (
     <Card className="border border-gray-200 rounded-xl shadow-sm bg-white">
@@ -56,7 +56,9 @@ export function ProjectCard({
             <div className="mt-2 sm:mt-3 flex items-center gap-2 sm:gap-3">
               <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
                 <AvatarImage src={displayAvatar} alt={displayPerson} />
-                <AvatarFallback>{displayPerson?.[0]?.toUpperCase() || 'F'}</AvatarFallback>
+                <AvatarFallback>
+                  {displayPerson?.[0]?.toUpperCase() || "F"}
+                </AvatarFallback>
               </Avatar>
               <div className="min-w-0 text-xs sm:text-sm">
                 <p className="font-medium text-slate-700">{displayPerson}</p>
@@ -82,19 +84,30 @@ export function ProjectCard({
           )}
         </div>
 
+        {/* Button for sending a message, with responsive margin and consistent styling */}
         <div className="mt-3 sm:mt-4">
-          <Button 
+          <Button
             onClick={onMessage}
-            className="w-full rounded-full bg-[#002333] hover:bg-[#012b3f] text-white h-10 sm:h-11 text-sm sm:text-base touch-manipulation" 
+            className="w-full rounded-full bg-[#002333] hover:bg-[#012b3f] text-white h-10 sm:h-11 text-sm sm:text-base touch-manipulation"
             variant="default"
           >
             Message
           </Button>
         </div>
-      </CardContent>
-    </Card>
-  );
+            variant="default"
+          // Button for sending a message, with responsive margin and consistent styling
+          <div className="mt-3 sm:mt-4">
+            <Button
+              onClick={onMessage}
+              className="w-full rounded-full bg-[#002333] hover:bg-[#012b3f] text-white h-10 sm:h-11 text-sm sm:text-base touch-manipulation"
+              variant="default"
+            >
+              Message
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
 }
-
 
 export default ProjectCard;

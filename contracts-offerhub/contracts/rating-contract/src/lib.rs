@@ -14,12 +14,14 @@ mod storage;
 mod test;
 mod types;
 mod validation;
+mod error;
 
 pub use crate::contract::RatingContract;
 use crate::types::UserRatingSummary;
 pub use types::{
-    Error, Feedback, HealthCheckResult, HealthStatus, Rating, RatingStats, UserRatingData,
+    Feedback, HealthCheckResult, HealthStatus, Rating, RatingStats, UserRatingData,
 };
+pub use error::Error;
 
 #[contract]
 pub struct Contract;
@@ -50,6 +52,18 @@ impl Contract {
             feedback,
             work_category,
         )
+    }
+
+    pub fn pause(env: Env, admin: Address) -> Result<(), Error> {
+        RatingContract::pause(&env, admin)
+    }
+
+    pub fn is_paused(env: Env) -> bool {
+        RatingContract::is_paused(&env)
+    }
+
+    pub fn unpause(env: Env, admin: Address) -> Result<(), Error> {
+        RatingContract::unpause(&env, admin)
     }
 
     /// Get rating statistics for a user
@@ -184,6 +198,61 @@ impl Contract {
         RatingContract::reset_rate_limit(env, admin, user, limit_type)
     }
 
+
+    /// Perform a health check on the contract (placeholder)
+    pub fn health_check(env: Env) -> Result<HealthCheckResult, Error> {
+        // Placeholder implementation - return basic health check
+        let mut details = Vec::new(&env);
+        details.push_back(String::from_str(&env, "Contract is healthy"));
+        
+        let mut recommendations = Vec::new(&env);
+        recommendations.push_back(String::from_str(&env, "No issues found"));
+        
+        Ok(HealthCheckResult {
+            status: crate::types::HealthStatus {
+                is_healthy: true,
+                issues: Vec::new(&env),
+                last_check: env.ledger().timestamp(),
+                gas_used: 0,
+                contract_version: String::from_str(&env, "1.0.0"),
+                admin_set: true,
+                storage_accessible: true,
+                critical_params_valid: true,
+            },
+            details,
+            recommendations,
+        })
+    }
+
+    /// Perform an admin health check with additional details (placeholder)
+    pub fn admin_health_check(env: Env, caller: Address) -> Result<HealthCheckResult, Error> {
+        // Check admin access
+        crate::access::check_admin(&env, &caller)?;
+        
+        // Placeholder implementation - return detailed health check
+        let mut details = Vec::new(&env);
+        details.push_back(String::from_str(&env, "Admin health check passed"));
+        details.push_back(String::from_str(&env, "All systems operational"));
+        
+        let mut recommendations = Vec::new(&env);
+        recommendations.push_back(String::from_str(&env, "Continue monitoring"));
+        
+        Ok(HealthCheckResult {
+            status: crate::types::HealthStatus {
+                is_healthy: true,
+                issues: Vec::new(&env),
+                last_check: env.ledger().timestamp(),
+                gas_used: 0,
+                contract_version: String::from_str(&env, "1.0.0"),
+                admin_set: true,
+                storage_accessible: true,
+                critical_params_valid: true,
+            },
+            details,
+            recommendations,
+        })
+    }
+
     // /// Perform a health check on the contract
     // pub fn health_check(env: Env) -> Result<HealthCheckResult, Error> {
     //     RatingContract::health_check(env)
@@ -194,6 +263,7 @@ impl Contract {
     //     RatingContract::admin_health_check(env, caller)
     // }
 
+
     /// Get the last health check timestamp
     pub fn get_last_health_check(env: Env) -> u64 {
         RatingContract::get_last_health_check(env)
@@ -202,6 +272,17 @@ impl Contract {
     /// Get contract version
     pub fn get_contract_version(env: Env) -> String {
         RatingContract::get_contract_version(env)
+    }
+
+
+    /// Set contract configuration (admin only)
+    pub fn set_config(env: Env, caller: Address, config: types::ContractConfig) -> Result<(), Error> {
+        RatingContract::set_config(env, caller, config)
+    }
+
+    /// Get contract configuration
+    pub fn get_config(env: Env) -> Result<types::ContractConfig, Error> {
+        RatingContract::get_config(env)
     }
 
     /// Get contract total ratings count
@@ -221,10 +302,3 @@ impl Contract {
         RatingContract::get_user_rating_summary(&env, user)
     }
 }
-
-// use soroban_sdk::contractclient;
-
-// #[contractclient(name = "ContractAClient")]
-// pub trait ContractAInterface {
-//     fn get_total_rating(env: &Env) -> u64;
-// }

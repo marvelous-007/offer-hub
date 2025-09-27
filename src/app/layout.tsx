@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Root layout component for the Next.js application
+ * @author Offer Hub Team
+ */
+
 import './globals.css';
 
 import { Geist, Geist_Mono } from 'next/font/google';
@@ -14,6 +19,7 @@ import { OfferProvider } from '@/lib/contexts/OfferContext';
 import { Suspense } from 'react';
 import NotificationToast from '@/components/shared/NotificationToast';
 import { MessageProvider } from '@/lib/contexts/MessageContext';
+import { KeyboardShortcutsProvider } from '@/components/common/keyboard-shortcuts-provider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -48,13 +54,15 @@ export default function RootLayout({
                   <OfferProvider>
                     <WalletProvider>
                       <EscrowProvider>
-                        <Suspense fallback={null}>
-                          <main>
-                            {children}
-                          </main>
-                          <NotificationToast />
-                        </Suspense>
-                        <Toaster position="top-right" />
+                        <KeyboardShortcutsProvider>
+                          <Suspense fallback={null}>
+                            <main>
+                              {children}
+                            </main>
+                            <NotificationToast />
+                          </Suspense>
+                          <Toaster position="top-right" />
+                        </KeyboardShortcutsProvider>
                       </EscrowProvider>
                     </WalletProvider>
                   </OfferProvider>

@@ -8,6 +8,7 @@ mod storage;
 mod test;
 #[cfg(test)]
 mod test_optimization;
+mod types;
 mod utils;
 mod validation;
 

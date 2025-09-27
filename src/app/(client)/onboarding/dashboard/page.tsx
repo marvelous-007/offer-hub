@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Client dashboard page for managing user projects and activities
+ * @author Offer Hub Team
+ */
+
 "use client";
 
 import { DashboardEmptyState } from "@/components/client-dashboard/DashboardEmptyState.tsx";

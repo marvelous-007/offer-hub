@@ -1,4 +1,5 @@
-use crate::types::{Error, PublicationStatus, UserProfile, VerificationLevel};
+use crate::error::Error;
+use crate::types::{PublicationStatus, UserProfile, VerificationLevel};
 use soroban_sdk::{contracttype, symbol_short, Address, Env, Map, String, Symbol, Vec};
 
 pub const VERIFIED_USERS: Symbol = symbol_short!("VERIFIED");
@@ -12,6 +13,7 @@ pub const TOTAL_USERS: Symbol = symbol_short!("TOTALUSER");
 pub const RATING_CONTRACT: Symbol = symbol_short!("RATING");
 pub const ESCROW_CONTRACTS: Symbol = symbol_short!("ESCROWS");
 pub const DISPUTE_CONTRACTS: Symbol = symbol_short!("DISPUTES");
+pub const PAUSED: Symbol = symbol_short!("PAUSED");
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[contracttype]

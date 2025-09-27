@@ -17,14 +17,19 @@ use crate::storage::{
     get_user_feedback_ids, get_user_rating_history, get_user_rating_stats, increment_platform_stat,
     increment_rating_count, reset_rate_limit, save_admin, save_feedback, save_rating,
     save_rating_threshold, save_reputation_contract, save_user_rating_stats, set_rate_limit_bypass,
-    set_total_rating,
+    set_total_rating, 
 };
+use crate::error::Error;
 use crate::types::{
-    require_auth, AllRatingDataExport, Error, Feedback, HealthCheckResult, Rating,
-    RatingDataExport, RatingStats, RatingThreshold, UserRatingData, UserRatingSummary
+    require_auth, AllRatingDataExport, Feedback, Rating,
+    RatingStats, UserRatingData, RatingThreshold,
+    ContractConfig, CONTRACT_CONFIG, DEFAULT_MAX_RATING_PER_DAY, DEFAULT_MAX_FEEDBACK_LENGTH, MAX_RATING_AGE,
+    DEFAULT_MIN_RATING, DEFAULT_MAX_RATING, DEFAULT_RATE_LIMIT_CALLS, DEFAULT_RATE_LIMIT_WINDOW_HOURS,
+    DEFAULT_AUTO_MODERATION_ENABLED, DEFAULT_RESTRICTION_THRESHOLD, DEFAULT_WARNING_THRESHOLD,
+    DEFAULT_TOP_RATED_THRESHOLD, RatingDataExport, UserRatingSummary, PAUSED
 };
 use crate::validation::{validate_report_feedback, validate_submit_rating};
-use soroban_sdk::{Address, Env, IntoVal, String, Symbol, Vec};
+use soroban_sdk::{log, Address, Env, IntoVal, String, Symbol, Vec, Bytes};
 
 pub struct RatingContract;
 
@@ -32,28 +37,96 @@ impl RatingContract {
     pub fn init(env: Env, admin: Address) -> Result<(), Error> {
         save_admin(&env, &admin);
 
+        
+        // Initialize contract configuration
+        let contract_config = ContractConfig {
+            max_rating_per_day: DEFAULT_MAX_RATING_PER_DAY,
+            max_feedback_length: DEFAULT_MAX_FEEDBACK_LENGTH,
+            min_rating: DEFAULT_MIN_RATING,
+            max_rating: DEFAULT_MAX_RATING,
+            rate_limit_calls: DEFAULT_RATE_LIMIT_CALLS,
+            rate_limit_window_hours: DEFAULT_RATE_LIMIT_WINDOW_HOURS,
+            auto_moderation_enabled: DEFAULT_AUTO_MODERATION_ENABLED,
+            restriction_threshold: DEFAULT_RESTRICTION_THRESHOLD,
+            warning_threshold: DEFAULT_WARNING_THRESHOLD,
+            top_rated_threshold: DEFAULT_TOP_RATED_THRESHOLD,
+        };
+        env.storage().instance().set(&CONTRACT_CONFIG, &contract_config);
+        env.storage().instance().set(&PAUSED, &false);
+
+
         // Initialize default thresholds
         let restriction_threshold = RatingThreshold {
             threshold_type: String::from_str(&env, "restriction"),
-            value: crate::types::DEFAULT_RESTRICTION_THRESHOLD,
+            value: DEFAULT_RESTRICTION_THRESHOLD,
         };
         save_rating_threshold(&env, &restriction_threshold);
 
         let warning_threshold = RatingThreshold {
             threshold_type: String::from_str(&env, "warning"),
-            value: crate::types::DEFAULT_WARNING_THRESHOLD,
+            value: DEFAULT_WARNING_THRESHOLD,
         };
         save_rating_threshold(&env, &warning_threshold);
 
         let top_rated_threshold = RatingThreshold {
             threshold_type: String::from_str(&env, "top_rated"),
-            value: crate::types::DEFAULT_TOP_RATED_THRESHOLD,
+            value: DEFAULT_TOP_RATED_THRESHOLD,
         };
         save_rating_threshold(&env, &top_rated_threshold);
+
+        // Health check system initialization removed for now
 
         // Initialize health check system
         // crate::health_check::initialize_health_check_system(&env)?;
 
+        Ok(())
+    }
+
+    pub fn is_paused(env: &Env) -> bool {
+        env.storage().instance().get(&PAUSED).unwrap_or(false)
+    }
+
+    // Function to pause the contract
+    pub fn pause(env: &Env, admin: Address) -> Result<(), Error> {
+        admin.require_auth();
+        let stored_admin = get_admin(env);
+        if stored_admin != admin {
+            return Err(Error::Unauthorized);
+        }
+        
+        if Self::is_paused(env) {
+            return Err(Error::AlreadyPaused);
+        }
+        
+        env.storage().instance().set(&PAUSED, &true);
+        
+        env.events().publish(
+            (Symbol::new(env, "contract_paused"), admin),
+            env.ledger().timestamp(),
+        );
+        
+        Ok(())
+    }
+
+    // Function to unpause the contract
+    pub fn unpause(env: &Env, admin: Address) -> Result<(), Error> {
+        admin.require_auth();
+        let stored_admin = get_admin(env);
+        if stored_admin != admin {
+            return Err(Error::Unauthorized);
+        }
+        
+        if !Self::is_paused(env) {
+            return Err(Error::NotPaused);
+        }
+        
+        env.storage().instance().set(&PAUSED, &false);
+        
+        env.events().publish(
+            (Symbol::new(env, "contract_unpaused"), admin),
+            env.ledger().timestamp(),
+        );
+        
         Ok(())
     }
 
@@ -67,6 +140,18 @@ impl RatingContract {
         work_category: String,
     ) -> Result<(), Error> {
         require_auth(&caller)?;
+        if Self::is_paused(&env) {
+            return Err(Error::ContractPaused);
+        }
+        let user_rating = get_user_rating_history(&env, &rated_user, 3, 0);
+
+        let mut user_time = 0;
+        if let Some(rating) = user_rating.get(0) {
+            user_time = rating.timestamp;
+        }
+        
+        Self::validate_timestamp(&env, user_time)?;
+
         // Rate limit: max 5 per hour per user
         let limit_type = String::from_str(&env, "submit_rating");
         // 3600 seconds
@@ -85,6 +170,8 @@ impl RatingContract {
 
         // Generate unique IDs
         let rating_id = Self::generate_rating_id(&env, &caller, &rated_user, &contract_id);
+        // log!(&env, " rating_id: {}", rating_id);
+
         let feedback_id = Self::generate_feedback_id(&env, &rating_id);
 
         // Create rating record
@@ -153,6 +240,9 @@ impl RatingContract {
         user: Address,
         bypass: bool,
     ) -> Result<(), Error> {
+        if Self::is_paused(&env) {
+            return Err(Error::ContractPaused);
+        }
         set_rate_limit_bypass(&env, &admin, &user, bypass)
     }
 
@@ -163,6 +253,9 @@ impl RatingContract {
         user: Address,
         limit_type: String,
     ) -> Result<(), Error> {
+        if Self::is_paused(&env) {
+            return Err(Error::ContractPaused);
+        }
         // simple admin auth
         if get_admin(&env) != admin {
             return Err(Error::Unauthorized);
@@ -270,6 +363,9 @@ impl RatingContract {
         feedback_id: String,
         reason: String,
     ) -> Result<(), Error> {
+        if Self::is_paused(&env) {
+            return Err(Error::ContractPaused);
+        }
         // Input validation
         validate_report_feedback(&env, &caller, &feedback_id, &reason)?;
         report_feedback_impl(&env, &caller, &feedback_id, &reason)
@@ -282,6 +378,9 @@ impl RatingContract {
         action: String,
         reason: String,
     ) -> Result<(), Error> {
+        if Self::is_paused(&env) {
+            return Err(Error::ContractPaused);
+        }
         moderate_feedback_impl(&env, &caller, &feedback_id, &action, &reason)
     }
 
@@ -298,10 +397,16 @@ impl RatingContract {
         caller: Address,
         incentive_type: String,
     ) -> Result<(), Error> {
+        if Self::is_paused(&env) {
+            return Err(Error::ContractPaused);
+        }
         claim_incentive_impl(&env, &caller, &incentive_type)
     }
 
     pub fn update_reputation(env: Env, caller: Address, user: Address) -> Result<(), Error> {
+        if Self::is_paused(&env) {
+            return Err(Error::ContractPaused);
+        }
         require_auth(&caller)?;
 
         // Get user's rating statistics
@@ -414,10 +519,16 @@ impl RatingContract {
     }
 
     pub fn add_moderator(env: Env, caller: Address, moderator: Address) -> Result<(), Error> {
+        if Self::is_paused(&env) {
+            return Err(Error::ContractPaused);
+        }
         add_moderator_impl(&env, &caller, &moderator)
     }
 
     pub fn remove_moderator(env: Env, caller: Address, moderator: Address) -> Result<(), Error> {
+        if Self::is_paused(&env) {
+            return Err(Error::ContractPaused);
+        }
         remove_moderator_impl(&env, &caller, &moderator)
     }
 
@@ -427,6 +538,9 @@ impl RatingContract {
         threshold_type: String,
         value: u32,
     ) -> Result<(), Error> {
+        if Self::is_paused(&env) {
+            return Err(Error::ContractPaused);
+        }
         crate::access::check_admin(&env, &caller)?;
 
         let threshold = RatingThreshold {
@@ -443,6 +557,9 @@ impl RatingContract {
         caller: Address,
         contract_address: Address,
     ) -> Result<(), Error> {
+        if Self::is_paused(&env) {
+            return Err(Error::ContractPaused);
+        }
         crate::access::check_admin(&env, &caller)?;
         save_reputation_contract(&env, &contract_address);
         Ok(())
@@ -453,6 +570,9 @@ impl RatingContract {
     }
 
     pub fn transfer_admin(env: Env, caller: Address, new_admin: Address) -> Result<(), Error> {
+        if Self::is_paused(&env) {
+            return Err(Error::ContractPaused);
+        }
         transfer_admin_impl(&env, &caller, &new_admin)
     }
 
@@ -466,8 +586,35 @@ impl RatingContract {
         let _timestamp = env.ledger().timestamp();
         let _sequence = env.ledger().sequence();
         // Create a simple ID without format! macro
-        String::from_str(env, "rating_id")
+        // String::from_str(env, "rating_id")
+        Self::u32_to_string(&env, _sequence)
     }
+
+    pub fn u32_to_string(env: &Env, n: u32) -> String {
+        // Simple conversion: handle 0 and build digits
+        let mut len = 0;
+
+        if n == 0 {
+            return String::from_str(env, "0");
+        }
+        let mut digits = Vec::<u32>::new(env);
+        let mut num = n;
+        while num > 0 {
+            len += 1;
+            let digit = (num % 10) as u8;
+            digits.push_front((b'0' + digit).into());
+            num /= 10;
+        }
+        let mut bytes = Bytes::new(env);
+        for digit in digits.iter() {
+            bytes.push_back(digit.try_into().unwrap());
+        }
+
+        let mut result = [0u8; 1024]; 
+        let new_slice = &mut result[..len as usize];
+        bytes.copy_into_slice(new_slice);
+        String::from_bytes(env, &new_slice)
+}
 
     fn generate_feedback_id(env: &Env, _rating_id: &String) -> String {
         // Create a simple ID without format! macro
@@ -513,6 +660,9 @@ impl RatingContract {
         Ok(())
     }
 
+
+    // Health check functions removed for now
+
     // Health check functions
     // pub fn health_check(env: Env) -> Result<HealthCheckResult, Error> {
     //     crate::health_check::perform_health_check(&env)
@@ -534,11 +684,83 @@ impl RatingContract {
         crate::storage::get_contract_version(&env)
     }
 
+    pub fn set_config(env: Env, caller: Address, config: ContractConfig) -> Result<(), Error> {
+        if Self::is_paused(&env) {
+            return Err(Error::ContractPaused);
+        }
+        crate::access::check_admin(&env, &caller)?;
+        
+        // Validate config parameters
+        Self::validate_config(&config)?;
+        
+        env.storage().instance().set(&CONTRACT_CONFIG, &config);
+        
+        // Emit event
+        env.events().publish(
+            (soroban_sdk::symbol_short!("cfg_upd"), caller),
+            (config.max_rating_per_day, config.max_feedback_length, config.auto_moderation_enabled),
+        );
+        
+        Ok(())
+    }
+
+    pub fn get_config(env: Env) -> Result<ContractConfig, Error> {
+        if !env.storage().instance().has(&CONTRACT_CONFIG) {
+            return Err(Error::Unauthorized);
+        }
+        Ok(env.storage().instance().get(&CONTRACT_CONFIG).unwrap())
+    }
+
+// Helper function to validate config parameters
+fn validate_config(config: &ContractConfig) -> Result<(), Error> {
+    // Validate max rating per day (1-100)
+    if config.max_rating_per_day < 1 || config.max_rating_per_day > 100 {
+        return Err(Error::InvalidRating);
+    }
+    
+    // Validate feedback length (10-5000 characters)
+    if config.max_feedback_length < 10 || config.max_feedback_length > 5000 {
+        return Err(Error::InvalidRating);
+    }
+    
+    // Validate rating range
+    if config.min_rating >= config.max_rating {
+        return Err(Error::InvalidRating);
+    }
+    
+    if config.min_rating < 1 || config.max_rating > 5 {
+        return Err(Error::InvalidRating);
+    }
+    
+    // Validate rate limit parameters
+    if config.rate_limit_window_hours < 1 || config.rate_limit_window_hours > 168 {
+        return Err(Error::InvalidRating);
+    }
+    
+    if config.rate_limit_calls < 1 || config.rate_limit_calls > 1000 {
+        return Err(Error::InvalidRating);
+    }
+    
+    // Validate thresholds
+    if config.restriction_threshold >= config.warning_threshold {
+        return Err(Error::InvalidRating);
+    }
+    
+    if config.warning_threshold >= config.top_rated_threshold {
+        return Err(Error::InvalidRating);
+    }
+    
+    Ok(())
+}
+
     pub fn get_total_rating(env: &Env) -> u64 {
         crate::storage::get_total_rating(&env)
     }
 
     pub fn reset_total_rating(env: &Env, admin: Address) -> Result<(), Error> {
+        if Self::is_paused(&env) {
+            return Err(Error::ContractPaused);
+        }
         admin.require_auth();
         if get_admin(&env) != admin {
             return Err(Error::Unauthorized);
@@ -656,5 +878,21 @@ impl RatingContract {
         );
 
         Ok(export_data)
+    }
+
+    pub fn validate_timestamp(env: &Env, timestamp: u64) -> Result<(), Error> {
+        let current_time = env.ledger().timestamp();
+        const GRACE_PERIOD: u64 = 60; // Allow 60 seconds for slight clock skew
+
+        // Prevent future timestamps beyond grace period
+        if timestamp > current_time + GRACE_PERIOD {
+            return Err(Error::InvalidTimestamp);
+        }
+
+        if current_time - timestamp > MAX_RATING_AGE {
+            return Err(Error::TimestampTooOld);
+        }
+
+        Ok(())
     }
 }

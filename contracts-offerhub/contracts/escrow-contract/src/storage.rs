@@ -1,8 +1,12 @@
-use crate::types::Error;
-use soroban_sdk::{contracttype, symbol_short, Address, Env, String, Symbol, Vec};
+use crate::error::Error;
+use soroban_sdk::{contracttype, symbol_short, Address, Env, String, Symbol, Vec, log};
 
 pub const ESCROW_DATA: Symbol = symbol_short!("ESCROW");
 pub const INITIALIZED: Symbol = symbol_short!("INIT");
+pub const CONTRACT_CONFIG: Symbol = symbol_short!("CONFIG");
+
+pub const PAUSED: Symbol = symbol_short!("PAUSED");
+
 
 // Rate limit storage keys
 pub const RATE_LIMITS: Symbol = symbol_short!("RLIM");
@@ -13,7 +17,18 @@ pub const CALL_LOGS: Symbol = symbol_short!("LOGS");
 pub const LOG_COUNT: Symbol = symbol_short!("LCOUNT");
 pub const MAX_LOGS: u32 = 100;
 
+
+// Default configuration values
+pub const DEFAULT_MIN_ESCROW_AMOUNT: i128 = 1000;       // Minimum 1000 units
+pub const DEFAULT_MAX_ESCROW_AMOUNT: i128 = 1000000000; // Maximum 1 billion units
+pub const DEFAULT_TIMEOUT_DAYS: u32 = 30;               // 30 days
+pub const DEFAULT_MAX_MILESTONES: u32 = 20;              // Maximum 20 milestones
+pub const DEFAULT_FEE_PERCENTAGE: i128 = 250;           // 2.5% fee
+pub const DEFAULT_RATE_LIMIT_CALLS: u32 = 10;           // 10 calls per window
+pub const DEFAULT_RATE_LIMIT_WINDOW_HOURS: u32 = 1;     // 1 hour window
+
 pub const TOTAL_ESCROW_COUNT: Symbol = symbol_short!("ESCCOUNT");
+
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[contracttype]
@@ -162,4 +177,75 @@ pub fn increment_escrow_transaction_count(env: &Env) -> u64 {
     let new_escrow_count = current_count + 1;
     set_escrow_transaction_count(env, new_escrow_count);
     new_escrow_count
+}
+
+// --- Escrow state handling ---
+use crate::types::{EscrowData, EscrowState};
+use crate::error::handle_error;
+
+// pub fn set_escrow_state(env: &Env, new_state: EscrowState) {
+//     let mut data: EscrowData = env.storage().instance().get(&ESCROW_DATA).unwrap();
+
+
+//     if !data.state.can_transition_to(&new_state) {
+//         handle_error(env, Error::InvalidStatus)
+//     }
+
+//     data.state = new_state.clone();
+//     env.storage().instance().set(&ESCROW_DATA, &data);
+
+//     log!(env, "Escrow state changed to {:?}", new_state);
+// }
+
+pub fn set_escrow_state(env: &Env, new_state: EscrowState) {
+        let mut data: EscrowData = crate::storage::get_escrow_data(env);
+        // Guard initialization and load
+    
+        if !data.state.can_transition_to(&new_state) {
+            handle_error(env, Error::InvalidStatus)
+        }
+    
+        let prev = data.state;
+        let now = env.ledger().timestamp();
+    
+        // Maintain audit timestamps tied to states
+        match new_state {
+            EscrowState::Funded => data.funded_at = Some(now),
+            EscrowState::Released => {
+                data.released_at = Some(now);
+                data.resolved_at = data.resolved_at.or(Some(now));
+            }
+            EscrowState::Refunded => {
+                data.resolved_at = Some(now);
+            }
+            EscrowState::Disputed => data.disputed_at = Some(now),
+            EscrowState::Created => {}
+        }
+    
+        data.state = new_state;
+        env.storage().instance().set(&ESCROW_DATA, &data);
+    
+        // Emit event + keep debug log
+        env.events().publish(
+            (Symbol::new(env, "escrow_state_changed"), env.current_contract_address()),
+            (&prev, &data.state, now),
+        );
+
+        log!(env, "Escrow state changed from {:?} to {:?}", prev, data.state);
+    }
+
+pub fn get_escrow_state(env: &Env) -> EscrowState {
+    get_escrow_data(env).state
+}
+
+pub fn get_escrow_data(env: &Env) -> EscrowData {
+    if !env.storage().instance().has(&INITIALIZED) {
+        handle_error(env, Error::NotInitialized);
+    }
+    
+    env.storage().instance().get(&ESCROW_DATA).unwrap()
+}
+
+pub fn is_escrow_funded(env: &Env) -> bool {
+    get_escrow_state(env) == EscrowState::Funded
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { VALIDATION_LIMITS } from "@/constants/magic-numbers"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -97,12 +98,12 @@ export default function TalentCard({
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2">
-                {freelancer.skills.slice(0, 5).map((skill: string) => (
+                {freelancer.skills.slice(0, VALIDATION_LIMITS.MAX_SKILLS_DISPLAY_CARD).map((skill: string) => (
                   <Badge key={skill} variant="outline">
                     {skill}
                   </Badge>
                 ))}
-                {freelancer.skills.length > 5 && <Badge variant="outline">+{freelancer.skills.length - 5} more</Badge>}
+                {freelancer.skills.length > VALIDATION_LIMITS.MAX_SKILLS_DISPLAY_CARD && <Badge variant="outline">+{freelancer.skills.length - VALIDATION_LIMITS.MAX_SKILLS_DISPLAY_CARD} more</Badge>}
               </div>
 
               <div className="mt-4 flex flex-wrap gap-4 text-sm text-[#002333]/70">
@@ -185,12 +186,12 @@ export default function TalentCard({
           </div>
 
           <div className="mt-4 flex flex-wrap gap-1">
-            {freelancer.skills.slice(0, 3).map((skill: string) => (
+            {freelancer.skills.slice(0, VALIDATION_LIMITS.MAX_SKILLS_DISPLAY_DETAIL).map((skill: string) => (
               <Badge key={skill} variant="outline">
                 {skill}
               </Badge>
             ))}
-            {freelancer.skills.length > 3 && <Badge variant="outline">+{freelancer.skills.length - 3} more</Badge>}
+            {freelancer.skills.length > VALIDATION_LIMITS.MAX_SKILLS_DISPLAY_DETAIL && <Badge variant="outline">+{freelancer.skills.length - VALIDATION_LIMITS.MAX_SKILLS_DISPLAY_DETAIL} more</Badge>}
           </div>
 
           <div className="mt-4 flex items-center text-sm text-[#002333]/70">
