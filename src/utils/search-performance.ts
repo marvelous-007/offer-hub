@@ -1,9 +1,7 @@
 import { 
   SearchCacheEntry, 
   SearchPerformanceMetrics, 
-  FreelancerSearchResult,
-  SearchQuery,
-  SearchResults
+  FreelancerSearchResult
 } from '../types/freelancer-search.types'
 
 interface PerformanceConfig {
@@ -38,7 +36,7 @@ class SearchPerformanceManager {
   }
 
 
-  startQuery(queryId: string, query: string): void {
+  startQuery(queryId: string): void {
     if (!this.shouldSample()) return
     
     this.startTimes.set(queryId, performance.now())
@@ -307,7 +305,7 @@ export class SearchCache {
   }
 
  
-  private estimateSize(data: any): number {
+  private estimateSize(data: unknown): number {
     try {
       return JSON.stringify(data).length * 2
     } catch {
@@ -502,10 +500,10 @@ export const PerformanceUtils = {
   },
 
 
-  throttle<T extends (...args: any[]) => any>(fn: T, limit: number): T {
+  throttle<T extends (...args: unknown[]) => unknown>(fn: T, limit: number): T {
     let inThrottle = false
     
-    return ((...args: any[]) => {
+    return ((...args: Parameters<T>) => {
       if (!inThrottle) {
         fn.apply(this, args)
         inThrottle = true
