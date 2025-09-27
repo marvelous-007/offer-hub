@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { MediationController } from '../controllers/mediation.controller';
 import { authenticateToken } from '../middlewares/auth.middleware';
 import { requireRole } from '../middlewares/role.middleware';
+import { UserRole } from "@/types/auth.types";
 import { validateRequestLegacy } from '../middlewares/validation.middleware';
 import { body, param, query } from 'express-validator';
 
@@ -107,7 +108,7 @@ router.get('/mediators',
 // Mediation Assignment Routes
 router.post('/assignments/:disputeId', 
   authenticateToken(),
-  requireRole({ requiredRoles: ['admin', 'moderator'] }),
+  requireRole({ requiredRoles: [UserRole.ADMIN, UserRole.MODERATOR] }),
   assignMediatorValidation,
   validateRequestLegacy,
   mediationController.assignMediator.bind(mediationController)
@@ -185,7 +186,7 @@ router.post('/agreements/:agreementId/sign',
 // Analytics Routes
 router.get('/analytics', 
   authenticateToken(),
-  requireRole({ requiredRoles: ['admin', 'moderator'] }),
+  requireRole({ requiredRoles: [UserRole.ADMIN, UserRole.MODERATOR] }),
   query('timeRange').optional().isIn(['7d', '30d', '90d', '1y']).withMessage('Invalid time range'),
   validateRequestLegacy,
   mediationController.getMediationAnalytics.bind(mediationController)
@@ -259,7 +260,7 @@ router.post('/sessions/:sessionId/quality-report',
 
 router.get('/quality-analytics', 
   authenticateToken(),
-  requireRole({ requiredRoles: ['admin', 'moderator'] }),
+  requireRole({ requiredRoles: [UserRole.ADMIN, UserRole.MODERATOR] }),
   query('timeRange').optional().isIn(['7d', '30d', '90d', '1y']).withMessage('Invalid time range'),
   validateRequestLegacy,
   mediationController.getPlatformQualityAnalytics.bind(mediationController)
