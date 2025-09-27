@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import Image from 'next/image';
-import Link from 'next/link';
-import React from 'react';
+import Image from "next/image";
+import Link from "next/link";
+import React from "react";
+import FavoriteButton from "./favorite-button";
 
-import SaveTalent from '@/components/talent/SaveTalent';
-import { Button } from '@/components/ui/button';
+import SaveTalent from "@/components/talent/SaveTalent";
+import { Button } from "@/components/ui/button";
 
 interface Skill {
   name: string;
@@ -27,6 +28,7 @@ interface TalentCardProps {
   actionText: string;
   onActionClick?: (talentId: number) => void;
   className?: string;
+  userId: string;
 }
 
 const TalentCard: React.FC<TalentCardProps> = ({
@@ -42,9 +44,8 @@ const TalentCard: React.FC<TalentCardProps> = ({
   description,
   actionText,
   onActionClick,
-  className = ''
+  className = "",
 }) => {
-
   const getActionLink = () => {
     switch (actionText.toLowerCase()) {
       case "message":
@@ -59,39 +60,41 @@ const TalentCard: React.FC<TalentCardProps> = ({
   return (
     <div className={`bg-gray-50 border-b border-b-gray-200 p-6 ${className}`}>
       {/* Avatar and Header info */}
-      <div className='flex items-start gap-4 mb-4 profile-section'>
+      <div className="flex items-start gap-4 mb-4 profile-section">
         {/* Avatar */}
         <Image
           src={avatar}
           alt={name}
           width={60}
           height={60}
-          className='rounded-full object-cover flex-shrink-0'
+          className="rounded-full object-cover flex-shrink-0"
         />
 
         {/* Header info */}
-        <div className='flex-1'>
-          <div className='flex items-center gap-2 mb-1'>
-            <h3 className='text-gray-400 text-sm font-normal'>{name}</h3>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="text-gray-400 text-sm font-normal">{name}</h3>
           </div>
           {/* Title linking to profile */}
           <Link href={`/talent/${id}/profile`}>
-            <h2 className='text-lg font-semibold text-gray-900 leading-tight mb-1 hover:underline cursor-pointer'>
+            <h2 className="text-lg font-semibold text-gray-900 leading-tight mb-1 hover:underline cursor-pointer">
               {title}
             </h2>
           </Link>
-          <div className='flex items-center gap-4 text-sm'>
-            <p className='text-teal-600'>{location}</p>
+          <div className="flex items-center gap-4 text-sm">
+            <p className="text-teal-600">{location}</p>
           </div>
         </div>
       </div>
 
       {/* Skills */}
-      <div className='flex flex-wrap gap-2 mb-4'>
+      <div className="flex flex-wrap gap-2 mb-4">
         {skills.map((skill, index) => (
           <span
             key={index}
-            className={`px-3 py-1 rounded-full text-sm font-medium text-white ${skill.color} ${index === 0 && "bg-slate-500"}`}
+            className={`px-3 py-1 rounded-full text-sm font-medium text-white ${
+              skill.color
+            } ${index === 0 && "bg-slate-500"}`}
           >
             {skill.name}
           </span>
@@ -99,19 +102,38 @@ const TalentCard: React.FC<TalentCardProps> = ({
       </div>
 
       {/* Description */}
-      <p className='text-gray-600 text-sm mb-6 leading-relaxed'>
+      <p className="text-gray-600 text-sm mb-6 leading-relaxed">
         {description}
       </p>
 
       {/* Action Buttons */}
-      <div className='flex items-center gap-4'>
-        <SaveTalent talentId={id} size='lg' />
-        <Link href={getActionLink()} className='flex-1'>
-          <Button className='w-full bg-slate-800 hover:bg-slate-700 text-white rounded-full py-3 font-medium'>
-            {actionText}
-          </Button>
-        </Link>
-      </div>
+      <Button
+        variant="ghost"
+        size="icon"
+        className={`absolute top-4 left-4 h-8 w-8 rounded-full ${
+          isSelected ? "bg-[#15949C] text-white" : "bg-white/80 text-[#002333]"
+        }`}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleSelect();
+        }}
+      >
+        {isSelected ? (
+          <Check className="h-4 w-4" />
+        ) : (
+          <Heart className="h-4 w-4" />
+        )}
+      </Button>
+
+      <FavoriteButton
+        freelancerId={freelancer.id}
+        userId={userId}
+        size="sm"
+        variant={isSelected ? "default" : "outline"}
+        className={`absolute top-4 left-4 h-8 w-8 rounded-full ${
+          isSelected ? "bg-[#15949C] text-white" : "bg-white/80"
+        }`}
+      />
     </div>
   );
 };
