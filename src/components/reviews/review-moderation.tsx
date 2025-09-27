@@ -38,18 +38,17 @@ import {
 } from 'lucide-react';
 import {
   ReviewCreationData,
-  ReviewModeration,
+  ReviewModeration as ReviewModerationType,
   ModerationFlag,
   ModerationAction,
   ModerationStatus,
   ModerationFlagType,
   ModerationActionType,
   ReviewModerationProps,
-  QualityAnalytics,
-  ModerationHistory,
   ComplianceReport,
   MODERATION_STATUSES
 } from '@/types/review-creation.types';
+import { QualityAnalytics, ModerationHistory } from '@/types/review-quality.types';
 
 // ===== MODERATION STATUS CONFIGURATIONS =====
 
@@ -161,7 +160,7 @@ const FLAG_TYPE_CONFIG = {
 
 interface ModerationCardProps {
   review: ReviewCreationData;
-  moderation: ReviewModeration;
+  moderation: ReviewModerationType;
   onModerate: (reviewId: string, action: ModerationAction) => void;
   showDetails?: boolean;
 }
@@ -265,7 +264,7 @@ const ModerationCard: React.FC<ModerationCardProps> = ({
   const handleModerationAction = async (action: ModerationActionType) => {
     setIsModerating(true);
     try {
-      await onModerate(review.id, {
+      await onModerate(review.contractId, {
         type: action,
         description: `${action} action performed`,
         performedBy: 'current_user', // In real implementation, get from auth context
@@ -709,9 +708,9 @@ export const ReviewModeration: React.FC<ReviewModerationProps> = ({
   });
 
   // Mock moderation data - in real implementation, this would come from props or API
-  const moderationData: ReviewModeration[] = reviews.map(review => ({
-    id: `mod_${review.id}`,
-    reviewId: review.id,
+  const moderationData: ReviewModerationType[] = reviews.map(review => ({
+    id: `mod_${review.contractId}`,
+    reviewId: review.contractId,
     status: 'pending' as ModerationStatus,
     automatedScore: Math.floor(Math.random() * 40) + 60, // 60-100
     flags: [
@@ -789,7 +788,7 @@ export const ReviewModeration: React.FC<ReviewModerationProps> = ({
     if (selectedReviews.length === reviews.length) {
       setSelectedReviews([]);
     } else {
-      setSelectedReviews(reviews.map(r => r.id));
+      setSelectedReviews(reviews.map(r => r.contractId));
     }
   };
 
@@ -873,16 +872,16 @@ export const ReviewModeration: React.FC<ReviewModerationProps> = ({
         </div>
 
         {filteredReviews.map((review) => {
-          const moderation = moderationData.find(m => m.reviewId === review.id);
+          const moderation = moderationData.find(m => m.reviewId === review.contractId);
           if (!moderation) return null;
 
           return (
-            <div key={review.id} className="flex items-start space-x-3">
+            <div key={review.contractId} className="flex items-start space-x-3">
               {enableBulkActions && (
                 <input
                   type="checkbox"
-                  checked={selectedReviews.includes(review.id)}
-                  onChange={(e) => handleReviewSelect(review.id, e.target.checked)}
+                  checked={selectedReviews.includes(review.contractId)}
+                  onChange={(e) => handleReviewSelect(review.contractId, e.target.checked)}
                   className="mt-6 rounded"
                 />
               )}

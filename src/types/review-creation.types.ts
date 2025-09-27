@@ -22,6 +22,7 @@ export interface RatingValidation {
     isOutlier: boolean;
     confidence: number;
     reason: string;
+    recommendations: string[];
   };
 }
 

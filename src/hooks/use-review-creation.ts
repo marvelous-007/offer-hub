@@ -170,14 +170,12 @@ export function useReviewCreation({
     errors: [],
     warnings: [],
     consistencyScore: 0,
-    outlierDetection: {
-      isOutlier: false,
-      confidence: 0,
-      method: 'rule_based',
-      reason: '',
-      similarReviews: [],
-      recommendations: []
-    }
+      outlierDetection: {
+        isOutlier: false,
+        confidence: 0,
+        reason: '',
+        recommendations: []
+      }
   });
 
   // ===== CONFIGURATION =====
@@ -248,9 +246,7 @@ export function useReviewCreation({
         outlierDetection: {
           isOutlier: false,
           confidence: 0,
-          method: 'rule_based',
           reason: 'No ratings provided',
-          similarReviews: [],
           recommendations: []
         }
       };
@@ -663,11 +659,11 @@ export function useReviewCreation({
   // ===== COMPUTED VALUES =====
   
   const isValid = useMemo(() => {
-    return validation.isValid && 
+    return Boolean(validation.isValid && 
            reviewData.title && 
            reviewData.content && 
            reviewData.ratings &&
-           Object.values(reviewData.ratings).every(rating => rating > 0);
+           Object.values(reviewData.ratings).every(rating => rating > 0));
   }, [validation.isValid, reviewData.title, reviewData.content, reviewData.ratings]);
 
   // ===== RETURN INTERFACE =====
