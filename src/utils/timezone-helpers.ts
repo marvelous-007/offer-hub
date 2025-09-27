@@ -73,8 +73,8 @@ export interface TimezoneCompatibility {
         timeZone: timezone,
         timeZoneName: 'short',
       }).split(', ')[1] || timezone.split('/').pop()?.replace(/_/g, ' ') || timezone
-    } catch (_) {
-      console.log('Error getting timezone abbreviation:', _)
+      //@typescript-eslint/no-unused-vars
+    } catch {
       return timezone.split('/').pop()?.replace(/_/g, ' ') || timezone
     }
   }
@@ -232,8 +232,7 @@ export interface TimezoneCompatibility {
         minute: '2-digit',
         hour12: true
       })
-      //@ts-ignore
-    } catch (_) {
+    } catch {
       return 'Unknown'
     }
   }
