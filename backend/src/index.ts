@@ -27,6 +27,7 @@ import { rawBodyParser, verifyWebhookSignature } from "@/middlewares/webhook-sig
 import { redactSensitiveHeaders } from "@/middlewares/sensitive-data-redaction.middleware";
 import reviewResponseRoutes from "@/routes/review-response.routes";
 import { workflowRoutes } from "@/routes/workflow.routes";
+import mediationRoutes from "@/routes/mediation.routes";
 
 // Setup global error handlers for uncaught exceptions and unhandled rejections
 setupGlobalErrorHandlers();
@@ -45,6 +46,9 @@ app.use(generalLimiter);
 
 // Workflow routes (no authentication required for testing)
 app.use("/api/workflow", workflowRoutes);
+
+// Mediation routes (authentication required)
+app.use("/api/mediation", authenticateToken(), mediationRoutes);
 
 // Public routes (no authentication required)
 app.use("/api/auth", authLimiter, authRoutes);
