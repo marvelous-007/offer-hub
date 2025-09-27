@@ -1,6 +1,6 @@
 import { FC } from "react"
 import { Card } from "@/components/ui/card"
-import ChartSkeleton from "@/components/charts/chart-skeleton"
+import ChartSkeleton from "../charts/chart-skeleton"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { cn } from "@/lib/utils"
 
