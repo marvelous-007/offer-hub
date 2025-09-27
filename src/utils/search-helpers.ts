@@ -398,7 +398,7 @@ export function applyLocationFilter(
   const radius = locationFilter.radius || 50
   const radiusInKm = locationFilter.radiusUnit === 'miles' ? radius * 1.609 : radius
 
-  //@ts-ignore\
+  //@ts-expect-error - Complex type inference issue with map function
   return results
     .map(freelancer => {
       if (!freelancer.location?.coordinates) {

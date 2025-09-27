@@ -319,7 +319,7 @@ export class SearchCache {
 
 export class SearchDebouncer {
   private timeouts = new Map<string, NodeJS.Timeout>()
-  private promises = new Map<string, { resolve: Function; reject: Function }>()
+  private promises = new Map<string, { resolve: (value: any) => void; reject: (reason?: any) => void }>()
 
   debounce<T>(key: string, fn: () => Promise<T>, delay: number): Promise<T> {
     const existingTimeout = this.timeouts.get(key)

@@ -227,7 +227,7 @@ export function useSearchResultsCache(options: UseSearchCacheOptions = {}) {
       if (!existing) {
         try {
           const results = await searchFunction(query)
-          //@ts-ignore
+          //@ts-expect-error - Complex type inference issue with cacheResults function
           cacheResults(query, results, { prewarmed: true })
         } catch (error) {
           console.warn('Failed to prewarm cache for query:', query, error)
