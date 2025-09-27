@@ -1,9 +1,7 @@
 import { 
   SearchCacheEntry, 
   SearchPerformanceMetrics, 
-  FreelancerSearchResult,
-  SearchQuery,
-  SearchResults
+  FreelancerSearchResult
 } from '../types/freelancer-search.types'
 
 interface PerformanceConfig {
@@ -38,7 +36,7 @@ class SearchPerformanceManager {
   }
 
 
-  startQuery(queryId: string, query: string): void {
+  startQuery(queryId: string): void {
     if (!this.shouldSample()) return
     
     this.startTimes.set(queryId, performance.now())
@@ -307,7 +305,7 @@ export class SearchCache {
   }
 
  
-  private estimateSize(data: any): number {
+  private estimateSize(data: unknown): number {
     try {
       return JSON.stringify(data).length * 2
     } catch {
@@ -319,7 +317,10 @@ export class SearchCache {
 
 export class SearchDebouncer {
   private timeouts = new Map<string, NodeJS.Timeout>()
-  private promises = new Map<string, { resolve: Function; reject: Function }>()
+  private promises = new Map<string, { 
+    resolve: (value: any) => void
+    reject: (reason?: any) => void 
+  }>()
 
   debounce<T>(key: string, fn: () => Promise<T>, delay: number): Promise<T> {
     const existingTimeout = this.timeouts.get(key)
@@ -502,10 +503,10 @@ export const PerformanceUtils = {
   },
 
 
-  throttle<T extends (...args: any[]) => any>(fn: T, limit: number): T {
+  throttle<T extends (...args: unknown[]) => unknown>(fn: T, limit: number): T {
     let inThrottle = false
     
-    return ((...args: any[]) => {
+    return ((...args: Parameters<T>) => {
       if (!inThrottle) {
         fn.apply(this, args)
         inThrottle = true

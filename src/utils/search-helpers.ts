@@ -7,7 +7,6 @@ import {
   Currency,
   LocationFilter,
   SearchSortBy,
-  SearchResultMetadata,
   SearchLogicalOperator
 } from '../types/freelancer-search.types'
 
@@ -398,11 +397,12 @@ export function applyLocationFilter(
   const radius = locationFilter.radius || 50
   const radiusInKm = locationFilter.radiusUnit === 'miles' ? radius * 1.609 : radius
 
-  //@ts-ignore\
+ 
   return results
     .map(freelancer => {
+      // Keep the original data structure to maintain type compatibility
       if (!freelancer.location?.coordinates) {
-        return { ...freelancer, location: { ...freelancer.location, distance: Infinity } }
+        return freelancer
       }
       
       const distance = calculateDistance(
@@ -414,14 +414,17 @@ export function applyLocationFilter(
       
       return {
         ...freelancer,
-        location: { ...freelancer.location, distance }
-      }
+        location: {
+          ...freelancer.location,
+          distance
+        }
+      } as FreelancerSearchResult
     })
     .filter(freelancer => 
       locationFilter.allowRemote || 
       (freelancer.location?.distance !== undefined && freelancer.location.distance <= radiusInKm)
     )
-    .sort((a, b) => (a.location?.distance || Infinity) - (b.location?.distance || Infinity))
+    .sort((a, b) => ((a.location?.distance ?? Infinity) - (b.location?.distance ?? Infinity)))
 }
 
 
