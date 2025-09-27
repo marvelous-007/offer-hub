@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -84,7 +83,6 @@ export function ProjectCard({
           )}
         </div>
 
-        {/* Button for sending a message, with responsive margin and consistent styling */}
         <div className="mt-3 sm:mt-4">
           <Button
             onClick={onMessage}
@@ -94,20 +92,9 @@ export function ProjectCard({
             Message
           </Button>
         </div>
-            variant="default"
-          // Button for sending a message, with responsive margin and consistent styling
-          <div className="mt-3 sm:mt-4">
-            <Button
-              onClick={onMessage}
-              className="w-full rounded-full bg-[#002333] hover:bg-[#012b3f] text-white h-10 sm:h-11 text-sm sm:text-base touch-manipulation"
-              variant="default"
-            >
-              Message
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
+      </CardContent>
+    </Card>
+  );
 }
 
 export default ProjectCard;
