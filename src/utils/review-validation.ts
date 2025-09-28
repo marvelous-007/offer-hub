@@ -13,10 +13,7 @@ import {
   ReviewTemplate,
   ReviewTemplateSection,
   ModerationFlag,
-  ModerationFlagType,
-  ReviewPattern,
-  RATING_DIMENSIONS,
-  MODERATION_STATUSES
+  ReviewPattern
 } from '@/types/review-creation.types';
 
 // ===== DEFAULT CONFIGURATION =====
@@ -298,7 +295,7 @@ export function validateReviewContent(
 /**
  * Analyzes content quality using various metrics
  */
-export function analyzeContentQuality(content: string, title: string): {
+export function analyzeContentQuality(content: string): {
   readabilityScore: number;
   sentimentScore: number;
   spamScore: number;
@@ -423,7 +420,6 @@ function calculateSpamScore(content: string): number {
   ];
   
   let spamScore = 0;
-  const contentLength = content.length;
   
   for (const indicator of spamIndicators) {
     const matches = content.match(indicator);
@@ -606,7 +602,7 @@ function validateTemplateSection(
 /**
  * Gets section value from review data
  */
-function getSectionValue(reviewData: Partial<ReviewCreationData>, section: ReviewTemplateSection): any {
+function getSectionValue(reviewData: Partial<ReviewCreationData>, section: ReviewTemplateSection): unknown {
   // This is a simplified implementation
   // In a real system, you would have a more sophisticated mapping
   switch (section.id) {

@@ -165,8 +165,8 @@ export function useMessages(userId?: string): UseMessagesResult {
             prev.map((m) => (m.id === optimisticMsg.id ? res.data! : m))
           );
         }
-      } catch (e: any) {
-        setErrorSend(e.message);
+      } catch (e: unknown) {
+        setErrorSend(e instanceof Error ? e.message : 'Unknown error');
         setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
       } finally {
         setSendingMessage(false);
