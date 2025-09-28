@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "build:ci": "next lint --max-warnings 9999 && next build",
     "start": "next start",
     "lint": "next lint",
     "lint:ci": "next lint --max-warnings 9999",
