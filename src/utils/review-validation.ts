@@ -295,7 +295,7 @@ export function validateReviewContent(
 /**
  * Analyzes content quality using various metrics
  */
-export function analyzeContentQuality(content: string, _title: string): {
+export function analyzeContentQuality(content: string): {
   readabilityScore: number;
   sentimentScore: number;
   spamScore: number;
