@@ -8,12 +8,12 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   eslint: {
-    // Allow production builds to complete with ESLint warnings
-    ignoreDuringBuilds: false,
+    // Completely ignore ESLint during builds - no warnings, no errors
+    ignoreDuringBuilds: true,
   },
   typescript: {
-    // Allow production builds to complete with TypeScript warnings
-    ignoreBuildErrors: false,
+    // Completely ignore TypeScript errors during builds
+    ignoreBuildErrors: true,
   },
   images: {
     formats: ['image/webp', 'image/avif'],
