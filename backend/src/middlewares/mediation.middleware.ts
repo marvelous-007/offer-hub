@@ -507,14 +507,12 @@ export class MediationMiddleware {
 }
 
 // Extend Express Request interface to include mediation-specific properties
-declare global {
-  namespace Express {
+declare module 'express' {
     interface Request {
       mediator?: any;
       mediationSession?: any;
       settlementAgreement?: any;
     }
   }
-}
 
 export const mediationMiddleware = new MediationMiddleware();
