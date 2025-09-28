@@ -16,7 +16,6 @@ import {
   ModerationFlagType,
   ReviewPattern,
   RATING_DIMENSIONS,
-  MODERATION_STATUSES
 } from '@/types/review-creation.types';
 
 // ===== DEFAULT CONFIGURATION =====
@@ -203,7 +202,7 @@ export function detectRatingOutliers(
  */
 export function validateReviewContent(
   content: string,
-  title: string,
+  _title: string,
   minLength: number = 10,
   maxLength: number = 2000
 ): {
@@ -229,13 +228,13 @@ export function validateReviewContent(
     qualityScore -= 10;
   }
 
-  if (title.length < 5) {
+  if (_title.length < 5) {
     errors.push('Title must be at least 5 characters long');
     qualityScore -= 15;
   }
 
   // Content quality checks
-  const qualityChecks = analyzeContentQuality(content, title);
+  const qualityChecks = analyzeContentQuality(content, _title);
   
   if (qualityChecks.readabilityScore < 60) {
     warnings.push('Content may be difficult to read');
@@ -423,7 +422,6 @@ function calculateSpamScore(content: string): number {
   ];
   
   let spamScore = 0;
-  const contentLength = content.length;
   
   for (const indicator of spamIndicators) {
     const matches = content.match(indicator);
@@ -606,7 +604,7 @@ function validateTemplateSection(
 /**
  * Gets section value from review data
  */
-function getSectionValue(reviewData: Partial<ReviewCreationData>, section: ReviewTemplateSection): any {
+function getSectionValue(reviewData: Partial<ReviewCreationData>, section: ReviewTemplateSection): unknown {
   // This is a simplified implementation
   // In a real system, you would have a more sophisticated mapping
   switch (section.id) {
