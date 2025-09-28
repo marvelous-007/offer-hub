@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, DollarSign, Clock } from "lucide-react";
 import { PortfolioProject } from "@/lib/mockData/portfolio-mock-data";
+import ProgressiveImage from "@/components/ui/progressive-image";
 
 interface PortfolioGalleryProps {
   projects: PortfolioProject[];
