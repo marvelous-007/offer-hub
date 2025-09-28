@@ -18,6 +18,7 @@ import { TalentProvider } from '@/lib/contexts/TalentContext';
 import { OfferProvider } from '@/lib/contexts/OfferContext';
 import { Suspense } from 'react';
 import NotificationToast from '@/components/shared/NotificationToast';
+import LoadingIndicator from '@/components/navigation/loading-indicator';
 import { MessageProvider } from '@/lib/contexts/MessageContext';
 import { KeyboardShortcutsProvider } from '@/components/common/keyboard-shortcuts-provider';
 
