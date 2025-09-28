@@ -15,7 +15,7 @@ import {
   ModerationFlag,
   ModerationFlagType,
   ReviewPattern,
-  RATING_DIMENSIONS,
+  RATING_DIMENSIONS
 } from '@/types/review-creation.types';
 
 // ===== DEFAULT CONFIGURATION =====
@@ -234,7 +234,7 @@ export function validateReviewContent(
   }
 
   // Content quality checks
-  const qualityChecks = analyzeContentQuality(content, _title);
+  const qualityChecks = analyzeContentQuality(content);
   
   if (qualityChecks.readabilityScore < 60) {
     warnings.push('Content may be difficult to read');
@@ -297,7 +297,7 @@ export function validateReviewContent(
 /**
  * Analyzes content quality using various metrics
  */
-export function analyzeContentQuality(content: string, title: string): {
+export function analyzeContentQuality(content: string): {
   readabilityScore: number;
   sentimentScore: number;
   spamScore: number;
