@@ -13,7 +13,9 @@ import {
   ReviewTemplate,
   ReviewTemplateSection,
   ModerationFlag,
-  ReviewPattern
+  ModerationFlagType,
+  ReviewPattern,
+  RATING_DIMENSIONS
 } from '@/types/review-creation.types';
 
 // ===== DEFAULT CONFIGURATION =====
@@ -200,7 +202,7 @@ export function detectRatingOutliers(
  */
 export function validateReviewContent(
   content: string,
-  title: string,
+  _title: string,
   minLength: number = 10,
   maxLength: number = 2000
 ): {
@@ -226,13 +228,13 @@ export function validateReviewContent(
     qualityScore -= 10;
   }
 
-  if (title.length < 5) {
+  if (_title.length < 5) {
     errors.push('Title must be at least 5 characters long');
     qualityScore -= 15;
   }
 
   // Content quality checks
-  const qualityChecks = analyzeContentQuality(content, title);
+  const qualityChecks = analyzeContentQuality(content);
   
   if (qualityChecks.readabilityScore < 60) {
     warnings.push('Content may be difficult to read');
