@@ -1,13 +1,12 @@
 import React from 'react';
-import { ExportButton } from '@/components/common/export-button';
-import { ExportData } from '@/utils/export-helpers';
+import { ExportButton } from '../common/export-button';
 
 interface DataTableProps {
-  data: ExportData[];
+  data: any[];
   columns: Array<{
     key: string;
     label: string;
-    render?: (value: any, row: ExportData) => React.ReactNode;
+    render?: (value: any, row: any) => React.ReactNode;
   }>;
   title?: string;
   filename?: string;

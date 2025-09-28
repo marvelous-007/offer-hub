@@ -2,50 +2,56 @@
  * Utility functions for data export functionality
  */
 
-export interface ExportData {
-  [key: string]: any;
+export interface ExportOptions {
+  format: 'csv' | 'json';
+  filename?: string;
 }
 
 /**
- * Export data to CSV format
+ * Exports data to CSV or JSON format
  * @param data - Array of objects to export
- * @param filename - Name of the exported file
+ * @param options - Export configuration
  */
-export const exportToCSV = (data: ExportData[], filename: string = 'export.csv'): void => {
-  if (!data || data.length === 0) return;
+export const exportData = (data: any[], options: ExportOptions): void => {
+  const { format, filename = 'export' } = options;
+  
+  if (format === 'csv') {
+    exportToCSV(data, filename);
+  } else if (format === 'json') {
+    exportToJSON(data, filename);
+  }
+};
 
+/**
+ * Exports data to CSV format
+ */
+const exportToCSV = (data: any[], filename: string): void => {
+  if (data.length === 0) return;
+  
   const headers = Object.keys(data[0]);
   const csvContent = [
     headers.join(','),
-    ...data.map(row => 
-      headers.map(header => 
-        JSON.stringify(row[header] || '')
-      ).join(',')
-    )
+    ...data.map(row => headers.map(header => `"${row[header] || ''}"`).join(','))
   ].join('\n');
-
-  downloadFile(csvContent, filename, 'text/csv');
+  
+  downloadFile(csvContent, `${filename}.csv`, 'text/csv');
 };
 
 /**
- * Export data to JSON format
- * @param data - Array of objects to export
- * @param filename - Name of the exported file
+ * Exports data to JSON format
  */
-export const exportToJSON = (data: ExportData[], filename: string = 'export.json'): void => {
+const exportToJSON = (data: any[], filename: string): void => {
   const jsonContent = JSON.stringify(data, null, 2);
-  downloadFile(jsonContent, filename, 'application/json');
+  downloadFile(jsonContent, `${filename}.json`, 'application/json');
 };
 
 /**
- * Download file with given content
- * @param content - File content
- * @param filename - Name of the file
- * @param mimeType - MIME type of the file
+ * Downloads file to user's device
  */
 const downloadFile = (content: string, filename: string, mimeType: string): void => {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
+  
   const link = document.createElement('a');
   link.href = url;
   link.download = filename;

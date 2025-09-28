@@ -1,47 +1,46 @@
 import React from 'react';
-import { Download } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { exportToCSV, exportToJSON, ExportData } from '@/utils/export-helpers';
+import { exportData, ExportOptions } from '../../utils/export-helpers';
 
 interface ExportButtonProps {
-  data: ExportData[];
+  data: any[];
   filename?: string;
   className?: string;
 }
 
+/**
+ * Button component for exporting data
+ */
 export const ExportButton: React.FC<ExportButtonProps> = ({ 
   data, 
-  filename = 'export', 
-  className 
+  filename = 'data-export',
+  className = ''
 }) => {
   const handleCSVExport = () => {
-    exportToCSV(data, `${filename}.csv`);
+    exportData(data, { format: 'csv', filename });
   };
 
   const handleJSONExport = () => {
-    exportToJSON(data, `${filename}.json`);
+    exportData(data, { format: 'json', filename });
   };
+
+  if (!data || data.length === 0) {
+    return null;
+  }
 
   return (
     <div className={`flex gap-2 ${className}`}>
-      <Button
-        variant="outline"
-        size="sm"
+      <button
         onClick={handleCSVExport}
-        disabled={!data || data.length === 0}
+        className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
       >
-        <Download className="w-4 h-4 mr-2" />
-        CSV
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
+        Export CSV
+      </button>
+      <button
         onClick={handleJSONExport}
-        disabled={!data || data.length === 0}
+        className="px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
       >
-        <Download className="w-4 h-4 mr-2" />
-        JSON
-      </Button>
+        Export JSON
+      </button>
     </div>
   );
 };
