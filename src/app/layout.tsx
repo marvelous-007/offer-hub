@@ -20,7 +20,9 @@ import { Suspense } from 'react';
 import NotificationToast from '@/components/shared/NotificationToast';
 import { MessageProvider } from '@/lib/contexts/MessageContext';
 import { KeyboardShortcutsProvider } from '@/components/common/keyboard-shortcuts-provider';
-import LoadingIndicator from '@/components/navigation/loading-indicator';
+
+import { ScrollToTop } from '@/components/common/scroll-to-top';
+
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -62,6 +64,7 @@ export default function RootLayout({
                               {children}
                             </main>
                             <NotificationToast />
+                            <ScrollToTop />
                           </Suspense>
                           <Toaster position="top-right" />
                         </KeyboardShortcutsProvider>
