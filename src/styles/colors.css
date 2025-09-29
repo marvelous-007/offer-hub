@@ -1,0 +1,46 @@
+/**
+ * Centralized color palette for Offer Hub
+ * Defines consistent colors used across components
+ */
+
+:root {
+  /* Primary colors */
+  --color-primary: #3b82f6;
+  --color-primary-foreground: #ffffff;
+  --color-primary-hover: #2563eb;
+  
+  /* Secondary colors */
+  --color-secondary: #f1f5f9;
+  --color-secondary-foreground: #0f172a;
+  --color-secondary-hover: #e2e8f0;
+  
+  /* Background colors */
+  --color-background: #ffffff;
+  --color-background-hover: #f8fafc;
+  
+  /* Text colors */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #64748b;
+  --color-text-muted: #94a3b8;
+  
+  /* Border colors */
+  --color-border: #e2e8f0;
+  --color-border-hover: #cbd5e1;
+  
+  /* Accent colors */
+  --color-accent: #f1f5f9;
+  --color-accent-foreground: #0f172a;
+  
+  /* Destructive colors */
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-destructive-hover: #dc2626;
+  
+  /* Success colors */
+  --color-success: #10b981;
+  --color-success-foreground: #ffffff;
+  
+  /* Warning colors */
+  --color-warning: #f59e0b;
+  --color-warning-foreground: #ffffff;
+}
