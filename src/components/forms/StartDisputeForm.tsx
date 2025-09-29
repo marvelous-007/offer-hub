@@ -11,9 +11,20 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useStartDisputeForm } from "../../hooks/useStartDispute";
+import { ValidatedInput } from "./validated-input";
+import { validationSchemas } from "@/utils/validation";
+import { useState } from "react";
 
 export function StartDisputeForm() {
   const { form, loading, response, onSubmit } = useStartDisputeForm();
+  const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
+
+  const handleFieldValidation = (field: string) => (isValid: boolean) => {
+    setFieldErrors(prev => ({
+      ...prev,
+      [field]: !isValid
+    }));
+  };
 
   return (
     <div className="space-y-6">
@@ -26,9 +37,15 @@ export function StartDisputeForm() {
               <FormItem>
                 <FormLabel>Contract / Escrow ID</FormLabel>
                 <FormControl>
-                  <Input
+                  <ValidatedInput
+                    name="contractId"
+                    label=""
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    onValidation={handleFieldValidation('contractId')}
+                    validationRules={validationSchemas.contractId}
                     placeholder="CAZ6UQX7..."
-                    {...field}
+                    disabled={loading}
                   />
                 </FormControl>
                 <FormMessage />
@@ -43,7 +60,16 @@ export function StartDisputeForm() {
               <FormItem>
                 <FormLabel>Signer Address</FormLabel>
                 <FormControl>
-                  <Input placeholder="GSIGN...XYZ" {...field} />
+                  <ValidatedInput
+                    name="signer"
+                    label=""
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    onValidation={handleFieldValidation('signer')}
+                    validationRules={validationSchemas.address}
+                    placeholder="GSIGN...XYZ"
+                    disabled={loading}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -57,14 +83,27 @@ export function StartDisputeForm() {
               <FormItem>
                 <FormLabel>Reason for Dispute</FormLabel>
                 <FormControl>
-                  <Input placeholder="Describe the reason for the dispute..." {...field} />
+                  <ValidatedInput
+                    name="reason"
+                    label=""
+                    value={field.value || ''}
+                    onChange={field.onChange}
+                    onValidation={handleFieldValidation('reason')}
+                    validationRules={validationSchemas.reason}
+                    placeholder="Describe the reason for the dispute..."
+                    disabled={loading}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <Button type="submit" disabled={loading} className="w-full">
+          <Button 
+            type="submit" 
+            disabled={loading || Object.values(fieldErrors).some(error => error)} 
+            className="w-full"
+          >
             {loading ? "Starting Dispute..." : "Start Dispute"}
           </Button>
         </form>
