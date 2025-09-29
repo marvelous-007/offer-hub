@@ -1,22 +1,28 @@
-"use client";
-
 import { useState, useEffect } from 'react';
 
 /**
- * Hook to track scroll position
- * @returns current scroll position in pixels
+ * Hook to track the current scroll position of the window
+ * @returns {number} The current scroll position in pixels from the top
  */
-export const useScrollPosition = (): number => {
+const useScrollPosition = (): number => {
   const [scrollPosition, setScrollPosition] = useState(0);
 
   useEffect(() => {
-    const handleScroll = () => {
+    // Function to handle scroll events
+    const handleScroll = (): void => {
       setScrollPosition(window.scrollY);
     };
 
+    // Add scroll event listener
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    // Cleanup function to remove event listener
+    return (): void => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   return scrollPosition;
 };
+
+export default useScrollPosition;
