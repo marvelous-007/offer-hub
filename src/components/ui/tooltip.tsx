@@ -27,5 +27,35 @@ const TooltipContent = React.forwardRef<
 ))
 TooltipContent.displayName = TooltipPrimitive.Content.displayName
 
+// Export individual components
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }
 
+// Main Tooltip component with composition
+interface TooltipProps {
+  children: React.ReactNode
+  content: React.ReactNode
+  delayDuration?: number
+  side?: "top" | "right" | "bottom" | "left"
+  align?: "start" | "center" | "end"
+  className?: string
+}
+
+const StandardTooltip = ({
+  children,
+  content,
+  delayDuration = 300,
+  side = "top",
+  align = "center",
+  className,
+}: TooltipProps) => {
+  return (
+    <Tooltip delayDuration={delayDuration}>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent side={side} align={align} className={className}>
+        {content}
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
+export default StandardTooltip
