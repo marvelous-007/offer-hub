@@ -25,4 +25,5 @@ const useScrollPosition = (): number => {
   return scrollPosition;
 };
 
+export { useScrollPosition };
 export default useScrollPosition;
