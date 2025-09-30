@@ -13,6 +13,10 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 
+/**
+ * ConfirmationDialog component
+ * Reusable dialog for confirming user actions with customizable content and actions
+ */
 interface ConfirmationDialogProps {
   isOpen: boolean
   onClose: () => void
