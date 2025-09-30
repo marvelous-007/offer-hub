@@ -104,13 +104,21 @@ export function useMessages(userId?: string): UseMessagesResult {
 
   useEffect(() => {
     if (!userId) return;
+    let isPolling = false
     const interval = setInterval(() => {
+      if (isPolling) return
+      isPolling = true
 
-      getUserConversations(userId).then((res) => {
-        if (!res.error && res.data) setConversations(res.data);
-      });
+      getUserConversations(userId)
+        .then((res) => {
+          if (!res.error && res.data) setConversations(res.data);
+        })
+        .finally(() => {
+          isPolling = false
+        })
 
       if (activeConversationId) {
+        // separate guard for messages polling
         getConversationMessages(activeConversationId).then((res) => {
           if (!res.error && res.data) setMessages(res.data);
         });
