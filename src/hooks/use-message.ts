@@ -18,6 +18,9 @@ export function useMessageComposer(onSendMessage: (content: string, file?: File)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleSendMessage = async () => {
+    // Prevent duplicate sends while a send is already in progress
+    if (isLoading) return
+
     if (newMessage.trim()) {
       setIsLoading(true)
       try {
@@ -31,6 +34,9 @@ export function useMessageComposer(onSendMessage: (content: string, file?: File)
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
+    // Prevent duplicate uploads while an upload/send is in progress
+    if (isLoading) return
+
     if (file) {
       setIsLoading(true)
       try {
