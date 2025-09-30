@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { HelpCircle, AlertCircle, CheckCircle, XCircle, Info } from 'lucide-react'
-import { TooltipWrapper } from '@/components/ui/tooltip'
+import { Tooltip, TooltipTrigger, TooltipContent, getVariantStyles } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import { FieldHelpProps } from '../ui/tooltip-types'
 
@@ -89,52 +89,68 @@ export default function FieldHelp({
     return <>{children}</>
   }
 
+  const getVariantStyles = () => {
+    switch (getVariant()) {
+      case 'info':
+        return 'bg-blue-50 border-blue-200 text-blue-900'
+      case 'warning':
+        return 'bg-yellow-50 border-yellow-200 text-yellow-900'
+      case 'success':
+        return 'bg-green-50 border-green-200 text-green-900'
+      case 'error':
+        return 'bg-red-50 border-red-200 text-red-900'
+      case 'help':
+        return 'bg-gray-50 border-gray-200 text-gray-900'
+      default:
+        return 'bg-white border-gray-200 text-gray-900'
+    }
+  }
+
   return (
-    <div className="flex items-center gap-2">
-      {children}
-      <TooltipWrapper
-        content={
-          <div className="space-y-1">
-            <div className="font-medium">
-              {getVariant() === 'error' && 'Error'}
-              {getVariant() === 'success' && 'Success'}
-              {getVariant() === 'warning' && 'Warning'}
-              {getVariant() === 'info' && 'Information'}
-              {getVariant() === 'help' && 'Help'}
-            </div>
-            <div className="text-sm opacity-90">
-              {content}
-            </div>
-            {(required || optional) && (
-              <div className="text-xs opacity-75 pt-1 border-t border-gray-200">
-                {required && 'This field is required'}
-                {optional && 'This field is optional'}
+    <div className="relative w-full">
+      <Tooltip delayDuration={200}>
+        <TooltipTrigger asChild>
+          {children}
+        </TooltipTrigger>
+        <TooltipContent 
+          side={side} 
+          align={align}
+          className={cn(getVariantStyles(), "max-w-xs")}
+        >
+          <div className="flex items-start gap-2">
+            {getVariantIcon(getVariant()) && (
+              <div className="flex-shrink-0 mt-0.5">
+                {getVariantIcon(getVariant())}
               </div>
             )}
+            <div className="flex-1">
+              <div className="space-y-1">
+                <div className="font-medium">
+                  {getVariant() === 'error' && 'Error'}
+                  {getVariant() === 'success' && 'Success'}
+                  {getVariant() === 'warning' && 'Warning'}
+                  {getVariant() === 'info' && 'Information'}
+                  {getVariant() === 'help' && 'Help'}
+                </div>
+                <div className="text-sm opacity-90">
+                  {content}
+                </div>
+                {(required || optional) && (
+                  <div className="text-xs opacity-75 pt-1 border-t border-gray-200">
+                    {required && 'This field is required'}
+                    {optional && 'This field is optional'}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        }
-        variant={getVariant()}
-        side={side}
-        align={align}
-        delayDuration={200}
-        disabled={disabled}
-        className={cn(
-          "inline-flex items-center justify-center flex-shrink-0",
-          getTriggerSize(),
-          className
-        )}
-        {...props}
-      >
-        {showIcon ? (
-          <div className="flex items-center justify-center">
-            {getIcon()}
-          </div>
-        ) : (
-          <span className="text-xs text-gray-500">
-            {required ? '*' : optional ? '(optional)' : '?'}
-          </span>
-        )}
-      </TooltipWrapper>
+        </TooltipContent>
+      </Tooltip>
+      {showIcon && (
+        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+          {getVariantIcon(getVariant())}
+        </div>
+      )}
     </div>
   )
 }
