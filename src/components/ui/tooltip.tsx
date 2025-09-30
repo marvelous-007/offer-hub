@@ -28,6 +28,41 @@ const TooltipContent = React.forwardRef<
 ))
 TooltipContent.displayName = TooltipPrimitive.Content.displayName
 
+// Helper functions for variants
+export const getVariantStyles = (variant: TooltipVariant) => {
+  switch (variant) {
+    case 'info':
+      return 'bg-blue-50 border-blue-200 text-blue-900'
+    case 'warning':
+      return 'bg-yellow-50 border-yellow-200 text-yellow-900'
+    case 'success':
+      return 'bg-green-50 border-green-200 text-green-900'
+    case 'error':
+      return 'bg-red-50 border-red-200 text-red-900'
+    case 'help':
+      return 'bg-gray-50 border-gray-200 text-gray-900'
+    default:
+      return 'bg-white border-gray-200 text-gray-900'
+  }
+}
+
+export const getVariantIcon = (variant: TooltipVariant) => {
+  switch (variant) {
+    case 'info':
+      return <Info className="h-4 w-4" />
+    case 'warning':
+      return <AlertCircle className="h-4 w-4" />
+    case 'success':
+      return <CheckCircle className="h-4 w-4" />
+    case 'error':
+      return <AlertCircle className="h-4 w-4" />
+    case 'help':
+      return <HelpCircle className="h-4 w-4" />
+    default:
+      return null
+  }
+}
+
 // Enhanced tooltip with different variants
 interface TooltipProps {
   children: React.ReactNode
@@ -54,39 +89,6 @@ const TooltipWrapper = React.forwardRef<
   disabled = false,
   ...props 
 }, ref) => {
-  const getVariantStyles = () => {
-    switch (variant) {
-      case 'info':
-        return 'bg-blue-50 border-blue-200 text-blue-900'
-      case 'warning':
-        return 'bg-yellow-50 border-yellow-200 text-yellow-900'
-      case 'success':
-        return 'bg-green-50 border-green-200 text-green-900'
-      case 'error':
-        return 'bg-red-50 border-red-200 text-red-900'
-      case 'help':
-        return 'bg-gray-50 border-gray-200 text-gray-900'
-      default:
-        return 'bg-white border-gray-200 text-gray-900'
-    }
-  }
-
-  const getIcon = () => {
-    switch (variant) {
-      case 'info':
-        return <Info className="h-4 w-4" />
-      case 'warning':
-        return <AlertCircle className="h-4 w-4" />
-      case 'success':
-        return <CheckCircle className="h-4 w-4" />
-      case 'error':
-        return <AlertCircle className="h-4 w-4" />
-      case 'help':
-        return <HelpCircle className="h-4 w-4" />
-      default:
-        return null
-    }
-  }
 
   if (disabled) {
     return <>{children}</>
@@ -95,19 +97,19 @@ const TooltipWrapper = React.forwardRef<
   return (
     <Tooltip delayDuration={delayDuration}>
       <TooltipTrigger asChild>
-        <div ref={ref} className={className} {...props}>
+        <div ref={ref} className={cn(className, "inline-block")} {...props}>
           {children}
         </div>
       </TooltipTrigger>
       <TooltipContent 
         side={side} 
         align={align}
-        className={cn(getVariantStyles(), "max-w-xs")}
+        className={cn(getVariantStyles(variant), "max-w-xs")}
       >
         <div className="flex items-start gap-2">
-          {getIcon() && (
+          {getVariantIcon(variant) && (
             <div className="flex-shrink-0 mt-0.5">
-              {getIcon()}
+              {getVariantIcon(variant)}
             </div>
           )}
           <div className="flex-1">
