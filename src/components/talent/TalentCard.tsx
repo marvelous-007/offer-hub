@@ -3,11 +3,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
-import FavoriteButton from "./favorite-button";
-
-import SaveTalent from "@/components/talent/SaveTalent";
+import React, { useState } from "react";
+import FavoriteButton from "./FavoriteButton";
 import { Button } from "@/components/ui/button";
+import { Check, Heart } from "lucide-react"; // Added missing imports
 
 interface Skill {
   name: string;
@@ -45,7 +44,10 @@ const TalentCard: React.FC<TalentCardProps> = ({
   actionText,
   onActionClick,
   className = "",
+  userId, // Make sure this is included in props
 }) => {
+  const [isSelected, setIsSelected] = useState(false); // Added state for selection
+
   const getActionLink = () => {
     switch (actionText.toLowerCase()) {
       case "message":
@@ -57,8 +59,24 @@ const TalentCard: React.FC<TalentCardProps> = ({
     }
   };
 
+  const handleToggleSelect = () => {
+    setIsSelected(!isSelected);
+    // You can add additional logic here if needed
+  };
+
   return (
-    <div className={`bg-gray-50 border-b border-b-gray-200 p-6 ${className}`}>
+    <div className={`bg-gray-50 border-b border-b-gray-200 p-6 relative ${className}`}>
+      {/* Favorite Button - Only one needed */}
+      <FavoriteButton
+        freelancerId={id}
+        userId={userId}
+        size="sm"
+        variant={isSelected ? "default" : "outline"}
+        className={`absolute top-4 left-4 h-8 w-8 rounded-full ${
+          isSelected ? "bg-[#15949C] text-white" : "bg-white/80"
+        }`}
+      />
+
       {/* Avatar and Header info */}
       <div className="flex items-start gap-4 mb-4 profile-section">
         {/* Avatar */}
@@ -106,34 +124,17 @@ const TalentCard: React.FC<TalentCardProps> = ({
         {description}
       </p>
 
-      {/* Action Buttons */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className={`absolute top-4 left-4 h-8 w-8 rounded-full ${
-          isSelected ? "bg-[#15949C] text-white" : "bg-white/80 text-[#002333]"
-        }`}
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleSelect();
-        }}
-      >
-        {isSelected ? (
-          <Check className="h-4 w-4" />
-        ) : (
-          <Heart className="h-4 w-4" />
-        )}
-      </Button>
-
-      <FavoriteButton
-        freelancerId={freelancer.id}
-        userId={userId}
-        size="sm"
-        variant={isSelected ? "default" : "outline"}
-        className={`absolute top-4 left-4 h-8 w-8 rounded-full ${
-          isSelected ? "bg-[#15949C] text-white" : "bg-white/80"
-        }`}
-      />
+      {/* Action Button */}
+      <div className="flex justify-end">
+        <Link href={getActionLink()}>
+          <Button 
+            onClick={() => onActionClick?.(id)}
+            className="bg-[#15949C] hover:bg-[#117981] text-white"
+          >
+            {actionText}
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 };
