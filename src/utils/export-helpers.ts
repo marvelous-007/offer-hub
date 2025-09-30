@@ -1,5 +1,6 @@
 /**
  * Utility functions for data export functionality
+ * Provides CSV and JSON export capabilities for data arrays
  */
 
 export interface ExportOptions {
