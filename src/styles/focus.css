@@ -13,8 +13,8 @@
   /* used with theme color */
 }
 
-/* Remove default outline but keep focus-visible for keyboard users */
-:focus {
+/* Keep default focus but changes outline to non on focus-visible */
+:focus:not(:focus-visible) {
   outline: none;
 }
 
