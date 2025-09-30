@@ -4,6 +4,7 @@
   html, body {
     background: #fff !important;
     color: #000 !important;
+    print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
 
@@ -27,8 +28,9 @@
     height: auto !important;
   }
 
-  /* Show link destinations inline */
-  a[href]:after {
+  /* Show link destinations inline for external (absolute) links only */
+  /* Matches http and https links; excludes anchors and relative/internal paths */
+  a[href^="http"]:after {
     content: " (" attr(href) ")";
     font-size: 0.9em;
     color: #000;
