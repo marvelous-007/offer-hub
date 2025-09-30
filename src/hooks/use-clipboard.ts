@@ -1,5 +1,9 @@
 import { useState } from 'react';
 
+/**
+ * Hook for copying text to clipboard
+ * @returns {UseClipboardReturn} Object with copied state and copy function
+ */
 interface UseClipboardReturn {
   copied: boolean;
   copy: (text: string) => Promise<boolean>;
