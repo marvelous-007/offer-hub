@@ -108,3 +108,32 @@ export function Alert({
     </div>
   );
 }
+
+// Export AlertTitle and AlertDescription components for compatibility
+export function AlertTitle({ 
+  children, 
+  className 
+}: { 
+  children: React.ReactNode; 
+  className?: string; 
+}) {
+  return (
+    <h4 className={cn("font-semibold mb-1", className)}>
+      {children}
+    </h4>
+  );
+}
+
+export function AlertDescription({ 
+  children, 
+  className 
+}: { 
+  children: React.ReactNode; 
+  className?: string; 
+}) {
+  return (
+    <div className={cn("text-sm", className)}>
+      {children}
+    </div>
+  );
+}
