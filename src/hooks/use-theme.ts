@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 type Theme = "light" | "dark";
+const THEME_KEY = "offer-hub-theme";
 
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>("light");
@@ -11,36 +12,36 @@ export function useTheme() {
   // Initialize theme from localStorage or system preference
   useEffect(() => {
     setMounted(true);
-    const savedTheme = localStorage.getItem("theme") as Theme | null;
-    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-      .matches
-      ? "dark"
-      : "light";
+    try {
+      const savedTheme = localStorage.getItem(THEME_KEY) as Theme | null;
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+        .matches
+        ? "dark"
+        : "light";
 
-    const initialTheme = savedTheme || systemTheme;
-    setTheme(initialTheme);
-    document.documentElement.classList.toggle("dark", initialTheme === "dark");
+      const initialTheme = savedTheme || systemTheme;
+      setTheme(initialTheme);
+      document.documentElement.classList.toggle("dark", initialTheme === "dark");
+    } catch (error) {
+      // Fallback to light theme if storage access fails
+      console.warn("Failed to access localStorage or matchMedia:", error);
+    }
   }, []);
 
   // Update theme
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
+  const applyTheme = (newTheme: Theme) => {
     setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
+    try {
+      localStorage.setItem(THEME_KEY, newTheme);
+    } catch (error) {
+      console.warn("Failed to save theme preference:", error);
+    }
     document.documentElement.classList.toggle("dark", newTheme === "dark");
   };
 
-  const setLightTheme = () => {
-    setTheme("light");
-    localStorage.setItem("theme", "light");
-    document.documentElement.classList.remove("dark");
-  };
-
-  const setDarkTheme = () => {
-    setTheme("dark");
-    localStorage.setItem("theme", "dark");
-    document.documentElement.classList.add("dark");
-  };
+  const setLightTheme = () => applyTheme("light");
+  const setDarkTheme = () => applyTheme("dark");
+  const toggleTheme = () => applyTheme(theme === "light" ? "dark" : "light");
 
   return {
     theme,
