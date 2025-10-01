@@ -10,6 +10,8 @@ import { useState, useCallback } from 'react';
  * Example usage:
  *   const [isLoading, withLoading] = useLoading();
  *   const handleClick = () => withLoading(async () => { ... });
+ *
+ * Concurrent calls are not expected currently and this is intentional for simplicity.
  */
 export function useLoading(): [boolean, <T>(fn: () => Promise<T>) => Promise<T>] {
   const [isLoading, setIsLoading] = useState(false);
