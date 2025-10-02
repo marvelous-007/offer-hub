@@ -33,7 +33,7 @@ export default class ErrorBoundary extends Component<Props, State> {
       timestamp: new Date().toISOString(),
       userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Server',
       url: typeof window !== 'undefined' ? window.location.href : 'Server'
-    })
+    });
 
     // In production, you could send this to an error reporting service
     // Example: errorReportingService.captureException(error, errorInfo)

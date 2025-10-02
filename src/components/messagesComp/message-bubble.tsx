@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { Check, CheckCheck, FileText, Reply } from "lucide-react";
 import { type Attachment, type Message } from "@/types/messages-types";
 import ProgressiveImage from "@/components/ui/progressive-image";
+import Image from "next/image";
 
 function isImage(att: Attachment) {
   return att.kind === "image" || att.mime.startsWith("image/");
