@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, FileText, Send, Upload } from "lucide-react";
+import { FileSharing } from "./file-sharing";
 
 import { Button } from "@/components/ui/button";
 
@@ -10,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import type { Conversation, Message } from "@/types/messages.types";
 import { cn } from "@/lib/utils";
 import { useRef, useState } from "react";
+
+const [showFileSharing, setShowFileSharing] = useState(false);
 
 interface MessagesMainProps {
   activeConversation: Conversation | null;
@@ -232,6 +235,31 @@ export function MessagesMain({
           >
             <Send className="w-4 h-4" />
           </Button>
+          // Add this import
+import { FileSharing } from './file-sharing';
+
+// Add this state
+const [showFileSharing, setShowFileSharing] = useState(false);
+
+// Add this to the message input area, next to the upload button:
+<Button
+  variant="ghost"
+  size="icon"
+  className="w-8 h-8 text-gray-400 hover:text-gray-600 hover:bg-transparent"
+  onClick={() => setShowFileSharing(true)}
+  disabled={sending}
+>
+ <Files className="w-4 h-4" />
+</Button>
+
+<FileSharing
+  conversationId={activeConversation?.id || ''}
+  onFileSent={(file) => {
+    // Handle file sent - you might want to send it as a message
+    handleSendMessage(`Shared file: ${file.name}`, file);
+    setShowFileSharing(false);
+  }}
+/>
         </div>
         <input
           ref={fileInputRef}
