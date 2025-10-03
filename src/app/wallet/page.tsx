@@ -1,5 +1,12 @@
+"use client";
+
+import dynamic from "next/dynamic";
 import { PublicRoute } from "@/components/auth/public-route";
-import WalletConnectPage from "../../components/onboarding/ConnectWalletPage";
+
+const WalletConnectPage = dynamic(
+   () => import("../../components/onboarding/ConnectWalletPage"),
+   { ssr: false }
+);
 
 export default function WalletPage() {
    return (
